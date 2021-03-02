@@ -1,0 +1,19 @@
+---
+title: "estimateR: Incidence Data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{basicUsage}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(estimateR)
+```
