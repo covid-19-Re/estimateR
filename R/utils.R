@@ -13,7 +13,7 @@
 #' @examples
 get_module_input <- function(data) {
   #TODO properly check input format
-  if (is.list(data)) {w
+  if (is.list(data)) {
     values <- as.double(data$values)
     index_offset <- data$index_offset
   } else {
