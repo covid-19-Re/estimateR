@@ -24,17 +24,17 @@ smooth_incidence <- function(incidence_data, smoothing_method = "LOESS", ...) {
 #' LOESS smoothing function
 #'
 #' @param incidence_input
-#' @param days_incl integer
+#' @param data_points_incl integer
 #' @param degree integer
 #'
 #' @return module output
 #'
 #' @examples
-smooth_LOESS <- function(incidence_input, days_incl = 21, degree = 1) {
+smooth_LOESS <- function(incidence_input, data_points_incl = 21, degree = 1) {
   incidence_vector <- incidence_input$values
 
   n_points <- length(incidence_vector)
-  sel_span <- days_incl / n_points
+  sel_span <- data_points_incl / n_points
 
   n_pad <- round(length(incidence_vector) * sel_span * 0.5)
 
