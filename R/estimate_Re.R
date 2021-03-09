@@ -1,46 +1,58 @@
-
-#TODO fill in doc
-#' Title
+#' Estimate effective reproductive number Re from incidence data
 #'
-#' @param incidence_data
-#' @param estimation_method
+#' The incidence data input should represent infections,
+#' as opposed to representing delayed observations of infections.
+#' If the incidence data represents delayed observations of infections
+#' then one should deconvolve it first with \code{deconvolve_incidence}.
+#'
+#' For now, only one Re estimation function is implemented.
+#'
+#' #TODO specify input format
+#'
+#' @param incidence_data Format still to define.
+#' @param estimation_method string. Options are "EpiEstim sliding window".
 #' @param ...
 #'
-#' @return
+#'#TODO figure out output format
+#' @return a module output object (subject to change)
 #' @export
 #'
+#'#TODO add example
 #' @examples
 estimate_Re <- function( incidence_data, estimation_method = "EpiEstim sliding window", ... ) {
 
-  input <- get_module_input(incidence_data)
+  input <- .get_module_input(incidence_data)
 
   Re_estimate <- dplyr::case_when(
-    estimation_method == "EpiEstim sliding window" ~ estimate_Re_EpiEstim_sliding_window(input, ... ),
-    TRUE ~ rep(NA_real_, length.out = get_input_length(input))
+    estimation_method == "EpiEstim sliding window" ~ .estimate_Re_EpiEstim_sliding_window(input, ... ),
+    TRUE ~ rep(NA_real_, length.out = .get_input_length(input))
   )
   return(Re_estimate)
 }
 
 
-#TODO fill in doc
-#' Title
+#' Estimate Re with EpiEstim using a sliding window
 #'
-#' @param incidence_input
+#' The Re value reported for time t corresponds to the value estimated
+#' when assuming that is Re is constant over e.g. (T-3, T-2, T-1, T),
+#' for a sliding window of 4 time steps.
+#'
+#' @param incidence_input module input object. Time series of infections.
 #' @param minimul_cumul_incidence Numeric scalar. Minimum number of cumulated infections before starting the Re estimation
-#' @param estimation_window
-#' @param mean_serial_interval
-#' @param std_serial_interval
-#' @param mean_Re_prior
+#' @param estimation_window Integer scalar. Number of data points over which to assume Re to be constant.
+#' @param mean_serial_interval Numeric positive scalar. "mean_si" for EpiEstim::estimate_R
+#' @param std_serial_interval Numeric positive scalar. "std_si" for EpiEstim::estimate_R
+#' @param mean_Re_prior Numeric positive scalar. "mean prior" for EpiEstim::estimate_R
 #'
-#' @return
-estimate_Re_EpiEstim_sliding_window <- function(incidence_input,
+#' @return module output object. mean of Re estimates
+.estimate_Re_EpiEstim_sliding_window <- function(incidence_input,
                         minimul_cumul_incidence = 0,
                         estimation_window = 3,
                         mean_serial_interval = 4.8,
                         std_serial_interval  = 2.3,
                         mean_Re_prior = 1) {
 
-  incidence_vector <- incidence_input$values
+  incidence_vector <- .get_values(incidence_input)
 
   # Ensure that incidence_vector has no NA or negative values
   #TODO make these checks in the get_module_input function
@@ -76,7 +88,7 @@ estimate_Re_EpiEstim_sliding_window <- function(incidence_input,
 
 
   additional_offset <- t_end[1] - 1
-  R_mean <- get_module_output(R_instantaneous$R$`Mean(R)`,
+  R_mean <- .get_module_output(R_instantaneous$R$`Mean(R)`,
                               input,
                               additional_offset)
 

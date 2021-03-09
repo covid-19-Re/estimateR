@@ -2,16 +2,24 @@
 % Please edit documentation in R/utils.R
 \name{merge_outputs}
 \alias{merge_outputs}
-\title{Title}
+\title{Merge multiple module outputs into tibble}
 \usage{
 merge_outputs(output_list, ref_date = NULL, time_step = "day")
 }
 \arguments{
-\item{time_step}{}
+\item{output_list}{named list of module outputs}
+
+\item{ref_date}{Date. Reference date.}
+
+\item{time_step}{string. "day", "2 days", "week", "year"... (see seq.Date help page for details)}
 }
 \value{
-
+tibble
 }
 \description{
-Title
+Output tibble from list of unsynced module outputs, with an optional date reference.
+The optional reference date is the starting date of an input with offset 0.
+In general, this will be the date corresponding to the first entry in the original incidence data.
+If a reference date is provided, a date column is appended to the tibble,
+with sequential dates generated with the time step specified by the optional time_step parameter.
 }

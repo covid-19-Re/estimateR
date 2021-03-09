@@ -2,16 +2,28 @@
 % Please edit documentation in R/estimate_Re.R
 \name{estimate_Re}
 \alias{estimate_Re}
-\title{Title}
+\title{Estimate effective reproductive number Re from incidence data}
 \usage{
 estimate_Re(incidence_data, estimation_method = "EpiEstim sliding window", ...)
 }
 \arguments{
-\item{...}{}
+\item{incidence_data}{Format still to define.}
+
+\item{estimation_method}{string. Options are "EpiEstim sliding window".}
+
+\item{...}{#TODO figure out output format}
 }
 \value{
-
+a module output object (subject to change)
 }
 \description{
-Title
+The incidence data input should represent infections,
+as opposed to representing delayed observations of infections.
+If the incidence data represents delayed observations of infections
+then one should deconvolve it first with \code{deconvolve_incidence}.
+}
+\details{
+For now, only one Re estimation function is implemented.
+
+#TODO specify input format
 }

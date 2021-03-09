@@ -1,3 +1,5 @@
+#TODO test that merge outputs works with inputs of
+
 test_that("get_module_input() deals with well-formatted input", {
   toy_incidence <- c(1,2,1,0)
   data_1 <- list(values = toy_incidence, index_offset = -4)

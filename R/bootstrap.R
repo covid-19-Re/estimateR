@@ -1,70 +1,82 @@
 
-#TODO fill in documentation
 #' Obtain a bootstrap replicate from incidence data
 #'
-#' @param original_data
-#' @param bootstrapping_method
-#' @param ...
+#' Apply a bootstrapping procedure on some original incidence data.
+#' Estimating Re over many bootstrapped replicates allows one to estimate
+#' the uncertainty over the estimated Re value due to observation noise.
+#' In future versions, the user will be able to choose between different
+#' bootstrapping procedures.
+#' For now, only one bootstrapping function is implemented.
+#' It performs a non-parametric block bootstrapping.
 #'
-#' @return
+#'#TODO specify input format
+#'
+#' @param original_data Format still to define.
+#' @param bootstrapping_method string. Options are "non-parametric block boostrap"
+#' @param ... Extra parameters to pass to the smoothing function
+#'
+#' @return a module output object. A boostrapped replicate.
 #' @export
 #'
+#'#TODO fill in example
 #' @examples
 get_bootstrap_replicate <- function( original_data, bootstrapping_method = "non-parametric block boostrap", ... ) {
 
-  input <- get_module_input(original_data)
+  input <- .get_module_input(original_data)
 
   bootstrapped_incidence <- dplyr::case_when(
-    bootstrapping_method == "non-parametric block boostrap" ~ block_bootstrap(input, ... ),
-    TRUE ~ rep(NA_real_, length.out = get_input_length(input))
+    bootstrapping_method == "non-parametric block boostrap" ~ .block_bootstrap(input, ... ),
+    TRUE ~ rep(NA_real_, length.out = .get_input_length(input))
   )
-  # return(bootstrapped_incidence)
+  return(bootstrapped_incidence)
 }
 
 
-
-#TODO apply block-bootstrapping bug fix from Shiny dashboard code (cf commit by Jana)
-#TODO test what happens with NAs in the original vector
-
-#TODO fill in documentation
-#' Apply block-bootstrapping procedure
+#' Apply block-bootstrapping procedure to module input
 #'
-#' @param incidence_input
-#' @param block_size
-#' @param days_incl
+#'\code{.block_bootstrap} returns a block-bootstrapped replicate
+#'of the incidence. Incidence should be a vector of non-negative values
 #'
-#' @return
+#'This function works by resampling blocks of differences (on the log-scale)
+#' between the original data and a smoothed version of the original data.
 #'
-#' @examples
-block_bootstrap <- function(incidence_input, block_size = 10, days_incl = 21) {
+#' @param incidence_input module input. Original incidence to bootstrap over.
+#' @param block_size integer. Size of a bootstrapping block.
+#' @param data_points_incl integer. Window size for LOESS smoothing, see \link{smooth_incidence}.
+#' @param round_incidence boolean. Round the bootstrapped incidence?
+#'
+#' @return a module output object
+.block_bootstrap <- function(incidence_input, block_size = 10, data_points_incl = 21, round_incidence = TRUE) {
 
-  incidence_vector <- incidence_input$values
+  incidence_vector <- .get_values(incidence_input)
 
-  log_original <- dplyr::if_else(incidence_data !=0, log(incidence_vector + 1), 0)
-  smoothed_log <- smooth_incidence(log_original, smoothing_method = "LOESS")
-  diff_smoothed_original <- dplyr::if_else(log_original != 0, log_original - smoothed_log, 0)
+  log_original <-log(incidence_vector + 1)
+  smoothed_log <- smooth_incidence(log_original, smoothing_method = "LOESS", data_points_incl = data_points_incl)
+  diff_smoothed_original <- log_original - smoothed_log
 
-  bootstrapped_diff <- block_bootstrap_overlap_func(diff_smoothed_original, block_size)
+  bootstrapped_diff <- .block_bootstrap_overlap_func(diff_smoothed_original, block_size)
 
   bootstrapped_incidence <- exp(bootstrapped_diff + smoothed_log) -1
-  bootstrapped_incidence[bootstrapped_incidence<0] <- 0
-  bootstrapped_incidence <- round(bootstrapped_incidence) #TODO we don't necessarily want to round the incidence, make it an argument
 
-  return(get_module_output(bootstrapped_incidence, incidence_input))
+  bootstrapped_incidence[bootstrapped_incidence<0] <- 0
+
+  if(round_incidence) {
+    bootstrapped_incidence <- round(bootstrapped_incidence)
+  }
+
+  return(.get_module_output(bootstrapped_incidence, incidence_input))
 }
 
-#TODO fill in function doc
-#' Title
+#' Helper function for block-bootstrapping
 #'
-#' @param incidence_vector
-#' @param block_size
-#' @param keep_weekdays_aligned
+#' Builds a bootstrapped vector of errors.
 #'
-#' @return
-#' @export
+#' @param incidence_vector module input. Original incidence to bootstrap over.
+#' @param block_size integer. Size of a bootstrapping block.
+#' @param keep_weekdays_aligned boolean. Set to FALSE if not daily incidence, or if no weekly noise pattern.
 #'
-#' @examples
-block_bootstrap_overlap_func <- function(incidence_vector, block_size = 10, keep_weekdays_aligned = TRUE){
+#' @return numeric vector. Bootstrapped differences.
+.block_bootstrap_overlap_func <- function(incidence_vector, block_size = 10, keep_weekdays_aligned = TRUE){
 
   bootstrapped_incidence <-c()
 

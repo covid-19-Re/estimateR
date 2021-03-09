@@ -2,7 +2,7 @@
 % Please edit documentation in R/deconvolve.R
 \name{deconvolve_incidence}
 \alias{deconvolve_incidence}
-\title{Title}
+\title{Infer Infection Events Dates from Delayed Observation}
 \usage{
 deconvolve_incidence(
   incidence_data,
@@ -12,10 +12,18 @@ deconvolve_incidence(
 }
 \arguments{
 \item{...}{}
+
+\item{estimation_method}{string. Options are "Richardson-Lucy delay distribution"}
 }
 \value{
-
+module output object.
 }
 \description{
-Title
+This function reconstructs an incidence of infection events from incidence data representing delayed observations.
+The assumption made is that delayed observations represent the convolution of the infections with a delay distribution.
+\code{deconvolve_incidence} implements a deconvolution algorithm (Richardson-Lucy) to reconstruct
+a vector of infection events from input data representing delayed observations.
+}
+\details{
+#TODO figure out input format
 }

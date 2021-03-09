@@ -1,43 +1,43 @@
-
-#TODO write documentation for each function
-#TODO add a mandatory parameter for passing info on the delay distribution
-
-#' Title
+#' Infer Infection Events Dates from Delayed Observation
 #'
+#' This function reconstructs an incidence of infection events from incidence data representing delayed observations.
+#' The assumption made is that delayed observations represent the convolution of the infections with a delay distribution.
+#' \code{deconvolve_incidence} implements a deconvolution algorithm (Richardson-Lucy) to reconstruct
+#' a vector of infection events from input data representing delayed observations.
+#'
+#'#TODO figure out input format
 #' @param incidence_data
-#' @param estimation_method
+#' @param estimation_method string. Options are "Richardson-Lucy delay distribution"
 #' @param ...
 #'
-#' @return
+#' @return module output object.
 #' @export
 #'
+#'#TODO add examples
 #' @examples
+#TODO add a mandatory parameter for passing info on the delay distribution
 deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richardson-Lucy delay distribution", ... ) {
 
-  input <- get_module_input(incidence_data)
+  input <- .get_module_input(incidence_data)
 
   deconvolved_incidence <- dplyr::case_when(
-    deconvolution_method == "Richardson-Lucy delay distribution" ~ deconvolve_incidence_Richardson_Lucy(input, ... ),
-    TRUE ~ rep(NA_real_, length.out = get_input_length(input))
+    deconvolution_method == "Richardson-Lucy delay distribution" ~ .deconvolve_incidence_Richardson_Lucy(input, ... ),
+    TRUE ~ rep(NA_real_, length.out = .get_input_length(input))
   )
   return(deconvolved_incidence)
 }
 
-#TODO fill in doc
-# incidence_vector is the vector with the original incidence
-# delay_distribution_matrix is either a matrix or vector
-#' Title
+#' Deconvolve the incidence input with the Richardson-Lucy (R-L) algorithm
 #'
-#' @param incidence_input
-#' @param delay_distribution
-#' @param initial_delta
-#' @param time_units_in_the_past
-#' @param threshold_chi_squared
-#' @param max_iterations
-#' @param verbose
+#' @param incidence_input module input object.
+#' @param delay_distribution numeric square matrix or vector.
+#' @param initial_delta integer. number of steps by which input data is left-shifted in first step of R-L algo.
+#' @param threshold_chi_squared numeric. Threshold for chi-squared values under which the R-L algo stops.
+#' @param max_iterations integer. Maximum threshold for the number of iterations in the Richardson-Lucy algo.
+#' @param verbose Boolean. Print verbose output?
 #'
-#' @return
-deconvolve_incidence_Richardson_Lucy <- function(
+#' @return module output object. Deconvolved incidence.
+.deconvolve_incidence_Richardson_Lucy <- function(
   incidence_input,
   delay_distribution,
   initial_delta,
@@ -47,11 +47,12 @@ deconvolve_incidence_Richardson_Lucy <- function(
   verbose = FALSE
 ) {
 
-  incidence_vector <- incidence_input$values
-
+  incidence_vector <- .get_values(incidence_input)
 
   #TODO test whether delay_distribution sums up to 1 if vector
   #TODO add parameter to allow delay_distribution to not sum up to 1 if not waiting time distribution
+  #TODO compute first_guess_delay if delay_distribution is a matrix
+  ##create a general utility function that does it for both vectors and matrices, with customisable way of getting the delay (mode, median, mean,..)
 
   # Test delay_distribution input
   if(NCOL(delay_distribution) != 1 && NCOL(delay_distribution) != NROW(delay_distribution)) {
@@ -59,7 +60,13 @@ deconvolve_incidence_Richardson_Lucy <- function(
     print("Delay distribution input must be a vector or square matrix")
   }
 
-  first_guess_delay <- ceiling(initial_delta)
+  if(NCOL(delay_distribution) == 1) {
+    first_guess_delay <- ceiling(min(which(cumsum(delay_distribution) > 0.5)) - 1)
+  } else {
+    print("NOT IMPLEMENTED YET")
+    return()
+  }
+
   length_original_vector <- length(incidence_vector)
   first_recorded_incidence <-  incidence_vector[1]
   last_recorded_incidence <- incidence_vector[length(incidence_vector)]
@@ -67,28 +74,22 @@ deconvolve_incidence_Richardson_Lucy <- function(
   # prepare vector with initial guess for first step of deconvolution
   first_guess <- c(incidence_vector, rep(last_recorded_incidence, times = first_guess_delay))
 
-  if(first_guess_delay < time_units_in_the_past) {
-    first_guess <- c(rep(first_recorded_incidence, times = time_units_in_the_past - first_guess_delay), first_guess)
-  } else if(time_units_in_the_past < first_guess_delay) {
-    first_guess <- first_guess[-c(1:(first_guess_delay - time_units_in_the_past))]
-  }
-
-  original_incidence <- c(rep(0, times = length(first_guess) - length(incidence_vector)), incidence_vector)
+  original_incidence <- c(rep(0, times = first_guess_delay), incidence_vector)
 
   # Richardson-Lucy algorithm
-  # initial step
+  ## initial step
   current_estimate <- first_guess
   chi_squared <- Inf
   count <- 1
 
   if(NCOL(delay_distribution) == 1) {
-    delay_distribution_matrix <- get_matrix_from_constant_waiting_time_distr(delay_distribution,
+    delay_distribution_matrix <- .get_matrix_from_constant_waiting_time_distr(delay_distribution,
                                                                              N=length(current_estimate))
   } else {
     delay_distribution_matrix <- delay_distribution[1:length(current_estimate), 1:length(current_estimate)]
   }
 
-  truncated_delay_distribution_matrix <- delay_distribution_matrix[(1 + time_units_in_the_past):NROW(delay_distribution_matrix),, drop = F]
+  truncated_delay_distribution_matrix <- delay_distribution_matrix[(1 + first_guess_delay):NROW(delay_distribution_matrix),, drop = F]
 
   Q_vector <- apply(truncated_delay_distribution_matrix, MARGIN = 2, sum)
 
@@ -96,6 +97,7 @@ deconvolve_incidence_Richardson_Lucy <- function(
     cat("\tStart of Richardson-Lucy algorithm\n")
   }
 
+  ## iterative steps
   while(chi_squared > threshold_chi_squared & count <= max_iterations) {
 
     if (verbose) {
@@ -108,13 +110,13 @@ deconvolve_incidence_Richardson_Lucy <- function(
     current_estimate <- current_estimate / Q_vector *  as.vector(crossprod(B, delay_distribution_matrix))
     current_estimate <- tidyr::replace_na(current_estimate, 0)
 
-    chi_squared <- 1/length_original_vector * sum((E[(time_units_in_the_past + 1): length(E)] - original_incidence[(time_units_in_the_past + 1) : length(original_incidence)])^2/E[(time_units_in_the_past + 1): length(E)], na.rm = T)
+    chi_squared <- 1/length_original_vector * sum((E[(first_guess_delay + 1): length(E)] - original_incidence[(first_guess_delay + 1) : length(original_incidence)])^2/E[(first_guess_delay + 1): length(E)], na.rm = T)
     count <- count + 1
   }
 
-  additional_offset <- - min(first_guess_delay, time_units_in_the_past)
+  additional_offset <- - first_guess_delay
   # Remove last values as they cannot be properly inferred
   final_estimate <- current_estimate[1:(length(current_estimate) - first_guess_delay)]
 
-  return(get_module_output(final_estimate, input, additional_offset))
+  return(.get_module_output(final_estimate, input, additional_offset))
 }

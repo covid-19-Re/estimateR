@@ -2,31 +2,76 @@
 % Please edit documentation in R/pipe.R
 \name{get_block_bootstrapped_estimate}
 \alias{get_block_bootstrapped_estimate}
-\title{Title}
+\title{Estimate Re from incidence and estimate uncertainty with block-bootstrapping}
 \usage{
 get_block_bootstrapped_estimate(
   incidence_vector,
   N_bootstrap_replicates = 100,
   smoothing_method = "LOESS",
+  deconvolution_method = "Richardson-Lucy delay distribution",
+  estimation_method = "EpiEstim sliding window",
   shape_incubation,
   scale_incubation,
-  shape_onset_to_report,
-  scale_onset_to_report,
-  length_out = 200,
-  n_random_samples = 1e+06,
-  minimul_cumul_incidence = 0,
+  shape_onset_to_report = 0,
+  scale_onset_to_report = 0,
   estimation_window = 3,
   mean_serial_interval = 4.8,
   std_serial_interval = 2.3,
-  mean_Re_prior = 1
+  ref_date = NULL,
+  time_step = "day",
+  verbose = FALSE
 )
 }
 \arguments{
-\item{mean_Re_prior}{}
+\item{N_bootstrap_replicates}{integer. Number of bootstrap samples.}
+
+\item{smoothing_method}{string. see \code{\link{smooth_incidence}}.}
+
+\item{deconvolution_method}{string. see \code{\link{deconvolve_incidence}}}
+
+\item{estimation_method}{string. see \code{\link{estimate_Re}}}
+
+\item{shape_incubation}{numeric. Shape parameter of the gamma distribution representing the delay between infection and symptom onset.}
+
+\item{scale_incubation}{numeric. Scale parameter of the gamma distribution representing the delay between infection and symptom onset.}
+
+\item{shape_onset_to_report}{numeric. Shape parameter of the gamma distribution representing the delay between symtom onset and observation.}
+
+\item{scale_onset_to_report}{numeric. Scale parameter of the gamma distribution representing the delay between symtom onset and observation.}
+
+\item{estimation_window}{integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.
+see \code{\link{estimate_Re}}}
+
+\item{mean_serial_interval}{numeric. see \code{\link{estimate_Re}}}
+
+\item{std_serial_interval}{numeric. see \code{\link{estimate_Re}}}
+
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_vector}}
+
+\item{time_step}{string. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
+
+#TODO expand on the output}
+
+\item{verbose}{boolean. see \code{\link{deconvolve_incidence}}}
 }
 \value{
-
+tibble. Re estimations along with results from each pipeline step.
 }
 \description{
-Title
+An estimation of the effective reproductive number through time is made with \code{smooth_deconvolve_estimate}
+on the original incidence data.
+Then, the same estimation is performed on a number of bootstrap samples built from the original incidence data.
+The estimate on the original data is output along with confidence interval boundaries
+built from the distribution of bootstrapped estimates.
+}
+\details{
+A base assumption made here is that the delay between infection can be split into two independent delays
+(with the second delay being optional).
+The first waiting time corresponds to the time between the infection event and the onset of symptoms.
+The second (optional) waiting time corresponds to the delay between the onset of symptoms and the case observation.
+If this second waiting time is omitted, observation is assumed to have happened at the end of the first waiting time.
+In latter case, the first waiting time distribution does not need to correspond to an incubation period per se,
+but it must in any case correspond to the delay between infection and case observation.
+
+#TODO clarify input
 }

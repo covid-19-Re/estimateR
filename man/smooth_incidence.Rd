@@ -7,11 +7,15 @@
 smooth_incidence(incidence_data, smoothing_method = "LOESS", ...)
 }
 \arguments{
-\item{smoothing_method}{}
+\item{smoothing_method}{string. Options are "LOESS".}
 }
 \value{
-
+module output. Smoothed incidence.
 }
 \description{
-Smooth Noisy Incidence Data
+Currently only LOESS smoothing (smoothing_method = "LOESS")
+is implemented.
+}
+\details{
+#TODO specify input format
 }

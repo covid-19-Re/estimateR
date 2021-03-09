@@ -4,16 +4,19 @@
 \alias{smooth_LOESS}
 \title{LOESS smoothing function}
 \usage{
-smooth_LOESS(incidence_input, days_incl = 21, degree = 1)
+smooth_LOESS(incidence_input, data_points_incl = 21, degree = 1)
 }
 \arguments{
-\item{days_incl}{integer}
+\item{incidence_input}{module input. Noisy incidence data to smooth.}
 
-\item{degree}{integer}
+\item{data_points_incl}{integer. Size of the window used in the LOESS algorithm.}
+
+\item{degree}{integer. LOESS degree.}
 }
 \value{
-module output
+module output. Smoothed incidence.
 }
 \description{
-LOESS smoothing function
+see help page of \link{stats::loess} for more details on the meaning
+of the function's parameter.
 }

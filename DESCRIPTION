@@ -1,12 +1,33 @@
 Package: estimateR
 Title: Reproductive number estimation from delayed infection reports
 Version: 0.0.0.9000
-Authors@R: 
-    person(given = "Jeremie",
+Authors@R: c(
+    person(given = "Jérémie",
            family = "Scire",
            role = c("aut", "cre"),
-           email = "jeremie.scire@bsse.ethz.ch")
-Description: TODO
+           email = "jeremie.scire@bsse.ethz.ch"),
+    person(given = "Jana",
+           family = "Huisman",
+           role = "aut"),
+    person(given = "Daniel",
+           family = "Angst",
+           role = "aut"),
+    person(given = "Jinzhou",
+           family = "Li",
+           role = "aut"))
+Description: Draft description. 
+    The estimateR package implements a modular pipeline to estimate the effective reproductive number from incidence data.
+    The incidence data does not need to directly represent infections.
+    Instead, the incidence data can represent indirect and temporally-delayed noisy observations of infection events.
+    Typically, these could be: case confirmation via testing for the pathogen of interest,
+    or hospital admissions of patients suffering from the disease of interest,
+    ICU admissions of such patients, or even deaths.
+    In addition to incidence data, one needs an estimate of the delay distribution between infection events and their observations.
+    Typically, the delay between an infection and its observation can be split into two independent delays:
+    the incubation period and the delay between symptom onset and observation.
+    If the incidence data represents dates of onset of symptoms, the latter delay is not needed.
+    Once the original incidence data is transformed into incidence of infection events,
+    the effective reproductive number is estimated using wrappers around the EpiEstim package (Cori et al. 2013).
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

@@ -2,31 +2,61 @@
 % Please edit documentation in R/pipe.R
 \name{smooth_deconvolve_estimate}
 \alias{smooth_deconvolve_estimate}
-\title{Title}
+\title{Estimate Re from incidence data}
 \usage{
 smooth_deconvolve_estimate(
   incidence_vector,
   delay_distribution_vector,
-  initial_delta,
-  minimul_cumul_incidence = 0,
+  smoothing_method = "LOESS",
+  deconvolution_method = "Richardson-Lucy delay distribution",
+  estimation_method = "EpiEstim sliding window",
   estimation_window = 3,
   mean_serial_interval = 4.8,
   std_serial_interval = 2.3,
-  mean_Re_prior = 1,
-  time_units_in_the_past = 30,
-  max_iterations = 100,
-  verbose = FALSE,
   output_Re_only = TRUE,
   ref_date = NULL,
-  time_step = "day"
+  time_step = "day",
+  verbose = FALSE
 )
 }
 \arguments{
-\item{time_step}{}
+\item{delay_distribution_vector}{see \code{\link{deconvolve_incidence}}}
+
+\item{smoothing_method}{string. see \code{\link{smooth_incidence}}.}
+
+\item{deconvolution_method}{string. see \code{\link{deconvolve_incidence}}}
+
+\item{estimation_method}{string. see \code{\link{estimate_Re}}}
+
+\item{estimation_window}{integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.
+see \code{\link{estimate_Re}}}
+
+\item{mean_serial_interval}{numeric. see \code{\link{estimate_Re}}}
+
+\item{std_serial_interval}{numeric. see \code{\link{estimate_Re}}}
+
+\item{output_Re_only}{boolean. Should the output only contain Re estimates? (as opposed to containing results for each intermediate step)}
+
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_vector}}
+
+\item{time_step}{string. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
+
+#TODO add details on output formatting}
+
+\item{verbose}{boolean. see \code{\link{deconvolve_incidence}}}
 }
 \value{
-
+effective reproductive number estimates through time.
 }
 \description{
-Title
+This pipe function combines a smoothing step using (to remove noise from the original observations),
+a deconvolution step (to retrieve infection events from the observed delays),
+and an Re estimation step (wrapping around EpiEstim).
+}
+\details{
+The smoothing step uses the LOESS method by default.
+The deconvolution step uses the Richardson-Lucy algorithm  by default.
+The estimation uses the Cori method with a sliding window  by default.
+
+#TODO clarify input
 }

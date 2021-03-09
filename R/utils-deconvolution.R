@@ -1,5 +1,22 @@
-#### Make square delay distribution matrix from vector of delay distributions
-get_matrix_from_constant_waiting_time_distr <- function(waiting_time_distr, N) {
+#TODO add a function to deal with empirical delay distribution and build delay distribution matrix
+## make sure it can deal with Spanish data specificity
+
+# TODO transform make_ecdf_from_two_gammas into a more general function summing draws from n distributions (allow type of distribution to be changed)
+
+# TODO make make_ecdf_from_empirical_data_and_gamma more general, draws can be from different types of distribution.
+## Check why gamma_draws is an input and not drawn inside the function
+## Check why not Vectorized ecdf output as in make_ecdf_from_two_gammas
+
+# TODO think about whether utilities like '.get_matrix_from_constant_waiting_time_distr' need to be exported
+
+
+#' Make square delay distribution matrix from vector of delay distributions
+#'
+#' @param waiting_time_distr numeric vector
+#' @param N integer. Dimension of output matrix
+#'
+#' @return square numeric matrix
+.get_matrix_from_constant_waiting_time_distr <- function(waiting_time_distr, N) {
 
   if(N >= length(waiting_time_distr)) {
     waiting_time_distr <- c(waiting_time_distr, rep(0, times = N - length(waiting_time_distr)))
@@ -13,16 +30,36 @@ get_matrix_from_constant_waiting_time_distr <- function(waiting_time_distr, N) {
   return(delay_distribution_matrix)
 }
 
-#### Build empirical CDF from draws summing samples from two gamma distributions
-make_ecdf_from_two_gammas <- function(shape, scale, numberOfSamples = 1E6) {
+
+#' Build an empirical Cumulative Distribution Function
+#' from the convolution of two independent Gamma distributions
+#'
+#' Utility function that draws a large number of samples (1E6 by default) from 2 gamma distributions,
+#' sums a sample from each, and buids an empirical cdf from the distribution of samples obtained.
+#'
+#' @param shape numeric vector
+#' @param scale numeric vector
+#' @param number_of_samples integer. Number of samples.
+#'
+#' @return Vectorize ecdf object
+.make_ecdf_from_two_gammas <- function(shape, scale, number_of_samples = 1E6) {
   draws <-
-    stats::rgamma(numberOfSamples, shape = shape[1], scale = scale[1]) +
-    stats::rgamma(numberOfSamples, shape = shape[2], scale = scale[2])
+    stats::rgamma(number_of_samples, shape = shape[1], scale = scale[1]) +
+    stats::rgamma(number_of_samples, shape = shape[2], scale = scale[2])
   return(Vectorize(stats::ecdf(draws)))
 }
 
-#### Build empirical CDF from draws from a gamma distribution summmed with an empirical distribution
-make_ecdf_from_empirical_data_and_gamma <- function(gamma_draws,
+#' Build an empirical Cumulative Distribution Function
+#' from the convolution of a gamma distribution and an empirical distribution
+#'
+#' Utility function that sums samples from an empirical distribution and a gamma distribution.
+#'
+#' @param shape numeric vector
+#' @param scale numeric vector
+#' @param number_of_samples integer. Number of samples.
+#'
+#' @return ecdf object
+.make_ecdf_from_empirical_data_and_gamma <- function(gamma_draws,
                                                     empirical_distr,
                                                     multiplier_init = 100){
 
@@ -45,16 +82,26 @@ make_ecdf_from_empirical_data_and_gamma <- function(gamma_draws,
   return(stats::ecdf(draws))
 }
 
-get_vector_constant_waiting_time_distr <- function(shape_incubation,
+#' Build a waiting time distribution from the convolution of two gamma distributions
+#'
+#' @param shape_incubation numeric. Shape parameter of the gamma distribution representing the delay between infection and symptom onset.
+#' @param scale_incubation numeric. Scale parameter of the gamma distribution representing the delay between infection and symptom onset.
+#' @param shape_onset_to_report numeric. Shape parameter of the gamma distribution representing the delay between symtom onset and observation.
+#' @param scale_onset_to_report numeric. Scale parameter of the gamma distribution representing the delay between symtom onset and observation.
+#' @param length_out integer. Length of the output vector
+#' @param n_random_samples integer. number of samples drawn from each distribution
+#'
+#' @return vector specifying the CDF between each time step of the waiting time distribution.
+.get_vector_constant_waiting_time_distr <- function(shape_incubation,
                                                    scale_incubation,
                                                    shape_onset_to_report,
                                                    scale_onset_to_report,
                                                    length_out = 200,
                                                    n_random_samples = 1E6) {
 
-  F_h <- make_ecdf_from_two_gammas(shape = c(shape_incubation, shape_onset_to_report),
+  F_h <- .make_ecdf_from_two_gammas(shape = c(shape_incubation, shape_onset_to_report),
                                    scale = c(scale_incubation, scale_onset_to_report),
-                                   numberOfSamples = n_random_samples)
+                                   number_of_samples = n_random_samples)
 
   f <- Vectorize(function(x){
     if(x < 0) {
@@ -72,9 +119,10 @@ get_vector_constant_waiting_time_distr <- function(shape_incubation,
 }
 
 
+#TODO rework on this function
 #TODO format of empirical_delays must be specified somewhere:
 # use "event_date" and "report_delay" as column names
-get_matrix_empirical_waiting_time_distr <- function(empirical_delays,
+.get_matrix_empirical_waiting_time_distr <- function(empirical_delays,
                                                     start_date,
                                                     N,
                                                     time_step = "day",
@@ -166,17 +214,17 @@ get_matrix_empirical_waiting_time_distr <- function(empirical_delays,
 #####
 
 #####
-#TODO make additional function that prepares incidence if it onset data to take into account the fact that it needs to first be reported
-build_delay_distribution_matrix_from_empirical_data <- function(empirical_delay_data) {
+#TODO make additional function that prepares incidence if it is onset data to take into account the fact that it needs to first be reported
+.build_delay_distribution_matrix_from_empirical_data <- function(empirical_delay_data) {
 
 
   ##TODO finish
   if(! is_onset_data ) { # copy pasted, maybe we don't keep the if statement
-    delay_distribution_matrix_onset_to_report <- get_matrix_empirical_waiting_time_distr(
+    delay_distribution_matrix_onset_to_report <- .get_matrix_empirical_waiting_time_distr(
       empirical_delays,
       all_dates[(days_further_in_the_past_incubation + 1):length(all_dates)])
 
-    delay_distribution_matrix_incubation <- get_matrix_constant_waiting_time_distr(
+    delay_distribution_matrix_incubation <- .get_matrix_constant_waiting_time_distr(
       constant_delay_distribution_incubation,
       all_dates)
 
@@ -188,5 +236,4 @@ build_delay_distribution_matrix_from_empirical_data <- function(empirical_delay_
   return()
 }
 
-##TODO add a function to deal with empirical delay distribution and build delay distribution matrix
-## make sure it can deal with Spanish data specificity
+
