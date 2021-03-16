@@ -70,7 +70,11 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 #'
 #' @return vector containing values
 .get_values <- function(module_object) {
+  if(is.list(module_object)) {
   return(module_object$values)
+  } else {
+    return(module_object)
+  }
 }
 
 

@@ -28,8 +28,6 @@
 }
 \value{
 vector specifying the CDF between each time step of the waiting time distribution.
-
-#TODO add example
 }
 \description{
 Build a waiting time distribution from the convolution of two gamma distributions

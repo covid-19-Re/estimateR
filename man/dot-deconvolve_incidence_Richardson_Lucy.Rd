@@ -21,8 +21,6 @@
 
 \item{initial_delta}{integer. number of steps by which input data is left-shifted in first step of R-L algo.}
 
-\item{time_units_in_the_past}{integer. Number of time steps}
-
 \item{threshold_chi_squared}{numeric. Threshold for chi-squared values under which the R-L algo stops.}
 
 \item{max_iterations}{integer. Maximum threshold for the number of iterations in the Richardson-Lucy algo.}
