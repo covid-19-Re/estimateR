@@ -113,7 +113,22 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 #'
 #' @return module output object
 .get_module_output <- function(results, input, offset = 0) {
+
+  if(length(results) == 0) {
+    return(.make_empty_module_output())
+  }
+
   new_offset <- input$index_offset + offset
+
+  while(is.na(results[1])) {
+    results <- results[-1]
+    new_offset <- new_offset + 1
+
+    if(length(results) == 0) {
+      return(.make_empty_module_output())
+    }
+  }
+
   return(list("values" = results, "index_offset" = new_offset))
 }
 
@@ -155,6 +170,17 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
   indices <- seq(from = tmp_output$index_offset, by = 1, length.out = length(tmp_output$values))
 
   return(dplyr::tibble(index = indices, !!output_name := tmp_output$values))
+}
+
+
+
+#' Utility function to print vectors in a copy-pastable format
+#'
+#' @param a
+#'
+#' @return Print vector as string
+.print_as_vector <- function(a, digits = 3) {
+  cat(paste0("c(",paste(round(a, digits = digits), collapse=","), ")"))
 }
 
 

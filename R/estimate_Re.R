@@ -93,7 +93,6 @@ estimate_Re <- function( incidence_data, estimation_method = "EpiEstim sliding w
     )
   )
 
-
   additional_offset <- t_end[1] - 1
   R_mean <- .get_module_output(R_instantaneous$R$`Mean(R)`,
                                incidence_input,

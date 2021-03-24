@@ -38,7 +38,6 @@ deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richar
 #'
 #' @param incidence_input module input object.
 #' @param delay_distribution numeric square matrix or vector.
-#' @param initial_delta integer. number of steps by which input data is left-shifted in first step of R-L algo.
 #' @param threshold_chi_squared numeric. Threshold for chi-squared values under which the R-L algo stops.
 #' @param max_iterations integer. Maximum threshold for the number of iterations in the Richardson-Lucy algo.
 #' @param verbose Boolean. Print verbose output?
@@ -47,7 +46,6 @@ deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richar
 .deconvolve_incidence_Richardson_Lucy <- function(
   incidence_input,
   delay_distribution,
-  initial_delta,
   time_units_in_the_past = 30,
   threshold_chi_squared = 1,
   max_iterations = 100,
@@ -125,5 +123,5 @@ deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richar
   # Remove last values as they cannot be properly inferred
   final_estimate <- current_estimate[1:(length(current_estimate) - first_guess_delay)]
 
-  return(.get_module_output(final_estimate, input, additional_offset))
+  return(.get_module_output(final_estimate, incidence_input, additional_offset))
 }
