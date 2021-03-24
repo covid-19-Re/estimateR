@@ -8,20 +8,30 @@
 #'#TODO specify input format
 #' @param incidence_data
 #' @param smoothing_method string. Options are "LOESS".
+#' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
 #'
 #' @return module output. Smoothed incidence.
 #' @export
 #'
 #'#TODO fill in example
 #' @examples
-smooth_incidence <- function(incidence_data, smoothing_method = "LOESS", ...) {
+smooth_incidence <- function(incidence_data,
+                             smoothing_method = "LOESS",
+                             simplify_output = TRUE,
+                             ...) {
 
   input <- .get_module_input(incidence_data)
 
-  smoothed_incidence <- dplyr::case_when(
-    smoothing_method == "LOESS" ~ .smooth_LOESS(input, ...),
-    TRUE ~ rep(NA_real_, length.out = .get_input_length(input))
-  )
+  if(smoothing_method == "LOESS") {
+    smoothed_incidence <- .smooth_LOESS(input, ...)
+  } else {
+    smoothed_incidence <- .make_empty_module_output()
+  }
+
+  if(simplify_output) {
+    smoothed_incidence <- .simplify_output(smoothed_incidence)
+  }
+
   return(smoothed_incidence)
 }
 

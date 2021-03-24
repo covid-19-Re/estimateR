@@ -13,6 +13,7 @@
 #'
 #' @param original_data Format still to define.
 #' @param bootstrapping_method string. Options are "non-parametric block boostrap"
+#' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
 #' @param ... Extra parameters to pass to the smoothing function
 #'
 #' @return a module output object. A boostrapped replicate.
@@ -20,14 +21,23 @@
 #'
 #'#TODO fill in example
 #' @examples
-get_bootstrap_replicate <- function( original_data, bootstrapping_method = "non-parametric block boostrap", ... ) {
+get_bootstrap_replicate <- function( original_data,
+                                     bootstrapping_method = "non-parametric block boostrap",
+                                     simplify_output = TRUE,
+                                     ... ) {
 
   input <- .get_module_input(original_data)
 
-  bootstrapped_incidence <- dplyr::case_when(
-    bootstrapping_method == "non-parametric block boostrap" ~ .block_bootstrap(input, ... ),
-    TRUE ~ rep(NA_real_, length.out = .get_input_length(input))
-  )
+  if(bootstrapping_method == "non-parametric block boostrap") {
+    bootstrapped_incidence <- .block_bootstrap(input, ... )
+  } else {
+    bootstrapped_incidence <- .make_empty_module_output()
+  }
+
+  if(simplify_output) {
+    bootstrapped_incidence <- .simplify_output(bootstrapped_incidence)
+  }
+
   return(bootstrapped_incidence)
 }
 

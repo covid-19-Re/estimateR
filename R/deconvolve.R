@@ -8,6 +8,7 @@
 #'#TODO figure out input format
 #' @param incidence_data
 #' @param estimation_method string. Options are "Richardson-Lucy delay distribution"
+#' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
 #' @param ...
 #'
 #' @return module output object.
@@ -16,14 +17,20 @@
 #'#TODO add examples
 #' @examples
 #TODO add a mandatory parameter for passing info on the delay distribution
-deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richardson-Lucy delay distribution", ... ) {
+deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richardson-Lucy delay distribution", simplify_output = TRUE, ... ) {
 
   input <- .get_module_input(incidence_data)
 
-  deconvolved_incidence <- dplyr::case_when(
-    deconvolution_method == "Richardson-Lucy delay distribution" ~ .deconvolve_incidence_Richardson_Lucy(input, ... ),
-    TRUE ~ rep(NA_real_, length.out = .get_input_length(input))
-  )
+  if(deconvolution_method == "Richardson-Lucy delay distribution") {
+    deconvolved_incidence <- .deconvolve_incidence_Richardson_Lucy(input, ... )
+  } else {
+    deconvolved_incidence <-  .make_empty_module_output()
+  }
+
+  if(simplify_output) {
+    deconvolved_incidence <- .simplify_output(deconvolved_incidence)
+  }
+
   return(deconvolved_incidence)
 }
 

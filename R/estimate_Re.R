@@ -11,6 +11,7 @@
 #'
 #' @param incidence_data Format still to define.
 #' @param estimation_method string. Options are "EpiEstim sliding window".
+#' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
 #' @param ...
 #'
 #'#TODO figure out output format
@@ -19,14 +20,20 @@
 #'
 #'#TODO add example
 #' @examples
-estimate_Re <- function( incidence_data, estimation_method = "EpiEstim sliding window", ... ) {
+estimate_Re <- function( incidence_data, estimation_method = "EpiEstim sliding window", simplify_output = TRUE, ... ) {
 
   input <- .get_module_input(incidence_data)
 
-  Re_estimate <- dplyr::case_when(
-    estimation_method == "EpiEstim sliding window" ~ .estimate_Re_EpiEstim_sliding_window(input, ... ),
-    TRUE ~ rep(NA_real_, length.out = .get_input_length(input))
-  )
+  if(estimation_method == "EpiEstim sliding window") {
+    Re_estimate <- .estimate_Re_EpiEstim_sliding_window(input, ... )
+  } else {
+    Re_estimate <- .make_empty_module_output()
+  }
+
+  if(simplify_output) {
+    Re_estimate <- .simplify_output(Re_estimate)
+  }
+
   return(Re_estimate)
 }
 
@@ -89,7 +96,7 @@ estimate_Re <- function( incidence_data, estimation_method = "EpiEstim sliding w
 
   additional_offset <- t_end[1] - 1
   R_mean <- .get_module_output(R_instantaneous$R$`Mean(R)`,
-                              input,
+                               incidence_input,
                               additional_offset)
 
   return(R_mean)

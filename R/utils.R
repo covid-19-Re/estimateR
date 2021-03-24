@@ -58,7 +58,14 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
     values <- as.double(data)
     index_offset <- 0
   }
-  return(list(values = values, index_offset = index_offset))
+  return(list("values" = values, "index_offset" = index_offset))
+}
+
+#' Make empty module output object
+#'
+#' @return empty module output object
+.make_empty_module_output <- function(){
+  return(list("values" = NA_real_, "index_offset" = 0))
 }
 
 
@@ -78,6 +85,22 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 }
 
 
+#' Get offset from module object
+#'
+#' This function must be adapted if the module_input_object implementation changes.
+#'
+#' @param module_input_object
+#'
+#' @return numeric scalar. Offset
+.get_offset <- function(module_object) {
+  if(is.list(module_object)) {
+    return(module_object$index_offset)
+  } else {
+    return(0)
+  }
+}
+
+
 #' Transform a result output of a module into a module output
 #'
 #' Also takes the module input object to calculate the offset of the output object.
@@ -91,12 +114,21 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 #' @return module output object
 .get_module_output <- function(results, input, offset = 0) {
   new_offset <- input$index_offset + offset
-  if(new_offset == 0){
-    # if offset stays 0, output vector with 'results' values
-    return(results)
+  return(list("values" = results, "index_offset" = new_offset))
+}
+
+#' Simplify output object if possible
+#'
+#' If offset is 0, return only vector containing values.
+#'
+#' @param output Module output object
+#'
+#' @return numeric vector or module output object. simplified output
+.simplify_output <- function(output){
+  if(.get_offset(output) == 0) {
+    return(.get_values(output))
   } else {
-    # else return list with 'values' and 'index_offset
-    return(list(values = results, index_offset = new_offset))
+    return(output)
   }
 }
 
