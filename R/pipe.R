@@ -63,6 +63,7 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                             estimation_window = 3,
                                             mean_serial_interval = 4.8,
                                             std_serial_interval  = 2.3,
+                                            mean_Re_prior = 1,
                                             ref_date = NULL,
                                             time_step = "day",
                                             verbose = FALSE){
@@ -78,9 +79,10 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                                 smoothing_method = smoothing_method,
                                                 deconvolution_method = deconvolution_method,
                                                 estimation_method = estimation_method,
+                                                estimation_window = estimation_window,
                                                 mean_serial_interval = mean_serial_interval,
                                                 std_serial_interval  = std_serial_interval,
-                                                estimation_window = estimation_window,
+                                                mean_Re_prior = mean_Re_prior,
                                                 ref_date = ref_date,
                                                 time_step = time_step,
                                                 output_Re_only = FALSE,
@@ -158,6 +160,7 @@ smooth_deconvolve_estimate <- function(incidence_vector,
                                        estimation_window = 3,
                                        mean_serial_interval = 4.8,
                                        std_serial_interval  = 2.3,
+                                       mean_Re_prior = 1,
                                        output_Re_only = TRUE,
                                        ref_date = NULL,
                                        time_step = "day",
@@ -168,7 +171,7 @@ smooth_deconvolve_estimate <- function(incidence_vector,
 
   deconvolved_incidence <- deconvolve_incidence(incidence_data = smoothed_incidence,
                                                 deconvolution_method = deconvolution_method,
-                                                delay_distribution_vector,
+                                                delay_distribution = delay_distribution_vector,
                                                 verbose = verbose)
 
   estimated_Re <- estimate_Re(incidence_data = deconvolved_incidence,
@@ -193,5 +196,4 @@ smooth_deconvolve_estimate <- function(incidence_vector,
   }
 
 }
-
 

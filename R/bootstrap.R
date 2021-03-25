@@ -11,7 +11,7 @@
 #'
 #'#TODO specify input format
 #'
-#' @param original_data Format still to define.
+#' @param incidence_data Format still to define.
 #' @param bootstrapping_method string. Options are "non-parametric block boostrap"
 #' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
 #' @param ... Extra parameters to pass to the smoothing function
@@ -21,12 +21,12 @@
 #'
 #'#TODO fill in example
 #' @examples
-get_bootstrap_replicate <- function( original_data,
+get_bootstrap_replicate <- function( incidence_data,
                                      bootstrapping_method = "non-parametric block boostrap",
                                      simplify_output = TRUE,
                                      ... ) {
 
-  input <- .get_module_input(original_data)
+  input <- .get_module_input(incidence_data)
 
   if(bootstrapping_method == "non-parametric block boostrap") {
     bootstrapped_incidence <- .block_bootstrap(input, ... )

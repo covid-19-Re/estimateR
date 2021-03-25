@@ -26,15 +26,20 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 
   tibble_list <- lapply(1:length(output_list),
                         function(i) {
-                          make_tibble_from_output(output = output_list[[i]],
+                          .make_tibble_from_output(output = output_list[[i]],
                                                   output_name = names(output_list)[i])
                         })
 
-  merged_outputs<- plyr::join_all(tibble_list, by='index', type='left')
+  # return(tibble_list)
+
+  merged_outputs <- plyr::join_all(tibble_list, by='index', type='full') %>%
+                      dplyr::arrange(index)
+  # return(merged_outputs)
 
   if( !is.null(ref_date) ) {
-    dates <- seq.Date(from = ref_date - min(merged_outputs$index), by = time_step, along.with = merged_outputs$index)
+    dates <- seq.Date(from = ref_date + min(merged_outputs$index), by = time_step, along.with = merged_outputs$index)
     merged_outputs$date <- dates
+    merged_outputs <- dplyr::select(merged_outputs, date, tidyselect::everything())
   }
 
   merged_outputs <- dplyr::select(merged_outputs, -index)
@@ -154,7 +159,7 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 #'
 #' @return integer. length of values vector.
 .get_input_length <- function(input) {
-  return(length(input$values))
+  return(length(.get_values(input)))
 }
 
 
@@ -166,10 +171,10 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 #' @return tibble
 .make_tibble_from_output <- function(output, output_name){
 
-  tmp_output <- get_module_input(output)
-  indices <- seq(from = tmp_output$index_offset, by = 1, length.out = length(tmp_output$values))
+  tmp_output <- .get_module_input(output)
+  indices <- seq(from = .get_offset(tmp_output), by = 1, length.out = length(.get_values(tmp_output)))
 
-  return(dplyr::tibble(index = indices, !!output_name := tmp_output$values))
+  return(dplyr::tibble(index = indices, !!output_name := .get_values(tmp_output)))
 }
 
 
@@ -179,7 +184,7 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 #' @param a
 #'
 #' @return Print vector as string
-.print_as_vector <- function(a, digits = 3) {
+.print_vector <- function(a, digits = 3) {
   cat(paste0("c(",paste(round(a, digits = digits), collapse=","), ")"))
 }
 
