@@ -92,7 +92,11 @@
 #' @param n_random_samples integer. number of samples drawn from each distribution
 #'
 #' @return vector specifying the CDF between each time step of the waiting time distribution.
-.get_vector_constant_waiting_time_distr <- function(shape_incubation,
+#' @export
+#'
+#' @examples
+#' #TODO add examples
+get_vector_constant_waiting_time_distr <- function(shape_incubation,
                                                    scale_incubation,
                                                    shape_onset_to_report,
                                                    scale_onset_to_report,

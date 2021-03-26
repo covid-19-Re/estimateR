@@ -17,12 +17,15 @@ get_block_bootstrapped_estimate(
   estimation_window = 3,
   mean_serial_interval = 4.8,
   std_serial_interval = 2.3,
+  mean_Re_prior = 1,
   ref_date = NULL,
   time_step = "day",
   verbose = FALSE
 )
 }
 \arguments{
+\item{incidence_vector}{numeric}
+
 \item{N_bootstrap_replicates}{integer. Number of bootstrap samples.}
 
 \item{smoothing_method}{string. see \code{\link{smooth_incidence}}.}
@@ -35,9 +38,9 @@ get_block_bootstrapped_estimate(
 
 \item{scale_incubation}{numeric. Scale parameter of the gamma distribution representing the delay between infection and symptom onset.}
 
-\item{shape_onset_to_report}{numeric. Shape parameter of the gamma distribution representing the delay between symtom onset and observation.}
+\item{shape_onset_to_report}{numeric. Shape parameter of the gamma distribution representing the delay between symptom onset and observation.}
 
-\item{scale_onset_to_report}{numeric. Scale parameter of the gamma distribution representing the delay between symtom onset and observation.}
+\item{scale_onset_to_report}{numeric. Scale parameter of the gamma distribution representing the delay between symptom onset and observation.}
 
 \item{estimation_window}{integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.
 see \code{\link{estimate_Re}}}
@@ -45,6 +48,8 @@ see \code{\link{estimate_Re}}}
 \item{mean_serial_interval}{numeric. see \code{\link{estimate_Re}}}
 
 \item{std_serial_interval}{numeric. see \code{\link{estimate_Re}}}
+
+\item{mean_Re_prior}{numeric. Mean of prior distribution on Re}
 
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_vector}}
 
@@ -74,4 +79,7 @@ In latter case, the first waiting time distribution does not need to correspond 
 but it must in any case correspond to the delay between infection and case observation.
 
 #TODO clarify input
+}
+\examples{
+#TODO add examples
 }

@@ -23,3 +23,6 @@ In general, this will be the date corresponding to the first entry in the origin
 If a reference date is provided, a date column is appended to the tibble,
 with sequential dates generated with the time step specified by the optional time_step parameter.
 }
+\examples{
+#TODO add examples
+}

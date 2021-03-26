@@ -5,15 +5,18 @@
 \title{Obtain a bootstrap replicate from incidence data}
 \usage{
 get_bootstrap_replicate(
-  original_data,
+  incidence_data,
   bootstrapping_method = "non-parametric block boostrap",
+  simplify_output = TRUE,
   ...
 )
 }
 \arguments{
-\item{original_data}{Format still to define.}
+\item{incidence_data}{Format still to define.}
 
 \item{bootstrapping_method}{string. Options are "non-parametric block boostrap"}
+
+\item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
 
 \item{...}{Extra parameters to pass to the smoothing function}
 }
@@ -31,4 +34,7 @@ It performs a non-parametric block bootstrapping.
 }
 \details{
 #TODO specify input format
+}
+\examples{
+#TODO add examples
 }

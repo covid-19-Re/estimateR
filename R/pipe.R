@@ -28,12 +28,12 @@
 #' but it must in any case correspond to the delay between infection and case observation.
 #'
 #' #TODO clarify input
-#' @param incidence_vector
+#' @param incidence_vector numeric
 #' @param N_bootstrap_replicates integer. Number of bootstrap samples.
 #' @param shape_incubation numeric. Shape parameter of the gamma distribution representing the delay between infection and symptom onset.
 #' @param scale_incubation numeric. Scale parameter of the gamma distribution representing the delay between infection and symptom onset.
-#' @param shape_onset_to_report numeric. Shape parameter of the gamma distribution representing the delay between symtom onset and observation.
-#' @param scale_onset_to_report numeric. Scale parameter of the gamma distribution representing the delay between symtom onset and observation.
+#' @param shape_onset_to_report numeric. Shape parameter of the gamma distribution representing the delay between symptom onset and observation.
+#' @param scale_onset_to_report numeric. Scale parameter of the gamma distribution representing the delay between symptom onset and observation.
 #' @param smoothing_method string. see \code{\link{smooth_incidence}}.
 #' @param deconvolution_method string. see \code{\link{deconvolve_incidence}}
 #' @param estimation_method string. see \code{\link{estimate_Re}}
@@ -41,6 +41,7 @@
 #'  see \code{\link{estimate_Re}}
 #' @param mean_serial_interval numeric. see \code{\link{estimate_Re}}
 #' @param std_serial_interval numeric. see \code{\link{estimate_Re}}
+#' @param mean_Re_prior numeric. Mean of prior distribution on Re
 #' @param verbose boolean. see \code{\link{deconvolve_incidence}}
 #' @param ref_date Date. Optional. Date of the first data entry in \code{incidence_vector}
 #' @param time_step string. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
@@ -49,8 +50,8 @@
 #' @return tibble. Re estimations along with results from each pipeline step.
 #' @export
 #'
-#'#TODO add examples
 #' @examples
+#' #TODO add examples
 get_block_bootstrapped_estimate <- function(incidence_vector,
                                             N_bootstrap_replicates = 100,
                                             smoothing_method = "LOESS",
@@ -69,7 +70,7 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                             verbose = FALSE){
 
 
-  delay_distribution_vector <- .get_vector_constant_waiting_time_distr(shape_incubation,
+  delay_distribution_vector <- get_vector_constant_waiting_time_distr(shape_incubation,
                                                                       scale_incubation,
                                                                       shape_onset_to_report,
                                                                       scale_onset_to_report)
@@ -132,7 +133,7 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 #'
 #'#TODO clarify input
 #'
-#' @param incidence_vector
+#' @param incidence_vector numeric
 #' @param delay_distribution_vector see \code{\link{deconvolve_incidence}}
 #' @param smoothing_method string. see \code{\link{smooth_incidence}}.
 #' @param deconvolution_method string. see \code{\link{deconvolve_incidence}}
@@ -141,6 +142,7 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 #'  see \code{\link{estimate_Re}}
 #' @param mean_serial_interval numeric. see \code{\link{estimate_Re}}
 #' @param std_serial_interval numeric. see \code{\link{estimate_Re}}
+#' @param mean_Re_prior numeric. Mean of prior distribution on Re
 #' @param verbose boolean. see \code{\link{deconvolve_incidence}}
 #' @param output_Re_only boolean. Should the output only contain Re estimates? (as opposed to containing results for each intermediate step)
 #' @param ref_date Date. Optional. Date of the first data entry in \code{incidence_vector}
@@ -150,8 +152,8 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 #' @return effective reproductive number estimates through time.
 #' @export
 #'
-#'#TODO add examples
 #' @examples
+#' #TODO add examples
 smooth_deconvolve_estimate <- function(incidence_vector,
                                        delay_distribution_vector,
                                        smoothing_method = "LOESS",
@@ -185,10 +187,10 @@ smooth_deconvolve_estimate <- function(incidence_vector,
     return(estimated_Re)
   } else {
     merged_results <- merge_outputs(
-      list(observed_incidence = incidence_vector,
-           smoothed_incidence = smoothed_incidence,
-           deconvolved_incidence = deconvolved_incidence,
-           R_mean = estimated_Re),
+      list("observed_incidence" = incidence_vector,
+           "smoothed_incidence" = smoothed_incidence,
+           "deconvolved_incidence" = deconvolved_incidence,
+           "R_mean" = estimated_Re),
       ref_date = ref_date,
       time_step = time_step)
 

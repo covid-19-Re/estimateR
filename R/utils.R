@@ -22,6 +22,9 @@
 #'
 #' @return tibble
 #' @export
+#'
+#' @examples
+#' #TODO add examples
 merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 
   tibble_list <- lapply(1:length(output_list),
@@ -78,7 +81,7 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 #'
 #' This function must be adapted if the module_input_object implementation changes.
 #'
-#' @param module_input_object
+#' @param module_object
 #'
 #' @return vector containing values
 .get_values <- function(module_object) {
@@ -94,7 +97,7 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 #'
 #' This function must be adapted if the module_input_object implementation changes.
 #'
-#' @param module_input_object
+#' @param module_object
 #'
 #' @return numeric scalar. Offset
 .get_offset <- function(module_object) {
@@ -181,7 +184,8 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 
 #' Utility function to print vectors in a copy-pastable format
 #'
-#' @param a
+#' @param a numeric vector
+#' @param digits integer. Number of digits to round.
 #'
 #' @return Print vector as string
 .print_vector <- function(a, digits = 3) {

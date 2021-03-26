@@ -6,16 +6,16 @@
 #' a vector of infection events from input data representing delayed observations.
 #'
 #'#TODO figure out input format
-#' @param incidence_data
-#' @param estimation_method string. Options are "Richardson-Lucy delay distribution"
+#' @param incidence_data numeric.
+#' @param deconvolution_method string. Options are "Richardson-Lucy delay distribution"
 #' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
 #' @param ...
 #'
 #' @return module output object.
 #' @export
 #'
-#'#TODO add examples
 #' @examples
+#' #TODO add examples
 #TODO add a mandatory parameter for passing info on the delay distribution
 deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richardson-Lucy delay distribution", simplify_output = TRUE, ... ) {
 
@@ -46,7 +46,6 @@ deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richar
 .deconvolve_incidence_Richardson_Lucy <- function(
   incidence_input,
   delay_distribution,
-  time_units_in_the_past = 30,
   threshold_chi_squared = 1,
   max_iterations = 100,
   verbose = FALSE

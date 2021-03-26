@@ -12,7 +12,6 @@ test_that("deconvolve_incidence yields consistent results on a toy example", {
   deconvolved_incidence <- deconvolve_incidence(incidence_data = toy_incidence_data,
                                                 deconvolution_method = "Richardson-Lucy delay distribution",
                                                 delay_distribution = delay_distribution,
-                                                time_units_in_the_past = 30,
                                                 threshold_chi_squared = 1,
                                                 max_iterations = 100)
 

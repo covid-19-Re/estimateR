@@ -6,15 +6,16 @@
 #' is implemented.
 #'
 #'#TODO specify input format
-#' @param incidence_data
+#' @param incidence_data numeric.
 #' @param smoothing_method string. Options are "LOESS".
 #' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
+#' @param ...
 #'
 #' @return module output. Smoothed incidence.
 #' @export
 #'
-#'#TODO fill in example
 #' @examples
+#' #TODO add examples
 smooth_incidence <- function(incidence_data,
                              smoothing_method = "LOESS",
                              simplify_output = TRUE,

@@ -4,10 +4,21 @@
 \alias{smooth_incidence}
 \title{Smooth Noisy Incidence Data}
 \usage{
-smooth_incidence(incidence_data, smoothing_method = "LOESS", ...)
+smooth_incidence(
+  incidence_data,
+  smoothing_method = "LOESS",
+  simplify_output = TRUE,
+  ...
+)
 }
 \arguments{
+\item{incidence_data}{numeric.}
+
 \item{smoothing_method}{string. Options are "LOESS".}
+
+\item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
+
+\item{...}{}
 }
 \value{
 module output. Smoothed incidence.
@@ -18,4 +29,7 @@ is implemented.
 }
 \details{
 #TODO specify input format
+}
+\examples{
+#TODO add examples
 }

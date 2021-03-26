@@ -18,8 +18,8 @@
 #' @return a module output object (subject to change)
 #' @export
 #'
-#'#TODO add example
 #' @examples
+#' #TODO add examples
 estimate_Re <- function( incidence_data, estimation_method = "EpiEstim sliding window", simplify_output = TRUE, ... ) {
 
   input <- .get_module_input(incidence_data)

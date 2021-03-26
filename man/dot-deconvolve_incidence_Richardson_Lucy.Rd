@@ -7,8 +7,6 @@
 .deconvolve_incidence_Richardson_Lucy(
   incidence_input,
   delay_distribution,
-  initial_delta,
-  time_units_in_the_past = 30,
   threshold_chi_squared = 1,
   max_iterations = 100,
   verbose = FALSE
@@ -18,8 +16,6 @@
 \item{incidence_input}{module input object.}
 
 \item{delay_distribution}{numeric square matrix or vector.}
-
-\item{initial_delta}{integer. number of steps by which input data is left-shifted in first step of R-L algo.}
 
 \item{threshold_chi_squared}{numeric. Threshold for chi-squared values under which the R-L algo stops.}
 

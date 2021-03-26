@@ -4,12 +4,19 @@
 \alias{estimate_Re}
 \title{Estimate effective reproductive number Re from incidence data}
 \usage{
-estimate_Re(incidence_data, estimation_method = "EpiEstim sliding window", ...)
+estimate_Re(
+  incidence_data,
+  estimation_method = "EpiEstim sliding window",
+  simplify_output = TRUE,
+  ...
+)
 }
 \arguments{
 \item{incidence_data}{Format still to define.}
 
 \item{estimation_method}{string. Options are "EpiEstim sliding window".}
+
+\item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
 
 \item{...}{#TODO figure out output format}
 }
@@ -26,4 +33,7 @@ then one should deconvolve it first with \code{deconvolve_incidence}.
 For now, only one Re estimation function is implemented.
 
 #TODO specify input format
+}
+\examples{
+#TODO add examples
 }

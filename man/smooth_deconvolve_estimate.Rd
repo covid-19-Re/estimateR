@@ -13,6 +13,7 @@ smooth_deconvolve_estimate(
   estimation_window = 3,
   mean_serial_interval = 4.8,
   std_serial_interval = 2.3,
+  mean_Re_prior = 1,
   output_Re_only = TRUE,
   ref_date = NULL,
   time_step = "day",
@@ -20,6 +21,8 @@ smooth_deconvolve_estimate(
 )
 }
 \arguments{
+\item{incidence_vector}{numeric}
+
 \item{delay_distribution_vector}{see \code{\link{deconvolve_incidence}}}
 
 \item{smoothing_method}{string. see \code{\link{smooth_incidence}}.}
@@ -34,6 +37,8 @@ see \code{\link{estimate_Re}}}
 \item{mean_serial_interval}{numeric. see \code{\link{estimate_Re}}}
 
 \item{std_serial_interval}{numeric. see \code{\link{estimate_Re}}}
+
+\item{mean_Re_prior}{numeric. Mean of prior distribution on Re}
 
 \item{output_Re_only}{boolean. Should the output only contain Re estimates? (as opposed to containing results for each intermediate step)}
 
@@ -59,4 +64,7 @@ The deconvolution step uses the Richardson-Lucy algorithm  by default.
 The estimation uses the Cori method with a sliding window  by default.
 
 #TODO clarify input
+}
+\examples{
+#TODO add examples
 }

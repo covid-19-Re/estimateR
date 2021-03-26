@@ -19,8 +19,8 @@
 #' @return a module output object. A boostrapped replicate.
 #' @export
 #'
-#'#TODO fill in example
 #' @examples
+#' #TODO add examples
 get_bootstrap_replicate <- function( incidence_data,
                                      bootstrapping_method = "non-parametric block boostrap",
                                      simplify_output = TRUE,

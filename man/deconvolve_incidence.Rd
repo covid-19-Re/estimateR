@@ -7,13 +7,18 @@
 deconvolve_incidence(
   incidence_data,
   deconvolution_method = "Richardson-Lucy delay distribution",
+  simplify_output = TRUE,
   ...
 )
 }
 \arguments{
-\item{...}{}
+\item{incidence_data}{numeric.}
 
-\item{estimation_method}{string. Options are "Richardson-Lucy delay distribution"}
+\item{deconvolution_method}{string. Options are "Richardson-Lucy delay distribution"}
+
+\item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
+
+\item{...}{}
 }
 \value{
 module output object.
@@ -26,4 +31,7 @@ a vector of infection events from input data representing delayed observations.
 }
 \details{
 #TODO figure out input format
+}
+\examples{
+#TODO add examples
 }
