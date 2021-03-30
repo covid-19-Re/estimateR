@@ -1,16 +1,19 @@
+#TODO write deconvolution step with the convolution of a matrix with vector. That should apply to Swiss non-onset data
+#TODO write deconvolution step that takes into account that data is onset data (when it is). That should apply to Swiss onset data
+
 #TODO add a function to deal with empirical delay distribution and build delay distribution matrix
 ## make sure it can deal with Spanish data specificity
 
-# TODO transform make_ecdf_from_two_gammas into a more general function summing draws from n distributions (allow type of distribution to be changed)
+#TODO transform make_ecdf_from_two_gammas into a more general function summing draws from n distributions (allow type of distribution to be changed)
 
-# TODO make make_ecdf_from_empirical_data_and_gamma more general, draws can be from different types of distribution.
+#TODO make make_ecdf_from_empirical_data_and_gamma more general, draws can be from different types of distribution.
 ## Check why gamma_draws is an input and not drawn inside the function
 ## Check why not Vectorized ecdf output as in make_ecdf_from_two_gammas
 
-# TODO think about whether utilities like '.get_matrix_from_constant_waiting_time_distr' need to be exported
+#TODO think about whether utilities like '.get_matrix_from_constant_waiting_time_distr' need to be exported
 
 
-#' Make square delay distribution matrix from vector of delay distributions
+#' Make square delay distribution matrix from vector of delay distributions.
 #'
 #' @param waiting_time_distr numeric vector
 #' @param N integer. Dimension of output matrix
@@ -24,6 +27,30 @@
 
   delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
   for(i in 1:N) {
+    delay_distribution_matrix[, i ] <-  c(rep(0, times = i - 1 ), waiting_time_distr[1:(N - i + 1)])
+  }
+
+  return(delay_distribution_matrix)
+}
+
+#TODO fill documentation
+#TODO test
+#maybe merge with .get_matrix_from_constant_waiting_time_distr by adding N parm and checking if list or unique vector
+#' Build delay distribution matrix from list of delay distribution vectors
+#'
+#' @param waiting_time_distribution_list
+#'
+#' @return
+.get_matrix_from_waiting_time_distributions <- function(waiting_time_distribution_list){
+  N <- length(waiting_time_distribution_list)
+  delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
+
+  for(i in 1:N){
+
+    waiting_time_distr <- waiting_time_distribution_list[[i]]
+    if(length(waiting_time_distr) < N - i + 1) {
+      waiting_time_distr <- c(waiting_time_distr, rep(0, times = N - i + 1 - length(waiting_time_distr)))
+    }
     delay_distribution_matrix[, i ] <-  c(rep(0, times = i - 1 ), waiting_time_distr[1:(N - i + 1)])
   }
 
@@ -47,6 +74,140 @@
     stats::rgamma(number_of_samples, shape = shape[1], scale = scale[1]) +
     stats::rgamma(number_of_samples, shape = shape[2], scale = scale[2])
   return(Vectorize(stats::ecdf(draws)))
+}
+
+#TODO add details on the discretization
+#TODO fill documentation
+#TODO test (test that vector sums up to 1)
+#' Build a delay distribution vector
+#'
+#' Only allows for gamma distributions for now.
+#' @param parm1 numeric. If \code{distribution_type=="gamma"}, \code{parm1} is the shape parameter.
+#' @param parm2 numeric. If \code{distribution_type=="gamma"}, \code{parm2} is the scale parameter.
+#' @param distribution_type string. Options are "gamma".
+#' @param max_quantile numeric value between 0 and 1. TODO write what max_quantile does
+#'
+#' @return numeric vector.
+#' @export
+#'
+#' @examples
+#' TODO add example
+build_delay_distribution <- function(parm1,
+                                     parm2,
+                                     distribution_type = "gamma",
+                                     max_quantile = 0.999){
+  if(distribution_type == "gamma") {
+    # Take the right boundary of the delay distribution vector
+    right_boundary <- ceiling(stats::qgamma(max_quantile, shape = parm1, scale = parm2)) + 1
+    right_boundary <- max(right_boundary, 2) # Set the right boundary to at least two
+
+    cdf_values <- stats::pgamma(c(0, seq(from = 0.5, to = right_boundary, by = 1)), shape = parm1, scale = parm2)
+    distribution_vector <- diff(cdf_values)
+  } else {
+    #TODO throw error
+    return(NA)
+  }
+
+  return(distribution_vector)
+}
+
+
+#TODO fill documentation
+#' Title
+#'
+#' @param vector_a numeric
+#' @param vector_b numeric
+#'
+#' @return numeric vector
+.convolve_delay_distribution_vectors <- function(vector_a, vector_b){
+  # Right-pad vectors with zeroes to bring them to the same length
+
+  final_length <- length(vector_b) + length(vector_a)
+
+  vector_a <- c(vector_a, rep(0,times = final_length - length(vector_a)))
+  vector_b <- c(vector_b, rep(0,times = final_length - length(vector_b)))
+
+  vector_c <- rep(0, times = final_length)
+
+  for(i in 1 : final_length) {
+    reversed_vector_b <- rev(vector_b[1:i]) # Reverse vector_b truncated at index i
+    reversed_vector_b <- c(reversed_vector_b, rep(0, times = final_length - i)) # Right-pad with zeroes
+    vector_c[i] <- vector_a %*% reversed_vector_b # Compute dot product between vectors
+  }
+
+  return(vector_c)
+}
+
+# TODO test against simple example
+# TODO test that columns sum to one (need to have padded zeroes in both)
+# TODO document function and document delay distribution matrix format
+#' Title
+#'
+#' @param vector_a
+#' @param matrix_b
+#' @param vector_first boolean. Delay described in vector is applied before delay described in matrix
+#'
+#' @return square matrix. Delay disitribution matrix
+.convolve_delay_distribution_vector_with_matrix <- function(vector_a, matrix_b, vector_first = TRUE){
+
+   #TODO add check that matrix_b is square
+   N <- nrow(matrix_b)
+   # Right-pad vector with zeroes to bring to same dimension as square matrix
+   vector_a <- c(vector_a, rep(0, times = max(0, N - length(vector_a))))
+
+   # Initialize result matrix
+   convolved_matrix <- matrix(0, nrow = N, ncol = N)
+
+   # Iterate over columns (each column represents the delay distribution on a specific date)
+   for(j in 1:N) {
+     # Iterate over rows
+      for(i in 0 : (N - j)) {
+        if(vector_first) { # Take corresponding row in matrix_b
+          # The row is left-truncated (only j to N indices) so as to start at same date (date with index j) as column in convolved matrix
+          matrix_b_elements <- matrix_b[i + j, j : (j + i) ]
+        } else { # Take corresponding column in matrix_b (and revert it)
+          matrix_b_elements <- matrix_b[(i + j) : j, j]
+        }
+
+        truncated_vector_a <- vector_a[1:i]
+        convolved_matrix[i + j, j] <- truncated_vector_a %*% row_matrix_b
+      }
+   }
+   return(convolved_matrix)
+}
+
+# TODO test on simple example
+# TODO test that columns sum to one (need to have padded zeroes in both)
+# TODO document function and document delay distribution matrix format
+#' Title
+#'
+#' Note that this convolution operation is not commutative!
+#' @param matrix_a square numeric matrix
+#' @param matrix_b square numeric matrix
+#'
+#' @return square matrix. Convolved matrix of time-varying delays.
+.convove_delay_distribution_matrices <- function(matrix_a, matrix_b){
+  #TODO return error if matrices are not square or not of the same size
+
+  N <- nrow(matrix_a)
+  # Initialize result matrix
+  convolved_matrix <- matrix(0, nrow = N, ncol = N)
+
+  # Iterate over columns (each column represents the delay distribution on a specific date)
+  for(j in 1:N) {
+    # Iterate over rows
+    for(i in 0 : (N - j)) {
+
+      # Take truncated column of matrix_a (first delay applied)
+      matrix_a_elements <- matrix_b[(i + j) : j, j ]
+      # Take truncated row of matrix_b (second delay applied)
+      matrix_b_elements <- matrix_b[i + j, j : (j + i) ]
+
+      convolved_matrix[i + j, j] <- matrix_a_elements %*% matrix_b_elements
+    }
+  }
+  return(convolved_matrix)
+
 }
 
 #' Build an empirical Cumulative Distribution Function
@@ -123,10 +284,29 @@ get_vector_constant_waiting_time_distr <- function(shape_incubation,
 }
 
 
-#TODO rework on this function
+
+
+#TODO improve function documentation
 #TODO format of empirical_delays must be specified somewhere:
 # use "event_date" and "report_delay" as column names
-.get_matrix_empirical_waiting_time_distr <- function(empirical_delays,
+
+#' Build matrix of delay distributions through time from empirical delay data.
+#'
+#' This matrix is required for the application of the Richardson-Lucy algorithm.
+#'
+#' @param empirical_delays tibble. format to be specified
+#' @param start_date Date. First date of incidence data
+#' @param N integer. Length of incidence time series
+#' @param time_step string. "day", "X days", "week", "month"... (see \link{\code{seq.Date}} for details)
+#' @param min_number_cases integer. Minimal number of cases to build empirical distribution from
+#' @param upper_quantile_threshold numeric. Between 0 and 1. TODO add details
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' #TODO add example
+get_matrix_empirical_waiting_time_distr <- function(empirical_delays,
                                                     start_date,
                                                     N,
                                                     time_step = "day",
@@ -151,7 +331,7 @@ get_vector_constant_waiting_time_distr <- function(shape_incubation,
     dplyr::mutate(cumul_freq = cumsum(counts)/sum(counts)) %>%
     dplyr::filter(cumul_freq > upper_quantile_threshold) %>%
     utils::head(n=1) %>%
-    dplyr::pull(delay)
+    dplyr::pull(report_delay)
 
   min_number_cases <- min(min_number_cases, sum(delay_counts$counts))
 
@@ -171,28 +351,23 @@ get_vector_constant_waiting_time_distr <- function(shape_incubation,
     weeks_averaged <- 0
     repeat{
       weeks_averaged <- weeks_averaged + 1
-      recent_counts_distribution <- onset_to_report_empirical_delays %>%
-        dplyr::filter( onset_date %in% get_dates_to_average_over(i, all_dates, weeks_averaged))
+      recent_counts_distribution <- empirical_delays %>%
+        dplyr::filter( event_date %in% .get_dates_to_average_over(i, all_dates, weeks_averaged)) #TODO: add .get_dates_to_average_over
 
       if(nrow( recent_counts_distribution ) >= min_number_cases) {
         break
       }
     }
 
-    recent_delay_counts <-  recent_counts_distribution %>%
-      dplyr::select(delay) %>%
-      dplyr::group_by(delay) %>%
-      dplyr::summarise(counts = n(), .groups = "drop") %>%
-      tidyr::complete(delay  = seq(min(delay), max(delay)),
-                      fill = list(counts = 0))
-
     recent_delays <- recent_counts_distribution %>% dplyr::pull(delay)
 
     gamma_fit <- try(fitdistrplus::fitdist(recent_delays + 1, distr = "gamma"))
     if ("try-error" %in% class(gamma_fit)) {
+      #TODO only output this if verbose output
       cat("    mle failed to estimate the parameters. Trying method = \"mme\"\n")
       gamma_fit <- fitdistrplus::fitdist(recent_delays + 1, distr = "gamma", method = "mme")
     }
+    #TODO if none work revert to empirical distribution
 
     shape_fit <- gamma_fit$estimate["shape"]
     rate_fit <- gamma_fit$estimate["rate"]
@@ -217,12 +392,16 @@ get_vector_constant_waiting_time_distr <- function(shape_incubation,
 
 #####
 
+#TODO write functions to convolve two delay distributions together and represent them as functions. This should make the deconvolution easier.
+
+
+
 #####
 #TODO make additional function that prepares incidence if it is onset data to take into account the fact that it needs to first be reported
 .build_delay_distribution_matrix_from_empirical_data <- function(empirical_delay_data) {
 
-
   ##TODO finish
+  # this is unfinished work
   if(! is_onset_data ) { # copy pasted, maybe we don't keep the if statement
     delay_distribution_matrix_onset_to_report <- .get_matrix_empirical_waiting_time_distr(
       empirical_delays,
