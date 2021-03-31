@@ -2,7 +2,7 @@
 # 1) build_delay_distribution throws error when unsupported distribution_type is thrown in
 #and when unsuitable parameter values are thrown in (not numeric, or negative values for instance)
 # 2) get_matrix_empirical_waiting_time_distr  reports consistent results on a toy example
-#
+
 
 test_that("build_delay_distribution returns a vector whose elements sum up to 1", {
   N <- 100
@@ -20,7 +20,6 @@ test_that("build_delay_distribution returns a vector whose elements sum up to 1"
 
   expect_equal(max_difference_to_1, 0, tolerance = 1E-4)
 })
-
 
 test_that(".convolve_delay_distribution_vectors returns a vector whose elements sum up to 1", {
   N <- 100
@@ -43,7 +42,6 @@ test_that(".convolve_delay_distribution_vectors returns a vector whose elements 
 
   expect_equal(max_difference_to_1, 0, tolerance = 1E-4)
 })
-
 
 test_that(".convolve_delay_distribution_vectors returns correct output on a simple example", {
 
@@ -87,7 +85,105 @@ test_that(".combine_incubation_with_reporting_delay returns same output as empir
  expect_equal(max(absolute_diff), 0, tolerance = 1E-3)
 })
 
+test_that(".convolve_delay_distribution_vector_with_matrix returns correct output on a simple example", {
+  vector_a <- c(0.2, 0.3, 0.5)
+  matrix_b <- matrix(c(0.1,0,0,
+                       0.3,0.2,0,
+                       0.6,0.4,0.15),
+                     nrow=3,
+                     ncol=3,
+                     byrow = TRUE)
 
+  ref_convolved_matrix_vector_first <- matrix(c(0.02,0,0,
+                                                0.12,0.04,0,
+                                                0.315,0.125,0.03),
+                                              nrow=3,
+                                              ncol=3,
+                                              byrow = TRUE)
+
+  ref_convolved_matrix_vector_last <- matrix(c(0.02,0,0,
+                                                0.09,0.04,0,
+                                                0.26,0.14,0.03),
+                                              nrow=3,
+                                              ncol=3,
+                                              byrow = TRUE)
+
+  convolved_matrix_vector_first <- .convolve_delay_distribution_vector_with_matrix(vector_a = vector_a,
+                                                                                   matrix_b = matrix_b,
+                                                                                   vector_first = T)
+
+  convolved_matrix_vector_last <- .convolve_delay_distribution_vector_with_matrix(vector_a = vector_a,
+                                                                                   matrix_b = matrix_b,
+                                                                                   vector_first = F)
+
+
+  expect_equal(convolved_matrix_vector_first, ref_convolved_matrix_vector_first)
+  expect_equal(convolved_matrix_vector_last, ref_convolved_matrix_vector_last)
+})
+
+test_that(".convolve_delay_distribution_vector_with_matrix returns valid output", {
+  vector_a <- c(0.2, 0.3, 0.5, 0,0,0,0,0,0,0,0,0,0,0,0,0)
+  vector_b <- c(0.3,0.13,0.42, 0.14,0.01)
+  matrix_b <- .get_matrix_from_single_delay_distr(vector_b, N = 20)
+
+  convolved_matrix_vector_first <- .convolve_delay_distribution_vector_with_matrix(vector_a = vector_a,
+                                                                                   matrix_b = matrix_b,
+                                                                                   vector_first = T)
+
+  convolved_matrix_vector_last <- .convolve_delay_distribution_vector_with_matrix(vector_a = vector_a,
+                                                                                  matrix_b = matrix_b,
+                                                                                  vector_first = F)
+
+  sums_full_cols_first <- apply(convolved_matrix_vector_first[,1:10], MARGIN = 2, FUN = sum)
+  expect_equal(sums_full_cols_first, rep(1, times = length(sums_full_cols_first)))
+
+  sums_full_cols_last <- apply(convolved_matrix_vector_last[,1:10], MARGIN = 2, FUN = sum)
+  expect_equal(sums_full_cols_last, rep(1, times = length(sums_full_cols_last)))
+
+  sum_all_cols_first <- apply(convolved_matrix_vector_first, MARGIN = 2, FUN = sum)
+  expect_lte(max(abs(sums_full_cols_first)), 1)
+  sum_all_cols_last <- apply(convolved_matrix_vector_last, MARGIN = 2, FUN = sum)
+  expect_lte(max(abs(sums_full_cols_last)), 1)
+})
+
+test_that(".convolve_delay_distribution_matrices returns valid output", {
+  vector_a <- c(0.21, 0.14, 0.17, 0.09, 0.01,0.27, 0.11)
+  vector_b <- c(0.3, 0.13, 0.42, 0.14,0.01)
+  matrix_a <- .get_matrix_from_single_delay_distr(vector_a, N = 30)
+  matrix_b <- .get_matrix_from_single_delay_distr(vector_b, N = 30)
+
+  convolved_matrix_ab <- .convolve_delay_distribution_matrices(matrix_a = matrix_a,
+                                                              matrix_b = matrix_b)
+
+  convolved_matrix_ba <- .convolve_delay_distribution_matrices(matrix_a = matrix_b,
+                                                              matrix_b = matrix_a)
+
+  sums_full_cols_first <- apply(convolved_matrix_ab[,1:10], MARGIN = 2, FUN = sum)
+  expect_equal(sums_full_cols_first, rep(1, times = length(sums_full_cols_first)))
+
+  sums_full_cols_last <- apply(convolved_matrix_ba[,1:10], MARGIN = 2, FUN = sum)
+  expect_equal(sums_full_cols_last, rep(1, times = length(sums_full_cols_last)))
+
+  sum_all_cols_first <- apply(convolved_matrix_ab, MARGIN = 2, FUN = sum)
+  expect_lte(max(abs(sums_full_cols_first)), 1)
+  sum_all_cols_last <- apply(convolved_matrix_ba, MARGIN = 2, FUN = sum)
+  expect_lte(max(abs(sums_full_cols_last)), 1)
+})
+
+test_that(".get_delay_matrix_from_delay_distribution_parms returns valid output", {
+  N <- 100
+  shapes <- stats::runif(N, min = 0, max = 10)
+  scales <- stats::runif(N, min = 0, max = 10)
+
+  matrix_result <- .get_delay_matrix_from_delay_distribution_parms(parm1_vector = shapes,
+                                                  parm2_vector = scales,
+                                                  distribution_type = "gamma",
+                                                  max_quantile = 0.999)
+
+  # Check that all columns sum up to less than one.
+  sum_all_cols <- apply(matrix_result, MARGIN = 2, FUN = sum)
+  expect_lte(max(abs(sum_all_cols)), 1)
+})
 
 
 

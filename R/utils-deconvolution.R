@@ -34,28 +34,50 @@
 }
 
 #TODO fill documentation
-#TODO test
-#maybe merge with .get_matrix_from_single_delay_distr by adding N parm and checking if list or unique vector
-#' Build delay distribution matrix from list of delay distribution vectors
+#TODO maybe export
+#TODO maybe merge with .get_matrix_from_single_delay_distr by adding N parm and checking if list or unique vector
+#' Build delay distribution matrix from list of delay distribution parameters
 #'
-#' @param waiting_time_distribution_list
+#' @param parm1_vector
+#' @param parm2_vector
+#' @param distribution_type
+#' @param max_quantile
 #'
-#' @return
-.get_matrix_from_waiting_time_distributions <- function(waiting_time_distribution_list){
-  N <- length(waiting_time_distribution_list)
+#' @return delay distribution matrix
+.get_delay_matrix_from_delay_distribution_parms <- function(parm1_vector,
+                                                         parm2_vector,
+                                                         distribution_type = "gamma",
+                                                         max_quantile = 0.999) {
+  #TODO add checks on validity of input
+  N <- length(parm1_vector)
+
+  # Generate list of delay distribution vectors
+  delay_distribution_list <- lapply(1:N, function(x){
+    build_delay_distribution(parm1_vector[x],
+                             parm2_vector[x],
+                            distribution_type = distribution_type,
+                            max_quantile = max_quantile)
+  })
+
+  # Initialize empty matrix
   delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
 
+  # Fill matrix by column
   for(i in 1:N){
+    delay_distr <- delay_distribution_list[[i]]
 
-    waiting_time_distr <- waiting_time_distribution_list[[i]]
-    if(length(waiting_time_distr) < N - i + 1) {
-      waiting_time_distr <- c(waiting_time_distr, rep(0, times = N - i + 1 - length(waiting_time_distr)))
+    # Right-pad delay_distr vector with zeroes if needed
+    if(length(delay_distr) < N - i + 1) {
+      delay_distr <- c(delay_distr, rep(0, times = N - i + 1 - length(delay_distr)))
     }
-    delay_distribution_matrix[, i ] <-  c(rep(0, times = i - 1 ), waiting_time_distr[1:(N - i + 1)])
+    delay_distribution_matrix[, i ] <-  c(rep(0, times = i - 1 ), delay_distr[1:(N - i + 1)])
   }
 
   return(delay_distribution_matrix)
+
 }
+
+
 
 #TODO add details on the discretization
 #TODO fill documentation
@@ -128,7 +150,7 @@ build_delay_distribution <- function(parm1,
 #' @param matrix_b
 #' @param vector_first boolean. Delay described in vector is applied before delay described in matrix
 #'
-#' @return square matrix. Delay disitribution matrix
+#' @return square matrix. Delay distribution matrix
 .convolve_delay_distribution_vector_with_matrix <- function(vector_a, matrix_b, vector_first = TRUE){
 
    #TODO add check that matrix_b is square
@@ -150,8 +172,8 @@ build_delay_distribution <- function(parm1,
           matrix_b_elements <- matrix_b[(i + j) : j, j]
         }
 
-        truncated_vector_a <- vector_a[1:i]
-        convolved_matrix[i + j, j] <- truncated_vector_a %*% row_matrix_b
+        truncated_vector_a <- vector_a[1:(i+1)]
+        convolved_matrix[i + j, j] <- truncated_vector_a %*% matrix_b_elements
       }
    }
    return(convolved_matrix)
@@ -167,7 +189,7 @@ build_delay_distribution <- function(parm1,
 #' @param matrix_b square numeric matrix
 #'
 #' @return square matrix. Convolved matrix of time-varying delays.
-.convove_delay_distribution_matrices <- function(matrix_a, matrix_b){
+.convolve_delay_distribution_matrices <- function(matrix_a, matrix_b){
   #TODO return error if matrices are not square or not of the same size
 
   N <- nrow(matrix_a)
@@ -180,7 +202,7 @@ build_delay_distribution <- function(parm1,
     for(i in 0 : (N - j)) {
 
       # Take truncated column of matrix_a (first delay applied)
-      matrix_a_elements <- matrix_b[(i + j) : j, j ]
+      matrix_a_elements <- matrix_a[ j : (j + i), j ]
       # Take truncated row of matrix_b (second delay applied)
       matrix_b_elements <- matrix_b[i + j, j : (j + i) ]
 
@@ -191,38 +213,6 @@ build_delay_distribution <- function(parm1,
 
 }
 
-#' Build an empirical Cumulative Distribution Function
-#' from the convolution of a gamma distribution and an empirical distribution
-#'
-#' Utility function that sums samples from an empirical distribution and a gamma distribution.
-#'
-#' @param shape numeric vector
-#' @param scale numeric vector
-#' @param number_of_samples integer. Number of samples.
-#'
-#' @return ecdf object
-.make_ecdf_from_empirical_data_and_gamma <- function(gamma_draws,
-                                                    empirical_distr,
-                                                    multiplier_init = 100){
-
-  multiplier <- multiplier_init
-  while(length(gamma_draws) < (length(empirical_distr)*multiplier) && multiplier > 1) {
-    multiplier <- floor(multiplier * 0.8)
-  }
-
-  if(multiplier < 1) {
-    multiplier <- 1
-  }
-
-  if(multiplier == 1) {
-    final_length <- min(length(gamma_draws), length(empirical_distr))
-    draws <- sample(gamma_draws, final_length, replace = F) + sample(empirical_distr, final_length, replace = F)
-  } else {
-    draws <- gamma_draws[1:(length(empirical_distr)*multiplier)] + rep(empirical_distr, times=multiplier)
-  }
-
-  return(stats::ecdf(draws))
-}
 
 #TODO fill in and update documentation
 #' Build a waiting time distribution from the convolution of two gamma distributions
@@ -269,6 +259,7 @@ combine_incubation_with_reporting_delay <- function(parm1_incubation,
 
 
 
+#TODO test
 #TODO improve function documentation
 #TODO format of empirical_delays must be specified somewhere:
 # use "event_date" and "report_delay" as column names
@@ -304,12 +295,13 @@ get_matrix_empirical_waiting_time_distr <- function(empirical_delays,
   empirical_delays <- empirical_delays %>%
     dplyr::filter(event_date %in% all_dates)
 
+  # Find the threshold for right-truncation
+  # No time-variation beyond this threshold due to the fraction of unsampled individuals when nearing the last sampling date
   delay_counts <- empirical_delays %>%
     dplyr::select(report_delay) %>%
     dplyr::group_by(report_delay) %>%
     dplyr::summarise(counts = n(), .groups = "drop")
 
-  #TODO rethink way of defining this right_truncation threshold
   threshold_right_truncation <- delay_counts %>%
     dplyr::mutate(cumul_freq = cumsum(counts)/sum(counts)) %>%
     dplyr::filter(cumul_freq > upper_quantile_threshold) %>%
@@ -320,29 +312,20 @@ get_matrix_empirical_waiting_time_distr <- function(empirical_delays,
 
   delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
 
+  scale_fits <- c()
+  shape_fits <- c()
+
+  last_varying_col <- ifelse(N > threshold_right_truncation, N - threshold_right_truncation, N)
+
   # Populate the delay_distribution_matrix by column
-  for(i in 1:N) {
+  for(i in 1:last_varying_col) {
 
-    if(i > (N - threshold_right_truncation) & N > threshold_right_truncation ) {
-
-      delay_distribution_matrix[, i ] <-  c(0, delay_distribution_matrix[1:(N-1), i - 1 ])
-      next
-    }
-
-    #TODO reconsider if we do week averaging: maybe not
-    #TODO get the last X delays (or get the last from the same date)
-    weeks_averaged <- 0
-    repeat{
-      weeks_averaged <- weeks_averaged + 1
-      recent_counts_distribution <- empirical_delays %>%
-        dplyr::filter( event_date %in% .get_dates_to_average_over(i, all_dates, weeks_averaged)) #TODO: add .get_dates_to_average_over
-
-      if(nrow( recent_counts_distribution ) >= min_number_cases) {
-        break
-      }
-    }
-
-    recent_delays <- recent_counts_distribution %>% dplyr::pull(delay)
+    recent_counts_distribution <- empirical_delays %>%
+      dplyr::filter( event_date <= all_dates[i] ) %>%
+      dplyr::slice( sample(1:n()) ) %>% # shuffle rows so as to get rid of potential biases
+      dplyr::arrange( desc(event_date) ) %>%
+      dplyr::slice_head( n = min_number_cases )  %>%
+      dplyr::pull(delay)
 
     gamma_fit <- try(fitdistrplus::fitdist(recent_delays + 1, distr = "gamma"))
     if ("try-error" %in% class(gamma_fit)) {
@@ -352,21 +335,24 @@ get_matrix_empirical_waiting_time_distr <- function(empirical_delays,
     }
     #TODO if none work revert to empirical distribution
 
-    shape_fit <- gamma_fit$estimate["shape"]
-    rate_fit <- gamma_fit$estimate["rate"]
+    shape_fits[i] <- gamma_fit$estimate["shape"]
+    scale_fits[i] <- 1/gamma_fit$estimate["rate"]
+  }
 
+  if(last_varying_col == N) {
+    delay_distribution_matrix <- .get_delay_matrix_from_delay_distribution_parms(parm1_vector = shape_fits,
+                                                                                 parm2_vector = scale_fits,
+                                                                                 distribution_type = "gamma")
+  } else {
+    shape_fits[(N - threshold_right_truncation) : N] <- 0
+    scale_fits[(N - threshold_right_truncation) : N] <- 0
 
-    last_index <- N - i + 1
-    x <- (1:last_index) + 0.5
-    x <- c(0, x)
+    delay_distribution_matrix <- .get_delay_matrix_from_delay_distribution_parms(parm1_vector = shape_fits,
+                                                                                 parm2_vector = scale_fits,
+                                                                                 distribution_type = "gamma")
 
-    cdf_values <- stats::pgamma(x, shape = shape_fit, rate = rate_fit)
-    freq <- diff(cdf_values)
-
-    if(length(freq) >= last_index) {
-      delay_distribution_matrix[, i ] <-  c(rep(0, times = i - 1 ), freq[1:last_index])
-    } else {
-      delay_distribution_matrix[, i ] <-  c(rep(0, times = i - 1 ), freq[1:length(freq)], rep(0, times = last_index - length(freq)))
+    for(i in (N - threshold_right_truncation) : N) {
+      delay_distribution_matrix[, i ] <-  c(0, delay_distribution_matrix[1:(N-1), i - 1 ])
     }
   }
 
