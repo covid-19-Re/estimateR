@@ -91,7 +91,7 @@
 #' @export
 #'
 #' @examples
-#' TODO add example
+#' #TODO add example
 build_delay_distribution <- function(parm1,
                                      parm2,
                                      distribution_type = "gamma",

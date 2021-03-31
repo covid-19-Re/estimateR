@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-deconvolution.R
 \name{.get_matrix_from_constant_waiting_time_distr}
 \alias{.get_matrix_from_constant_waiting_time_distr}
-\title{Make square delay distribution matrix from vector of delay distributions}
+\title{Make square delay distribution matrix from vector of delay distributions.}
 \usage{
 .get_matrix_from_constant_waiting_time_distr(waiting_time_distr, N)
 }
@@ -15,5 +15,5 @@
 square numeric matrix
 }
 \description{
-Make square delay distribution matrix from vector of delay distributions
+Make square delay distribution matrix from vector of delay distributions.
 }

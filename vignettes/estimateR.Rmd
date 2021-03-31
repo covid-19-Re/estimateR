@@ -1,8 +1,8 @@
 ---
-title: "Basic use case"
+title: "estimateR"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Basic use case}
+  %\VignetteIndexEntry{estimateR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,10 +12,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-```
-
-```{r setup}
-library(estimateR)
 ```
 
 # Draft vignette demonstrating a simple use case of *estimateR*
@@ -29,6 +25,8 @@ This incidence data counts the number of people getting tested positive for a pa
 
 TODO replace with example data in the package
 ```{r}
+library(estimateR)
+
   toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
                           77,78,113,102,134,165,183,
                           219,247,266,308,304,324,346,
@@ -52,9 +50,10 @@ But all we have at the moment is a smoothed version of the time series of confir
 First, in almost all real-life cases, only a fraction of infected individuals will get tested, and even among individuals tested some false-negative results will arise. For simplicity, we ignore false-positive numbers here.
 This difference does not cause direct issues for estimating *Re*. Indeed, as long as the fraction of tested individuals among the pool of newly-infected individuals remains constant then *Re* estimates are not biased.
   
-Second, a case-confirmation report is not a direct observation of an infection event. This report will always come with a delay. For simplicity, we assume here that individuals are only tested after they start showing symptoms for the pathogen of interest. The delay between infection and observation can thus be divided into two distinct time periods: the incubation period and the delay from symptom onset to case confirmation. The exact number of days this delay represents will vary from individual to individual, we capture this variability by assuming the delay observed in any particular individual is the result of a random draw from a probability distribution representing the population variability in the reporting delays.  
+Second, a case-confirmation report is not a direct observation of an infection event. This report will always come with a delay. For simplicity, we assume here that individuals are only tested after they start showing symptoms for the pathogen of interest. 
+The delay between infection and observation can thus be divided into two distinct time periods: the incubation period and the delay from symptom onset to case confirmation. The exact number of days this delay represents will vary from individual to individual, we capture this variability by assuming the delay observed in any particular individual is the result of a random draw from a probability distribution representing the population variability in the reporting delays.  
 
-In mathematical terms, the observed time series is the result of the convolution of the time series of infections and the distribution of delays. To infer the time series of infection events, we perform the inverse transformation: we deconvolve the delay distribution from the time series of observations. We use the 
+In mathematical terms, the observed time series is the result of the convolution of the time series of infections and the distribution of delays. To infer the time series of infection events, we perform the inverse transformation: we deconvolve the delay distribution from the time series of observations. We use the Richardson-Lucy algorithm to perform this deconvolution step. 
 
 In *estimateR*, we approximate both delay distributions -incubation period and delay from onset of symptoms to case observation- by gamma distributions.
 
@@ -125,6 +124,12 @@ The process presented above can be performed in a single function `smooth_deconv
 We rewrite all the code blocks above using `smooth_deconvolve_estimate` this time.
 
 ```{r}
+date_first_data_point <- as.Date("2020-02-24")
+toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
+                          77,78,113,102,134,165,183,
+                          219,247,266,308,304,324,346,
+                          348,331,311,267,288,254,239)
+
 # Build a vector containing the delay distribution
 delay_distribution <- get_vector_constant_waiting_time_distr(shape_incubation,
                                                             scale_incubation,
@@ -140,7 +145,7 @@ toy_estimates <- smooth_deconvolve_estimate(toy_incidence_data,
                                          mean_serial_interval = mean_serial_interval,
                                          std_serial_interval  = std_serial_interval,
                                          output_Re_only = FALSE,
-                                         ref_date = as.Date("2020-02-24"),
+                                         ref_date = date_first_data_point,
                                          time_step = "day")
 
 head(toy_estimates)
@@ -150,6 +155,7 @@ head(toy_estimates)
 ## Uncertainty estimation
 
 In order to estimate the uncertainty around the *Re* estimation made above, we apply a bootstrapping procedure to the toy observation data.
+
 TODO add details on what this bootstrapping procedure is and why it is used.
 
 ```{r}
@@ -174,3 +180,6 @@ head(estimates)
 ```
 
 TODO add util to summarize the uncertainty from bootstrapping procedure.
+
+
+

@@ -1,0 +1,75 @@
+---
+title: "README"
+output: github_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# *estimateR* package
+
+The *estimateR* package provides tools to estimate the effective reproductive number through time from delayed and indirect observations of infection events.
+This package is under development. 
+The README file is still at a super rough stage.
+
+
+## Quick toy example
+
+We demonstrate below a basic use of the *estimateR* package. Check out the estimateR vignette for more details.
+
+We start with arbitrary incidence data representing daily counts of case confirmations for a disease of interest.
+This incidence data counts the number of people getting tested positive for a particular infectious disease X on day *T*.
+
+```{r}
+library(estimateR)
+date_first_data_point <- as.Date("2020-02-24")
+toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
+                          77,78,113,102,134,165,183,
+                          219,247,266,308,304,324,346,
+                          348,331,311,267,288,254,239)
+
+
+## The numbers below are part of the user input, they need to be adapted to the particular disease studied.
+# Incubation period - gamma distribution parameters
+shape_incubation = 3.2 
+scale_incubation = 1.3
+
+# Delay from onset of symptoms to case observation - gamma distribution parameters
+shape_onset_to_report = 2.7
+scale_onset_to_report = 1.6
+
+# We specify these parameters in the same unit as the time steps in the original observation data. For instance, if the original data represents daily reports, the parameters below must be specified in days (this is the case in this toy example).
+mean_serial_interval = 4.8
+std_serial_interval = 2.3
+
+estimation_window = 3 # The estimation window corresponds to the size of the sliding window used in EpiEstim (see help(estimate_Re) for additional details. Here, it is set to three days.
+
+## End of user input
+
+# Build a vector containing the delay distribution
+delay_distribution <- get_vector_constant_waiting_time_distr(shape_incubation,
+                                                            scale_incubation,
+                                                            shape_onset_to_report,
+                                                            scale_onset_to_report)
+
+toy_estimates <- smooth_deconvolve_estimate(toy_incidence_data,
+                                         delay_distribution,
+                                         smoothing_method = "LOESS",
+                                         deconvolution_method = "Richardson-Lucy delay distribution",
+                                         estimation_method = "EpiEstim sliding window",
+                                         estimation_window = estimation_window,
+                                         mean_serial_interval = mean_serial_interval,
+                                         std_serial_interval  = std_serial_interval,
+                                         output_Re_only = FALSE,
+                                         ref_date = date_first_data_point,
+                                         time_step = "day")
+
+head(toy_estimates, n = 20)
+```
+
+
+
