@@ -3,8 +3,10 @@ README
 
 # *estimateR* package
 
-This package is under development. The README file is still at a super
-rough stage.
+The *estimateR* package provides tools to estimate the effective
+reproductive number through time from delayed and indirect observations
+of infection events. This package is under development. The README file
+is still at a super rough stage.
 
 ## Quick toy example
 
@@ -25,7 +27,9 @@ toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
                           348,331,311,267,288,254,239)
 
 
-## The numbers below are part of the user input, they need to be adapted to the particular disease studied.
+## The numbers below are part of the user input, 
+## they need to be adapted to the particular disease studied.
+
 # Incubation period - gamma distribution parameters
 shape_incubation = 3.2 
 scale_incubation = 1.3
@@ -34,11 +38,16 @@ scale_incubation = 1.3
 shape_onset_to_report = 2.7
 scale_onset_to_report = 1.6
 
-# We specify these parameters in the same unit as the time steps in the original observation data. For instance, if the original data represents daily reports, the parameters below must be specified in days (this is the case in this toy example).
+# We specify these parameters in the same unit as the time steps in the original observation data.
+# For instance, if the original data represents daily reports,
+# the parameters below must be specified in days (this is the case in this toy example).
 mean_serial_interval = 4.8
 std_serial_interval = 2.3
 
-estimation_window = 3 # The estimation window corresponds to the size of the sliding window used in EpiEstim (see help(estimate_Re) for additional details. Here, it is set to three days.
+# The estimation window corresponds to the size of the sliding window used in EpiEstim
+# (see help(estimate_Re) for additional details.
+# Here, it is set to three days.
+estimation_window = 3 
 
 ## End of user input
 
@@ -62,45 +71,45 @@ toy_estimates <- smooth_deconvolve_estimate(toy_incidence_data,
 
 head(toy_estimates, n = 20)
 #>          date observed_incidence smoothed_incidence deconvolved_incidence
-#> 1  2020-02-16                 NA                 NA              18.45610
-#> 2  2020-02-17                 NA                 NA              22.00860
-#> 3  2020-02-18                 NA                 NA              25.80581
-#> 4  2020-02-19                 NA                 NA              30.34882
-#> 5  2020-02-20                 NA                 NA              36.11492
-#> 6  2020-02-21                 NA                 NA              43.47508
-#> 7  2020-02-22                 NA                 NA              52.47845
-#> 8  2020-02-23                 NA                 NA              63.24369
-#> 9  2020-02-24                  4           17.75345              75.79922
-#> 10 2020-02-25                  9           21.35431              90.00460
-#> 11 2020-02-26                 19           25.29413             105.40811
-#> 12 2020-02-27                 14           30.08292             121.75955
-#> 13 2020-02-28                 36           36.23071             139.17814
-#> 14 2020-02-29                 16           44.08374             157.80535
-#> 15 2020-03-01                 39           53.55827             177.78476
-#> 16 2020-03-02                 27           64.51933             196.14027
-#> 17 2020-03-03                 46           76.83199             210.70836
-#> 18 2020-03-04                 77           90.36127             222.88002
-#> 19 2020-03-05                 78          104.73262             234.12165
-#> 20 2020-03-06                113          119.79569             245.99790
+#> 1  2020-02-16                 NA                 NA              18.46059
+#> 2  2020-02-17                 NA                 NA              22.01742
+#> 3  2020-02-18                 NA                 NA              25.82375
+#> 4  2020-02-19                 NA                 NA              30.36457
+#> 5  2020-02-20                 NA                 NA              36.13353
+#> 6  2020-02-21                 NA                 NA              43.49776
+#> 7  2020-02-22                 NA                 NA              52.50639
+#> 8  2020-02-23                 NA                 NA              63.27568
+#> 9  2020-02-24                  4           17.75345              75.83544
+#> 10 2020-02-25                  9           21.35431              90.04614
+#> 11 2020-02-26                 19           25.29413             105.45573
+#> 12 2020-02-27                 14           30.08292             121.81231
+#> 13 2020-02-28                 36           36.23071             139.23459
+#> 14 2020-02-29                 16           44.08374             157.86473
+#> 15 2020-03-01                 39           53.55827             177.84684
+#> 16 2020-03-02                 27           64.51933             196.20617
+#> 17 2020-03-03                 46           76.83199             210.77829
+#> 18 2020-03-04                 77           90.36127             222.95087
+#> 19 2020-03-05                 78          104.73262             234.19047
+#> 20 2020-03-06                113          119.79569             246.06494
 #>      R_mean
 #> 1        NA
 #> 2        NA
 #> 3        NA
 #> 4        NA
-#> 5  4.452439
-#> 6  3.173346
-#> 7  2.662589
-#> 8  2.441557
-#> 9  2.336807
-#> 10 2.273509
-#> 11 2.214613
-#> 12 2.145223
-#> 13 2.065419
-#> 14 1.982872
-#> 15 1.905365
-#> 16 1.826351
-#> 17 1.735490
-#> 18 1.632058
-#> 19 1.528450
-#> 20 1.440786
+#> 5  4.453265
+#> 6  3.173586
+#> 7  2.662685
+#> 8  2.441576
+#> 9  2.336766
+#> 10 2.273414
+#> 11 2.214492
+#> 12 2.145094
+#> 13 2.065283
+#> 14 1.982720
+#> 15 1.905197
+#> 16 1.826182
+#> 17 1.735341
+#> 18 1.631936
+#> 19 1.528346
+#> 20 1.440684
 ```

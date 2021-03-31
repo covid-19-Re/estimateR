@@ -33,7 +33,9 @@ toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
                           348,331,311,267,288,254,239)
 
 
-## The numbers below are part of the user input, they need to be adapted to the particular disease studied.
+## The numbers below are part of the user input, 
+## they need to be adapted to the particular disease studied.
+
 # Incubation period - gamma distribution parameters
 shape_incubation = 3.2 
 scale_incubation = 1.3
@@ -42,11 +44,16 @@ scale_incubation = 1.3
 shape_onset_to_report = 2.7
 scale_onset_to_report = 1.6
 
-# We specify these parameters in the same unit as the time steps in the original observation data. For instance, if the original data represents daily reports, the parameters below must be specified in days (this is the case in this toy example).
+# We specify these parameters in the same unit as the time steps in the original observation data.
+# For instance, if the original data represents daily reports,
+# the parameters below must be specified in days (this is the case in this toy example).
 mean_serial_interval = 4.8
 std_serial_interval = 2.3
 
-estimation_window = 3 # The estimation window corresponds to the size of the sliding window used in EpiEstim (see help(estimate_Re) for additional details. Here, it is set to three days.
+# The estimation window corresponds to the size of the sliding window used in EpiEstim
+# (see help(estimate_Re) for additional details.
+# Here, it is set to three days.
+estimation_window = 3 
 
 ## End of user input
 
