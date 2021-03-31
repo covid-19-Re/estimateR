@@ -1,5 +1,7 @@
 #TODO build pipe_functions that reads in "configuration" file
 
+#TODO decide if "combine_incubation_with_reporting_delay" is done inside or outside of pipes
+
 #TODO build way to pass extra parameters to functions inside pipe (with ...)
 
 #TODO add a utility to summarize the uncertainty in the get_block_bootstrapped_estimate pipe
@@ -70,10 +72,10 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                             verbose = FALSE){
 
 
-  delay_distribution_vector <- get_vector_constant_waiting_time_distr(shape_incubation,
-                                                                      scale_incubation,
-                                                                      shape_onset_to_report,
-                                                                      scale_onset_to_report)
+  delay_distribution_vector <- combine_incubation_with_reporting_delay(parm1_incubation = shape_incubation,
+                                                                       parm2_incubation = scale_incubation,
+                                                                       parm1_onset_to_report = shape_onset_to_report,
+                                                                       parm2_onset_to_report = scale_onset_to_report)
 
   original_result <- smooth_deconvolve_estimate(incidence_vector,
                                                 delay_distribution_vector,

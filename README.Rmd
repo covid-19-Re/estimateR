@@ -58,10 +58,10 @@ estimation_window = 3
 ## End of user input
 
 # Build a vector containing the delay distribution
-delay_distribution <- get_vector_constant_waiting_time_distr(shape_incubation,
-                                                            scale_incubation,
-                                                            shape_onset_to_report,
-                                                            scale_onset_to_report)
+delay_distribution <- combine_incubation_with_reporting_delay(parm1_incubation = shape_incubation,
+                                                            parm2_incubation = scale_incubation,
+                                                            parm1_onset_to_report = shape_onset_to_report,
+                                                            parm2_onset_to_report = scale_onset_to_report)
 
 toy_estimates <- smooth_deconvolve_estimate(toy_incidence_data,
                                          delay_distribution,

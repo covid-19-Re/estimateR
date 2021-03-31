@@ -87,7 +87,7 @@ deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richar
   count <- 1
 
   if(NCOL(delay_distribution) == 1) {
-    delay_distribution_matrix <- .get_matrix_from_constant_waiting_time_distr(delay_distribution,
+    delay_distribution_matrix <- .get_matrix_from_single_delay_distr(delay_distribution,
                                                                              N=length(current_estimate))
   } else {
     delay_distribution_matrix <- delay_distribution[1:length(current_estimate), 1:length(current_estimate)]

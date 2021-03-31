@@ -10,24 +10,24 @@
 ## Check why gamma_draws is an input and not drawn inside the function
 ## Check why not Vectorized ecdf output as in make_ecdf_from_two_gammas
 
-#TODO think about whether utilities like '.get_matrix_from_constant_waiting_time_distr' need to be exported
+#TODO think about whether utilities like '.get_matrix_from_single_delay_distr' need to be exported
 
 
 #' Make square delay distribution matrix from vector of delay distributions.
 #'
-#' @param waiting_time_distr numeric vector
+#' @param delay_distribution numeric vector
 #' @param N integer. Dimension of output matrix
 #'
 #' @return square numeric matrix
-.get_matrix_from_constant_waiting_time_distr <- function(waiting_time_distr, N) {
+.get_matrix_from_single_delay_distr <- function(delay_distribution, N) {
 
-  if(N >= length(waiting_time_distr)) {
-    waiting_time_distr <- c(waiting_time_distr, rep(0, times = N - length(waiting_time_distr)))
+  if(N >= length(delay_distribution)) {
+    delay_distribution <- c(delay_distribution, rep(0, times = N - length(delay_distribution)))
   }
 
   delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
   for(i in 1:N) {
-    delay_distribution_matrix[, i ] <-  c(rep(0, times = i - 1 ), waiting_time_distr[1:(N - i + 1)])
+    delay_distribution_matrix[, i ] <-  c(rep(0, times = i - 1 ), delay_distribution[1:(N - i + 1)])
   }
 
   return(delay_distribution_matrix)
@@ -35,7 +35,7 @@
 
 #TODO fill documentation
 #TODO test
-#maybe merge with .get_matrix_from_constant_waiting_time_distr by adding N parm and checking if list or unique vector
+#maybe merge with .get_matrix_from_single_delay_distr by adding N parm and checking if list or unique vector
 #' Build delay distribution matrix from list of delay distribution vectors
 #'
 #' @param waiting_time_distribution_list
@@ -55,25 +55,6 @@
   }
 
   return(delay_distribution_matrix)
-}
-
-
-#' Build an empirical Cumulative Distribution Function
-#' from the convolution of two independent Gamma distributions
-#'
-#' Utility function that draws a large number of samples (1E6 by default) from 2 gamma distributions,
-#' sums a sample from each, and buids an empirical cdf from the distribution of samples obtained.
-#'
-#' @param shape numeric vector
-#' @param scale numeric vector
-#' @param number_of_samples integer. Number of samples.
-#'
-#' @return Vectorize ecdf object
-.make_ecdf_from_two_gammas <- function(shape, scale, number_of_samples = 1E6) {
-  draws <-
-    stats::rgamma(number_of_samples, shape = shape[1], scale = scale[1]) +
-    stats::rgamma(number_of_samples, shape = shape[2], scale = scale[2])
-  return(Vectorize(stats::ecdf(draws)))
 }
 
 #TODO add details on the discretization
@@ -243,44 +224,46 @@ build_delay_distribution <- function(parm1,
   return(stats::ecdf(draws))
 }
 
+#TODO fill in and update documentation
 #' Build a waiting time distribution from the convolution of two gamma distributions
 #'
-#' @param shape_incubation numeric. Shape parameter of the gamma distribution representing the delay between infection and symptom onset.
-#' @param scale_incubation numeric. Scale parameter of the gamma distribution representing the delay between infection and symptom onset.
-#' @param shape_onset_to_report numeric. Shape parameter of the gamma distribution representing the delay between symtom onset and observation.
-#' @param scale_onset_to_report numeric. Scale parameter of the gamma distribution representing the delay between symtom onset and observation.
-#' @param length_out integer. Length of the output vector
-#' @param n_random_samples integer. number of samples drawn from each distribution
+#' @param parm1_incubation numeric. Shape parameter of the gamma distribution representing the delay between infection and symptom onset.
+#' @param parm2_incubation numeric. Scale parameter of the gamma distribution representing the delay between infection and symptom onset.
+#' @param parm1_onset_to_report numeric. Shape parameter of the gamma distribution representing the delay between symtom onset and observation.
+#' @param parm2_onset_to_report numeric. Scale parameter of the gamma distribution representing the delay between symtom onset and observation.
+#' @param distribution_type_incubation string.
+#' @param distribution_type_onset_to_report string.
+#' @param max_quantile numeric. between 0 and 1.
 #'
 #' @return vector specifying the CDF between each time step of the waiting time distribution.
 #' @export
 #'
 #' @examples
 #' #TODO add examples
-get_vector_constant_waiting_time_distr <- function(shape_incubation,
-                                                   scale_incubation,
-                                                   shape_onset_to_report,
-                                                   scale_onset_to_report,
-                                                   length_out = 200,
-                                                   n_random_samples = 1E6) {
+combine_incubation_with_reporting_delay <- function(parm1_incubation,
+                                                    parm2_incubation,
+                                                    parm1_onset_to_report,
+                                                    parm2_onset_to_report,
+                                                    distribution_type_incubation = "gamma",
+                                                    distribution_type_onset_to_report = "gamma",
+                                                    max_quantile = 0.9999) {
 
-  F_h <- .make_ecdf_from_two_gammas(shape = c(shape_incubation, shape_onset_to_report),
-                                   scale = c(scale_incubation, scale_onset_to_report),
-                                   number_of_samples = n_random_samples)
 
-  f <- Vectorize(function(x){
-    if(x < 0) {
-      return(0)
-    } else if(x < 0.5) {
-      return(F_h(0.5))
-    } else {
-      return(F_h(round(x + 1E-8) + 0.5) - F_h(round(x + 1E-8) - 0.5))
-    }
-  })
+  delay_distribution_incubation <- build_delay_distribution(parm1 = parm1_incubation,
+                                                            parm2 = parm2_incubation,
+                                                            distribution_type = distribution_type_incubation,
+                                                            max_quantile = max_quantile)
 
-  x <- 0:(length_out - 1)
+  delay_distribution_onset_to_report <- build_delay_distribution(parm1 = parm1_onset_to_report,
+                                                                 parm2 = parm2_onset_to_report,
+                                                                 distribution_type = distribution_type_onset_to_report,
+                                                                 max_quantile = max_quantile)
 
-  return(f(x))
+
+  convolved_output <- .convolve_delay_distribution_vectors(delay_distribution_incubation,
+                                                           delay_distribution_onset_to_report)
+
+  return(convolved_output)
 }
 
 

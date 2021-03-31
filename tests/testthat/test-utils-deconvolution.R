@@ -57,6 +57,36 @@ test_that(".convolve_delay_distribution_vectors returns correct output on a simp
   expect_equal(convolved_output, ref_convolved_output, tolerance = 1E-4)
 })
 
+test_that(".combine_incubation_with_reporting_delay returns same output as empirical method of convoluting gammas", {
+
+  shape_incubation = 3.2
+  scale_incubation = 1.3
+
+  shape_onset_to_report = 2.7
+  scale_onset_to_report = 1.6
+
+  convolved_output <- combine_incubation_with_reporting_delay(parm1_incubation=shape_incubation,
+                                                              parm2_incubation=scale_incubation,
+                                                              parm1_onset_to_report=shape_onset_to_report,
+                                                              parm2_onset_to_report=scale_onset_to_report,
+                                                              distribution_type_incubation="gamma",
+                                                              distribution_type_onset_to_report="gamma",
+                                                              max_quantile = 0.9999)
+
+  empirical_convolution_result <- c(0,9e-04,0.00947,0.03214,0.06438,0.09523,0.11566,
+                                    0.12255,0.11742,0.1043,0.08721,0.06951,0.05329,
+                                    0.03951,0.02841,0.01991,0.01371,0.00925,0.00616,
+                                    0.00402,0.0026,0.00165,0.00105,0.00065,0.00039,
+                                    0.00025,0.00015,9e-05,6e-05,3e-05,2e-05,1e-05,
+                                    1e-05,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+
+ padded_convolved_output <- c(convolved_output, rep(0, times = length(empirical_convolution_result) - length(convolved_output)))
+
+ absolute_diff <- abs(padded_convolved_output - empirical_convolution_result)
+
+ expect_equal(max(absolute_diff), 0, tolerance = 1E-3)
+})
+
 
 
 

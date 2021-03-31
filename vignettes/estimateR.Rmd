@@ -72,10 +72,10 @@ shape_onset_to_report = 2.7
 scale_onset_to_report = 1.6
 
 # Build a vector containing the delay distribution
-delay_distribution <- get_vector_constant_waiting_time_distr(shape_incubation,
-                                                            scale_incubation,
-                                                            shape_onset_to_report,
-                                                            scale_onset_to_report)
+delay_distribution <- combine_incubation_with_reporting_delay(parm1_incubation = shape_incubation,
+                                                            parm2_incubation = scale_incubation,
+                                                            parm1_onset_to_report = shape_onset_to_report,
+                                                            parm2_onset_to_report = scale_onset_to_report)
 
 # Infer the original infection events by deconvolving the delay distribution from the smoothed observations.
 toy_infection_events <- deconvolve_incidence(incidence_data = smoothed_toy_incidence,
@@ -131,10 +131,10 @@ toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
                           348,331,311,267,288,254,239)
 
 # Build a vector containing the delay distribution
-delay_distribution <- get_vector_constant_waiting_time_distr(shape_incubation,
-                                                            scale_incubation,
-                                                            shape_onset_to_report,
-                                                            scale_onset_to_report)
+delay_distribution <- combine_incubation_with_reporting_delay(parm1_incubation = shape_incubation,
+                                                            parm2_incubation = scale_incubation,
+                                                            parm1_onset_to_report = shape_onset_to_report,
+                                                            parm2_onset_to_report = scale_onset_to_report)
 
 toy_estimates <- smooth_deconvolve_estimate(toy_incidence_data,
                                          delay_distribution,
