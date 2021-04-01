@@ -83,18 +83,22 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">estimateR</span><span class="op">)</span>
 
-  <span class="va">toy_incidence_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>,<span class="fl">9</span>,<span class="fl">19</span>,<span class="fl">14</span>,<span class="fl">36</span>,<span class="fl">16</span>,<span class="fl">39</span>,<span class="fl">27</span>,<span class="fl">46</span>,
-                          <span class="fl">77</span>,<span class="fl">78</span>,<span class="fl">113</span>,<span class="fl">102</span>,<span class="fl">134</span>,<span class="fl">165</span>,<span class="fl">183</span>,
-                          <span class="fl">219</span>,<span class="fl">247</span>,<span class="fl">266</span>,<span class="fl">308</span>,<span class="fl">304</span>,<span class="fl">324</span>,<span class="fl">346</span>,
-                          <span class="fl">348</span>,<span class="fl">331</span>,<span class="fl">311</span>,<span class="fl">267</span>,<span class="fl">288</span>,<span class="fl">254</span>,<span class="fl">239</span><span class="op">)</span></code></pre></div>
+<span class="va">toy_incidence_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>
+  <span class="fl">4</span>, <span class="fl">9</span>, <span class="fl">19</span>, <span class="fl">14</span>, <span class="fl">36</span>, <span class="fl">16</span>, <span class="fl">39</span>, <span class="fl">27</span>, <span class="fl">46</span>,
+  <span class="fl">77</span>, <span class="fl">78</span>, <span class="fl">113</span>, <span class="fl">102</span>, <span class="fl">134</span>, <span class="fl">165</span>, <span class="fl">183</span>,
+  <span class="fl">219</span>, <span class="fl">247</span>, <span class="fl">266</span>, <span class="fl">308</span>, <span class="fl">304</span>, <span class="fl">324</span>, <span class="fl">346</span>,
+  <span class="fl">348</span>, <span class="fl">331</span>, <span class="fl">311</span>, <span class="fl">267</span>, <span class="fl">288</span>, <span class="fl">254</span>, <span class="fl">239</span>
+<span class="op">)</span></code></pre></div>
 <p>Here, we represent the incidence data in its simplest form: a numeric vector. Let us assume reporting started on Feb 24th 2021. There are 30 entries in our <code>toy_incidence_data</code> vector, each representing data for a single day in succession. There were 4 reported cases on Feb 24th and 239 on March 25th, the last reporting date.</p>
 <div id="smoothing" class="section level2">
 <h2 class="hasAnchor">
 <a href="#smoothing" class="anchor"></a>Smoothing</h2>
 <p>The toy incidence data we generated above is noisy, as could be real incidence data. Thus, we start by smoothing the toy data, using the <strong>LOESS</strong> smoothing method.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R">    <span class="va">smoothed_toy_incidence</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth_incidence.html">smooth_incidence</a></span><span class="op">(</span>incidence_data <span class="op">=</span> <span class="va">toy_incidence_data</span>,
-                                               smoothing_method <span class="op">=</span> <span class="st">"LOESS"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="va">smoothed_toy_incidence</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth_incidence.html">smooth_incidence</a></span><span class="op">(</span>
+  incidence_data <span class="op">=</span> <span class="va">toy_incidence_data</span>,
+  smoothing_method <span class="op">=</span> <span class="st">"LOESS"</span>
+<span class="op">)</span></code></pre></div>
 <p>We are interested in the effective reproductive number through time <em>Re</em>. To estimate this number, we need the time series (in the conceptual sense, not the data type sense) of infection events over the period of interest. But all we have at the moment is a smoothed version of the time series of confirmed case reports. There are two major differences between this time series and the time series of infection events. First, in almost all real-life cases, only a fraction of infected individuals will get tested, and even among individuals tested some false-negative results will arise. For simplicity, we ignore false-positive numbers here. This difference does not cause direct issues for estimating <em>Re</em>. Indeed, as long as the fraction of tested individuals among the pool of newly-infected individuals remains constant then <em>Re</em> estimates are not biased.</p>
 <p>Second, a case-confirmation report is not a direct observation of an infection event. This report will always come with a delay. For simplicity, we assume here that individuals are only tested after they start showing symptoms for the pathogen of interest. The delay between infection and observation can thus be divided into two distinct time periods: the incubation period and the delay from symptom onset to case confirmation. The exact number of days this delay represents will vary from individual to individual, we capture this variability by assuming the delay observed in any particular individual is the result of a random draw from a probability distribution representing the population variability in the reporting delays.</p>
 <p>In mathematical terms, the observed time series is the result of the convolution of the time series of infections and the distribution of delays. To infer the time series of infection events, we perform the inverse transformation: we deconvolve the delay distribution from the time series of observations. We use the Richardson-Lucy algorithm to perform this deconvolution step.</p>
@@ -108,24 +112,27 @@
 <span class="co"># These numbers are part of the user input, they need to be adapted to the particular disease studied.</span>
 
 <span class="co"># Incubation period - gamma distribution parameters</span>
-<span class="va">shape_incubation</span> <span class="op">=</span> <span class="fl">3.2</span> 
-<span class="va">scale_incubation</span> <span class="op">=</span> <span class="fl">1.3</span>
+<span class="va">shape_incubation</span> <span class="op">&lt;-</span> <span class="fl">3.2</span>
+<span class="va">scale_incubation</span> <span class="op">&lt;-</span> <span class="fl">1.3</span>
 
 <span class="co"># Delay from onset of symptoms to case observation - gamma distribution parameters</span>
-<span class="va">shape_onset_to_report</span> <span class="op">=</span> <span class="fl">2.7</span>
-<span class="va">scale_onset_to_report</span> <span class="op">=</span> <span class="fl">1.6</span>
+<span class="va">shape_onset_to_report</span> <span class="op">&lt;-</span> <span class="fl">2.7</span>
+<span class="va">scale_onset_to_report</span> <span class="op">&lt;-</span> <span class="fl">1.6</span>
 
 <span class="co"># Build a vector containing the delay distribution</span>
-<span class="va">delay_distribution</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_incubation_with_reporting_delay.html">combine_incubation_with_reporting_delay</a></span><span class="op">(</span>parm1_incubation <span class="op">=</span> <span class="va">shape_incubation</span>,
-                                                            parm2_incubation <span class="op">=</span> <span class="va">scale_incubation</span>,
-                                                            parm1_onset_to_report <span class="op">=</span> <span class="va">shape_onset_to_report</span>,
-                                                            parm2_onset_to_report <span class="op">=</span> <span class="va">scale_onset_to_report</span><span class="op">)</span>
+<span class="va">delay_distribution</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_incubation_with_reporting_delay.html">combine_incubation_with_reporting_delay</a></span><span class="op">(</span>
+  parm1_incubation <span class="op">=</span> <span class="va">shape_incubation</span>,
+  parm2_incubation <span class="op">=</span> <span class="va">scale_incubation</span>,
+  parm1_onset_to_report <span class="op">=</span> <span class="va">shape_onset_to_report</span>,
+  parm2_onset_to_report <span class="op">=</span> <span class="va">scale_onset_to_report</span>
+<span class="op">)</span>
 
 <span class="co"># Infer the original infection events by deconvolving the delay distribution from the smoothed observations.</span>
-<span class="va">toy_infection_events</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/deconvolve_incidence.html">deconvolve_incidence</a></span><span class="op">(</span>incidence_data <span class="op">=</span> <span class="va">smoothed_toy_incidence</span>,
-                                                deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
-                                                delay_distribution <span class="op">=</span> <span class="va">delay_distribution</span><span class="op">)</span>
-                                                                      </code></pre></div>
+<span class="va">toy_infection_events</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/deconvolve_incidence.html">deconvolve_incidence</a></span><span class="op">(</span>
+  incidence_data <span class="op">=</span> <span class="va">smoothed_toy_incidence</span>,
+  deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
+  delay_distribution <span class="op">=</span> <span class="va">delay_distribution</span>
+<span class="op">)</span></code></pre></div>
 </div>
 <div id="reproductive-number-estimation" class="section level2">
 <h2 class="hasAnchor">
@@ -133,33 +140,42 @@
 <p>Now, we can estimate the effective reproductive number. We do so using a wrapper around the <em>EpiEstim</em> package. As additional input, we need the mean and standard deviation of the serial interval of the disease of interest.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
-<span class="co"># We specify these parameters in the same unit as the time steps in the original observation data. For instance, if the original data represents daily reports, the parameters below must be specified in days (this is the case in this toy example).</span>
-<span class="va">mean_serial_interval</span> <span class="op">=</span> <span class="fl">4.8</span>
-<span class="va">std_serial_interval</span> <span class="op">=</span> <span class="fl">2.3</span>
+<span class="co"># We specify these parameters in the same unit as the time steps in the original observation data.</span>
+<span class="co"># For instance, if the original data represents daily reports, the parameters below must be specified in days</span>
+<span class="co"># (this is the case in this toy example).</span>
+<span class="va">mean_serial_interval</span> <span class="op">&lt;-</span> <span class="fl">4.8</span>
+<span class="va">std_serial_interval</span> <span class="op">&lt;-</span> <span class="fl">2.3</span>
 
-<span class="va">estimation_window</span> <span class="op">=</span> <span class="fl">3</span> <span class="co"># The estimation window corresponds to the size of the sliding window used in EpiEstim (see help(estimate_Re) for additional details. Here, it is set to three days.</span>
+<span class="va">estimation_window</span> <span class="op">&lt;-</span> <span class="fl">3</span>
+<span class="co"># The estimation window corresponds to the size of the sliding window used in EpiEstim (see help(estimate_Re)</span>
+<span class="co"># for additional details. Here, it is set to three days.</span>
 
-<span class="va">toy_Re_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_Re.html">estimate_Re</a></span><span class="op">(</span>incidence_data <span class="op">=</span> <span class="va">toy_infection_events</span>,
-                              estimation_method <span class="op">=</span> <span class="st">"EpiEstim sliding window"</span>,
-                              estimation_window <span class="op">=</span> <span class="va">estimation_window</span>, 
-                              mean_serial_interval <span class="op">=</span> <span class="va">mean_serial_interval</span>,
-                              std_serial_interval <span class="op">=</span> <span class="va">std_serial_interval</span><span class="op">)</span></code></pre></div>
+<span class="va">toy_Re_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_Re.html">estimate_Re</a></span><span class="op">(</span>
+  incidence_data <span class="op">=</span> <span class="va">toy_infection_events</span>,
+  estimation_method <span class="op">=</span> <span class="st">"EpiEstim sliding window"</span>,
+  estimation_window <span class="op">=</span> <span class="va">estimation_window</span>,
+  mean_serial_interval <span class="op">=</span> <span class="va">mean_serial_interval</span>,
+  std_serial_interval <span class="op">=</span> <span class="va">std_serial_interval</span>
+<span class="op">)</span></code></pre></div>
 </div>
 <div id="final-result" class="section level2">
 <h2 class="hasAnchor">
 <a href="#final-result" class="anchor"></a>Final result</h2>
 <p>Finally, we merge the outputs of the different steps into a dataframe, along with a column for dates.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R">  <span class="va">toy_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/merge_outputs.html">merge_outputs</a></span><span class="op">(</span>
-      <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="st">"observed_incidence"</span> <span class="op">=</span> <span class="va">toy_incidence_data</span>, <span class="co"># The LHS terms are arbitrary names for the output of each step.</span>
-           <span class="st">"smoothed_incidence"</span> <span class="op">=</span> <span class="va">smoothed_toy_incidence</span>,
-           <span class="st">"deconvolved_incidence"</span> <span class="op">=</span> <span class="va">toy_infection_events</span>,
-           <span class="st">"R_mean"</span> <span class="op">=</span> <span class="va">toy_Re_estimates</span><span class="op">)</span>,
-      ref_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"2020-02-24"</span><span class="op">)</span>, <span class="co"># The observation data starts on Feb 24th 2021.</span>
-      time_step <span class="op">=</span> <span class="st">"day"</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">toy_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/merge_outputs.html">merge_outputs</a></span><span class="op">(</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>
+    <span class="st">"observed_incidence"</span> <span class="op">=</span> <span class="va">toy_incidence_data</span>, <span class="co"># The LHS terms are arbitrary names for the output of each step.</span>
+    <span class="st">"smoothed_incidence"</span> <span class="op">=</span> <span class="va">smoothed_toy_incidence</span>,
+    <span class="st">"deconvolved_incidence"</span> <span class="op">=</span> <span class="va">toy_infection_events</span>,
+    <span class="st">"R_mean"</span> <span class="op">=</span> <span class="va">toy_Re_estimates</span>
+  <span class="op">)</span>,
+  ref_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"2020-02-24"</span><span class="op">)</span>, <span class="co"># The observation data starts on Feb 24th 2021.</span>
+  time_step <span class="op">=</span> <span class="st">"day"</span>
+<span class="op">)</span>
 
 
-  <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">toy_results</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">toy_results</span><span class="op">)</span>
 <span class="co">#&gt;         date observed_incidence smoothed_incidence deconvolved_incidence</span>
 <span class="co">#&gt; 1 2020-02-16                 NA                 NA              18.43658</span>
 <span class="co">#&gt; 2 2020-02-17                 NA                 NA              21.98975</span>
@@ -181,28 +197,33 @@
 <p>The process presented above can be performed in a single function <code>smooth_deconvolve_estimate</code>. We rewrite all the code blocks above using <code>smooth_deconvolve_estimate</code> this time.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">date_first_data_point</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"2020-02-24"</span><span class="op">)</span>
-<span class="va">toy_incidence_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>,<span class="fl">9</span>,<span class="fl">19</span>,<span class="fl">14</span>,<span class="fl">36</span>,<span class="fl">16</span>,<span class="fl">39</span>,<span class="fl">27</span>,<span class="fl">46</span>,
-                          <span class="fl">77</span>,<span class="fl">78</span>,<span class="fl">113</span>,<span class="fl">102</span>,<span class="fl">134</span>,<span class="fl">165</span>,<span class="fl">183</span>,
-                          <span class="fl">219</span>,<span class="fl">247</span>,<span class="fl">266</span>,<span class="fl">308</span>,<span class="fl">304</span>,<span class="fl">324</span>,<span class="fl">346</span>,
-                          <span class="fl">348</span>,<span class="fl">331</span>,<span class="fl">311</span>,<span class="fl">267</span>,<span class="fl">288</span>,<span class="fl">254</span>,<span class="fl">239</span><span class="op">)</span>
+<span class="va">toy_incidence_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>
+  <span class="fl">4</span>, <span class="fl">9</span>, <span class="fl">19</span>, <span class="fl">14</span>, <span class="fl">36</span>, <span class="fl">16</span>, <span class="fl">39</span>, <span class="fl">27</span>, <span class="fl">46</span>,
+  <span class="fl">77</span>, <span class="fl">78</span>, <span class="fl">113</span>, <span class="fl">102</span>, <span class="fl">134</span>, <span class="fl">165</span>, <span class="fl">183</span>,
+  <span class="fl">219</span>, <span class="fl">247</span>, <span class="fl">266</span>, <span class="fl">308</span>, <span class="fl">304</span>, <span class="fl">324</span>, <span class="fl">346</span>,
+  <span class="fl">348</span>, <span class="fl">331</span>, <span class="fl">311</span>, <span class="fl">267</span>, <span class="fl">288</span>, <span class="fl">254</span>, <span class="fl">239</span>
+<span class="op">)</span>
 
 <span class="co"># Build a vector containing the delay distribution</span>
-<span class="va">delay_distribution</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_incubation_with_reporting_delay.html">combine_incubation_with_reporting_delay</a></span><span class="op">(</span>parm1_incubation <span class="op">=</span> <span class="va">shape_incubation</span>,
-                                                            parm2_incubation <span class="op">=</span> <span class="va">scale_incubation</span>,
-                                                            parm1_onset_to_report <span class="op">=</span> <span class="va">shape_onset_to_report</span>,
-                                                            parm2_onset_to_report <span class="op">=</span> <span class="va">scale_onset_to_report</span><span class="op">)</span>
+<span class="va">delay_distribution</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_incubation_with_reporting_delay.html">combine_incubation_with_reporting_delay</a></span><span class="op">(</span>
+  parm1_incubation <span class="op">=</span> <span class="va">shape_incubation</span>,
+  parm2_incubation <span class="op">=</span> <span class="va">scale_incubation</span>,
+  parm1_onset_to_report <span class="op">=</span> <span class="va">shape_onset_to_report</span>,
+  parm2_onset_to_report <span class="op">=</span> <span class="va">scale_onset_to_report</span>
+<span class="op">)</span>
 
 <span class="va">toy_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth_deconvolve_estimate.html">smooth_deconvolve_estimate</a></span><span class="op">(</span><span class="va">toy_incidence_data</span>,
-                                         <span class="va">delay_distribution</span>,
-                                         smoothing_method <span class="op">=</span> <span class="st">"LOESS"</span>,
-                                         deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
-                                         estimation_method <span class="op">=</span> <span class="st">"EpiEstim sliding window"</span>,
-                                         estimation_window <span class="op">=</span> <span class="va">estimation_window</span>,
-                                         mean_serial_interval <span class="op">=</span> <span class="va">mean_serial_interval</span>,
-                                         std_serial_interval  <span class="op">=</span> <span class="va">std_serial_interval</span>,
-                                         output_Re_only <span class="op">=</span> <span class="cn">FALSE</span>,
-                                         ref_date <span class="op">=</span> <span class="va">date_first_data_point</span>,
-                                         time_step <span class="op">=</span> <span class="st">"day"</span><span class="op">)</span>
+  <span class="va">delay_distribution</span>,
+  smoothing_method <span class="op">=</span> <span class="st">"LOESS"</span>,
+  deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
+  estimation_method <span class="op">=</span> <span class="st">"EpiEstim sliding window"</span>,
+  estimation_window <span class="op">=</span> <span class="va">estimation_window</span>,
+  mean_serial_interval <span class="op">=</span> <span class="va">mean_serial_interval</span>,
+  std_serial_interval  <span class="op">=</span> <span class="va">std_serial_interval</span>,
+  output_Re_only <span class="op">=</span> <span class="cn">FALSE</span>,
+  ref_date <span class="op">=</span> <span class="va">date_first_data_point</span>,
+  time_step <span class="op">=</span> <span class="st">"day"</span>
+<span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">toy_estimates</span><span class="op">)</span>
 <span class="co">#&gt;         date observed_incidence smoothed_incidence deconvolved_incidence</span>
@@ -229,19 +250,20 @@
 <code class="sourceCode R"><span class="va">N_bootstrap_replicates</span> <span class="op">&lt;-</span> <span class="fl">100</span>
 
 <span class="va">estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_block_bootstrapped_estimate.html">get_block_bootstrapped_estimate</a></span><span class="op">(</span><span class="va">toy_incidence_data</span>,
-                                          N_bootstrap_replicates <span class="op">=</span> <span class="va">N_bootstrap_replicates</span>,
-                                          smoothing_method <span class="op">=</span> <span class="st">"LOESS"</span>,
-                                          deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
-                                          estimation_method <span class="op">=</span> <span class="st">"EpiEstim sliding window"</span>,
-                                          shape_incubation <span class="op">=</span> <span class="va">shape_incubation</span>,
-                                          scale_incubation <span class="op">=</span> <span class="va">scale_incubation</span>,
-                                          shape_onset_to_report <span class="op">=</span> <span class="va">shape_onset_to_report</span>,
-                                          scale_onset_to_report <span class="op">=</span> <span class="va">scale_onset_to_report</span>,
-                                          estimation_window <span class="op">=</span> <span class="va">estimation_window</span>,
-                                          mean_serial_interval <span class="op">=</span> <span class="va">mean_serial_interval</span>,
-                                          std_serial_interval  <span class="op">=</span> <span class="va">std_serial_interval</span>,
-                                          ref_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"2020-02-24"</span><span class="op">)</span>,
-                                          time_step <span class="op">=</span> <span class="st">"day"</span><span class="op">)</span>
+  N_bootstrap_replicates <span class="op">=</span> <span class="va">N_bootstrap_replicates</span>,
+  smoothing_method <span class="op">=</span> <span class="st">"LOESS"</span>,
+  deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
+  estimation_method <span class="op">=</span> <span class="st">"EpiEstim sliding window"</span>,
+  shape_incubation <span class="op">=</span> <span class="va">shape_incubation</span>,
+  scale_incubation <span class="op">=</span> <span class="va">scale_incubation</span>,
+  shape_onset_to_report <span class="op">=</span> <span class="va">shape_onset_to_report</span>,
+  scale_onset_to_report <span class="op">=</span> <span class="va">scale_onset_to_report</span>,
+  estimation_window <span class="op">=</span> <span class="va">estimation_window</span>,
+  mean_serial_interval <span class="op">=</span> <span class="va">mean_serial_interval</span>,
+  std_serial_interval <span class="op">=</span> <span class="va">std_serial_interval</span>,
+  ref_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"2020-02-24"</span><span class="op">)</span>,
+  time_step <span class="op">=</span> <span class="st">"day"</span>
+<span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">estimates</span><span class="op">)</span>
 <span class="co">#&gt;         date observed_incidence smoothed_incidence deconvolved_incidence</span>
