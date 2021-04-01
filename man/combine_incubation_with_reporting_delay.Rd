@@ -9,8 +9,8 @@ combine_incubation_with_reporting_delay(
   parm2_incubation,
   parm1_onset_to_report,
   parm2_onset_to_report,
-  distribution_type_incubation,
-  distribution_type_onset_to_report,
+  distribution_type_incubation = "gamma",
+  distribution_type_onset_to_report = "gamma",
   max_quantile = 0.9999
 )
 }

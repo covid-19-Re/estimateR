@@ -14,7 +14,7 @@
 \item{vector_first}{boolean. Delay described in vector is applied before delay described in matrix}
 }
 \value{
-square matrix. Delay disitribution matrix
+square matrix. Delay distribution matrix
 }
 \description{
 Title
