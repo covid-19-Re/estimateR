@@ -64,33 +64,33 @@ deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richar
     print("Delay distribution input must be a vector or square matrix")
   }
 
-  if(NCOL(delay_distribution) == 1) {
-    first_guess_delay <- ceiling(min(which(cumsum(delay_distribution) > 0.5)) - 1)
-  } else {
-    print("NOT IMPLEMENTED YET")
-    return()
-  }
-
   length_original_vector <- length(incidence_vector)
   first_recorded_incidence <-  incidence_vector[1]
-  last_recorded_incidence <- incidence_vector[length(incidence_vector)]
+  last_recorded_incidence <- incidence_vector[length_original_vector]
 
-  # prepare vector with initial guess for first step of deconvolution
-  first_guess <- c(incidence_vector, rep(last_recorded_incidence, times = first_guess_delay))
+  if(NCOL(delay_distribution) == 1) {
+    first_guess_delay <- .get_initial_deconvolution_shift(delay_distribution)
+  } else {
+    #TODO add check that NCOL(delay_distribution) > length_original_vector
+    first_guess_delay <- NCOL(delay_distribution) - length_original_vector
+  }
 
   original_incidence <- c(rep(0, times = first_guess_delay), incidence_vector)
 
-  # Richardson-Lucy algorithm
-  ## initial step
-  current_estimate <- first_guess
+  ### Richardson-Lucy algorithm
+  #TODO document the math notations used in the algo and possibly rename some intermediary variables (E, B...)
+
+  ## Initial step
+  # Prepare vector with initial guess for first step of deconvolution
+  current_estimate <- c(incidence_vector, rep(last_recorded_incidence, times = first_guess_delay))
   chi_squared <- Inf
   count <- 1
 
   if(NCOL(delay_distribution) == 1) {
     delay_distribution_matrix <- .get_matrix_from_single_delay_distr(delay_distribution,
-                                                                             N=length(current_estimate))
+                                                                     N=length(current_estimate))
   } else {
-    delay_distribution_matrix <- delay_distribution[1:length(current_estimate), 1:length(current_estimate)]
+    delay_distribution_matrix <- delay_distribution
   }
 
   truncated_delay_distribution_matrix <- delay_distribution_matrix[(1 + first_guess_delay):NROW(delay_distribution_matrix),, drop = F]
@@ -101,7 +101,7 @@ deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richar
     cat("\tStart of Richardson-Lucy algorithm\n")
   }
 
-  ## iterative steps
+  ## Iterative steps
   while(chi_squared > threshold_chi_squared & count <= max_iterations) {
 
     if (verbose) {
@@ -116,6 +116,10 @@ deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richar
 
     chi_squared <- 1/length_original_vector * sum((E[(first_guess_delay + 1): length(E)] - original_incidence[(first_guess_delay + 1) : length(original_incidence)])^2/E[(first_guess_delay + 1): length(E)], na.rm = T)
     count <- count + 1
+  }
+
+  if (verbose) {
+    cat("\tEnd of Richardson-Lucy algorithm\n")
   }
 
   additional_offset <- - first_guess_delay

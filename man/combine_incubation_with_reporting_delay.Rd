@@ -11,7 +11,9 @@ combine_incubation_with_reporting_delay(
   parm2_onset_to_report,
   distribution_type_incubation = "gamma",
   distribution_type_onset_to_report = "gamma",
-  max_quantile = 0.9999
+  max_quantile = 0.9999,
+  incubation_offset_by_one = FALSE,
+  onset_to_report_offset_by_one = FALSE
 )
 }
 \arguments{

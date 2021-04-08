@@ -180,7 +180,53 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
   return(dplyr::tibble(index = indices, !!output_name := .get_values(tmp_output)))
 }
 
+#TODO fill in documentation
+#TODO allow for other types of time steps than days
+#' Generate delay data.
+#'
+#' This utility can be used to build toy examples to test functions dealing with empirical delay data.
+#'
+#' @param origin_date
+#' @param n_time_steps
+#' @param delay_ratio_start_to_end
+#' @param shape_initial_delay
+#' @param time_step
+#' @param seed
+#' @param scale_initial_delay
+#'
+#' @return data.frame. Simulated delay data.
+#' @export
+#'
+#' @examples
+#' #TODO add examples
+generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
+                                 n_time_steps = 100,
+                                time_step = "day",
+                                 delay_ratio_start_to_end = 2,
+                                 shape_initial_delay = 6,
+                                 scale_initial_delay = 1.5,
+                                 seed = NULL){
 
+  if(!is.null(seed)) {
+    set.seed(seed)
+  }
+
+  random_pop_size_walk <- cumsum(sample(c(-1, 0, 1), n_time_steps, TRUE))
+  pop_size <- random_pop_size_walk - min(0, min(random_pop_size_walk)) + 1
+
+  event_dates <- seq.Date(from = origin_date, length.out = n_time_steps, by = time_step)
+
+  delays <- lapply(1:n_time_steps, function(i) {
+    # Sample a number of draws from the gamma delay distribution, based on the pop size at time step i
+    raw_sampled_delays <- stats::rgamma(n = pop_size[i], shape = shape_initial_delay, scale_initial_delay)
+    # Multiply these samples by a factor that accounts for the linear inflation or deflation of delays.
+    sampled_delays <- round(raw_sampled_delays * (1 + i/n_time_steps * (delay_ratio_start_to_end - 1)))
+
+    return(tibble::tibble(event_date = event_dates[i], report_delay = sampled_delays))
+  })
+
+  return(dplyr::bind_rows(delays))
+}
 
 #' Utility function to print vectors in a copy-pastable format
 #'

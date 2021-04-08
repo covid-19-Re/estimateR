@@ -47,7 +47,8 @@
 .get_delay_matrix_from_delay_distribution_parms <- function(parm1_vector,
                                                          parm2_vector,
                                                          distribution_type = "gamma",
-                                                         max_quantile = 0.999) {
+                                                         max_quantile = 0.999,
+                                                         offset_by_one = FALSE) {
   #TODO add checks on validity of input
   N <- length(parm1_vector)
 
@@ -56,7 +57,8 @@
     build_delay_distribution(parm1_vector[x],
                              parm2_vector[x],
                             distribution_type = distribution_type,
-                            max_quantile = max_quantile)
+                            max_quantile = max_quantile,
+                            offset_by_one = offset_by_one)
   })
 
   # Initialize empty matrix
@@ -77,6 +79,37 @@
 
 }
 
+#TODO document
+#' Title
+#'
+#' @param delay_distribution_matrix
+#' @param n_col_augment an integer.
+#'
+#' @return
+.left_augment_delay_distribution <- function(delay_distribution_matrix,
+                                             n_col_augment){
+
+  n_col_original <- ncol(delay_distribution_matrix)
+  n_col_augmented <- n_col_original + n_col_augment
+
+  # Initialize empty matrix
+  augmented_matrix <- matrix(0,nrow = n_col_augmented, ncol = n_col_augmented)
+
+  # Fill matrix by column
+
+  # Start by duplicating first column in original matrix into 'n_col_augment' first columns of augmented_matrix
+  for(i in 1:n_col_augment){
+    augmented_matrix[, i ] <-  c(rep(0, times = i - 1 ), delay_distribution_matrix[, 1], rep(0, times = n_col_augment - i + 1))
+  }
+
+  # Then fill with original matrix, adding the required zero on the top rows
+  for(i in (n_col_augment + 1):n_col_augmented){
+    augmented_matrix[, i ] <-  c(rep(0, times = n_col_augment ), delay_distribution_matrix[, i - n_col_augment])
+  }
+
+  return(augmented_matrix)
+}
+
 
 
 #TODO add details on the discretization
@@ -89,6 +122,7 @@
 #' @param parm2 numeric. If \code{distribution_type=="gamma"}, \code{parm2} is the scale parameter.
 #' @param distribution_type string. Options are "gamma".
 #' @param max_quantile numeric value between 0 and 1. TODO write what max_quantile does
+#' @param offset_by_one boolean. Gamma distribution comes from fit on (raw_data + 1) to accommodate zeroes in the raw_data.
 #'
 #' @return numeric vector.
 #' @export
@@ -98,20 +132,34 @@
 build_delay_distribution <- function(parm1,
                                      parm2,
                                      distribution_type = "gamma",
-                                     max_quantile = 0.999){
+                                     max_quantile = 0.999,
+                                     offset_by_one = FALSE){
   if(distribution_type == "gamma") {
+
+    if(parm1 == 0 || parm2 == 0) {
+      return(0)
+    }
+
     # Take the right boundary of the delay distribution vector
     right_boundary <- ceiling(stats::qgamma(max_quantile, shape = parm1, scale = parm2)) + 1
     right_boundary <- max(right_boundary, 2) # Set the right boundary to at least two
 
-    cdf_values <- stats::pgamma(c(0, seq(from = 0.5, to = right_boundary, by = 1)), shape = parm1, scale = parm2)
-    distribution_vector <- diff(cdf_values)
+    if(offset_by_one) {
+      cdf_values <- stats::pgamma(c(0, seq(from = 1.5, to = right_boundary, by = 1)), shape = parm1, scale = parm2)
+    } else {
+      cdf_values <- stats::pgamma(c(0, seq(from = 0.5, to = right_boundary, by = 1)), shape = parm1, scale = parm2)
+    }
+
   } else {
     #TODO throw error
     return(NA)
   }
 
-  return(distribution_vector)
+  if(length(cdf_values) == 1) {
+    return(0)
+  } else {
+    return(diff(cdf_values))
+  }
 }
 
 
@@ -141,19 +189,25 @@ build_delay_distribution <- function(parm1,
   return(vector_c)
 }
 
-# TODO test against simple example
-# TODO test that columns sum to one (need to have padded zeroes in both)
 # TODO document function and document delay distribution matrix format
+# TODO if vector_first = FALSE is used, need to consider doing an operation equivalent to .left_augment_delay_distribution
 #' Title
 #'
 #' @param vector_a
 #' @param matrix_b
-#' @param vector_first boolean. Delay described in vector is applied before delay described in matrix
+#' @param vector_first a boolean. Delay described in vector is applied before delay described in matrix
 #'
 #' @return square matrix. Delay distribution matrix
 .convolve_delay_distribution_vector_with_matrix <- function(vector_a, matrix_b, vector_first = TRUE){
 
-   #TODO add check that matrix_b is square
+  #TODO add check that matrix_b is square
+
+  if( vector_first ) {
+    n_col_augment <- .get_initial_deconvolution_shift(vector_a)
+    matrix_b <- .left_augment_delay_distribution(delay_distribution_matrix = matrix_b,
+                                                 n_col_augment = n_col_augment)
+  }
+
    N <- nrow(matrix_b)
    # Right-pad vector with zeroes to bring to same dimension as square matrix
    vector_a <- c(vector_a, rep(0, times = max(0, N - length(vector_a))))
@@ -176,12 +230,12 @@ build_delay_distribution <- function(parm1,
         convolved_matrix[i + j, j] <- truncated_vector_a %*% matrix_b_elements
       }
    }
+
    return(convolved_matrix)
 }
 
-# TODO test on simple example
-# TODO test that columns sum to one (need to have padded zeroes in both)
 # TODO document function and document delay distribution matrix format
+# TODO if used, need to consider if left augmentation is required like for .convolve_delay_distribution_vector_with_matrix
 #' Title
 #'
 #' Note that this convolution operation is not commutative!
@@ -236,18 +290,22 @@ combine_incubation_with_reporting_delay <- function(parm1_incubation,
                                                     parm2_onset_to_report,
                                                     distribution_type_incubation = "gamma",
                                                     distribution_type_onset_to_report = "gamma",
-                                                    max_quantile = 0.9999) {
+                                                    max_quantile = 0.9999,
+                                                    incubation_offset_by_one = FALSE,
+                                                    onset_to_report_offset_by_one = FALSE) {
 
 
   delay_distribution_incubation <- build_delay_distribution(parm1 = parm1_incubation,
                                                             parm2 = parm2_incubation,
                                                             distribution_type = distribution_type_incubation,
-                                                            max_quantile = max_quantile)
+                                                            max_quantile = max_quantile,
+                                                            offset_by_one = incubation_offset_by_one)
 
   delay_distribution_onset_to_report <- build_delay_distribution(parm1 = parm1_onset_to_report,
                                                                  parm2 = parm2_onset_to_report,
                                                                  distribution_type = distribution_type_onset_to_report,
-                                                                 max_quantile = max_quantile)
+                                                                 max_quantile = max_quantile,
+                                                                 offset_by_one = onset_to_report_offset_by_one)
 
 
   convolved_output <- .convolve_delay_distribution_vectors(delay_distribution_incubation,
@@ -256,11 +314,24 @@ combine_incubation_with_reporting_delay <- function(parm1_incubation,
   return(convolved_output)
 }
 
+#TODO document
+#TODO add options to take median, mode, mean...
+#' Get initial shift for deconvolution step
+#'
+#' @param delay_distribution_vector
+#'
+#' @return
+.get_initial_deconvolution_shift <- function(delay_distribution_vector){
+    initial_shift <- ceiling(min(which(cumsum(delay_distribution_vector) > 0.5)) - 1)
+    return(initial_shift)
+}
+
 
 
 
 #TODO test
 #TODO improve function documentation
+#TODO possibly allow for other ways to specifiy initial sift than median of all reports.
 #TODO format of empirical_delays must be specified somewhere:
 # use "event_date" and "report_delay" as column names
 
@@ -270,7 +341,7 @@ combine_incubation_with_reporting_delay <- function(parm1_incubation,
 #'
 #' @param empirical_delays tibble. format to be specified
 #' @param start_date Date. First date of incidence data
-#' @param N integer. Length of incidence time series
+#' @param n_report_time_steps integer. Length of incidence time series
 #' @param time_step string. "day", "X days", "week", "month"... (see \link{\code{seq.Date}} for details)
 #' @param min_number_cases integer. Minimal number of cases to build empirical distribution from
 #' @param upper_quantile_threshold numeric. Between 0 and 1. TODO add details
@@ -280,27 +351,29 @@ combine_incubation_with_reporting_delay <- function(parm1_incubation,
 #'
 #' @examples
 #' #TODO add example
-get_matrix_empirical_waiting_time_distr <- function(empirical_delays,
-                                                    start_date,
-                                                    N,
-                                                    time_step = "day",
-                                                    min_number_cases = 300,
-                                                    upper_quantile_threshold = 0.99){
+get_matrix_from_empirical_delay_distr <- function(empirical_delays,
+                                                  start_date,
+                                                  n_report_time_steps,
+                                                  time_step = "day",
+                                                  min_number_cases = 300,
+                                                  upper_quantile_threshold = 0.99){
 
   ##TODO need to account for offset if onset data (or not onset data?)
   ##TODO reconsider if we make gamma fit (allow to turn it off, or to use different distribution)
 
-  all_dates <- seq.Date(from = start_date, by = time_step, length.out = N)
+  all_report_dates <- seq.Date(from = start_date, by = time_step, length.out = n_report_time_steps)
 
+  # Ignore the delay data that is posterior to the last incidence report date.
   empirical_delays <- empirical_delays %>%
-    dplyr::filter(event_date %in% all_dates)
+    dplyr::filter(event_date <= max(all_report_dates))
 
   # Find the threshold for right-truncation
   # No time-variation beyond this threshold due to the fraction of unsampled individuals when nearing the last sampling date
+  # TODO put the search for threshold_right_truncation in separate utility function
   delay_counts <- empirical_delays %>%
     dplyr::select(report_delay) %>%
     dplyr::group_by(report_delay) %>%
-    dplyr::summarise(counts = n(), .groups = "drop")
+    dplyr::summarise(counts = dplyr::n(), .groups = "drop")
 
   threshold_right_truncation <- delay_counts %>%
     dplyr::mutate(cumul_freq = cumsum(counts)/sum(counts)) %>%
@@ -308,30 +381,55 @@ get_matrix_empirical_waiting_time_distr <- function(empirical_delays,
     utils::head(n=1) %>%
     dplyr::pull(report_delay)
 
-  min_number_cases <- min(min_number_cases, sum(delay_counts$counts))
+  # Use median of reported delays as initial shift (needed for deconvolution step)
+  initial_shift <- round(stats::median(empirical_delays$report_delay, na.rm = T))
 
-  delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
+  # Left-pad the dates we are looking at to account for shift between event dates and observation dates.
+  all_dates <- c(rev(seq.Date(from = start_date, by = paste0("-1 ", time_step), length.out = initial_shift + 1)),
+                 seq.Date(from = start_date, by = time_step, length.out = n_report_time_steps)[-1])
+
+  n_time_steps <- n_report_time_steps + initial_shift
+
+  delay_distribution_matrix <- matrix(0, nrow = n_time_steps, ncol = n_time_steps)
 
   scale_fits <- c()
   shape_fits <- c()
 
-  last_varying_col <- ifelse(N > threshold_right_truncation, N - threshold_right_truncation, N)
+  last_varying_col <- ifelse(n_time_steps > threshold_right_truncation, n_time_steps - threshold_right_truncation, n_time_steps)
 
   # Populate the delay_distribution_matrix by column
   for(i in 1:last_varying_col) {
 
-    recent_counts_distribution <- empirical_delays %>%
-      dplyr::filter( event_date <= all_dates[i] ) %>%
-      dplyr::slice( sample(1:n()) ) %>% # shuffle rows so as to get rid of potential biases
-      dplyr::arrange( desc(event_date) ) %>%
-      dplyr::slice_head( n = min_number_cases )  %>%
-      dplyr::pull(delay)
+    # Shuffle rows so as to get rid of potential biases
+    shuffled_delays <- empirical_delays %>%
+      dplyr::slice( sample(1:dplyr::n()) )
 
-    gamma_fit <- try(fitdistrplus::fitdist(recent_delays + 1, distr = "gamma"))
+    recent_counts <- shuffled_delays %>%
+      dplyr::arrange( dplyr::desc(event_date) ) %>%
+      dplyr::filter( event_date <= all_dates[i] )
+
+    if( nrow(recent_counts) >= min_number_cases ) {
+      # If enough data points before date of interest,
+      # take most recent observations before this date
+
+      recent_counts_distribution <- recent_counts %>%
+        dplyr::slice_head( n = min_number_cases )  %>%
+        dplyr::pull(report_delay)
+    } else {
+      # Otherwise, take 'min_number_of_cases' observations,
+      # even after date of interest.
+      recent_counts_distribution <- shuffled_delays %>%
+        dplyr::arrange( event_date ) %>%
+        dplyr::slice_head( n = min_number_cases )  %>%
+        dplyr::pull(report_delay)
+    }
+
+    gamma_fit <- try(suppressWarnings(fitdistrplus::fitdist(recent_counts_distribution + 1, distr = "gamma")),
+                     silent = T)
     if ("try-error" %in% class(gamma_fit)) {
       #TODO only output this if verbose output
       cat("    mle failed to estimate the parameters. Trying method = \"mme\"\n")
-      gamma_fit <- fitdistrplus::fitdist(recent_delays + 1, distr = "gamma", method = "mme")
+      gamma_fit <- fitdistrplus::fitdist(recent_counts_distribution + 1, distr = "gamma", method = "mme")
     }
     #TODO if none work revert to empirical distribution
 
@@ -339,53 +437,28 @@ get_matrix_empirical_waiting_time_distr <- function(empirical_delays,
     scale_fits[i] <- 1/gamma_fit$estimate["rate"]
   }
 
-  if(last_varying_col == N) {
+  if(last_varying_col == n_time_steps) {
     delay_distribution_matrix <- .get_delay_matrix_from_delay_distribution_parms(parm1_vector = shape_fits,
                                                                                  parm2_vector = scale_fits,
-                                                                                 distribution_type = "gamma")
+                                                                                 distribution_type = "gamma",
+                                                                                 offset_by_one = TRUE)
   } else {
-    shape_fits[(N - threshold_right_truncation) : N] <- 0
-    scale_fits[(N - threshold_right_truncation) : N] <- 0
+    shape_fits[(n_time_steps - threshold_right_truncation) : n_time_steps] <- 0
+    scale_fits[(n_time_steps - threshold_right_truncation) : n_time_steps] <- 0
 
+    # Fill all but the last columns
     delay_distribution_matrix <- .get_delay_matrix_from_delay_distribution_parms(parm1_vector = shape_fits,
                                                                                  parm2_vector = scale_fits,
-                                                                                 distribution_type = "gamma")
+                                                                                 distribution_type = "gamma",
+                                                                                 offset_by_one = TRUE)
 
-    for(i in (N - threshold_right_truncation) : N) {
-      delay_distribution_matrix[, i ] <-  c(0, delay_distribution_matrix[1:(N-1), i - 1 ])
+    # Fill the last columns with a copy of the previous column
+    for(i in (n_time_steps - threshold_right_truncation) : n_time_steps) {
+      delay_distribution_matrix[, i ] <-  c(0, delay_distribution_matrix[1:(n_time_steps-1), i - 1 ])
     }
   }
 
   return( delay_distribution_matrix )
-}
-
-#####
-
-#TODO write functions to convolve two delay distributions together and represent them as functions. This should make the deconvolution easier.
-
-
-
-#####
-#TODO make additional function that prepares incidence if it is onset data to take into account the fact that it needs to first be reported
-.build_delay_distribution_matrix_from_empirical_data <- function(empirical_delay_data) {
-
-  ##TODO finish
-  # this is unfinished work
-  if(! is_onset_data ) { # copy pasted, maybe we don't keep the if statement
-    delay_distribution_matrix_onset_to_report <- .get_matrix_empirical_waiting_time_distr(
-      empirical_delays,
-      all_dates[(days_further_in_the_past_incubation + 1):length(all_dates)])
-
-    delay_distribution_matrix_incubation <- .get_matrix_constant_waiting_time_distr(
-      constant_delay_distribution_incubation,
-      all_dates)
-
-    #TODO round this
-    initial_delta_incubation <- min(which(cumsum(constant_delay_distribution_incubation) > 0.5)) - 1 # take median value (-1 because index 1 corresponds to zero days)
-    initial_delta_report <-  stats::median(empirical_delays$delay, na.rm = T)
-  }
-
-  return()
 }
 
 

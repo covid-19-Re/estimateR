@@ -42,7 +42,8 @@ Imports:
     fitdistrplus,
     magrittr,
     tidyselect,
-    plyr
+    plyr,
+    tibble
 Suggests: 
     testthat (>= 3.0.0),
     knitr,

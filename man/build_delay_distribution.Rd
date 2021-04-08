@@ -8,7 +8,8 @@ build_delay_distribution(
   parm1,
   parm2,
   distribution_type = "gamma",
-  max_quantile = 0.999
+  max_quantile = 0.999,
+  offset_by_one = FALSE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ build_delay_distribution(
 \item{distribution_type}{string. Options are "gamma".}
 
 \item{max_quantile}{numeric value between 0 and 1. TODO write what max_quantile does}
+
+\item{offset_by_one}{boolean. Gamma distribution comes from fit on (raw_data + 1) to accommodate zeroes in the raw_data.}
 }
 \value{
 numeric vector.

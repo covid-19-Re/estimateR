@@ -8,7 +8,8 @@
   parm1_vector,
   parm2_vector,
   distribution_type = "gamma",
-  max_quantile = 0.999
+  max_quantile = 0.999,
+  offset_by_one = FALSE
 )
 }
 \arguments{

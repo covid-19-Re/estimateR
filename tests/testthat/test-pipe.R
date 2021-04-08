@@ -35,7 +35,7 @@ test_that("smooth_deconvolve_estimate yields consistent results on a toy example
 })
 
 
-
+#TODO skip on CRAN as it can fail by chance
 test_that("get_block_bootstrapped_estimate yields consistent results on a toy example", {
 
   toy_incidence_data <- c(6,8,10,13,17,22,31,41,52,65,80,97,116,

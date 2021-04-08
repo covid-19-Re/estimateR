@@ -68,7 +68,7 @@ In *estimateR*, we approximate both delay distributions -incubation period and d
 # These numbers are part of the user input, they need to be adapted to the particular disease studied.
 
 # Incubation period - gamma distribution parameters
-shape_incubation <- 3.2
+shape_incubation <- 3.2 
 scale_incubation <- 1.3
 
 # Delay from onset of symptoms to case observation - gamma distribution parameters
@@ -104,7 +104,7 @@ std_serial_interval <- 2.3
 
 estimation_window <- 3
 # The estimation window corresponds to the size of the sliding window used in EpiEstim (see help(estimate_Re)
-# for additional details. Here, it is set to three days.
+# for additional details). Here, it is set to three days.
 
 toy_Re_estimates <- estimate_Re(
   incidence_data = toy_infection_events,

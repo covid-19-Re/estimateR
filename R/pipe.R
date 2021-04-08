@@ -12,6 +12,7 @@
 
 #TODO outsource delay distribution building to utility function (generalizing to more than gamma distributions, separated )
 
+#TODO place deconvolution pipes into deconvolve module
 
 #' Estimate Re from incidence and estimate uncertainty with block-bootstrapping
 #'
@@ -201,3 +202,53 @@ smooth_deconvolve_estimate <- function(incidence_vector,
 
 }
 
+
+#TODO test
+#TODO document
+#TODO look into how we could pass (...) arguments to 'deconvolve_incidence' function as well as 'get_matrix_from_empirical_delay_distr'
+#TODO maybe this function should be in the deconvolution module directly?
+#' Title
+#'
+#' @param incidence_vector
+#' @param empirical_delay_data
+#' @param deconvolution_method
+#' @param shape_incubation
+#' @param scale_incubation
+#' @param ref_date
+#' @param time_step
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+deconvolve_using_empirical_delays <- function(incidence_vector,
+                                              empirical_delay_data,
+                                              deconvolution_method = "Richardson-Lucy delay distribution",
+                                              shape_incubation,
+                                              scale_incubation,
+                                              ref_date,
+                                              time_step = "day",
+                                              ...){
+
+  empirical_delays_matrix <- get_matrix_from_empirical_delay_distr(empirical_delays = empirical_delay_data,
+                                        start_date = ref_date,
+                                        n_report_time_steps = .get_input_length(incidence_vector),
+                                        time_step = time_step,
+                                        ...)
+
+  incubation_period <- build_delay_distribution(parm1 = shape_incubation,
+                           parm2 = scale_incubation,
+                           distribution_type = "gamma")
+
+  # Combine incubation delay with delay from symptom onset to observation
+  total_reporting_delay_matrix <- .convolve_delay_distribution_vector_with_matrix(incubation_period,
+                                                                           empirical_delays_matrix,
+                                                                           vector_first = TRUE)
+
+  deconvolved_incidence <- deconvolve_incidence( incidence_data = incidence_vector,
+                        deconvolution_method = deconvolution_method,
+                        delay_distribution = total_reporting_delay_matrix )
+
+  return(deconvolved_incidence)
+}

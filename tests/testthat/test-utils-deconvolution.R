@@ -1,8 +1,17 @@
 #TODO TEST that:
 # 1) build_delay_distribution throws error when unsupported distribution_type is thrown in
-#and when unsuitable parameter values are thrown in (not numeric, or negative values for instance)
-# 2) get_matrix_empirical_waiting_time_distr  reports consistent results on a toy example
+# and when unsuitable parameter values are thrown in (not numeric, or negative values for instance)
+# 2) get_matrix_empirical_waiting_time_distr: last few columns are constant when they should be (on a simple example)
 
+expect_delay_matrix_sums_lte_1 <- function(matrix, full_cols = 0, tolerance = 1E-3){
+  if(full_cols > 0 && full_cols < ncol(matrix)) {
+    sums_full_cols <- apply(matrix[,1:full_cols], MARGIN = 2, FUN = sum)
+    expect_equal(sums_full_cols, rep(1, times = length(sums_full_cols)), tolerance = tolerance)
+  }
+
+  sum_all_cols <- apply(matrix, MARGIN = 2, FUN = sum)
+  expect_lte(max(abs(sum_all_cols)), 1)
+}
 
 test_that("build_delay_distribution returns a vector whose elements sum up to 1", {
   N <- 100
@@ -94,11 +103,13 @@ test_that(".convolve_delay_distribution_vector_with_matrix returns correct outpu
                      ncol=3,
                      byrow = TRUE)
 
-  ref_convolved_matrix_vector_first <- matrix(c(0.02,0,0,
-                                                0.12,0.04,0,
-                                                0.315,0.125,0.03),
-                                              nrow=3,
-                                              ncol=3,
+  ref_convolved_matrix_vector_first <- matrix(c(0.02,   0,   0,   0,   0,
+                                                0.09,0.02,   0,   0,   0,
+                                                0.26,0.09,0.02,   0,   0,
+                                                0.33,0.31,0.12,0.04,   0,
+                                                0.30,0.38,0.315,0.125,0.03),
+                                              nrow=5,
+                                              ncol=5,
                                               byrow = TRUE)
 
   ref_convolved_matrix_vector_last <- matrix(c(0.02,0,0,
@@ -134,16 +145,8 @@ test_that(".convolve_delay_distribution_vector_with_matrix returns valid output"
                                                                                   matrix_b = matrix_b,
                                                                                   vector_first = F)
 
-  sums_full_cols_first <- apply(convolved_matrix_vector_first[,1:10], MARGIN = 2, FUN = sum)
-  expect_equal(sums_full_cols_first, rep(1, times = length(sums_full_cols_first)))
-
-  sums_full_cols_last <- apply(convolved_matrix_vector_last[,1:10], MARGIN = 2, FUN = sum)
-  expect_equal(sums_full_cols_last, rep(1, times = length(sums_full_cols_last)))
-
-  sum_all_cols_first <- apply(convolved_matrix_vector_first, MARGIN = 2, FUN = sum)
-  expect_lte(max(abs(sums_full_cols_first)), 1)
-  sum_all_cols_last <- apply(convolved_matrix_vector_last, MARGIN = 2, FUN = sum)
-  expect_lte(max(abs(sums_full_cols_last)), 1)
+  expect_delay_matrix_sums_lte_1(convolved_matrix_vector_first, full_cols = 10)
+  expect_delay_matrix_sums_lte_1(convolved_matrix_vector_last, full_cols = 10)
 })
 
 test_that(".convolve_delay_distribution_matrices returns valid output", {
@@ -158,16 +161,8 @@ test_that(".convolve_delay_distribution_matrices returns valid output", {
   convolved_matrix_ba <- .convolve_delay_distribution_matrices(matrix_a = matrix_b,
                                                               matrix_b = matrix_a)
 
-  sums_full_cols_first <- apply(convolved_matrix_ab[,1:10], MARGIN = 2, FUN = sum)
-  expect_equal(sums_full_cols_first, rep(1, times = length(sums_full_cols_first)))
-
-  sums_full_cols_last <- apply(convolved_matrix_ba[,1:10], MARGIN = 2, FUN = sum)
-  expect_equal(sums_full_cols_last, rep(1, times = length(sums_full_cols_last)))
-
-  sum_all_cols_first <- apply(convolved_matrix_ab, MARGIN = 2, FUN = sum)
-  expect_lte(max(abs(sums_full_cols_first)), 1)
-  sum_all_cols_last <- apply(convolved_matrix_ba, MARGIN = 2, FUN = sum)
-  expect_lte(max(abs(sums_full_cols_last)), 1)
+  expect_delay_matrix_sums_lte_1(convolved_matrix_ab, full_cols = 10)
+  expect_delay_matrix_sums_lte_1(convolved_matrix_ba, full_cols = 10)
 })
 
 test_that(".get_delay_matrix_from_delay_distribution_parms returns valid output", {
@@ -181,8 +176,51 @@ test_that(".get_delay_matrix_from_delay_distribution_parms returns valid output"
                                                   max_quantile = 0.999)
 
   # Check that all columns sum up to less than one.
-  sum_all_cols <- apply(matrix_result, MARGIN = 2, FUN = sum)
-  expect_lte(max(abs(sum_all_cols)), 1)
+  expect_delay_matrix_sums_lte_1(matrix_result, full_cols = 0)
+})
+
+test_that(".get_matrix_from_empirical_delay_distr returns valid output",{
+  # First toy data test
+  start_date <- as.Date("2020-03-01")
+  time_series_length <- 100
+
+  report_delays <- sample(c(0,0,1,1,1,1,2,2,2,2,2,3,3,3,4,4,4,5,5,6,7,8,9,10), 1000, replace = T)
+  event_dates <- sample(seq.Date(from = start_date, length.out = time_series_length, by = "day"), 1000, replace = T)
+
+  empirical_delay_data <- tibble::tibble(event_date = event_dates,
+                                         report_delay = report_delays) %>%
+                          dplyr::arrange(event_date)
+
+  empirical_matrix <- get_matrix_from_empirical_delay_distr(empirical_delays = empirical_delay_data,
+                                        start_date = start_date,
+                                        n_report_time_steps = 90,
+                                        time_step = "day",
+                                        min_number_cases = 10,
+                                        upper_quantile_threshold = 0.99)
+
+  expect_delay_matrix_sums_lte_1(empirical_matrix, full_cols = 50)
+
+  # Second toy data test
+  start_date <- as.Date("2020-04-01")
+  n_days <- 50
+  delay_increase <- 1.5
+  shape_initial_delay <- 6
+  scale_initial_delay <- 1.5
+  seed <- 734
+  generated_empirical_delays <- generate_delay_data(origin_date = start_date,
+                                                    n_time_steps = n_days,
+                                                    delay_ratio_start_to_end = 1.5,
+                                                    shape_initial_delay = shape_initial_delay,
+                                                    scale_initial_delay = scale_initial_delay,
+                                                    seed = seed)
+
+  empirical_delays_matrix <- get_matrix_from_empirical_delay_distr(empirical_delays = generated_empirical_delays,
+                                                                   start_date = start_date,
+                                                                   n_report_time_steps = 50,
+                                                                   min_number_cases = 5)
+
+
+  expect_delay_matrix_sums_lte_1(empirical_delays_matrix, full_cols = 20)
 })
 
 

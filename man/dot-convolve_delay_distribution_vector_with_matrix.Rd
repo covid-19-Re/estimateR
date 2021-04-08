@@ -11,7 +11,7 @@
 )
 }
 \arguments{
-\item{vector_first}{boolean. Delay described in vector is applied before delay described in matrix}
+\item{vector_first}{a boolean. Delay described in vector is applied before delay described in matrix}
 }
 \value{
 square matrix. Delay distribution matrix

@@ -4,5 +4,6 @@
 .httr-oauth
 .DS_Store
 inst/doc
+dev
 dev-*
-docs
+.gitignore
