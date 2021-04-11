@@ -36,30 +36,28 @@
 #TODO fill documentation
 #TODO maybe export
 #TODO maybe merge with .get_matrix_from_single_delay_distr by adding N parm and checking if list or unique vector
-#' Build delay distribution matrix from list of delay distribution parameters
+#TODO finish replacing build_delay_distribution input.
+#' Build delay distribution matrix from list of delay distributions
 #'
-#' @param parm1_vector
-#' @param parm2_vector
-#' @param distribution_type
+#' @param distributions list of distributions
 #' @param max_quantile
+#' @param offset_by_one A boolean
 #'
 #' @return delay distribution matrix
-.get_delay_matrix_from_delay_distribution_parms <- function(parm1_vector,
-                                                         parm2_vector,
-                                                         distribution_type = "gamma",
-                                                         max_quantile = 0.999,
-                                                         offset_by_one = FALSE) {
+.get_delay_matrix_from_delay_distribution_parms <- function(distributions,
+                                                            max_quantile = 0.999,
+                                                            offset_by_one = FALSE) {
   #TODO add checks on validity of input
-  N <- length(parm1_vector)
+
 
   # Generate list of delay distribution vectors
-  delay_distribution_list <- lapply(1:N, function(x){
-    build_delay_distribution(parm1_vector[x],
-                             parm2_vector[x],
-                            distribution_type = distribution_type,
+  delay_distribution_list <- lapply(distributions, function(distr){
+    build_delay_distribution(distr,
                             max_quantile = max_quantile,
                             offset_by_one = offset_by_one)
   })
+
+  N <- length(distributions)
 
   # Initialize empty matrix
   delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
@@ -108,58 +106,6 @@
   }
 
   return(augmented_matrix)
-}
-
-
-
-#TODO add details on the discretization
-#TODO fill documentation
-#TODO test (test that vector sums up to 1)
-#' Build a delay distribution vector
-#'
-#' Only allows for gamma distributions for now.
-#' @param parm1 numeric. If \code{distribution_type=="gamma"}, \code{parm1} is the shape parameter.
-#' @param parm2 numeric. If \code{distribution_type=="gamma"}, \code{parm2} is the scale parameter.
-#' @param distribution_type string. Options are "gamma".
-#' @param max_quantile numeric value between 0 and 1. TODO write what max_quantile does
-#' @param offset_by_one boolean. Gamma distribution comes from fit on (raw_data + 1) to accommodate zeroes in the raw_data.
-#'
-#' @return numeric vector.
-#' @export
-#'
-#' @examples
-#' #TODO add example
-build_delay_distribution <- function(parm1,
-                                     parm2,
-                                     distribution_type = "gamma",
-                                     max_quantile = 0.999,
-                                     offset_by_one = FALSE){
-  if(distribution_type == "gamma") {
-
-    if(parm1 == 0 || parm2 == 0) {
-      return(0)
-    }
-
-    # Take the right boundary of the delay distribution vector
-    right_boundary <- ceiling(stats::qgamma(max_quantile, shape = parm1, scale = parm2)) + 1
-    right_boundary <- max(right_boundary, 2) # Set the right boundary to at least two
-
-    if(offset_by_one) {
-      cdf_values <- stats::pgamma(c(0, seq(from = 1.5, to = right_boundary, by = 1)), shape = parm1, scale = parm2)
-    } else {
-      cdf_values <- stats::pgamma(c(0, seq(from = 0.5, to = right_boundary, by = 1)), shape = parm1, scale = parm2)
-    }
-
-  } else {
-    #TODO throw error
-    return(NA)
-  }
-
-  if(length(cdf_values) == 1) {
-    return(0)
-  } else {
-    return(diff(cdf_values))
-  }
 }
 
 
@@ -271,12 +217,8 @@ build_delay_distribution <- function(parm1,
 #TODO fill in and update documentation
 #' Build a waiting time distribution from the convolution of two gamma distributions
 #'
-#' @param parm1_incubation numeric. Shape parameter of the gamma distribution representing the delay between infection and symptom onset.
-#' @param parm2_incubation numeric. Scale parameter of the gamma distribution representing the delay between infection and symptom onset.
-#' @param parm1_onset_to_report numeric. Shape parameter of the gamma distribution representing the delay between symtom onset and observation.
-#' @param parm2_onset_to_report numeric. Scale parameter of the gamma distribution representing the delay between symtom onset and observation.
-#' @param distribution_type_incubation string.
-#' @param distribution_type_onset_to_report string.
+#' @param distribution_incubation list. delay between infection and symptom onset
+#' @param distribution_onset_to_report list. delay between symtom onset and observation
 #' @param max_quantile numeric. between 0 and 1.
 #'
 #' @return vector specifying the CDF between each time step of the waiting time distribution.
@@ -284,26 +226,18 @@ build_delay_distribution <- function(parm1,
 #'
 #' @examples
 #' #TODO add examples
-combine_incubation_with_reporting_delay <- function(parm1_incubation,
-                                                    parm2_incubation,
-                                                    parm1_onset_to_report,
-                                                    parm2_onset_to_report,
-                                                    distribution_type_incubation = "gamma",
-                                                    distribution_type_onset_to_report = "gamma",
+combine_incubation_with_reporting_delay <- function(distribution_incubation,
+                                                    distribution_onset_to_report,
                                                     max_quantile = 0.9999,
                                                     incubation_offset_by_one = FALSE,
                                                     onset_to_report_offset_by_one = FALSE) {
 
 
-  delay_distribution_incubation <- build_delay_distribution(parm1 = parm1_incubation,
-                                                            parm2 = parm2_incubation,
-                                                            distribution_type = distribution_type_incubation,
+  delay_distribution_incubation <- build_delay_distribution(distribution = distribution_incubation,
                                                             max_quantile = max_quantile,
                                                             offset_by_one = incubation_offset_by_one)
 
-  delay_distribution_onset_to_report <- build_delay_distribution(parm1 = parm1_onset_to_report,
-                                                                 parm2 = parm2_onset_to_report,
-                                                                 distribution_type = distribution_type_onset_to_report,
+  delay_distribution_onset_to_report <- build_delay_distribution(distribution = distribution_onset_to_report,
                                                                  max_quantile = max_quantile,
                                                                  offset_by_one = onset_to_report_offset_by_one)
 
@@ -334,6 +268,7 @@ combine_incubation_with_reporting_delay <- function(parm1_incubation,
 #TODO possibly allow for other ways to specifiy initial sift than median of all reports.
 #TODO format of empirical_delays must be specified somewhere:
 # use "event_date" and "report_delay" as column names
+#TODO allow for other distributions than gamma for fit, and also allow no fit.
 
 #' Build matrix of delay distributions through time from empirical delay data.
 #'
@@ -392,10 +327,11 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
   delay_distribution_matrix <- matrix(0, nrow = n_time_steps, ncol = n_time_steps)
 
-  scale_fits <- c()
-  shape_fits <- c()
-
+  #TODO fix issue with what happens when n_time_steps <= threshold_right_truncation: we shouldn't go until n_time_steps
+  #TODO test what happens when n_time_steps <= threshold_right_truncation
   last_varying_col <- ifelse(n_time_steps > threshold_right_truncation, n_time_steps - threshold_right_truncation, n_time_steps)
+
+  distribution_list <- vector(mode = "list", length = last_varying_col)
 
   # Populate the delay_distribution_matrix by column
   for(i in 1:last_varying_col) {
@@ -433,30 +369,20 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     }
     #TODO if none work revert to empirical distribution
 
-    shape_fits[i] <- gamma_fit$estimate["shape"]
-    scale_fits[i] <- 1/gamma_fit$estimate["rate"]
+    shape_fit <- gamma_fit$estimate[["shape"]]
+    scale_fit <- 1/gamma_fit$estimate[["rate"]]
+
+    distribution_list[[i]] <- list(name = "gamma", shape = shape_fit, scale = scale_fit)
   }
 
-  if(last_varying_col == n_time_steps) {
-    delay_distribution_matrix <- .get_delay_matrix_from_delay_distribution_parms(parm1_vector = shape_fits,
-                                                                                 parm2_vector = scale_fits,
-                                                                                 distribution_type = "gamma",
-                                                                                 offset_by_one = TRUE)
-  } else {
-    shape_fits[(n_time_steps - threshold_right_truncation) : n_time_steps] <- 0
-    scale_fits[(n_time_steps - threshold_right_truncation) : n_time_steps] <- 0
-
-    # Fill all but the last columns
-    delay_distribution_matrix <- .get_delay_matrix_from_delay_distribution_parms(parm1_vector = shape_fits,
-                                                                                 parm2_vector = scale_fits,
-                                                                                 distribution_type = "gamma",
-                                                                                 offset_by_one = TRUE)
-
-    # Fill the last columns with a copy of the previous column
-    for(i in (n_time_steps - threshold_right_truncation) : n_time_steps) {
-      delay_distribution_matrix[, i ] <-  c(0, delay_distribution_matrix[1:(n_time_steps-1), i - 1 ])
+  if(last_varying_col <= n_time_steps) {
+    for( i in 1: threshold_right_truncation ) {
+      distribution_list <- append(distribution_list, distribution_list[last_varying_col])
     }
   }
+
+  delay_distribution_matrix <- .get_delay_matrix_from_delay_distribution_parms(distribution_list,
+                                                                               offset_by_one = TRUE)
 
   return( delay_distribution_matrix )
 }

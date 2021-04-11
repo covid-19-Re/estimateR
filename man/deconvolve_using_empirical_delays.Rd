@@ -7,9 +7,8 @@
 deconvolve_using_empirical_delays(
   incidence_vector,
   empirical_delay_data,
+  distribution_incubation,
   deconvolution_method = "Richardson-Lucy delay distribution",
-  shape_incubation,
-  scale_incubation,
   ref_date,
   time_step = "day",
   ...

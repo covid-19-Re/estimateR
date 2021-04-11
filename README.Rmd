@@ -39,10 +39,12 @@ toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
 # Incubation period - gamma distribution parameters
 shape_incubation = 3.2 
 scale_incubation = 1.3
+incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
 
 # Delay from onset of symptoms to case observation - gamma distribution parameters
 shape_onset_to_report = 2.7
 scale_onset_to_report = 1.6
+onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
 
 # We specify these parameters in the same unit as the time steps in the original observation data.
 # For instance, if the original data represents daily reports,
@@ -50,18 +52,18 @@ scale_onset_to_report = 1.6
 mean_serial_interval = 4.8
 std_serial_interval = 2.3
 
-# The estimation window corresponds to the size of the sliding window used in EpiEstim
-# (see help(estimate_Re) for additional details.
+# The estimation window corresponds to the size of the sliding window used in EpiEstim.
+# See help(estimate_Re) for additional details.
 # Here, it is set to three days.
 estimation_window = 3 
 
 ## End of user input
 
 # Build a vector containing the delay distribution
-delay_distribution <- combine_incubation_with_reporting_delay(parm1_incubation = shape_incubation,
-                                                            parm2_incubation = scale_incubation,
-                                                            parm1_onset_to_report = shape_onset_to_report,
-                                                            parm2_onset_to_report = scale_onset_to_report)
+delay_distribution <- combine_incubation_with_reporting_delay(
+  distribution_incubation = incubation,
+  distribution_onset_to_report = onset_to_report
+)
 
 toy_estimates <- smooth_deconvolve_estimate(toy_incidence_data,
                                          delay_distribution,

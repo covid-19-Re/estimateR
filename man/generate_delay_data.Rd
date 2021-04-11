@@ -9,13 +9,12 @@ generate_delay_data(
   n_time_steps = 100,
   time_step = "day",
   delay_ratio_start_to_end = 2,
-  shape_initial_delay = 6,
-  scale_initial_delay = 1.5,
+  distribution_initial_delay = list(name = "gamma", shape = 6, scale = 5),
   seed = NULL
 )
 }
 \arguments{
-\item{scale_initial_delay}{}
+\item{seed}{}
 }
 \value{
 data.frame. Simulated delay data.

@@ -182,6 +182,7 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 
 #TODO fill in documentation
 #TODO allow for other types of time steps than days
+#TODO stop exporting after removed from vignette
 #' Generate delay data.
 #'
 #' This utility can be used to build toy examples to test functions dealing with empirical delay data.
@@ -189,10 +190,9 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 #' @param origin_date
 #' @param n_time_steps
 #' @param delay_ratio_start_to_end
-#' @param shape_initial_delay
 #' @param time_step
+#' @param distribution_initial_delay
 #' @param seed
-#' @param scale_initial_delay
 #'
 #' @return data.frame. Simulated delay data.
 #' @export
@@ -201,10 +201,9 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 #' #TODO add examples
 generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
                                  n_time_steps = 100,
-                                time_step = "day",
+                                 time_step = "day",
                                  delay_ratio_start_to_end = 2,
-                                 shape_initial_delay = 6,
-                                 scale_initial_delay = 1.5,
+                                 distribution_initial_delay = list(name = "gamma", shape = 6, scale = 5),
                                  seed = NULL){
 
   if(!is.null(seed)) {
@@ -218,7 +217,8 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 
   delays <- lapply(1:n_time_steps, function(i) {
     # Sample a number of draws from the gamma delay distribution, based on the pop size at time step i
-    raw_sampled_delays <- stats::rgamma(n = pop_size[i], shape = shape_initial_delay, scale_initial_delay)
+    raw_sampled_delays <- .sample_from_distribution(distribution = distribution_initial_delay,
+                                                    n = pop_size[i])
     # Multiply these samples by a factor that accounts for the linear inflation or deflation of delays.
     sampled_delays <- round(raw_sampled_delays * (1 + i/n_time_steps * (delay_ratio_start_to_end - 1)))
 

@@ -14,23 +14,26 @@ knitr::opts_chunk$set(
 )
 ```
 
+TODO there's a lot of work to do on this vignette.
+
 ```{r setup}
 library(estimateR)
 ```
 
 ```{r}
 #TODO instead of generating data in the vignette, load external data containing these simulated observations
+#Or we could use data from germany or HK
 start_date <- as.Date("2020-04-01")
 n_days <- 50
 delay_increase <- 1.5
 shape_initial_delay <- 6
 scale_initial_delay <- 1.5
+distribution_initial_delay <- list(name = "gamma", shape = shape_initial_delay, scale = scale_initial_delay)
 seed <- 734
 generated_empirical_delays <- generate_delay_data(origin_date = start_date,
                     n_time_steps = n_days,
                     delay_ratio_start_to_end = 1.5,
-                    shape_initial_delay = shape_initial_delay,
-                    scale_initial_delay = scale_initial_delay,
+                    distribution_initial_delay = distribution_initial_delay,
                     seed = seed)
 
 head(generated_empirical_delays, n = 10)
@@ -56,14 +59,15 @@ smoothed_toy_incidence <- smooth_incidence(incidence_data = toy_incidence_data,
 # Incubation period - gamma distribution parameters
 shape_incubation <- 3.2
 scale_incubation <- 1.3
+distribution_incubation <- list(name = "gamma", shape = shape_incubation, scale = scale_incubation)
+
 
 min_number_cases <- 20
 
 toy_infection_events <- deconvolve_using_empirical_delays(incidence_vector = smoothed_toy_incidence,
                                   empirical_delay_data = generated_empirical_delays,
                                   deconvolution_method = "Richardson-Lucy delay distribution",
-                                  shape_incubation = shape_incubation,
-                                  scale_incubation = scale_incubation,
+                                  distribution_incubation = distribution_incubation,
                                   ref_date = start_date,
                                   time_step = "day",
                                   min_number_cases = min_number_cases)

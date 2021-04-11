@@ -43,15 +43,21 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
                           332,324,312,297,276,256,236,214,192,170,
                           145,118,91,66)
 
+  shape_incubation <-  2
+  scale_incubation <- 1.2
+  delay_incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
+
+  shape_onset_to_report <- 3
+  scale_onset_to_report <- 1.3
+  delay_onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
+
   estimates <- get_block_bootstrapped_estimate(toy_incidence_data,
                                                N_bootstrap_replicates = 100,
                                           smoothing_method = "LOESS",
                                           deconvolution_method = "Richardson-Lucy delay distribution",
                                           estimation_method = "EpiEstim sliding window",
-                                          shape_incubation = 2,
-                                          scale_incubation = 1.2,
-                                          shape_onset_to_report = 3,
-                                          scale_onset_to_report = 1.3,
+                                          distribution_incubation = delay_incubation,
+                                          distribution_onset_to_report = delay_onset_to_report,
                                           estimation_window = 3,
                                           mean_serial_interval = 4.8,
                                           std_serial_interval  = 2.3,

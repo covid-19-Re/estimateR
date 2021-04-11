@@ -5,29 +5,17 @@
 \title{Build a waiting time distribution from the convolution of two gamma distributions}
 \usage{
 combine_incubation_with_reporting_delay(
-  parm1_incubation,
-  parm2_incubation,
-  parm1_onset_to_report,
-  parm2_onset_to_report,
-  distribution_type_incubation = "gamma",
-  distribution_type_onset_to_report = "gamma",
+  distribution_incubation,
+  distribution_onset_to_report,
   max_quantile = 0.9999,
   incubation_offset_by_one = FALSE,
   onset_to_report_offset_by_one = FALSE
 )
 }
 \arguments{
-\item{parm1_incubation}{numeric. Shape parameter of the gamma distribution representing the delay between infection and symptom onset.}
+\item{distribution_incubation}{list. delay between infection and symptom onset}
 
-\item{parm2_incubation}{numeric. Scale parameter of the gamma distribution representing the delay between infection and symptom onset.}
-
-\item{parm1_onset_to_report}{numeric. Shape parameter of the gamma distribution representing the delay between symtom onset and observation.}
-
-\item{parm2_onset_to_report}{numeric. Scale parameter of the gamma distribution representing the delay between symtom onset and observation.}
-
-\item{distribution_type_incubation}{string.}
-
-\item{distribution_type_onset_to_report}{string.}
+\item{distribution_onset_to_report}{list. delay between symtom onset and observation}
 
 \item{max_quantile}{numeric. between 0 and 1.}
 }

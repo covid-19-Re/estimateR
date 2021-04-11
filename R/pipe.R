@@ -14,6 +14,8 @@
 
 #TODO place deconvolution pipes into deconvolve module
 
+#TODO write piping that takes distributions for delay or already prepared vector.
+
 #' Estimate Re from incidence and estimate uncertainty with block-bootstrapping
 #'
 #' An estimation of the effective reproductive number through time is made with \code{smooth_deconvolve_estimate}
@@ -60,10 +62,8 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                             smoothing_method = "LOESS",
                                             deconvolution_method = "Richardson-Lucy delay distribution",
                                             estimation_method = "EpiEstim sliding window",
-                                            shape_incubation,
-                                            scale_incubation,
-                                            shape_onset_to_report = 0,
-                                            scale_onset_to_report = 0,
+                                            distribution_incubation,
+                                            distribution_onset_to_report = list(name = "gamma", shape = 0, scale = 0),
                                             estimation_window = 3,
                                             mean_serial_interval = 4.8,
                                             std_serial_interval  = 2.3,
@@ -73,10 +73,8 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                             verbose = FALSE){
 
 
-  delay_distribution_vector <- combine_incubation_with_reporting_delay(parm1_incubation = shape_incubation,
-                                                                       parm2_incubation = scale_incubation,
-                                                                       parm1_onset_to_report = shape_onset_to_report,
-                                                                       parm2_onset_to_report = scale_onset_to_report)
+  delay_distribution_vector <- combine_incubation_with_reporting_delay(distribution_incubation = distribution_incubation,
+                                                                       distribution_onset_to_report = distribution_onset_to_report)
 
   original_result <- smooth_deconvolve_estimate(incidence_vector,
                                                 delay_distribution_vector,
@@ -211,9 +209,8 @@ smooth_deconvolve_estimate <- function(incidence_vector,
 #'
 #' @param incidence_vector
 #' @param empirical_delay_data
+#' @param distribution_incubation
 #' @param deconvolution_method
-#' @param shape_incubation
-#' @param scale_incubation
 #' @param ref_date
 #' @param time_step
 #' @param ...
@@ -224,9 +221,8 @@ smooth_deconvolve_estimate <- function(incidence_vector,
 #' @examples
 deconvolve_using_empirical_delays <- function(incidence_vector,
                                               empirical_delay_data,
+                                              distribution_incubation,
                                               deconvolution_method = "Richardson-Lucy delay distribution",
-                                              shape_incubation,
-                                              scale_incubation,
                                               ref_date,
                                               time_step = "day",
                                               ...){
@@ -237,9 +233,7 @@ deconvolve_using_empirical_delays <- function(incidence_vector,
                                         time_step = time_step,
                                         ...)
 
-  incubation_period <- build_delay_distribution(parm1 = shape_incubation,
-                           parm2 = scale_incubation,
-                           distribution_type = "gamma")
+  incubation_period <- build_delay_distribution(distribution_incubation)
 
   # Combine incubation delay with delay from symptom onset to observation
   total_reporting_delay_matrix <- .convolve_delay_distribution_vector_with_matrix(incubation_period,

@@ -18,12 +18,14 @@ test_that("build_delay_distribution returns a vector whose elements sum up to 1"
   shapes <- stats::runif(N, min = 0, max = 10)
   scales <- stats::runif(N, min = 0, max = 10)
 
-  delay_distribution_vectors <- sapply(1:N, function(x) {
-                                  build_delay_distribution(parm1 = shapes[x],
-                                                          parm2 = scales[x],
-                                                          distribution_type = "gamma",
-                                                          max_quantile = 0.9999)
-    })
+  distribution_list <- lapply(1:length(shapes), function(i) {
+    return(list(name = "gamma", shape = shapes[i], scale = scales[i]))
+  })
+
+  delay_distribution_vectors <- lapply(distribution_list, function(x) {
+    build_delay_distribution(x,
+                             max_quantile = 0.9999)
+  })
 
   max_difference_to_1 <- max(abs(sapply(delay_distribution_vectors, sum) - 1))
 
@@ -35,10 +37,12 @@ test_that(".convolve_delay_distribution_vectors returns a vector whose elements 
   shapes <- stats::runif(2*N, min = 0, max = 10)
   scales <- stats::runif(2*N, min = 0, max = 10)
 
-  delay_distribution_vectors <- sapply(1:(2*N), function(x) {
-    build_delay_distribution(parm1 = shapes[x],
-                             parm2 = scales[x],
-                             distribution_type = "gamma",
+  distribution_list <- lapply(1:length(shapes), function(i) {
+    return(list(name = "gamma", shape = shapes[i], scale = scales[i]))
+  })
+
+  delay_distribution_vectors <- lapply(distribution_list, function(x) {
+    build_delay_distribution(x,
                              max_quantile = 0.9999)
   })
 
@@ -69,15 +73,19 @@ test_that(".combine_incubation_with_reporting_delay returns same output as empir
   shape_incubation = 3.2
   scale_incubation = 1.3
 
+  incubation_delay <- list(name="gamma",
+                           shape=shape_incubation,
+                           scale=scale_incubation)
+
   shape_onset_to_report = 2.7
   scale_onset_to_report = 1.6
 
-  convolved_output <- combine_incubation_with_reporting_delay(parm1_incubation=shape_incubation,
-                                                              parm2_incubation=scale_incubation,
-                                                              parm1_onset_to_report=shape_onset_to_report,
-                                                              parm2_onset_to_report=scale_onset_to_report,
-                                                              distribution_type_incubation="gamma",
-                                                              distribution_type_onset_to_report="gamma",
+  onset_to_report_delay <- list(name = "gamma",
+                                shape = shape_onset_to_report,
+                                scale = scale_onset_to_report)
+
+  convolved_output <- combine_incubation_with_reporting_delay(distribution_incubation = incubation_delay,
+                                                              distribution_onset_to_report = onset_to_report_delay,
                                                               max_quantile = 0.9999)
 
   empirical_convolution_result <- c(0,9e-04,0.00947,0.03214,0.06438,0.09523,0.11566,
@@ -167,13 +175,16 @@ test_that(".convolve_delay_distribution_matrices returns valid output", {
 
 test_that(".get_delay_matrix_from_delay_distribution_parms returns valid output", {
   N <- 100
+
   shapes <- stats::runif(N, min = 0, max = 10)
   scales <- stats::runif(N, min = 0, max = 10)
 
-  matrix_result <- .get_delay_matrix_from_delay_distribution_parms(parm1_vector = shapes,
-                                                  parm2_vector = scales,
-                                                  distribution_type = "gamma",
-                                                  max_quantile = 0.999)
+  distribution_list <- lapply(1:length(shapes), function(i) {
+    return(list(name = "gamma", shape = shapes[i], scale = scales[i]))
+  })
+
+  matrix_result <- .get_delay_matrix_from_delay_distribution_parms(distributions = distribution_list,
+                                                                   max_quantile = 0.999)
 
   # Check that all columns sum up to less than one.
   expect_delay_matrix_sums_lte_1(matrix_result, full_cols = 0)
@@ -206,12 +217,14 @@ test_that(".get_matrix_from_empirical_delay_distr returns valid output",{
   delay_increase <- 1.5
   shape_initial_delay <- 6
   scale_initial_delay <- 1.5
+  distribution_initial_delay <- list(name = "gamma", shape = shape_initial_delay, scale = scale_initial_delay)
   seed <- 734
+
+
   generated_empirical_delays <- generate_delay_data(origin_date = start_date,
                                                     n_time_steps = n_days,
                                                     delay_ratio_start_to_end = 1.5,
-                                                    shape_initial_delay = shape_initial_delay,
-                                                    scale_initial_delay = scale_initial_delay,
+                                                    distribution_initial_delay = distribution_initial_delay,
                                                     seed = seed)
 
   empirical_delays_matrix <- get_matrix_from_empirical_delay_distr(empirical_delays = generated_empirical_delays,

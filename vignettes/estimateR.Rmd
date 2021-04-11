@@ -70,17 +70,17 @@ In *estimateR*, we approximate both delay distributions -incubation period and d
 # Incubation period - gamma distribution parameters
 shape_incubation <- 3.2 
 scale_incubation <- 1.3
+incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
 
 # Delay from onset of symptoms to case observation - gamma distribution parameters
 shape_onset_to_report <- 2.7
 scale_onset_to_report <- 1.6
+onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
 
 # Build a vector containing the delay distribution
 delay_distribution <- combine_incubation_with_reporting_delay(
-  parm1_incubation = shape_incubation,
-  parm2_incubation = scale_incubation,
-  parm1_onset_to_report = shape_onset_to_report,
-  parm2_onset_to_report = scale_onset_to_report
+  distribution_incubation = incubation,
+  distribution_onset_to_report = onset_to_report
 )
 
 # Infer the original infection events by deconvolving the delay distribution from the smoothed observations.
@@ -103,8 +103,9 @@ mean_serial_interval <- 4.8
 std_serial_interval <- 2.3
 
 estimation_window <- 3
-# The estimation window corresponds to the size of the sliding window used in EpiEstim (see help(estimate_Re)
-# for additional details). Here, it is set to three days.
+# The estimation window corresponds to the size of the sliding window used in EpiEstim.
+# See help(estimate_Re) for additional details.
+# Here, it is set to three days.
 
 toy_Re_estimates <- estimate_Re(
   incidence_data = toy_infection_events,
@@ -150,10 +151,8 @@ toy_incidence_data <- c(
 
 # Build a vector containing the delay distribution
 delay_distribution <- combine_incubation_with_reporting_delay(
-  parm1_incubation = shape_incubation,
-  parm2_incubation = scale_incubation,
-  parm1_onset_to_report = shape_onset_to_report,
-  parm2_onset_to_report = scale_onset_to_report
+  distribution_incubation = incubation,
+  distribution_onset_to_report = onset_to_report
 )
 
 toy_estimates <- smooth_deconvolve_estimate(toy_incidence_data,
@@ -187,10 +186,8 @@ estimates <- get_block_bootstrapped_estimate(toy_incidence_data,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
-  shape_incubation = shape_incubation,
-  scale_incubation = scale_incubation,
-  shape_onset_to_report = shape_onset_to_report,
-  scale_onset_to_report = scale_onset_to_report,
+  distribution_incubation = incubation,
+  distribution_onset_to_report = onset_to_report,
   estimation_window = estimation_window,
   mean_serial_interval = mean_serial_interval,
   std_serial_interval = std_serial_interval,

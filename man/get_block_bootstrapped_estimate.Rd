@@ -10,10 +10,8 @@ get_block_bootstrapped_estimate(
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
-  shape_incubation,
-  scale_incubation,
-  shape_onset_to_report = 0,
-  scale_onset_to_report = 0,
+  distribution_incubation,
+  distribution_onset_to_report = list(name = "gamma", shape = 0, scale = 0),
   estimation_window = 3,
   mean_serial_interval = 4.8,
   std_serial_interval = 2.3,
@@ -34,14 +32,6 @@ get_block_bootstrapped_estimate(
 
 \item{estimation_method}{string. see \code{\link{estimate_Re}}}
 
-\item{shape_incubation}{numeric. Shape parameter of the gamma distribution representing the delay between infection and symptom onset.}
-
-\item{scale_incubation}{numeric. Scale parameter of the gamma distribution representing the delay between infection and symptom onset.}
-
-\item{shape_onset_to_report}{numeric. Shape parameter of the gamma distribution representing the delay between symptom onset and observation.}
-
-\item{scale_onset_to_report}{numeric. Scale parameter of the gamma distribution representing the delay between symptom onset and observation.}
-
 \item{estimation_window}{integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.
 see \code{\link{estimate_Re}}}
 
@@ -58,6 +48,14 @@ see \code{\link{estimate_Re}}}
 #TODO expand on the output}
 
 \item{verbose}{boolean. see \code{\link{deconvolve_incidence}}}
+
+\item{shape_incubation}{numeric. Shape parameter of the gamma distribution representing the delay between infection and symptom onset.}
+
+\item{scale_incubation}{numeric. Scale parameter of the gamma distribution representing the delay between infection and symptom onset.}
+
+\item{shape_onset_to_report}{numeric. Shape parameter of the gamma distribution representing the delay between symptom onset and observation.}
+
+\item{scale_onset_to_report}{numeric. Scale parameter of the gamma distribution representing the delay between symptom onset and observation.}
 }
 \value{
 tibble. Re estimations along with results from each pipeline step.

@@ -2,22 +2,22 @@
 % Please edit documentation in R/utils-deconvolution.R
 \name{.get_delay_matrix_from_delay_distribution_parms}
 \alias{.get_delay_matrix_from_delay_distribution_parms}
-\title{Build delay distribution matrix from list of delay distribution parameters}
+\title{Build delay distribution matrix from list of delay distributions}
 \usage{
 .get_delay_matrix_from_delay_distribution_parms(
-  parm1_vector,
-  parm2_vector,
-  distribution_type = "gamma",
+  distributions,
   max_quantile = 0.999,
   offset_by_one = FALSE
 )
 }
 \arguments{
-\item{max_quantile}{}
+\item{distributions}{list of distributions}
+
+\item{offset_by_one}{A boolean}
 }
 \value{
 delay distribution matrix
 }
 \description{
-Build delay distribution matrix from list of delay distribution parameters
+Build delay distribution matrix from list of delay distributions
 }
