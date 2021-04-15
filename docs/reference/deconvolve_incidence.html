@@ -136,6 +136,11 @@ a vector of infection events from input data representing delayed observations.<
     <pre class="usage"><span class='fu'>deconvolve_incidence</span><span class='op'>(</span>
   <span class='va'>incidence_data</span>,
   deconvolution_method <span class='op'>=</span> <span class='st'>"Richardson-Lucy delay distribution"</span>,
+  <span class='va'>delay_incubation</span>,
+  delay_onset_to_report <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>,
+  start_date <span class='op'>=</span> <span class='cn'>NULL</span>,
+  time_step <span class='op'>=</span> <span class='st'>"day"</span>,
+  min_number_cases <span class='op'>=</span> <span class='cn'>NULL</span>,
   simplify_output <span class='op'>=</span> <span class='cn'>TRUE</span>,
   <span class='va'>...</span>
 <span class='op'>)</span></pre>

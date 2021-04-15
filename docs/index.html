@@ -135,67 +135,63 @@
 
 <span class="co">## End of user input</span>
 
-<span class="co"># Build a vector containing the delay distribution</span>
-<span class="va">delay_distribution</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/combine_incubation_with_reporting_delay.html">combine_incubation_with_reporting_delay</a></span><span class="op">(</span>
-  distribution_incubation <span class="op">=</span> <span class="va">incubation</span>,
-  distribution_onset_to_report <span class="op">=</span> <span class="va">onset_to_report</span>
-<span class="op">)</span>
-
 <span class="va">toy_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/smooth_deconvolve_estimate.html">smooth_deconvolve_estimate</a></span><span class="op">(</span><span class="va">toy_incidence_data</span>,
-                                         <span class="va">delay_distribution</span>,
-                                         smoothing_method <span class="op">=</span> <span class="st">"LOESS"</span>,
-                                         deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
-                                         estimation_method <span class="op">=</span> <span class="st">"EpiEstim sliding window"</span>,
-                                         estimation_window <span class="op">=</span> <span class="va">estimation_window</span>,
-                                         mean_serial_interval <span class="op">=</span> <span class="va">mean_serial_interval</span>,
-                                         std_serial_interval  <span class="op">=</span> <span class="va">std_serial_interval</span>,
-                                         output_Re_only <span class="op">=</span> <span class="cn">FALSE</span>,
-                                         ref_date <span class="op">=</span> <span class="va">date_first_data_point</span>,
-                                         time_step <span class="op">=</span> <span class="st">"day"</span><span class="op">)</span>
+  smoothing_method <span class="op">=</span> <span class="st">"LOESS"</span>,
+  deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
+  estimation_method <span class="op">=</span> <span class="st">"EpiEstim sliding window"</span>,
+  delay_incubation <span class="op">=</span> <span class="va">incubation</span>,
+  delay_onset_to_report <span class="op">=</span> <span class="va">onset_to_report</span>,
+  estimation_window <span class="op">=</span> <span class="va">estimation_window</span>,
+  mean_serial_interval <span class="op">=</span> <span class="va">mean_serial_interval</span>,
+  std_serial_interval  <span class="op">=</span> <span class="va">std_serial_interval</span>,
+  output_Re_only <span class="op">=</span> <span class="cn">FALSE</span>,
+  ref_date <span class="op">=</span> <span class="va">date_first_data_point</span>,
+  time_step <span class="op">=</span> <span class="st">"day"</span>
+<span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">toy_estimates</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>
 <span class="co">#&gt;          date observed_incidence smoothed_incidence deconvolved_incidence</span>
-<span class="co">#&gt; 1  2020-02-16                 NA                 NA              18.43658</span>
-<span class="co">#&gt; 2  2020-02-17                 NA                 NA              21.98975</span>
-<span class="co">#&gt; 3  2020-02-18                 NA                 NA              25.79057</span>
-<span class="co">#&gt; 4  2020-02-19                 NA                 NA              30.33145</span>
-<span class="co">#&gt; 5  2020-02-20                 NA                 NA              36.10225</span>
-<span class="co">#&gt; 6  2020-02-21                 NA                 NA              43.46936</span>
-<span class="co">#&gt; 7  2020-02-22                 NA                 NA              52.48495</span>
-<span class="co">#&gt; 8  2020-02-23                 NA                 NA              63.25370</span>
-<span class="co">#&gt; 9  2020-02-24                  4           17.75345              75.80899</span>
-<span class="co">#&gt; 10 2020-02-25                  9           21.35431              90.01547</span>
-<span class="co">#&gt; 11 2020-02-26                 19           25.29413             105.42380</span>
-<span class="co">#&gt; 12 2020-02-27                 14           30.08292             121.78325</span>
-<span class="co">#&gt; 13 2020-02-28                 36           36.23071             139.21148</span>
-<span class="co">#&gt; 14 2020-02-29                 16           44.08374             157.84799</span>
-<span class="co">#&gt; 15 2020-03-01                 39           53.55827             177.83487</span>
-<span class="co">#&gt; 16 2020-03-02                 27           64.51933             196.19681</span>
-<span class="co">#&gt; 17 2020-03-03                 46           76.83199             210.77046</span>
-<span class="co">#&gt; 18 2020-03-04                 77           90.36127             222.94616</span>
-<span class="co">#&gt; 19 2020-03-05                 78          104.73262             234.19189</span>
-<span class="co">#&gt; 20 2020-03-06                113          119.79569             246.07441</span>
+<span class="co">#&gt; 1  2020-02-16                 NA                 NA              18.43639</span>
+<span class="co">#&gt; 2  2020-02-17                 NA                 NA              21.98931</span>
+<span class="co">#&gt; 3  2020-02-18                 NA                 NA              25.78989</span>
+<span class="co">#&gt; 4  2020-02-19                 NA                 NA              30.33052</span>
+<span class="co">#&gt; 5  2020-02-20                 NA                 NA              36.10101</span>
+<span class="co">#&gt; 6  2020-02-21                 NA                 NA              43.46775</span>
+<span class="co">#&gt; 7  2020-02-22                 NA                 NA              52.48302</span>
+<span class="co">#&gt; 8  2020-02-23                 NA                 NA              63.25173</span>
+<span class="co">#&gt; 9  2020-02-24                  4           17.75345              75.80742</span>
+<span class="co">#&gt; 10 2020-02-25                  9           21.35431              90.01481</span>
+<span class="co">#&gt; 11 2020-02-26                 19           25.29413             105.42458</span>
+<span class="co">#&gt; 12 2020-02-27                 14           30.08292             121.78595</span>
+<span class="co">#&gt; 13 2020-02-28                 36           36.23071             139.21664</span>
+<span class="co">#&gt; 14 2020-02-29                 16           44.08374             157.85615</span>
+<span class="co">#&gt; 15 2020-03-01                 39           53.55827             177.84666</span>
+<span class="co">#&gt; 16 2020-03-02                 27           64.51933             196.21270</span>
+<span class="co">#&gt; 17 2020-03-03                 46           76.83199             210.79070</span>
+<span class="co">#&gt; 18 2020-03-04                 77           90.36127             222.97111</span>
+<span class="co">#&gt; 19 2020-03-05                 78          104.73262             234.22213</span>
+<span class="co">#&gt; 20 2020-03-06                113          119.79569             246.11074</span>
 <span class="co">#&gt;      R_mean</span>
 <span class="co">#&gt; 1        NA</span>
 <span class="co">#&gt; 2        NA</span>
 <span class="co">#&gt; 3        NA</span>
 <span class="co">#&gt; 4        NA</span>
-<span class="co">#&gt; 5  4.454238</span>
-<span class="co">#&gt; 6  3.174874</span>
-<span class="co">#&gt; 7  2.664220</span>
-<span class="co">#&gt; 8  2.443137</span>
-<span class="co">#&gt; 9  2.338135</span>
-<span class="co">#&gt; 10 2.274430</span>
-<span class="co">#&gt; 11 2.215192</span>
-<span class="co">#&gt; 12 2.145607</span>
-<span class="co">#&gt; 13 2.065729</span>
-<span class="co">#&gt; 14 1.983157</span>
-<span class="co">#&gt; 15 1.905623</span>
-<span class="co">#&gt; 16 1.826564</span>
-<span class="co">#&gt; 17 1.735650</span>
-<span class="co">#&gt; 18 1.632170</span>
-<span class="co">#&gt; 19 1.528527</span>
-<span class="co">#&gt; 20 1.440842</span></code></pre></div>
+<span class="co">#&gt; 5  4.454175</span>
+<span class="co">#&gt; 6  3.174828</span>
+<span class="co">#&gt; 7  2.664187</span>
+<span class="co">#&gt; 8  2.443120</span>
+<span class="co">#&gt; 9  2.338139</span>
+<span class="co">#&gt; 10 2.274462</span>
+<span class="co">#&gt; 11 2.215251</span>
+<span class="co">#&gt; 12 2.145688</span>
+<span class="co">#&gt; 13 2.065824</span>
+<span class="co">#&gt; 14 1.983260</span>
+<span class="co">#&gt; 15 1.905728</span>
+<span class="co">#&gt; 16 1.826669</span>
+<span class="co">#&gt; 17 1.735752</span>
+<span class="co">#&gt; 18 1.632269</span>
+<span class="co">#&gt; 19 1.528623</span>
+<span class="co">#&gt; 20 1.440937</span></code></pre></div>
 </div>
 </div>
 
