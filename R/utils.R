@@ -38,7 +38,7 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
                         })
 
   merged_outputs <- plyr::join_all(tibble_list, by='index', type='full') %>%
-                      dplyr::arrange(index)
+                      dplyr::arrange(.data$index)
 
   if( !is.null(ref_date) ) {
     dates <- seq.Date(from = ref_date + min(merged_outputs$index), by = time_step, along.with = merged_outputs$index)
@@ -46,7 +46,7 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
     merged_outputs <- dplyr::select(merged_outputs, date, tidyselect::everything())
   }
 
-  merged_outputs <- dplyr::select(merged_outputs, -index)
+  merged_outputs <- dplyr::select(merged_outputs, -.data$index)
 
   return(merged_outputs)
 }

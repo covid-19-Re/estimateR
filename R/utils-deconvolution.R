@@ -161,7 +161,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
   # Ignore the delay data that is posterior to the last incidence report date.
   empirical_delays <- empirical_delays %>%
-    dplyr::filter(event_date <= max(all_report_dates))
+    dplyr::filter(.data$event_date <= max(all_report_dates))
 
   # Set the 'min_number_cases' parameter if not set by the user
   #TODO make this 'min_number_cases' depend on the length of the time_series.
@@ -174,15 +174,15 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   # No time-variation beyond this threshold due to the fraction of unsampled individuals when nearing the last sampling date
   # TODO put the search for threshold_right_truncation in separate utility function
   delay_counts <- empirical_delays %>%
-    dplyr::select(report_delay) %>%
-    dplyr::group_by(report_delay) %>%
+    dplyr::select(.data$report_delay) %>%
+    dplyr::group_by(.data$report_delay) %>%
     dplyr::summarise(counts = dplyr::n(), .groups = "drop")
 
   threshold_right_truncation <- delay_counts %>%
-    dplyr::mutate(cumul_freq = cumsum(counts)/sum(counts)) %>%
-    dplyr::filter(cumul_freq > upper_quantile_threshold) %>%
+    dplyr::mutate(cumul_freq = cumsum(.data$counts)/sum(.data$counts)) %>%
+    dplyr::filter(.data$cumul_freq > upper_quantile_threshold) %>%
     utils::head(n=1) %>%
-    dplyr::pull(report_delay)
+    dplyr::pull(.data$report_delay)
 
   # Use median of reported delays as initial shift (needed for deconvolution step)
   initial_shift <- round(stats::median(empirical_delays$report_delay, na.rm = T))
@@ -209,8 +209,8 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
       dplyr::slice( sample(1:dplyr::n()) )
 
     recent_counts <- shuffled_delays %>%
-      dplyr::arrange( dplyr::desc(event_date) ) %>%
-      dplyr::filter( event_date <= all_dates[i] )
+      dplyr::arrange( dplyr::desc(.data$event_date) ) %>%
+      dplyr::filter( .data$event_date <= all_dates[i] )
 
     if( nrow(recent_counts) >= min_number_cases ) {
       # If enough data points before date of interest,
@@ -218,14 +218,14 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
       recent_counts_distribution <- recent_counts %>%
         dplyr::slice_head( n = min_number_cases )  %>%
-        dplyr::pull(report_delay)
+        dplyr::pull(.data$report_delay)
     } else {
       # Otherwise, take 'min_number_of_cases' observations,
       # even after date of interest.
       recent_counts_distribution <- shuffled_delays %>%
-        dplyr::arrange( event_date ) %>%
+        dplyr::arrange( .data$event_date ) %>%
         dplyr::slice_head( n = min_number_cases )  %>%
-        dplyr::pull(report_delay)
+        dplyr::pull(.data$report_delay)
     }
 
     gamma_fit <- try(suppressWarnings(fitdistrplus::fitdist(recent_counts_distribution + 1, distr = "gamma")),
