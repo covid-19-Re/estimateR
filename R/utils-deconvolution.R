@@ -1,7 +1,5 @@
 #TODO reorganize files between utils-deconvolution, utils-convolution, utils-distribution
 
-#TODO write deconvolution step with the convolution of a matrix with vector. That should apply to Swiss non-onset data
-
 #TODO write deconvolution step that takes into account that data is onset data (when it is). That should apply to Swiss onset data
 
 #TODO add a way to deal with Spanish data specificity

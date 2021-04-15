@@ -43,7 +43,7 @@
 #' @return square matrix. Delay distribution matrix
 .convolve_delay_distribution_vector_with_matrix <- function(vector_a, matrix_b, vector_first = TRUE){
 
-  #TODO add check that matrix_b is square
+  #TODO add check that matrix_b is lower-triangular (add utility for that)
 
   if( vector_first ) {
     n_col_augment <- .get_initial_deconvolution_shift(vector_a)

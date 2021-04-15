@@ -2,9 +2,6 @@
 
 #TODO add parameter to allow delay_distribution to not sum up to 1 if not waiting time distribution (e.g. shedding load distribution)
 
-
-#TODO add more parameters to match with get_matrix_from_empirical_delay_distr when data is empirical (maybe start_date, )
-#TODO possibly revert to dated objects for incidence to accomodate with the empirical delay data requirements. (not necessarily needed though)
 #TODO redo doc
 #' Infer Infection Events Dates from Delayed Observation
 #'
