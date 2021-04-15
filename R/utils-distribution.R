@@ -7,7 +7,7 @@
 #' @return
 .get_distribution_parms <- function(distribution, f){
   # Remove the name element from the distribution list
-  distribution <- within(distribution, rm(name))
+  distribution <- within(distribution, rm("name"))
 
   # Only keep elements of 'distribution' that are arguments of function f
   distribution_parms <- distribution[names(distribution) %in% methods::formalArgs(f)]
@@ -108,55 +108,6 @@
   return(right_boundary)
 }
 
-#TODO add checks for other distributions (lognormal, uniform, weibull, truncated_normal,...)
-#TODO fill in doc
-#' Title
-#'
-#' @param distribution
-#'
-#' @return a boolean value.
-.is_valid_distribution <- function(distribution){
-
-  if (class(distribution) != "list") {
-    stop("Distribution must be a named list.")
-  }
-
-  if (!"name" %in% names(distribution)) {
-    stop("Missing distribution name. Include a 'name' element in distribution.")
-  }
-
-  distribution_name <- distribution[["name"]]
-
-  density_function_name <- paste0("d", distribution_name)
-  density_function <- try(get(density_function_name, envir = loadNamespace("stats")),
-                          silent = TRUE)
-
-  if (class(density_function) == "try-error") {
-    stop(paste("The ", density_function_name, " function must be defined in the 'stats' package."))
-  }
-
-  distribution_parms <- .get_distribution_parms(distribution, density_function)
-
-  if (length(distribution_parms) == 0) {
-    stop("Missing distribution parameters.")
-  }
-
-  # Check if parameter values are pathological.
-  if (distribution_name == "gamma") {
-
-    if (distribution_parms[["shape"]] < 0) {
-      return(FALSE)
-    } else if ("scale" %in% names(distribution_parms) && distribution_parms[["scale"]] <= 0) {
-      return(FALSE)
-    } else {
-      return(TRUE)
-    }
-
-  }
-
-  return(TRUE)
-}
-
 #TODO add details on the discretization
 #TODO fill documentation
 #TODO specify format of distribution: distribution <- list(name = "gamma", shape = 2, scale = 4)
@@ -189,4 +140,26 @@ build_delay_distribution <- function(distribution,
 
   return(distribution_vector)
 }
+
+#TODO fill doc
+#' Title
+#'
+#' @param delay
+#' @param ...
+#'
+#' @return
+.get_delay_distribution <- function(delay,
+                                    ...){
+  if(class(delay) == "numeric") {
+    .check_is_probability_distr_vector(delay)
+    return(delay)
+  } else if(class(delay) == "list") {
+    return(build_delay_distribution(delay, ...))
+  } else {
+    #TODO add details to error message
+    stop("Input must either be a vector representing the discretized delay distribution or a distribution object.")
+  }
+}
+
+
 

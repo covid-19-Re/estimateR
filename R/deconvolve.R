@@ -1,3 +1,11 @@
+#TODO replace delay_incubation and delay_onset_to_report by list of delays
+
+#TODO add parameter to allow delay_distribution to not sum up to 1 if not waiting time distribution (e.g. shedding load distribution)
+
+
+#TODO add more parameters to match with get_matrix_from_empirical_delay_distr when data is empirical (maybe start_date, )
+#TODO possibly revert to dated objects for incidence to accomodate with the empirical delay data requirements. (not necessarily needed though)
+#TODO redo doc
 #' Infer Infection Events Dates from Delayed Observation
 #'
 #' This function reconstructs an incidence of infection events from incidence data representing delayed observations.
@@ -7,6 +15,8 @@
 #'
 #'#TODO figure out input format
 #' @param incidence_data numeric.
+#' @param delay_incubation
+#' @param delay_onset_to_report
 #' @param deconvolution_method string. Options are "Richardson-Lucy delay distribution"
 #' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
 #' @param ...
@@ -16,13 +26,30 @@
 #'
 #' @examples
 #' #TODO add examples
-#TODO add a mandatory parameter for passing info on the delay distribution
-deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richardson-Lucy delay distribution", simplify_output = TRUE, ... ) {
+deconvolve_incidence <- function( incidence_data,
+                                  deconvolution_method = "Richardson-Lucy delay distribution",
+                                  delay_incubation,
+                                  delay_onset_to_report = c(1.0),
+                                  start_date = NULL,
+                                  time_step = "day",
+                                  min_number_cases = NULL,
+                                  simplify_output = TRUE,
+                                  ... ) {
 
   input <- .get_module_input(incidence_data)
 
+  #TODO generalize this to a list of delay inputs
+  total_delay_distribution <- convolve_delay_inputs(delay_incubation,
+                                                    delay_onset_to_report,
+                                                    n_report_time_steps = .get_input_length(input),
+                                                    start_date = start_date,
+                                                    time_step = time_step,
+                                                    min_number_cases = min_number_cases)
+
   if(deconvolution_method == "Richardson-Lucy delay distribution") {
-    deconvolved_incidence <- .deconvolve_incidence_Richardson_Lucy(input, ... )
+    deconvolved_incidence <- .deconvolve_incidence_Richardson_Lucy(input,
+                                                                   delay_distribution = total_delay_distribution,
+                                                                   ... )
   } else {
     deconvolved_incidence <-  .make_empty_module_output()
   }
@@ -53,12 +80,8 @@ deconvolve_incidence <- function( incidence_data, deconvolution_method = "Richar
 
   incidence_vector <- .get_values(incidence_input)
 
-  #TODO test whether delay_distribution sums up to 1 if vector
-  #TODO add parameter to allow delay_distribution to not sum up to 1 if not waiting time distribution
-  #TODO compute first_guess_delay if delay_distribution is a matrix
-  ##create a general utility function that does it for both vectors and matrices, with customisable way of getting the delay (mode, median, mean,..)
-
   # Test delay_distribution input
+  #TODO apply proper validation step
   if(NCOL(delay_distribution) != 1 && NCOL(delay_distribution) != NROW(delay_distribution)) {
     #TODO cast proper error
     print("Delay distribution input must be a vector or square matrix")

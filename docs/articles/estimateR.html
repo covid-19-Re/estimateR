@@ -126,17 +126,17 @@
 <span class="co"># Incubation period - gamma distribution parameters</span>
 <span class="va">shape_incubation</span> <span class="op">&lt;-</span> <span class="fl">3.2</span> 
 <span class="va">scale_incubation</span> <span class="op">&lt;-</span> <span class="fl">1.3</span>
+<span class="va">incubation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>name<span class="op">=</span><span class="st">"gamma"</span>, shape <span class="op">=</span> <span class="va">shape_incubation</span>, scale <span class="op">=</span> <span class="va">scale_incubation</span><span class="op">)</span>
 
 <span class="co"># Delay from onset of symptoms to case observation - gamma distribution parameters</span>
 <span class="va">shape_onset_to_report</span> <span class="op">&lt;-</span> <span class="fl">2.7</span>
 <span class="va">scale_onset_to_report</span> <span class="op">&lt;-</span> <span class="fl">1.6</span>
+<span class="va">onset_to_report</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>name<span class="op">=</span><span class="st">"gamma"</span>, shape <span class="op">=</span> <span class="va">shape_onset_to_report</span>, scale <span class="op">=</span> <span class="va">scale_onset_to_report</span><span class="op">)</span>
 
 <span class="co"># Build a vector containing the delay distribution</span>
 <span class="va">delay_distribution</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_incubation_with_reporting_delay.html">combine_incubation_with_reporting_delay</a></span><span class="op">(</span>
-  parm1_incubation <span class="op">=</span> <span class="va">shape_incubation</span>,
-  parm2_incubation <span class="op">=</span> <span class="va">scale_incubation</span>,
-  parm1_onset_to_report <span class="op">=</span> <span class="va">shape_onset_to_report</span>,
-  parm2_onset_to_report <span class="op">=</span> <span class="va">scale_onset_to_report</span>
+  distribution_incubation <span class="op">=</span> <span class="va">incubation</span>,
+  distribution_onset_to_report <span class="op">=</span> <span class="va">onset_to_report</span>
 <span class="op">)</span>
 
 <span class="co"># Infer the original infection events by deconvolving the delay distribution from the smoothed observations.</span>
@@ -159,8 +159,9 @@
 <span class="va">std_serial_interval</span> <span class="op">&lt;-</span> <span class="fl">2.3</span>
 
 <span class="va">estimation_window</span> <span class="op">&lt;-</span> <span class="fl">3</span>
-<span class="co"># The estimation window corresponds to the size of the sliding window used in EpiEstim (see help(estimate_Re)</span>
-<span class="co"># for additional details). Here, it is set to three days.</span>
+<span class="co"># The estimation window corresponds to the size of the sliding window used in EpiEstim.</span>
+<span class="co"># See help(estimate_Re) for additional details.</span>
+<span class="co"># Here, it is set to three days.</span>
 
 <span class="va">toy_Re_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_Re.html">estimate_Re</a></span><span class="op">(</span>
   incidence_data <span class="op">=</span> <span class="va">toy_infection_events</span>,
@@ -218,10 +219,8 @@
 
 <span class="co"># Build a vector containing the delay distribution</span>
 <span class="va">delay_distribution</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/combine_incubation_with_reporting_delay.html">combine_incubation_with_reporting_delay</a></span><span class="op">(</span>
-  parm1_incubation <span class="op">=</span> <span class="va">shape_incubation</span>,
-  parm2_incubation <span class="op">=</span> <span class="va">scale_incubation</span>,
-  parm1_onset_to_report <span class="op">=</span> <span class="va">shape_onset_to_report</span>,
-  parm2_onset_to_report <span class="op">=</span> <span class="va">scale_onset_to_report</span>
+  distribution_incubation <span class="op">=</span> <span class="va">incubation</span>,
+  distribution_onset_to_report <span class="op">=</span> <span class="va">onset_to_report</span>
 <span class="op">)</span>
 
 <span class="va">toy_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth_deconvolve_estimate.html">smooth_deconvolve_estimate</a></span><span class="op">(</span><span class="va">toy_incidence_data</span>,
@@ -266,10 +265,8 @@
   smoothing_method <span class="op">=</span> <span class="st">"LOESS"</span>,
   deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
   estimation_method <span class="op">=</span> <span class="st">"EpiEstim sliding window"</span>,
-  shape_incubation <span class="op">=</span> <span class="va">shape_incubation</span>,
-  scale_incubation <span class="op">=</span> <span class="va">scale_incubation</span>,
-  shape_onset_to_report <span class="op">=</span> <span class="va">shape_onset_to_report</span>,
-  scale_onset_to_report <span class="op">=</span> <span class="va">scale_onset_to_report</span>,
+  distribution_incubation <span class="op">=</span> <span class="va">incubation</span>,
+  distribution_onset_to_report <span class="op">=</span> <span class="va">onset_to_report</span>,
   estimation_window <span class="op">=</span> <span class="va">estimation_window</span>,
   mean_serial_interval <span class="op">=</span> <span class="va">mean_serial_interval</span>,
   std_serial_interval <span class="op">=</span> <span class="va">std_serial_interval</span>,

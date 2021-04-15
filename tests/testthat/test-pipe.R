@@ -11,10 +11,10 @@ test_that("smooth_deconvolve_estimate yields consistent results on a toy example
                           0.001,0.001)
 
   estimates <- smooth_deconvolve_estimate(toy_incidence_data,
-                                         delay_distribution,
                                          smoothing_method = "LOESS",
                                          deconvolution_method = "Richardson-Lucy delay distribution",
                                          estimation_method = "EpiEstim sliding window",
+                                         delay_incubation = delay_distribution,
                                          estimation_window = 3,
                                          mean_serial_interval = 4.8,
                                          std_serial_interval  = 2.3,
@@ -53,21 +53,21 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
 
   estimates <- get_block_bootstrapped_estimate(toy_incidence_data,
                                                N_bootstrap_replicates = 100,
-                                          smoothing_method = "LOESS",
-                                          deconvolution_method = "Richardson-Lucy delay distribution",
-                                          estimation_method = "EpiEstim sliding window",
-                                          distribution_incubation = delay_incubation,
-                                          distribution_onset_to_report = delay_onset_to_report,
-                                          estimation_window = 3,
-                                          mean_serial_interval = 4.8,
-                                          std_serial_interval  = 2.3,
-                                          mean_Re_prior = 1,
-                                          ref_date = as.Date("2020-02-04"),
-                                          time_step = "day")
+                                              smoothing_method = "LOESS",
+                                              deconvolution_method = "Richardson-Lucy delay distribution",
+                                              estimation_method = "EpiEstim sliding window",
+                                              delay_incubation = delay_incubation,
+                                              delay_onset_to_report = delay_onset_to_report,
+                                              estimation_window = 3,
+                                              mean_serial_interval = 4.8,
+                                              std_serial_interval  = 2.3,
+                                              mean_Re_prior = 1,
+                                              ref_date = as.Date("2020-02-04"),
+                                              time_step = "day")
 
   estimated_R_mean <- estimates %>%
     dplyr::select(date, R_mean) %>%
-    na.omit %>%
+    stats::na.omit() %>%
     dplyr::group_by(date) %>%
     dplyr::summarise(mean_R = mean(R_mean)) %>%
     dplyr::ungroup() %>%

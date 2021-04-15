@@ -1,17 +1,12 @@
+#TODO reorganize files between utils-deconvolution, utils-convolution, utils-distribution
+
 #TODO write deconvolution step with the convolution of a matrix with vector. That should apply to Swiss non-onset data
+
 #TODO write deconvolution step that takes into account that data is onset data (when it is). That should apply to Swiss onset data
 
-#TODO add a function to deal with empirical delay distribution and build delay distribution matrix
-## make sure it can deal with Spanish data specificity
+#TODO add a way to deal with Spanish data specificity
 
-#TODO transform make_ecdf_from_two_gammas into a more general function summing draws from n distributions (allow type of distribution to be changed)
-
-#TODO make make_ecdf_from_empirical_data_and_gamma more general, draws can be from different types of distribution.
-## Check why gamma_draws is an input and not drawn inside the function
-## Check why not Vectorized ecdf output as in make_ecdf_from_two_gammas
-
-#TODO think about whether utilities like '.get_matrix_from_single_delay_distr' need to be exported
-
+#TODO add way to pass list of distributions in pipe
 
 #' Make square delay distribution matrix from vector of delay distributions.
 #'
@@ -108,146 +103,6 @@
   return(augmented_matrix)
 }
 
-
-#TODO fill documentation
-#' Title
-#'
-#' @param vector_a numeric
-#' @param vector_b numeric
-#'
-#' @return numeric vector
-.convolve_delay_distribution_vectors <- function(vector_a, vector_b){
-  # Right-pad vectors with zeroes to bring them to the same length
-
-  final_length <- length(vector_b) + length(vector_a)
-
-  vector_a <- c(vector_a, rep(0,times = final_length - length(vector_a)))
-  vector_b <- c(vector_b, rep(0,times = final_length - length(vector_b)))
-
-  vector_c <- rep(0, times = final_length)
-
-  for(i in 1 : final_length) {
-    reversed_vector_b <- rev(vector_b[1:i]) # Reverse vector_b truncated at index i
-    reversed_vector_b <- c(reversed_vector_b, rep(0, times = final_length - i)) # Right-pad with zeroes
-    vector_c[i] <- vector_a %*% reversed_vector_b # Compute dot product between vectors
-  }
-
-  return(vector_c)
-}
-
-# TODO document function and document delay distribution matrix format
-# TODO if vector_first = FALSE is used, need to consider doing an operation equivalent to .left_augment_delay_distribution
-#' Title
-#'
-#' @param vector_a
-#' @param matrix_b
-#' @param vector_first a boolean. Delay described in vector is applied before delay described in matrix
-#'
-#' @return square matrix. Delay distribution matrix
-.convolve_delay_distribution_vector_with_matrix <- function(vector_a, matrix_b, vector_first = TRUE){
-
-  #TODO add check that matrix_b is square
-
-  if( vector_first ) {
-    n_col_augment <- .get_initial_deconvolution_shift(vector_a)
-    matrix_b <- .left_augment_delay_distribution(delay_distribution_matrix = matrix_b,
-                                                 n_col_augment = n_col_augment)
-  }
-
-   N <- nrow(matrix_b)
-   # Right-pad vector with zeroes to bring to same dimension as square matrix
-   vector_a <- c(vector_a, rep(0, times = max(0, N - length(vector_a))))
-
-   # Initialize result matrix
-   convolved_matrix <- matrix(0, nrow = N, ncol = N)
-
-   # Iterate over columns (each column represents the delay distribution on a specific date)
-   for(j in 1:N) {
-     # Iterate over rows
-      for(i in 0 : (N - j)) {
-        if(vector_first) { # Take corresponding row in matrix_b
-          # The row is left-truncated (only j to N indices) so as to start at same date (date with index j) as column in convolved matrix
-          matrix_b_elements <- matrix_b[i + j, j : (j + i) ]
-        } else { # Take corresponding column in matrix_b (and revert it)
-          matrix_b_elements <- matrix_b[(i + j) : j, j]
-        }
-
-        truncated_vector_a <- vector_a[1:(i+1)]
-        convolved_matrix[i + j, j] <- truncated_vector_a %*% matrix_b_elements
-      }
-   }
-
-   return(convolved_matrix)
-}
-
-# TODO document function and document delay distribution matrix format
-# TODO if used, need to consider if left augmentation is required like for .convolve_delay_distribution_vector_with_matrix
-#' Title
-#'
-#' Note that this convolution operation is not commutative!
-#' @param matrix_a square numeric matrix
-#' @param matrix_b square numeric matrix
-#'
-#' @return square matrix. Convolved matrix of time-varying delays.
-.convolve_delay_distribution_matrices <- function(matrix_a, matrix_b){
-  #TODO return error if matrices are not square or not of the same size
-
-  N <- nrow(matrix_a)
-  # Initialize result matrix
-  convolved_matrix <- matrix(0, nrow = N, ncol = N)
-
-  # Iterate over columns (each column represents the delay distribution on a specific date)
-  for(j in 1:N) {
-    # Iterate over rows
-    for(i in 0 : (N - j)) {
-
-      # Take truncated column of matrix_a (first delay applied)
-      matrix_a_elements <- matrix_a[ j : (j + i), j ]
-      # Take truncated row of matrix_b (second delay applied)
-      matrix_b_elements <- matrix_b[i + j, j : (j + i) ]
-
-      convolved_matrix[i + j, j] <- matrix_a_elements %*% matrix_b_elements
-    }
-  }
-  return(convolved_matrix)
-
-}
-
-
-#TODO fill in and update documentation
-#' Build a waiting time distribution from the convolution of two gamma distributions
-#'
-#' @param distribution_incubation list. delay between infection and symptom onset
-#' @param distribution_onset_to_report list. delay between symtom onset and observation
-#' @param max_quantile numeric. between 0 and 1.
-#'
-#' @return vector specifying the CDF between each time step of the waiting time distribution.
-#' @export
-#'
-#' @examples
-#' #TODO add examples
-combine_incubation_with_reporting_delay <- function(distribution_incubation,
-                                                    distribution_onset_to_report,
-                                                    max_quantile = 0.9999,
-                                                    incubation_offset_by_one = FALSE,
-                                                    onset_to_report_offset_by_one = FALSE) {
-
-
-  delay_distribution_incubation <- build_delay_distribution(distribution = distribution_incubation,
-                                                            max_quantile = max_quantile,
-                                                            offset_by_one = incubation_offset_by_one)
-
-  delay_distribution_onset_to_report <- build_delay_distribution(distribution = distribution_onset_to_report,
-                                                                 max_quantile = max_quantile,
-                                                                 offset_by_one = onset_to_report_offset_by_one)
-
-
-  convolved_output <- .convolve_delay_distribution_vectors(delay_distribution_incubation,
-                                                           delay_distribution_onset_to_report)
-
-  return(convolved_output)
-}
-
 #TODO document
 #TODO add options to take median, mode, mean...
 #' Get initial shift for deconvolution step
@@ -277,7 +132,7 @@ combine_incubation_with_reporting_delay <- function(distribution_incubation,
 #' @param empirical_delays tibble. format to be specified
 #' @param start_date Date. First date of incidence data
 #' @param n_report_time_steps integer. Length of incidence time series
-#' @param time_step string. "day", "X days", "week", "month"... (see \link{\code{seq.Date}} for details)
+#' @param time_step string. "day", "X days", "week", "month"... (see \code{\link[base]{seq.Date}} for details)
 #' @param min_number_cases integer. Minimal number of cases to build empirical distribution from
 #' @param upper_quantile_threshold numeric. Between 0 and 1. TODO add details
 #'
@@ -287,20 +142,33 @@ combine_incubation_with_reporting_delay <- function(distribution_incubation,
 #' @examples
 #' #TODO add example
 get_matrix_from_empirical_delay_distr <- function(empirical_delays,
-                                                  start_date,
                                                   n_report_time_steps,
+                                                  start_date = NULL,
                                                   time_step = "day",
-                                                  min_number_cases = 300,
-                                                  upper_quantile_threshold = 0.99){
+                                                  min_number_cases = NULL,
+                                                  upper_quantile_threshold = 0.99,
+                                                  min_number_cases_fraction = 0.05,
+                                                  min_min_number_cases = 10){
 
   ##TODO need to account for offset if onset data (or not onset data?)
   ##TODO reconsider if we make gamma fit (allow to turn it off, or to use different distribution)
+
+  if(is.null(start_date)) {
+    start_date <- min(dplyr::pull(empirical_delays, .data$event_date), na.rm = TRUE)
+  }
 
   all_report_dates <- seq.Date(from = start_date, by = time_step, length.out = n_report_time_steps)
 
   # Ignore the delay data that is posterior to the last incidence report date.
   empirical_delays <- empirical_delays %>%
     dplyr::filter(event_date <= max(all_report_dates))
+
+  # Set the 'min_number_cases' parameter if not set by the user
+  #TODO make this 'min_number_cases' depend on the length of the time_series.
+  if( is.null(min_number_cases) ){
+    min_number_cases <- min_number_cases_fraction * nrow(empirical_delays)
+    min_number_cases <- max(min_number_cases, min_min_number_cases)
+  }
 
   # Find the threshold for right-truncation
   # No time-variation beyond this threshold due to the fraction of unsampled individuals when nearing the last sampling date
@@ -346,7 +214,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
     if( nrow(recent_counts) >= min_number_cases ) {
       # If enough data points before date of interest,
-      # take most recent observations before this date
+      # take most recent observations before this date.
 
       recent_counts_distribution <- recent_counts %>%
         dplyr::slice_head( n = min_number_cases )  %>%
@@ -386,5 +254,4 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
   return( delay_distribution_matrix )
 }
-
 

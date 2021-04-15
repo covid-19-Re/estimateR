@@ -59,23 +59,19 @@ estimation_window = 3
 
 ## End of user input
 
-# Build a vector containing the delay distribution
-delay_distribution <- combine_incubation_with_reporting_delay(
-  distribution_incubation = incubation,
-  distribution_onset_to_report = onset_to_report
-)
-
 toy_estimates <- smooth_deconvolve_estimate(toy_incidence_data,
-                                         delay_distribution,
-                                         smoothing_method = "LOESS",
-                                         deconvolution_method = "Richardson-Lucy delay distribution",
-                                         estimation_method = "EpiEstim sliding window",
-                                         estimation_window = estimation_window,
-                                         mean_serial_interval = mean_serial_interval,
-                                         std_serial_interval  = std_serial_interval,
-                                         output_Re_only = FALSE,
-                                         ref_date = date_first_data_point,
-                                         time_step = "day")
+  smoothing_method = "LOESS",
+  deconvolution_method = "Richardson-Lucy delay distribution",
+  estimation_method = "EpiEstim sliding window",
+  delay_incubation = incubation,
+  delay_onset_to_report = onset_to_report,
+  estimation_window = estimation_window,
+  mean_serial_interval = mean_serial_interval,
+  std_serial_interval  = std_serial_interval,
+  output_Re_only = FALSE,
+  ref_date = date_first_data_point,
+  time_step = "day"
+)
 
 head(toy_estimates, n = 20)
 ```

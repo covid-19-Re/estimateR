@@ -41,6 +41,7 @@ Imports:
     utils,
     fitdistrplus,
     magrittr,
+    rlang,
     tidyselect,
     plyr,
     tibble,

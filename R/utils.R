@@ -4,8 +4,12 @@
 
 #TODO make a utils function that converts individual module object into a tibble with a date
 
-#TODO clarify the language between module input object and module ouptut object
+#TODO clarify the language between module input object and module output object
 
+#TODO reorganize this file (maybe rename)
+
+# Useful operator
+`%!in%` <- Negate(`%in%`)
 
 #' Merge multiple module outputs into tibble
 #'
@@ -33,11 +37,8 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
                                                   output_name = names(output_list)[i])
                         })
 
-  # return(tibble_list)
-
   merged_outputs <- plyr::join_all(tibble_list, by='index', type='full') %>%
                       dplyr::arrange(index)
-  # return(merged_outputs)
 
   if( !is.null(ref_date) ) {
     dates <- seq.Date(from = ref_date + min(merged_outputs$index), by = time_step, along.with = merged_outputs$index)

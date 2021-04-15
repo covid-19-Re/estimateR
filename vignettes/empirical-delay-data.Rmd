@@ -37,10 +37,12 @@ generated_empirical_delays <- generate_delay_data(origin_date = start_date,
                     seed = seed)
 
 head(generated_empirical_delays, n = 10)
-```
+
+shape_incubation <- 3.2
+scale_incubation <- 1.3
+distribution_incubation <- list(name = "gamma", shape = shape_incubation, scale = scale_incubation)
 
 
-```{r}
 toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
                           77,78,113,102,134,165,183,
                           219,247,266,308,304,324,346,
@@ -49,57 +51,23 @@ toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
                           103,107,94,78,76,79,81,88,
                           94,99,106,114,123)
 
-smoothed_toy_incidence <- smooth_incidence(incidence_data = toy_incidence_data,
-                                          smoothing_method = "LOESS",
-                                           data_points_incl = 12)
-  
-```
-
-```{r}
-# Incubation period - gamma distribution parameters
-shape_incubation <- 3.2
-scale_incubation <- 1.3
-distribution_incubation <- list(name = "gamma", shape = shape_incubation, scale = scale_incubation)
-
-
-min_number_cases <- 20
-
-toy_infection_events <- deconvolve_using_empirical_delays(incidence_vector = smoothed_toy_incidence,
-                                  empirical_delay_data = generated_empirical_delays,
-                                  deconvolution_method = "Richardson-Lucy delay distribution",
-                                  distribution_incubation = distribution_incubation,
-                                  ref_date = start_date,
-                                  time_step = "day",
-                                  min_number_cases = min_number_cases)
-
-```
-
-TODO we could display a stepwise estimate here instead.
-```{r}
-# We specify these parameters in the same unit as the time steps in the original observation data. For instance, if the original data represents daily reports, the parameters below must be specified in days (this is the case in this toy example).
 mean_serial_interval <- 4.8
 std_serial_interval <- 2.3
 
-estimation_window <- 3 # The estimation window corresponds to the size of the sliding window used in EpiEstim (see help(estimate_Re) for additional details. Here, it is set to three days.
+estimation_window <- 3
 
-toy_Re_estimates <- estimate_Re(incidence_data = toy_infection_events,
-                              estimation_method = "EpiEstim sliding window",
-                              estimation_window = estimation_window, 
-                              mean_serial_interval = mean_serial_interval,
-                              std_serial_interval = std_serial_interval)
-```
-
-## Final result
-Finally, we merge the outputs of the different steps into a dataframe, along with a column for dates.
-```{r}
-  toy_results <- merge_outputs(
-      list("observed_incidence" = toy_incidence_data, # The LHS terms are arbitrary names for the output of each step.
-           "smoothed_incidence" = smoothed_toy_incidence,
-           "deconvolved_incidence" = toy_infection_events,
-           "R_mean" = toy_Re_estimates),
-      ref_date = as.Date("2020-02-24"), # The observation data starts on Feb 24th 2021.
-      time_step = "day")
-
-
-  head(toy_results)
+toy_estimates <- smooth_deconvolve_estimate(
+  toy_incidence_data,
+  smoothing_method = "LOESS",
+  deconvolution_method = "Richardson-Lucy delay distribution",
+  estimation_method = "EpiEstim sliding window",
+  delay_incubation = distribution_incubation,
+  delay_onset_to_report = generated_empirical_delays,
+  estimation_window = estimation_window,
+  mean_serial_interval = mean_serial_interval,
+  std_serial_interval  = std_serial_interval,
+  output_Re_only = FALSE,
+  ref_date = start_date,
+  time_step = "day"
+)
 ```

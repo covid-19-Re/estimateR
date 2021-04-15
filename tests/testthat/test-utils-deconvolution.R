@@ -1,3 +1,5 @@
+#TODO reorganize: check that all utilities tested are still in utils-deconvolution.R (create additional testing files otherwise and move tests there)
+
 #TODO TEST that:
 # 1) build_delay_distribution throws error when unsupported distribution_type is thrown in
 # and when unsuitable parameter values are thrown in (not numeric, or negative values for instance)
@@ -68,7 +70,7 @@ test_that(".convolve_delay_distribution_vectors returns correct output on a simp
   expect_equal(convolved_output, ref_convolved_output, tolerance = 1E-4)
 })
 
-test_that(".combine_incubation_with_reporting_delay returns same output as empirical method of convoluting gammas", {
+test_that("convolve_delay_inputs returns same output as empirical method of convoluting gammas", {
 
   shape_incubation = 3.2
   scale_incubation = 1.3
@@ -84,9 +86,8 @@ test_that(".combine_incubation_with_reporting_delay returns same output as empir
                                 shape = shape_onset_to_report,
                                 scale = scale_onset_to_report)
 
-  convolved_output <- combine_incubation_with_reporting_delay(distribution_incubation = incubation_delay,
-                                                              distribution_onset_to_report = onset_to_report_delay,
-                                                              max_quantile = 0.9999)
+  convolved_output <- convolve_delay_inputs(delay_incubation = incubation_delay,
+                                            delay_onset_to_report = onset_to_report_delay)
 
   empirical_convolution_result <- c(0,9e-04,0.00947,0.03214,0.06438,0.09523,0.11566,
                                     0.12255,0.11742,0.1043,0.08721,0.06951,0.05329,

@@ -6,21 +6,23 @@
 \usage{
 get_matrix_from_empirical_delay_distr(
   empirical_delays,
-  start_date,
   n_report_time_steps,
+  start_date = NULL,
   time_step = "day",
-  min_number_cases = 300,
-  upper_quantile_threshold = 0.99
+  min_number_cases = NULL,
+  upper_quantile_threshold = 0.99,
+  min_number_cases_fraction = 0.05,
+  min_min_number_cases = 10
 )
 }
 \arguments{
 \item{empirical_delays}{tibble. format to be specified}
 
-\item{start_date}{Date. First date of incidence data}
-
 \item{n_report_time_steps}{integer. Length of incidence time series}
 
-\item{time_step}{string. "day", "X days", "week", "month"... (see \link{\code{seq.Date}} for details)}
+\item{start_date}{Date. First date of incidence data}
+
+\item{time_step}{string. "day", "X days", "week", "month"... (see \code{\link[base]{seq.Date}} for details)}
 
 \item{min_number_cases}{integer. Minimal number of cases to build empirical distribution from}
 

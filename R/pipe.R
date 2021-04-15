@@ -1,20 +1,10 @@
 #TODO build pipe_functions that reads in "configuration" file
 
-#TODO decide if "combine_incubation_with_reporting_delay" is done inside or outside of pipes
-
 #TODO build way to pass extra parameters to functions inside pipe (with ...)
 
 #TODO add a utility to summarize the uncertainty in the get_block_bootstrapped_estimate pipe
 
 #TODO generalize get_block_bootstrapped_estimate to any bootstrapping that works the same way (parallel estimation and summary as a final step)
-
-#TODO maybe change way of specifying input delay distribution
-
-#TODO outsource delay distribution building to utility function (generalizing to more than gamma distributions, separated )
-
-#TODO place deconvolution pipes into deconvolve module
-
-#TODO write piping that takes distributions for delay or already prepared vector.
 
 #' Estimate Re from incidence and estimate uncertainty with block-bootstrapping
 #'
@@ -35,13 +25,11 @@
 #' #TODO clarify input
 #' @param incidence_vector numeric
 #' @param N_bootstrap_replicates integer. Number of bootstrap samples.
-#' @param shape_incubation numeric. Shape parameter of the gamma distribution representing the delay between infection and symptom onset.
-#' @param scale_incubation numeric. Scale parameter of the gamma distribution representing the delay between infection and symptom onset.
-#' @param shape_onset_to_report numeric. Shape parameter of the gamma distribution representing the delay between symptom onset and observation.
-#' @param scale_onset_to_report numeric. Scale parameter of the gamma distribution representing the delay between symptom onset and observation.
 #' @param smoothing_method string. see \code{\link{smooth_incidence}}.
 #' @param deconvolution_method string. see \code{\link{deconvolve_incidence}}
 #' @param estimation_method string. see \code{\link{estimate_Re}}
+#' @param delay_incubation #TODO fill in doc
+#' @param delay_onset_to_report #TODO fill in doc
 #' @param estimation_window integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.
 #'  see \code{\link{estimate_Re}}
 #' @param mean_serial_interval numeric. see \code{\link{estimate_Re}}
@@ -62,8 +50,8 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                             smoothing_method = "LOESS",
                                             deconvolution_method = "Richardson-Lucy delay distribution",
                                             estimation_method = "EpiEstim sliding window",
-                                            distribution_incubation,
-                                            distribution_onset_to_report = list(name = "gamma", shape = 0, scale = 0),
+                                            delay_incubation,
+                                            delay_onset_to_report = c(1.0),
                                             estimation_window = 3,
                                             mean_serial_interval = 4.8,
                                             std_serial_interval  = 2.3,
@@ -73,14 +61,17 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                             verbose = FALSE){
 
 
-  delay_distribution_vector <- combine_incubation_with_reporting_delay(distribution_incubation = distribution_incubation,
-                                                                       distribution_onset_to_report = distribution_onset_to_report)
+
+  # Prepare delay distribution vector or matrix early on as it spares the need to redo the same operation for each bootstrap replicate
+  total_delay_distribution <- convolve_delay_inputs(delay_incubation,
+                                                    delay_onset_to_report,
+                                                    n_report_time_steps = length(incidence_vector))
 
   original_result <- smooth_deconvolve_estimate(incidence_vector,
-                                                delay_distribution_vector,
                                                 smoothing_method = smoothing_method,
                                                 deconvolution_method = deconvolution_method,
                                                 estimation_method = estimation_method,
+                                                delay_incubation = total_delay_distribution,
                                                 estimation_window = estimation_window,
                                                 mean_serial_interval = mean_serial_interval,
                                                 std_serial_interval  = std_serial_interval,
@@ -100,10 +91,10 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                                       bootstrapping_method = "non-parametric block boostrap")
 
     bootstrapping_result <- smooth_deconvolve_estimate(bootstrapped_incidence,
-                                                       delay_distribution_vector,
                                                        smoothing_method = smoothing_method,
                                                        deconvolution_method = deconvolution_method,
                                                        estimation_method = estimation_method,
+                                                       delay_incubation = total_delay_distribution,
                                                        mean_serial_interval = mean_serial_interval,
                                                        std_serial_interval  = std_serial_interval,
                                                        estimation_window = estimation_window,
@@ -122,6 +113,7 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 
 
 #TODO rename function to remove deconvolution word
+#TODO update doc
 #' Estimate Re from incidence data
 #'
 #' This pipe function combines a smoothing step using (to remove noise from the original observations),
@@ -135,10 +127,11 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 #'#TODO clarify input
 #'
 #' @param incidence_vector numeric
-#' @param delay_distribution_vector see \code{\link{deconvolve_incidence}}
 #' @param smoothing_method string. see \code{\link{smooth_incidence}}.
 #' @param deconvolution_method string. see \code{\link{deconvolve_incidence}}
 #' @param estimation_method string. see \code{\link{estimate_Re}}
+#' @param delay_incubation
+#' @param delay_onset_to_report
 #' @param estimation_window integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.
 #'  see \code{\link{estimate_Re}}
 #' @param mean_serial_interval numeric. see \code{\link{estimate_Re}}
@@ -156,10 +149,11 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 #' @examples
 #' #TODO add examples
 smooth_deconvolve_estimate <- function(incidence_vector,
-                                       delay_distribution_vector,
                                        smoothing_method = "LOESS",
                                        deconvolution_method = "Richardson-Lucy delay distribution",
                                        estimation_method = "EpiEstim sliding window",
+                                       delay_incubation,
+                                       delay_onset_to_report = c(1.0),
                                        estimation_window = 3,
                                        mean_serial_interval = 4.8,
                                        std_serial_interval  = 2.3,
@@ -174,7 +168,10 @@ smooth_deconvolve_estimate <- function(incidence_vector,
 
   deconvolved_incidence <- deconvolve_incidence(incidence_data = smoothed_incidence,
                                                 deconvolution_method = deconvolution_method,
-                                                delay_distribution = delay_distribution_vector,
+                                                delay_incubation = delay_incubation,
+                                                delay_onset_to_report = delay_onset_to_report,
+                                                start_date = ref_date,
+                                                time_step = time_step,
                                                 verbose = verbose)
 
   estimated_Re <- estimate_Re(incidence_data = deconvolved_incidence,
@@ -197,52 +194,4 @@ smooth_deconvolve_estimate <- function(incidence_vector,
 
     return(merged_results)
   }
-
-}
-
-
-#TODO test
-#TODO document
-#TODO look into how we could pass (...) arguments to 'deconvolve_incidence' function as well as 'get_matrix_from_empirical_delay_distr'
-#TODO maybe this function should be in the deconvolution module directly?
-#' Title
-#'
-#' @param incidence_vector
-#' @param empirical_delay_data
-#' @param distribution_incubation
-#' @param deconvolution_method
-#' @param ref_date
-#' @param time_step
-#' @param ...
-#'
-#' @return
-#' @export
-#'
-#' @examples
-deconvolve_using_empirical_delays <- function(incidence_vector,
-                                              empirical_delay_data,
-                                              distribution_incubation,
-                                              deconvolution_method = "Richardson-Lucy delay distribution",
-                                              ref_date,
-                                              time_step = "day",
-                                              ...){
-
-  empirical_delays_matrix <- get_matrix_from_empirical_delay_distr(empirical_delays = empirical_delay_data,
-                                        start_date = ref_date,
-                                        n_report_time_steps = .get_input_length(incidence_vector),
-                                        time_step = time_step,
-                                        ...)
-
-  incubation_period <- build_delay_distribution(distribution_incubation)
-
-  # Combine incubation delay with delay from symptom onset to observation
-  total_reporting_delay_matrix <- .convolve_delay_distribution_vector_with_matrix(incubation_period,
-                                                                           empirical_delays_matrix,
-                                                                           vector_first = TRUE)
-
-  deconvolved_incidence <- deconvolve_incidence( incidence_data = incidence_vector,
-                        deconvolution_method = deconvolution_method,
-                        delay_distribution = total_reporting_delay_matrix )
-
-  return(deconvolved_incidence)
 }

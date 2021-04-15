@@ -6,10 +6,11 @@
 \usage{
 smooth_deconvolve_estimate(
   incidence_vector,
-  delay_distribution_vector,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
+  delay_incubation,
+  delay_onset_to_report = c(1),
   estimation_window = 3,
   mean_serial_interval = 4.8,
   std_serial_interval = 2.3,
@@ -22,8 +23,6 @@ smooth_deconvolve_estimate(
 }
 \arguments{
 \item{incidence_vector}{numeric}
-
-\item{delay_distribution_vector}{see \code{\link{deconvolve_incidence}}}
 
 \item{smoothing_method}{string. see \code{\link{smooth_incidence}}.}
 

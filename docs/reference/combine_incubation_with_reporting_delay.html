@@ -128,12 +128,8 @@
     </div>
 
     <pre class="usage"><span class='fu'>combine_incubation_with_reporting_delay</span><span class='op'>(</span>
-  <span class='va'>parm1_incubation</span>,
-  <span class='va'>parm2_incubation</span>,
-  <span class='va'>parm1_onset_to_report</span>,
-  <span class='va'>parm2_onset_to_report</span>,
-  distribution_type_incubation <span class='op'>=</span> <span class='st'>"gamma"</span>,
-  distribution_type_onset_to_report <span class='op'>=</span> <span class='st'>"gamma"</span>,
+  <span class='va'>distribution_incubation</span>,
+  <span class='va'>distribution_onset_to_report</span>,
   max_quantile <span class='op'>=</span> <span class='fl'>0.9999</span>,
   incubation_offset_by_one <span class='op'>=</span> <span class='cn'>FALSE</span>,
   onset_to_report_offset_by_one <span class='op'>=</span> <span class='cn'>FALSE</span>
@@ -143,28 +139,12 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>parm1_incubation</th>
-      <td><p>numeric. Shape parameter of the gamma distribution representing the delay between infection and symptom onset.</p></td>
+      <th>distribution_incubation</th>
+      <td><p>list. delay between infection and symptom onset</p></td>
     </tr>
     <tr>
-      <th>parm2_incubation</th>
-      <td><p>numeric. Scale parameter of the gamma distribution representing the delay between infection and symptom onset.</p></td>
-    </tr>
-    <tr>
-      <th>parm1_onset_to_report</th>
-      <td><p>numeric. Shape parameter of the gamma distribution representing the delay between symtom onset and observation.</p></td>
-    </tr>
-    <tr>
-      <th>parm2_onset_to_report</th>
-      <td><p>numeric. Scale parameter of the gamma distribution representing the delay between symtom onset and observation.</p></td>
-    </tr>
-    <tr>
-      <th>distribution_type_incubation</th>
-      <td><p>string.</p></td>
-    </tr>
-    <tr>
-      <th>distribution_type_onset_to_report</th>
-      <td><p>string.</p></td>
+      <th>distribution_onset_to_report</th>
+      <td><p>list. delay between symtom onset and observation</p></td>
     </tr>
     <tr>
       <th>max_quantile</th>

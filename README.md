@@ -53,65 +53,61 @@ estimation_window = 3
 
 ## End of user input
 
-# Build a vector containing the delay distribution
-delay_distribution <- combine_incubation_with_reporting_delay(
-  distribution_incubation = incubation,
-  distribution_onset_to_report = onset_to_report
-)
-
 toy_estimates <- smooth_deconvolve_estimate(toy_incidence_data,
-                                         delay_distribution,
-                                         smoothing_method = "LOESS",
-                                         deconvolution_method = "Richardson-Lucy delay distribution",
-                                         estimation_method = "EpiEstim sliding window",
-                                         estimation_window = estimation_window,
-                                         mean_serial_interval = mean_serial_interval,
-                                         std_serial_interval  = std_serial_interval,
-                                         output_Re_only = FALSE,
-                                         ref_date = date_first_data_point,
-                                         time_step = "day")
+  smoothing_method = "LOESS",
+  deconvolution_method = "Richardson-Lucy delay distribution",
+  estimation_method = "EpiEstim sliding window",
+  delay_incubation = incubation,
+  delay_onset_to_report = onset_to_report,
+  estimation_window = estimation_window,
+  mean_serial_interval = mean_serial_interval,
+  std_serial_interval  = std_serial_interval,
+  output_Re_only = FALSE,
+  ref_date = date_first_data_point,
+  time_step = "day"
+)
 
 head(toy_estimates, n = 20)
 #>          date observed_incidence smoothed_incidence deconvolved_incidence
-#> 1  2020-02-16                 NA                 NA              18.43658
-#> 2  2020-02-17                 NA                 NA              21.98975
-#> 3  2020-02-18                 NA                 NA              25.79057
-#> 4  2020-02-19                 NA                 NA              30.33145
-#> 5  2020-02-20                 NA                 NA              36.10225
-#> 6  2020-02-21                 NA                 NA              43.46936
-#> 7  2020-02-22                 NA                 NA              52.48495
-#> 8  2020-02-23                 NA                 NA              63.25370
-#> 9  2020-02-24                  4           17.75345              75.80899
-#> 10 2020-02-25                  9           21.35431              90.01547
-#> 11 2020-02-26                 19           25.29413             105.42380
-#> 12 2020-02-27                 14           30.08292             121.78325
-#> 13 2020-02-28                 36           36.23071             139.21148
-#> 14 2020-02-29                 16           44.08374             157.84799
-#> 15 2020-03-01                 39           53.55827             177.83487
-#> 16 2020-03-02                 27           64.51933             196.19681
-#> 17 2020-03-03                 46           76.83199             210.77046
-#> 18 2020-03-04                 77           90.36127             222.94616
-#> 19 2020-03-05                 78          104.73262             234.19189
-#> 20 2020-03-06                113          119.79569             246.07441
+#> 1  2020-02-16                 NA                 NA              18.43639
+#> 2  2020-02-17                 NA                 NA              21.98931
+#> 3  2020-02-18                 NA                 NA              25.78989
+#> 4  2020-02-19                 NA                 NA              30.33052
+#> 5  2020-02-20                 NA                 NA              36.10101
+#> 6  2020-02-21                 NA                 NA              43.46775
+#> 7  2020-02-22                 NA                 NA              52.48302
+#> 8  2020-02-23                 NA                 NA              63.25173
+#> 9  2020-02-24                  4           17.75345              75.80742
+#> 10 2020-02-25                  9           21.35431              90.01481
+#> 11 2020-02-26                 19           25.29413             105.42458
+#> 12 2020-02-27                 14           30.08292             121.78595
+#> 13 2020-02-28                 36           36.23071             139.21664
+#> 14 2020-02-29                 16           44.08374             157.85615
+#> 15 2020-03-01                 39           53.55827             177.84666
+#> 16 2020-03-02                 27           64.51933             196.21270
+#> 17 2020-03-03                 46           76.83199             210.79070
+#> 18 2020-03-04                 77           90.36127             222.97111
+#> 19 2020-03-05                 78          104.73262             234.22213
+#> 20 2020-03-06                113          119.79569             246.11074
 #>      R_mean
 #> 1        NA
 #> 2        NA
 #> 3        NA
 #> 4        NA
-#> 5  4.454238
-#> 6  3.174874
-#> 7  2.664220
-#> 8  2.443137
-#> 9  2.338135
-#> 10 2.274430
-#> 11 2.215192
-#> 12 2.145607
-#> 13 2.065729
-#> 14 1.983157
-#> 15 1.905623
-#> 16 1.826564
-#> 17 1.735650
-#> 18 1.632170
-#> 19 1.528527
-#> 20 1.440842
+#> 5  4.454175
+#> 6  3.174828
+#> 7  2.664187
+#> 8  2.443120
+#> 9  2.338139
+#> 10 2.274462
+#> 11 2.215251
+#> 12 2.145688
+#> 13 2.065824
+#> 14 1.983260
+#> 15 1.905728
+#> 16 1.826669
+#> 17 1.735752
+#> 18 1.632269
+#> 19 1.528623
+#> 20 1.440937
 ```

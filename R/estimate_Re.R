@@ -1,3 +1,5 @@
+#TODO replace mean/std serial interval inputs by a single input combining the two
+
 #' Estimate effective reproductive number Re from incidence data
 #'
 #' The incidence data input should represent infections,
