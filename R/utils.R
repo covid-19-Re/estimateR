@@ -52,6 +52,7 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 }
 
 
+
 #' Transform input data into a module input object
 #'
 #' #TODO specify what format data can take
