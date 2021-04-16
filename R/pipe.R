@@ -61,7 +61,7 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                             verbose = FALSE){
 
 
-
+  .are_valid_argument_values(as.list(environment()))
   # Prepare delay distribution vector or matrix early on as it spares the need to redo the same operation for each bootstrap replicate
   total_delay_distribution <- convolve_delay_inputs(delay_incubation,
                                                     delay_onset_to_report,

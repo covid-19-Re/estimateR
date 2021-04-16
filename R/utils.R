@@ -18,7 +18,7 @@
 #' @param string_user_input string containing the value that the user passed for the tested parameter
 #' @param parameter_name string containing the name of the parameter to be tested
 #'
-#' @return a boolean value. (TRUE if string_user_input is an accepted value. Throws otherwise)
+#' @return a boolean value. (TRUE if string_user_input is an accepted value. Throws an error otherwise)
 # TODO maybe add "" or , in between accepted parameter values in error message
 .is_value_in_accepted_values_vector <- function(string_user_input, parameter_name){
   if(!is.character(string_user_input)){
@@ -35,7 +35,7 @@
 #' @param string_user_input string containing the value that the user passed for the tested parameter
 #' @param parameter_name string containing the name of the parameter to be tested
 #' 
-#' @return a boolean value. (TRUE if string_user_input is an accepted time_step. Throws otherwise)
+#' @return a boolean value. (TRUE if string_user_input is an accepted time_step. Throws an error otherwise)
 #' An accepted time_step is considered to be: <<A character string, containing one of "day", "week", "month", "quarter" or "year". This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>> (from https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date)
 .is_value_valid_time_step <- function(string_user_input, parameter_name){
   if(!is.character(string_user_input)){
@@ -293,7 +293,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 
 #' Utility function that checks that the values the user passed when calling a function are valid
 #' Returns TRUE if all checks were passed.
-#' 
+#' @param user_inputs list of all arguments with which the tested function was called (can be obtain via "as.list(environment()")
 #' 
 #' @return TRUE if all checks were passed. Throws an error otherwise
 .are_valid_argument_values <- function(user_inputs){
