@@ -32,7 +32,8 @@ deconvolve_incidence <- function( incidence_data,
                                   min_number_cases = NULL,
                                   simplify_output = TRUE,
                                   ... ) {
-
+  
+  .are_valid_argument_values(as.list(environment()))
   input <- .get_module_input(incidence_data)
 
   #TODO generalize this to a list of delay inputs

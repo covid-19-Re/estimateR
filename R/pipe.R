@@ -163,6 +163,7 @@ smooth_deconvolve_estimate <- function(incidence_vector,
                                        time_step = "day",
                                        verbose = FALSE) {
 
+  .are_valid_argument_values(as.list(environment()))
   smoothed_incidence <- smooth_incidence(incidence_data = incidence_vector,
                                          smoothing_method = smoothing_method)
 

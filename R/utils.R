@@ -11,6 +11,58 @@
 # Useful operator
 `%!in%` <- Negate(`%in%`)
 
+
+
+#' Utility function that checks if a specific user given parameter value is among the accepted ones, in which case it returns TRUE
+#' Throws an error otherwise.
+#' @param string_user_input string containing the value that the user passed for the tested parameter
+#' @param parameter_name string containing the name of the parameter to be tested
+#'
+#' @return a boolean value. (TRUE if string_user_input is an accepted value. Throws otherwise)
+# TODO maybe add "" or , in between accepted parameter values in error message
+.is_value_in_accepted_values_vector <- function(string_user_input, parameter_name){
+  if(!is.character(string_user_input)){
+    stop(paste("Expected parameter", parameter_name, "to be a string."))
+  }
+  if(!(string_user_input %in% accepted_parameter_value[[parameter_name]])){
+    stop(paste("Expected parameter", parameter_name, "to have one of the following values:", toString(accepted_parameter_value[[parameter_name]]),"."))
+  }
+  return(TRUE)
+}
+
+#' Utility function that checks if a specific user given parameter value an accepted time_step, in which case it returns TRUE
+#' Throws an error otherwise.
+#' @param string_user_input string containing the value that the user passed for the tested parameter
+#' @param parameter_name string containing the name of the parameter to be tested
+#' 
+#' @return a boolean value. (TRUE if string_user_input is an accepted time_step. Throws otherwise)
+#' An accepted time_step is considered to be: <<A character string, containing one of "day", "week", "month", "quarter" or "year". This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>> (from https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date)
+.is_value_valid_time_step <- function(string_user_input, parameter_name){
+  if(!is.character(string_user_input)){
+    stop(paste("Expected parameter", parameter_name, "to be a string."))
+  }
+  is_valid_time_step <- grepl("^([-+]?\\d+ )?(day|week|month|quarter|year)s?$", string_user_input)
+  if(!is_valid_time_step){
+    stop(paste("Expected parameter", parameter_name, "to be a character string, containing one of \"day\", \"week\", \"month\", \"quarter\" or \"year\". This can optionally be preceded by a (positive or negative) integer and a space, or followed by \"s\"."))
+  }
+  return(TRUE)
+}
+
+# List containing testing functions for each parameter tested. 
+# The function is going to be called using two parameters: string_user_input and parameter_name, as passed to .is_valid_string_input() 
+# Each function returns TRUE if the user input is accepted, and THROWS AN ERROR otherwise
+tester_functions_for_parameters <- list(smoothing_method = .is_value_in_accepted_values_vector,
+                                        deconvolution_method = .is_value_in_accepted_values_vector,
+                                        estimation_method = .is_value_in_accepted_values_vector,
+                                        time_step = .is_value_valid_time_step,
+                                        bootstrapping_method = .is_value_in_accepted_values_vector)
+
+#List containing predefined accepted string inputs for exported functions, for parameters for which validity is tested using the.is_value_in_accepted_values_vector() function
+accepted_parameter_value <- list(smoothing_method = c("LOESS"),
+                                 deconvolution_method = c("Richardson-Lucy delay distribution"),
+                                 estimation_method = c("EpiEstim sliding window"),
+                                 bootstrapping_method = c("non-parametric block boostrap"))
+
 #' Merge multiple module outputs into tibble
 #'
 #' Output tibble from list of unsynced module outputs, with an optional date reference.
@@ -50,7 +102,6 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
 
   return(merged_outputs)
 }
-
 
 
 #' Transform input data into a module input object
@@ -240,5 +291,20 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   cat(paste0("c(",paste(round(a, digits = digits), collapse=","), ")"))
 }
 
+#' Utility function that checks that the values the user passed when calling a function are valid
+#' Returns TRUE if all checks were passed.
+#' 
+#' 
+#' @return TRUE if all checks were passed. Throws an error otherwise
+.are_valid_argument_values <- function(user_inputs){
+  for(parameter_name in names(user_inputs)){
+    if(parameter_name %in% names(tester_functions_for_parameters)){ #if a tester function was defined in the tester_functions_for_parameters list
+      string_user_input <- user_inputs[[parameter_name]]
+      tester_function <- tester_functions_for_parameters[[parameter_name]]
+      tester_function(string_user_input, parameter_name)
+    }
+  }
+  return(TRUE)
+}
 
 

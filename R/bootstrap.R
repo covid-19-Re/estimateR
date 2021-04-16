@@ -25,7 +25,7 @@ get_bootstrap_replicate <- function( incidence_data,
                                      bootstrapping_method = "non-parametric block boostrap",
                                      simplify_output = TRUE,
                                      ... ) {
-
+  .are_valid_argument_values(as.list(environment()))
   input <- .get_module_input(incidence_data)
 
   if(bootstrapping_method == "non-parametric block boostrap") {

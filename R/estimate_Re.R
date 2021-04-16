@@ -24,6 +24,7 @@
 #' #TODO add examples
 estimate_Re <- function( incidence_data, estimation_method = "EpiEstim sliding window", simplify_output = TRUE, ... ) {
 
+  .are_valid_argument_values(as.list(environment()))
   input <- .get_module_input(incidence_data)
 
   if(estimation_method == "EpiEstim sliding window") {
