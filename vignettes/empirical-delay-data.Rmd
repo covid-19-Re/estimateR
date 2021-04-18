@@ -18,6 +18,7 @@ TODO there's a lot of work to do on this vignette.
 
 ```{r setup}
 library(estimateR)
+library(ggplot2)
 ```
 
 Aggregated case data for the Hong Kong COVID-19 epidemic.
@@ -70,4 +71,17 @@ HK_estimates <- smooth_deconvolve_estimate(
   ref_date = start_date,
   time_step = "day"
 )
+
+head(HK_estimates)
 ```
+```{r, fig.width=7, fig.height=4}
+ggplot(HK_estimates, aes(x = date, y = R_mean)) +
+  geom_line(lwd=  1.1) +
+  scale_x_date(date_breaks = "1 month", 
+               date_labels = '%b\n%Y') +
+  ylab("Reproductive number") +
+  coord_cartesian(ylim = c(0, 3.7)) +
+  xlab("") +
+  theme_bw()
+```
+TODO add bit about noise in the observations and thus we need to bootstrap: add bootstrapping and plot results with uncertainty.
