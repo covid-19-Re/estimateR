@@ -40,7 +40,10 @@
     stop("'proper_class' must be a single string.")
   }
 
-  if (proper_class %!in% class(object)) {
+  # testing function
+  is_proper_class <- get(paste0("is.", proper_class), envir = loadNamespace("lubridate")) # need lubridate in case proper_class is Date
+
+  if (!is_proper_class(object)) {
     # deparse(substitute(...)) lets you do basically the reverse of get(..)
     stop(paste0(deparse(substitute(object)), " must be a ", proper_class, "."))
   }
@@ -102,7 +105,7 @@
 #'
 #' @return
 .check_is_empirical_delay_data <- function(delay){
-  if("data.frame" %in% class(delay)) {
+  if(is.data.frame(delay)) {
 
     if("event_date" %!in% colnames(delay)) {
       stop("Missing 'event_date' column in dataframe.")

@@ -39,6 +39,7 @@ Imports:
     tidyr,
     stats,
     utils,
+    lubridate,
     fitdistrplus,
     magrittr,
     rlang,
@@ -52,3 +53,5 @@ Suggests:
     rmarkdown
 Config/testthat/edition: 3
 VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)
