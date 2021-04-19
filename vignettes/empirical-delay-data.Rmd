@@ -18,51 +18,52 @@ TODO there's a lot of work to do on this vignette.
 
 ```{r setup}
 library(estimateR)
+library(ggplot2)
 ```
 
+Aggregated case data for the Hong Kong COVID-19 epidemic.
+This data is derived from the linelist published by the Hong Kong [Centre for Health Protection](https://www.chp.gov.hk).
 ```{r}
-#TODO instead of generating data in the vignette, load external data containing these simulated observations
-#Or we could use data from germany or HK
-start_date <- as.Date("2020-04-01")
-n_days <- 50
-delay_increase <- 1.5
-shape_initial_delay <- 6
-scale_initial_delay <- 1.5
-distribution_initial_delay <- list(name = "gamma", shape = shape_initial_delay, scale = scale_initial_delay)
-seed <- 734
-generated_empirical_delays <- generate_delay_data(origin_date = start_date,
-                    n_time_steps = n_days,
-                    delay_ratio_start_to_end = 1.5,
-                    distribution_initial_delay = distribution_initial_delay,
-                    seed = seed)
+# Hong Kong incidence data
+head(HK_incidence_data)
 
-head(generated_empirical_delays, n = 10)
+incidence <- HK_incidence_data$incidence
+start_date <- min(HK_incidence_data$report_date)
+```
 
+Dataset compiling the delay between onset of symptoms and case report for many cases reported in Hong Kong.
+This data is also derived from the linelist published by the Hong Kong [Centre for Health Protection](https://www.chp.gov.hk).
+```{r}
+# Delay between onset of symptom and case report
+head(HK_delay_data)
+```
+
+Other parameters required for Re estimation:
+```{r}
+# Delay between infection and onset of symptoms (incubation period)
 shape_incubation <- 3.2
 scale_incubation <- 1.3
-distribution_incubation <- list(name = "gamma", shape = shape_incubation, scale = scale_incubation)
+distribution_incubation <- list(name = "gamma", 
+                                shape = shape_incubation, 
+                                scale = scale_incubation)
 
-
-toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
-                          77,78,113,102,134,165,183,
-                          219,247,266,308,304,324,346,
-                          348,331,311,267,288,254,239,
-                          214,176,132,134,121,109,113,
-                          103,107,94,78,76,79,81,88,
-                          94,99,106,114,123)
-
+# Serial interval (for Re estimation)
 mean_serial_interval <- 4.8
 std_serial_interval <- 2.3
 
+# Sliding estimation window (for Re estimation)
 estimation_window <- 3
+```
 
-toy_estimates <- smooth_deconvolve_estimate(
-  toy_incidence_data,
+Estimation of the effective reproductive number through time
+```{r}
+HK_estimates <- smooth_deconvolve_estimate(
+  incidence,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
   delay_incubation = distribution_incubation,
-  delay_onset_to_report = generated_empirical_delays,
+  delay_onset_to_report = HK_delay_data,
   estimation_window = estimation_window,
   mean_serial_interval = mean_serial_interval,
   std_serial_interval  = std_serial_interval,
@@ -70,4 +71,17 @@ toy_estimates <- smooth_deconvolve_estimate(
   ref_date = start_date,
   time_step = "day"
 )
+
+head(HK_estimates)
 ```
+```{r, fig.width=7, fig.height=4}
+ggplot(HK_estimates, aes(x = date, y = R_mean)) +
+  geom_line(lwd=  1.1) +
+  scale_x_date(date_breaks = "1 month", 
+               date_labels = '%b\n%Y') +
+  ylab("Reproductive number") +
+  coord_cartesian(ylim = c(0, 3.7)) +
+  xlab("") +
+  theme_bw()
+```
+TODO add bit about noise in the observations and thus we need to bootstrap: add bootstrapping and plot results with uncertainty.
