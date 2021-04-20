@@ -32,4 +32,4 @@ HK_incidence_data <- HK_linelist_data %>%
                   fill = list(incidence = 0)) %>%
   dplyr::arrange(.data$report_date)
 
-usethis::use_data(HK_incidence_data, overwrite = TRUE, compress = "bzip2", version = 3)
+usethis::use_data(HK_incidence_data, overwrite = TRUE, compress = "bzip2", version = 2)

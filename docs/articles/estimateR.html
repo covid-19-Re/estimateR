@@ -271,6 +271,7 @@
   smoothing_method <span class="op">=</span> <span class="st">"LOESS"</span>,
   deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
   estimation_method <span class="op">=</span> <span class="st">"EpiEstim sliding window"</span>,
+  uncertainty_summary_method <span class="op">=</span> <span class="st">"original estimate - CI from bootstrap estimates"</span>,
   delay_incubation <span class="op">=</span> <span class="va">incubation</span>,
   delay_onset_to_report <span class="op">=</span> <span class="va">onset_to_report</span>,
   estimation_window <span class="op">=</span> <span class="va">estimation_window</span>,
@@ -281,21 +282,15 @@
 <span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">estimates</span><span class="op">)</span>
-<span class="co">#&gt;         date observed_incidence smoothed_incidence deconvolved_incidence</span>
-<span class="co">#&gt; 1 2020-02-16                 NA                 NA              18.43639</span>
-<span class="co">#&gt; 2 2020-02-17                 NA                 NA              21.98931</span>
-<span class="co">#&gt; 3 2020-02-18                 NA                 NA              25.78989</span>
-<span class="co">#&gt; 4 2020-02-19                 NA                 NA              30.33052</span>
-<span class="co">#&gt; 5 2020-02-20                 NA                 NA              36.10101</span>
-<span class="co">#&gt; 6 2020-02-21                 NA                 NA              43.46775</span>
-<span class="co">#&gt;     R_mean bootstrap_id</span>
-<span class="co">#&gt; 1       NA            0</span>
-<span class="co">#&gt; 2       NA            0</span>
-<span class="co">#&gt; 3       NA            0</span>
-<span class="co">#&gt; 4       NA            0</span>
-<span class="co">#&gt; 5 4.454175            0</span>
-<span class="co">#&gt; 6 3.174828            0</span></code></pre></div>
-<p>TODO add util to summarize the uncertainty from bootstrapping procedure.</p>
+<span class="co">#&gt; # A tibble: 6 x 4</span>
+<span class="co">#&gt;   date       Re_estimate CI_down CI_up</span>
+<span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;</span>
+<span class="co">#&gt; 1 2020-02-20        4.45    4.29  4.62</span>
+<span class="co">#&gt; 2 2020-02-21        3.17    3.02  3.33</span>
+<span class="co">#&gt; 3 2020-02-22        2.66    2.51  2.81</span>
+<span class="co">#&gt; 4 2020-02-23        2.44    2.27  2.62</span>
+<span class="co">#&gt; 5 2020-02-24        2.34    2.13  2.55</span>
+<span class="co">#&gt; 6 2020-02-25        2.27    2.04  2.51</span></code></pre></div>
 </div>
 </div>
   </div>

@@ -18,7 +18,7 @@ smooth_incidence(
 
 \item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
 
-\item{...}{}
+\item{...}{Additional parameters}
 }
 \value{
 module output. Smoothed incidence.
@@ -29,6 +29,7 @@ is implemented.
 }
 \details{
 #TODO specify input format
+#TODO figure out how to document additional parms for internal functions
 }
 \examples{
 #TODO add examples

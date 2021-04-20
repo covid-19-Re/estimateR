@@ -17,7 +17,7 @@
 module output. Smoothed incidence.
 }
 \description{
-see help page of \link{stats::loess} for more details.
+see help for \code{\link[stats]{loess}} for more details.
 }
 \details{
 #TODO add details on how data_points_incl relates to span.

@@ -34,4 +34,4 @@ HK_delay_data <- HK_linelist_data %>%
   dplyr::select(-.data$report_date) %>% # rearrange dataset
   dplyr::arrange(.data$event_date)
 
-usethis::use_data(HK_delay_data, overwrite = TRUE, compress = "xz", version = 3)
+usethis::use_data(HK_delay_data, overwrite = TRUE, compress = "xz", version = 2)
