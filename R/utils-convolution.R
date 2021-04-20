@@ -156,11 +156,16 @@
 #' @param delay_incubation
 #' @param delay_onset_to_report
 #' @param n_report_time_steps Integer value required if
+#' @param start_date
+#' @param time_step
+#' @param min_number_cases
+#' @param upper_quantile_threshold
 #'
 #' @return
 #' @export
 #'
 #' @examples
+#' #TODO add example
 convolve_delay_inputs <- function(delay_incubation,
                                   delay_onset_to_report,
                                   n_report_time_steps = 0,

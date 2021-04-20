@@ -6,10 +6,11 @@
 #' is implemented.
 #'
 #'#TODO specify input format
+#'#TODO figure out how to document additional parms for internal functions
 #' @param incidence_data numeric.
 #' @param smoothing_method string. Options are "LOESS".
 #' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
-#' @param ...
+#' @param ... Additional parameters
 #'
 #' @return module output. Smoothed incidence.
 #' @export
@@ -38,7 +39,7 @@ smooth_incidence <- function(incidence_data,
 
 #' LOESS smoothing function
 #'
-#' see help page of \link{stats::loess} for more details.
+#' see help for \code{\link[stats]{loess}} for more details.
 #'
 #' #TODO add details on how data_points_incl relates to span.
 #'
