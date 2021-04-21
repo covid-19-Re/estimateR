@@ -109,12 +109,13 @@
 }
 
 #TODO add details on the discretization
+#TODO add details on the distribution format
 #TODO fill documentation
 #TODO specify format of distribution: distribution <- list(name = "gamma", shape = 2, scale = 4)
 #TODO test (test that vector sums up to 1)
 #' Build a delay distribution vector
 #'
-#' @param distribution
+#' @param distribution distribution in list format e.g. list(name = "gamma", shape = 2, scale = 4)
 #' @param max_quantile numeric value between 0 and 1. TODO write what max_quantile does
 #' @param offset_by_one boolean. Gamma distribution comes from fit on (raw_data + 1) to accommodate zeroes in the raw_data.
 #'
@@ -127,6 +128,7 @@ build_delay_distribution <- function(distribution,
                                      max_quantile = 0.999,
                                      offset_by_one = FALSE){
 
+  #TODO revisit this return of false, maybe if fails we throw error always
   if(!.is_valid_distribution(distribution)) {
     return(0)
   }

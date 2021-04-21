@@ -192,6 +192,7 @@ estimates <- get_block_bootstrapped_estimate(toy_incidence_data,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
+  uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
   delay_incubation = incubation,
   delay_onset_to_report = onset_to_report,
   estimation_window = estimation_window,
@@ -203,8 +204,5 @@ estimates <- get_block_bootstrapped_estimate(toy_incidence_data,
 
 head(estimates)
 ```
-
-TODO add util to summarize the uncertainty from bootstrapping procedure.
-
 
 

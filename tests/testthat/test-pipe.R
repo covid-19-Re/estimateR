@@ -56,6 +56,7 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
                                               smoothing_method = "LOESS",
                                               deconvolution_method = "Richardson-Lucy delay distribution",
                                               estimation_method = "EpiEstim sliding window",
+                                              uncertainty_summary_method = "bagged mean - CI from bootstrap estimates",
                                               delay_incubation = delay_incubation,
                                               delay_onset_to_report = delay_onset_to_report,
                                               estimation_window = 3,
@@ -65,18 +66,26 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
                                               ref_date = as.Date("2020-02-04"),
                                               time_step = "day")
 
-  estimated_R_mean <- estimates %>%
-    dplyr::select(date, R_mean) %>%
-    stats::na.omit() %>%
-    dplyr::group_by(date) %>%
-    dplyr::summarise(mean_R = mean(R_mean)) %>%
-    dplyr::ungroup() %>%
-    dplyr::pull(mean_R)
-
-  reference_R_values <- c(4.981,3.595,3.027,2.766,2.619,2.508,2.408,
+  reference_R_mean_values <- c(4.981,3.595,3.027,2.766,2.619,2.508,2.408,
                           2.306,2.198,2.09,1.986,1.884,1.785,1.693,
                           1.604,1.518,1.437,1.362,1.29,1.22,1.153,
                           1.088,1.028,0.973,0.926,0.888,0.859,0.837,
                           0.819,0.804,0.787,0.769,0.75)
-  expect_equal(estimated_R_mean, reference_R_values, tolerance = 1E-1)
+
+  reference_CI_down_values <- c(4.66,3.297,2.74,2.488,2.365,2.294,2.231,
+                                2.149,2.051,1.95,1.854,1.767,1.687,1.61,
+                                1.535,1.46,1.384,1.311,1.241,1.172,1.104,
+                                1.039,0.975,0.912,0.854,0.803,0.762,0.727,
+                                0.697,0.667,0.634,0.597,0.556)
+
+  reference_CI_up_values <- c(5.053,3.666,3.096,2.832,2.676,2.552,2.449,
+                              2.359,2.27,2.182,2.088,1.982,1.873,1.769,
+                              1.669,1.575,1.49,1.413,1.339,1.265,1.189,
+                              1.114,1.043,0.979,0.923,0.879,0.846,0.82,
+                              0.799,0.779,0.758,0.733,0.708)
+
+
+  expect_equal(estimates$Re_estimate, reference_R_mean_values, tolerance = 1E-1)
+  expect_equal(estimates$CI_down, reference_CI_down_values, tolerance = 1E-1)
+  expect_equal(estimates$CI_up, reference_CI_up_values, tolerance = 1E-1)
 })

@@ -21,9 +21,9 @@ deconvolve_incidence(
 
 \item{deconvolution_method}{string. Options are "Richardson-Lucy delay distribution"}
 
-\item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
+\item{min_number_cases}{}
 
-\item{...}{}
+\item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
 }
 \value{
 module output object.

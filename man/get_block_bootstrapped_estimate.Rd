@@ -10,6 +10,7 @@ get_block_bootstrapped_estimate(
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
+  uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
   delay_incubation,
   delay_onset_to_report = c(1),
   estimation_window = 3,
@@ -32,11 +33,13 @@ get_block_bootstrapped_estimate(
 
 \item{estimation_method}{string. see \code{\link{estimate_Re}}}
 
+\item{uncertainty_summary_method}{string. 'NONE' or one of the possible strings in \code{\link{summarise_uncertainty}}}
+
 \item{delay_incubation}{#TODO fill in doc}
 
 \item{delay_onset_to_report}{#TODO fill in doc}
 
-\item{estimation_window}{integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.
+\item{estimation_window}{integer. Only used if \code{estimation_method = "EpiEstim sliding window"}.
 see \code{\link{estimate_Re}}}
 
 \item{mean_serial_interval}{numeric. see \code{\link{estimate_Re}}}

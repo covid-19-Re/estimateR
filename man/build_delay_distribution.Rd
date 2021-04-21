@@ -11,6 +11,8 @@ build_delay_distribution(
 )
 }
 \arguments{
+\item{distribution}{distribution in list format e.g. list(name = "gamma", shape = 2, scale = 4)}
+
 \item{max_quantile}{numeric value between 0 and 1. TODO write what max_quantile does}
 
 \item{offset_by_one}{boolean. Gamma distribution comes from fit on (raw_data + 1) to accommodate zeroes in the raw_data.}

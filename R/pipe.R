@@ -23,14 +23,16 @@
 #' but it must in any case correspond to the delay between infection and case observation.
 #'
 #' #TODO clarify input
+#'
 #' @param incidence_vector numeric
 #' @param N_bootstrap_replicates integer. Number of bootstrap samples.
 #' @param smoothing_method string. see \code{\link{smooth_incidence}}.
 #' @param deconvolution_method string. see \code{\link{deconvolve_incidence}}
 #' @param estimation_method string. see \code{\link{estimate_Re}}
+#' @param uncertainty_summary_method string. 'NONE' or one of the possible strings in \code{\link{summarise_uncertainty}}
 #' @param delay_incubation #TODO fill in doc
 #' @param delay_onset_to_report #TODO fill in doc
-#' @param estimation_window integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.
+#' @param estimation_window integer. Only used if \code{estimation_method = "EpiEstim sliding window"}.
 #'  see \code{\link{estimate_Re}}
 #' @param mean_serial_interval numeric. see \code{\link{estimate_Re}}
 #' @param std_serial_interval numeric. see \code{\link{estimate_Re}}
@@ -50,6 +52,7 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                             smoothing_method = "LOESS",
                                             deconvolution_method = "Richardson-Lucy delay distribution",
                                             estimation_method = "EpiEstim sliding window",
+                                            uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
                                             delay_incubation,
                                             delay_onset_to_report = c(1.0),
                                             estimation_window = 3,
@@ -111,7 +114,15 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
     bootstrapping_results <- c(bootstrapping_results, list(bootstrapping_result))
   }
 
-  return(dplyr::bind_rows(bootstrapping_results))
+  bootstrapped_estimates <- dplyr::bind_rows(bootstrapping_results)
+
+  estimates_with_uncertainty <- summarise_uncertainty(bootstrapped_estimates = bootstrapped_estimates,
+                                                      uncertainty_summary_method = uncertainty_summary_method,
+                                                      Re_estimate_col = "R_mean",
+                                                      bootstrap_id_col = "bootstrap_id",
+                                                      time_step = time_step)
+
+  return(estimates_with_uncertainty)
 }
 
 

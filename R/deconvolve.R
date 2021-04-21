@@ -11,12 +11,16 @@
 #' a vector of infection events from input data representing delayed observations.
 #'
 #'#TODO figure out input format
+#'
 #' @param incidence_data numeric.
+#' @param deconvolution_method string. Options are "Richardson-Lucy delay distribution"
 #' @param delay_incubation
 #' @param delay_onset_to_report
-#' @param deconvolution_method string. Options are "Richardson-Lucy delay distribution"
 #' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
 #' @param ...
+#' @param start_date
+#' @param time_step
+#' @param min_number_cases
 #'
 #' @return module output object.
 #' @export

@@ -141,6 +141,7 @@ built from the distribution of bootstrapped estimates.</p>
   smoothing_method <span class='op'>=</span> <span class='st'>"LOESS"</span>,
   deconvolution_method <span class='op'>=</span> <span class='st'>"Richardson-Lucy delay distribution"</span>,
   estimation_method <span class='op'>=</span> <span class='st'>"EpiEstim sliding window"</span>,
+  uncertainty_summary_method <span class='op'>=</span> <span class='st'>"original estimate - CI from bootstrap estimates"</span>,
   <span class='va'>delay_incubation</span>,
   delay_onset_to_report <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>,
   estimation_window <span class='op'>=</span> <span class='fl'>3</span>,
@@ -176,6 +177,10 @@ built from the distribution of bootstrapped estimates.</p>
       <td><p>string. see <code><a href='estimate_Re.html'>estimate_Re</a></code></p></td>
     </tr>
     <tr>
+      <th>uncertainty_summary_method</th>
+      <td><p>string. 'NONE' or one of the possible strings in <code><a href='summarise_uncertainty.html'>summarise_uncertainty</a></code></p></td>
+    </tr>
+    <tr>
       <th>delay_incubation</th>
       <td><p>#TODO fill in doc</p></td>
     </tr>
@@ -185,7 +190,7 @@ built from the distribution of bootstrapped estimates.</p>
     </tr>
     <tr>
       <th>estimation_window</th>
-      <td><p>integer. Only use if <code>estimation_method = "EpiEstim sliding window"</code>.
+      <td><p>integer. Only used if <code>estimation_method = "EpiEstim sliding window"</code>.
 see <code><a href='estimate_Re.html'>estimate_Re</a></code></p></td>
     </tr>
     <tr>

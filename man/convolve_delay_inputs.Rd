@@ -16,10 +16,15 @@ convolve_delay_inputs(
 }
 \arguments{
 \item{n_report_time_steps}{Integer value required if}
+
+\item{upper_quantile_threshold}{}
 }
 \value{
 
 }
 \description{
 Title
+}
+\examples{
+#TODO add example
 }
