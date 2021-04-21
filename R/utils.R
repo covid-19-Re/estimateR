@@ -284,13 +284,105 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 }
 
 
+#' Utility function to determine whether an object is a numeric vector with all positive (or zero) values.
+#'
+#' @param vector vector to be tested
+#'
+#' @return boolean. TRUE if vector is a positive numeric vector. FALSE otherwise
+
+.is_positive_numeric_vector <- function(vector){
+  if(!is.numeric(vector)){
+    return(FALSE)
+  }
+  if(!all(vector >= 0)){
+    return(FALSE)
+  }
+  return(TRUE)
+}
+
+#' Utility function that checks if a user input respects one the following criteria:
+#' - is either a numeric vector with values > 0
+#' - or is a list with two elements: $values: numeric vector with values > 0
+#'                                   $index_offset: integer 
+#'
+#' @param user_input the vector/list the user passed as a parameter, to be tested
+#'
+#' @return TRUE if user_input is a valid module input. Throws an informative error otherwise.
+.is_valid_module_input <- function(module_object){
+  if(is.list(module_object)){
+    if("values" %!in% names(module_object)){
+      stop("When passed as a list, the module input object has to contain a $values element.")
+    }
+    
+    if("index_offset" %!in% names(module_object)){
+      stop("When passed as a list, the module input object has to contain a $index_offset element.")
+    } 
+    
+    if(!.is_positive_numeric_vector(module_object$values)){
+      stop("The $values element of the module input list has to be a numeric vector with values greater or equal to 0.")
+    }
+    
+    if(module_object$index_offset != as.integer(module_object$index_offset)){ #if index_offset is not an integer
+      stop("The $index_offset element of the module input list has to be an integer.")
+    } 
+    
+  } else if(is.numeric(module_object)){
+    if(!.is_positive_numeric_vector(module_object)){
+      stop("The module input vector has to be a numeric vector with values greater or equal to 0.")
+    }
+    
+  } else {
+    stop("The module input has to be either a numeric vector or a list.")
+  }
+  return(TRUE)
+}
+
+#' TODO: fill in 
+#' TODO: can it have values on diagonal?
+#' TODO: test
+#' question: ask whether to keep throw error behavior or add a throw=True argument to the function?
+#' @param delay_matrix 
+#'
+#' @return
+.is_delay_distribution_matrix <- function(delay_matrix, incidence_data_length){
+  if(!is.matrix(delay_matrix) || !is.numeric(delay_matrix)){
+    stop("The delay distribution object needs to be a numeric matrix.")
+  }
+  
+  if(any(is.na(delay_matrix))){
+    stop("The delay distribution matrix cannot contain any NA values.")
+  }
+  
+  if(!all(delay_matrix >= 0){
+    stop("The delay distribution matrix needs to contain non-negative values.")
+  }
+  
+  if(ncol(delay_matrix) != nrow(delay_matrix)){
+    stop("The delay distribution matrix needs to be square.")
+  }
+    
+  if(!all(delay_matrix == delay_matrix*lower.tri(delay_matrix))){ #check if matrix is lower triangular
+    stop("The delay distribution matrix needs to be lower triangular.")
+  }
+  
+  if(!all(colSums(delay_matrix) < 1)){
+    stop("The delay distribution matrix is not valid. At least one column sums up to a value greater than 1.")
+  }
+  
+  if(ncol(delay_matrix) < incidence_data_length){
+    stop("The delay distribution matrix needs to have a greater size than the length of the incidence data.")
+  }
+  
+  return(TRUE)
+  
+}
+
 #' Utility function that checks that the values the user passed when calling a function are valid
 #' Returns TRUE if all checks were passed.
 #' @param user_inputs list of all arguments with which the tested function was called (can be obtain via "as.list(environment()")
 #' 
 #' @return TRUE if all checks were passed. Throws an error otherwise
 .are_valid_argument_values <- function(user_inputs){
-  a<-1
   for(i in 1:length(user_inputs)){
     user_input <- user_inputs[[i]]$user_input 
     input_type <- user_inputs[[i]]$input_type
@@ -299,7 +391,8 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
         "deconvolution_method" = .is_value_in_accepted_values_vector(user_input, "deconvolution_method"),
         "estimation_method" = .is_value_in_accepted_values_vector(user_input, "estimation_method"),
         "bootstrapping_method" = .is_value_in_accepted_values_vector(user_input, "bootstrapping_method"),
-        "time_step" = .is_value_valid_time_step(user_input)
+        "time_step" = .is_value_valid_time_step(user_input),
+        "module_input" = .is_valid_module_input(user_input)
     )
   }
   return(TRUE)

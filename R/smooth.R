@@ -21,7 +21,9 @@ smooth_incidence <- function(incidence_data,
                              smoothing_method = "LOESS",
                              simplify_output = TRUE,
                              ...) {
-  .are_valid_argument_values(list(list(user_input=smoothing_method, input_type="smoothing_method")))
+  .are_valid_argument_values(list(list(user_input=incidence_data, input_type="module_input"),
+                                  list(user_input=smoothing_method, input_type="smoothing_method")))
+  
   input <- .get_module_input(incidence_data)
 
   if(smoothing_method == "LOESS") {
