@@ -21,8 +21,9 @@ smooth_incidence <- function(incidence_data,
                              smoothing_method = "LOESS",
                              simplify_output = TRUE,
                              ...) {
-  .are_valid_argument_values(list(list(user_input=incidence_data, input_type="module_input"),
-                                  list(user_input=smoothing_method, input_type="smoothing_method")))
+  .are_valid_argument_values(list(list(user_input = incidence_data, input_type = "module_input", parameter_name = "incidence_data"),
+                                  list(user_input = smoothing_method, input_type = "smoothing_method", parameter_name = "smoothing_method"),
+                                  list(user_input = simplify_output, input_type="boolean", parameter_name = "simplify_output")))
   
   input <- .get_module_input(incidence_data)
 
@@ -51,6 +52,7 @@ smooth_incidence <- function(incidence_data,
 #'
 #' @return module output. Smoothed incidence.
 .smooth_LOESS <- function(incidence_input, data_points_incl = 21, degree = 1) {
+  
   incidence_vector <- .get_values(incidence_input)
 
   n_points <- length(incidence_vector)

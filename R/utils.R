@@ -272,13 +272,13 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #' 
 #' @return a boolean value. (TRUE if string_user_input is an accepted time_step. Throws an error otherwise)
 #' An accepted time_step is considered to be: <<A character string, containing one of "day", "week", "month", "quarter" or "year". This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>> (from https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date)
-.is_value_valid_time_step <- function(string_user_input){
+.is_value_valid_time_step <- function(string_user_input, parameter_name){
   if(!is.character(string_user_input)){
-    stop(paste("Expected parameter time_step to be a string."))
+    stop(paste("Expected parameter", parameter_name, "to be a string."))
   }
   is_valid_time_step <- grepl("^([-+]?\\d+ )?(day|week|month|quarter|year)s?$", string_user_input)
   if(!is_valid_time_step){
-    stop(paste("Expected parameter time_step to be a character string, containing one of \"day\", \"week\", \"month\", \"quarter\" or \"year\". This can optionally be preceded by a (positive or negative) integer and a space, or followed by \"s\"."))
+    stop(paste("Expected parameter", parameter_name, "to be a character string, containing one of \"day\", \"week\", \"month\", \"quarter\" or \"year\". This can optionally be preceded by a (positive or negative) integer and a space, or followed by \"s\"."))
   }
   return(TRUE)
 }
@@ -300,6 +300,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   return(TRUE)
 }
 
+
 #' Utility function that checks if a user input respects one the following criteria:
 #' - is either a numeric vector with values > 0
 #' - or is a list with two elements: $values: numeric vector with values > 0
@@ -308,31 +309,31 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #' @param user_input the vector/list the user passed as a parameter, to be tested
 #'
 #' @return TRUE if user_input is a valid module input. Throws an informative error otherwise.
-.is_valid_module_input <- function(module_object){
+.is_valid_module_input <- function(module_object, parameter_name){
   if(is.list(module_object)){
     if("values" %!in% names(module_object)){
-      stop("When passed as a list, the module input object has to contain a $values element.")
+      stop(paste("When passed as a list,", parameter_name, "has to contain a $values element."))
     }
     
     if("index_offset" %!in% names(module_object)){
-      stop("When passed as a list, the module input object has to contain a $index_offset element.")
+      stop(paste("When passed as a list,", parameter_name, "has to contain a $index_offset element."))
     } 
     
     if(!.is_positive_numeric_vector(module_object$values)){
-      stop("The $values element of the module input list has to be a numeric vector with values greater or equal to 0.")
+      stop(paste("The $values element of", parameter_name, "has to be a numeric vector with values greater or equal to 0."))
     }
     
     if(module_object$index_offset != as.integer(module_object$index_offset)){ #if index_offset is not an integer
-      stop("The $index_offset element of the module input list has to be an integer.")
+      stop(paste("The $index_offset element of", parameter_name, "has to be an integer."))
     } 
     
   } else if(is.numeric(module_object)){
     if(!.is_positive_numeric_vector(module_object)){
-      stop("The module input vector has to be a numeric vector with values greater or equal to 0.")
+      stop(paste(parameter_name, "has to be a numeric vector with values greater or equal to 0."))
     }
     
   } else {
-    stop("The module input has to be either a numeric vector or a list.")
+    stop(paste(parameter_name, "has to be either a numeric vector or a list."))
   }
   return(TRUE)
 }
@@ -353,7 +354,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
     stop("The delay distribution matrix cannot contain any NA values.")
   }
   
-  if(!all(delay_matrix >= 0){
+  if(!all(delay_matrix >= 0)){
     stop("The delay distribution matrix needs to contain non-negative values.")
   }
   
@@ -377,6 +378,31 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   
 }
 
+#' TODO fill in
+#'
+#' @param object 
+#' @param proper_class 
+#' @param parameter_name 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+.check_class_parameter_name <- function(object, proper_class, parameter_name){
+  tryCatch(
+    {
+      if(is.na(object)){
+        stop("Object was NA") # This error message is never shown. Overwritten below. 
+      }
+      .check_class(object, proper_class)
+    },
+    error=function(error) {
+      stop(paste("Expected parameter", parameter_name, "to be of type", proper_class, "and not NA."))
+    }
+  )    
+  return(TRUE)
+}
+
 #' Utility function that checks that the values the user passed when calling a function are valid
 #' Returns TRUE if all checks were passed.
 #' @param user_inputs list of all arguments with which the tested function was called (can be obtain via "as.list(environment()")
@@ -386,13 +412,16 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   for(i in 1:length(user_inputs)){
     user_input <- user_inputs[[i]]$user_input 
     input_type <- user_inputs[[i]]$input_type
+    parameter_name <- user_inputs[[i]]$parameter_name
     switch (input_type,
-        "smoothing_method" = .is_value_in_accepted_values_vector(user_input, "smoothing_method"),
-        "deconvolution_method" = .is_value_in_accepted_values_vector(user_input, "deconvolution_method"),
-        "estimation_method" = .is_value_in_accepted_values_vector(user_input, "estimation_method"),
-        "bootstrapping_method" = .is_value_in_accepted_values_vector(user_input, "bootstrapping_method"),
-        "time_step" = .is_value_valid_time_step(user_input),
-        "module_input" = .is_valid_module_input(user_input)
+        "smoothing_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+        "deconvolution_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+        "estimation_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+        "bootstrapping_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+        "time_step" = .is_value_valid_time_step(user_input, parameter_name),
+        "module_input" = .is_valid_module_input(user_input, parameter_name),
+        "boolean" = .check_class_parameter_name(user_input,"logical", parameter_name),
+        "empirical_delay_data" = .check_is_empirical_delay_data(user_input)
     )
   }
   return(TRUE)
