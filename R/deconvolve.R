@@ -33,7 +33,9 @@ deconvolve_incidence <- function( incidence_data,
                                   simplify_output = TRUE,
                                   ... ) {
   
-  .are_valid_argument_values(as.list(environment()))
+  .are_valid_argument_values(list(list(user_input=deconvolution_method, input_type="deconvolution_method"),
+                                  list(user_input=time_step, input_type="time_step")))
+  
   input <- .get_module_input(incidence_data)
 
   #TODO generalize this to a list of delay inputs

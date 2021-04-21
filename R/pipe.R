@@ -61,7 +61,10 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                             verbose = FALSE){
 
 
-  .are_valid_argument_values(as.list(environment()))
+  .are_valid_argument_values(list(list(user_input=smoothing_method, input_type="smoothing_method"),
+                                  list(user_input=deconvolution_method, input_type="deconvolution_method"),
+                                  list(user_input=estimation_method, input_type="estimation_method"),
+                                  list(user_input=time_step, input_type="time_step")))
   # Prepare delay distribution vector or matrix early on as it spares the need to redo the same operation for each bootstrap replicate
   total_delay_distribution <- convolve_delay_inputs(delay_incubation,
                                                     delay_onset_to_report,
@@ -163,7 +166,11 @@ smooth_deconvolve_estimate <- function(incidence_vector,
                                        time_step = "day",
                                        verbose = FALSE) {
 
-  .are_valid_argument_values(as.list(environment()))
+  .are_valid_argument_values(list(list(user_input=smoothing_method, input_type="smoothing_method"),
+                                  list(user_input=deconvolution_method, input_type="deconvolution_method"),
+                                  list(user_input=estimation_method, input_type="estimation_method"),
+                                  list(user_input=time_step, input_type="time_step")))
+  
   smoothed_incidence <- smooth_incidence(incidence_data = incidence_vector,
                                          smoothing_method = smoothing_method)
 
