@@ -2,18 +2,16 @@
 % Please edit documentation in R/utils-convolution.R
 \name{.convolve_delay_distribution_vectors}
 \alias{.convolve_delay_distribution_vectors}
-\title{Title}
+\title{Convolve two discretized probability distribution vectors.}
 \usage{
 .convolve_delay_distribution_vectors(vector_a, vector_b)
 }
 \arguments{
-\item{vector_a}{numeric}
-
-\item{vector_b}{numeric}
+\item{vector_a, vector_b}{Discretized probability distribution vectors}
 }
 \value{
-numeric vector
+discretized probability distribution vector
 }
 \description{
-Title
+Convolve two discretized probability distribution vectors.
 }

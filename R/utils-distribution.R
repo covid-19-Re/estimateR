@@ -152,10 +152,10 @@ build_delay_distribution <- function(distribution,
 #' @return
 .get_delay_distribution <- function(delay,
                                     ...){
-  if(class(delay) == "numeric") {
+  if( .is_numeric_vector(delay) ) {
     .check_is_probability_distr_vector(delay)
     return(delay)
-  } else if(class(delay) == "list") {
+  } else if( is.list(delay) ) {
     return(build_delay_distribution(delay, ...))
   } else {
     #TODO add details to error message

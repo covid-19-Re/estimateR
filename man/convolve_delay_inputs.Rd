@@ -15,9 +15,20 @@ convolve_delay_inputs(
 )
 }
 \arguments{
+\item{delay_incubation}{Delay}
+
 \item{n_report_time_steps}{Integer value required if}
 
-\item{upper_quantile_threshold}{}
+\item{start_date}{Optional. Date of the first incidence data point.}
+
+\item{time_step}{Size of time step used in delays. String in the format:
+"day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for
+details)}
+
+\item{min_number_cases}{Use only if an input is empirical delay data. Number
+of cases over which to build empirical delay distribution}
+
+\item{upper_quantile_threshold}{Value between 0 and 1. Quantile}
 }
 \value{
 

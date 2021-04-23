@@ -4,12 +4,16 @@
 \alias{.check_class}
 \title{Check whether the class of an object is as expected}
 \usage{
-.check_class(object, proper_class)
+.check_class(object, proper_class, mode = "any")
 }
 \arguments{
 \item{object}{An object whose class needs checking,}
 
-\item{proper_class}{A string describing the desired class of 'object'.}
+\item{proper_class}{A string describing the desired class of \code{object}.}
+
+\item{mode}{Optional. A string describing the desired mode of \code{object}.
+Use only if \code{proper_class} is \code{vector}. Mode cannot be \code{Date}.
+Use \code{proper_class = "Date"} for checking class of \code{Date vector}.}
 }
 \value{
 TRUE if no error is thrown.

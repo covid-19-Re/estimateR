@@ -5,10 +5,11 @@
 \title{Title}
 \usage{
 .summarise_CI_bootstrap(
+  central_estimates,
   bootstrapped_estimates,
   alpha = 0.95,
-  Re_estimate_col = "R_mean",
-  bootstrap_id_col = "bootstrap_id",
+  Re_estimate_col = Re_estimate_col,
+  bootstrap_id_col = bootstrap_id_col,
   time_step = "day"
 )
 }

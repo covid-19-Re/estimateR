@@ -22,16 +22,20 @@ smooth_deconvolve_estimate(
 )
 }
 \arguments{
-\item{incidence_vector}{numeric}
+\item{incidence_vector}{numeric.}
 
-\item{smoothing_method}{string. see \code{\link{smooth_incidence}}.}
+\item{smoothing_method}{string. Method used to smooth the original incidence data.
+Options are: "LOESS".}
 
-\item{deconvolution_method}{string. see \code{\link{deconvolve_incidence}}}
+\item{deconvolution_method}{string. Method used to infer timings of infection
+events from the original incidence data (aka deconvolution).
+Options are "Richardson-Lucy delay distribution".}
 
-\item{estimation_method}{string. see \code{\link{estimate_Re}}}
+\item{estimation_method}{string. Method used to estimate reproductive number
+values through time from the reconstructed infection timings.
+Options are "EpiEstim sliding window".}
 
-\item{estimation_window}{integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.
-see \code{\link{estimate_Re}}}
+\item{estimation_window}{integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.}
 
 \item{mean_serial_interval}{numeric. see \code{\link{estimate_Re}}}
 
@@ -63,7 +67,4 @@ The deconvolution step uses the Richardson-Lucy algorithm  by default.
 The estimation uses the Cori method with a sliding window  by default.
 
 #TODO clarify input
-}
-\examples{
-#TODO add examples
 }

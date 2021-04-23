@@ -14,11 +14,11 @@ estimate_Re(
 \arguments{
 \item{incidence_data}{Format still to define.}
 
-\item{estimation_method}{string. Options are "EpiEstim sliding window".}
+\item{estimation_method}{string. Method used to estimate reproductive number
+values through time from the reconstructed infection timings.
+Options are "EpiEstim sliding window".}
 
 \item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
-
-\item{...}{#TODO figure out output format}
 }
 \value{
 a module output object (subject to change)
@@ -33,7 +33,4 @@ then one should deconvolve it first with \code{deconvolve_incidence}.
 For now, only one Re estimation function is implemented.
 
 #TODO specify input format
-}
-\examples{
-#TODO add examples
 }

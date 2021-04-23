@@ -1,5 +1,6 @@
 #TODO replace mean/std serial interval inputs by a single input combining the two
 
+#TODO figure out output format
 #' Estimate effective reproductive number Re from incidence data
 #'
 #' The incidence data input should represent infections,
@@ -12,16 +13,13 @@
 #' #TODO specify input format
 #'
 #' @param incidence_data Format still to define.
-#' @param estimation_method string. Options are "EpiEstim sliding window".
 #' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
 #' @param ...
+#' @inheritParams smooth_deconvolve_estimate
 #'
-#'#TODO figure out output format
 #' @return a module output object (subject to change)
 #' @export
 #'
-#' @examples
-#' #TODO add examples
 estimate_Re <- function( incidence_data, estimation_method = "EpiEstim sliding window", simplify_output = TRUE, ... ) {
 
   input <- .get_module_input(incidence_data)

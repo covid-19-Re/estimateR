@@ -55,28 +55,34 @@ estimation_window <- 3
 ```
 
 Estimation of the effective reproductive number through time
-```{r}
-HK_estimates <- smooth_deconvolve_estimate(
+```{r message=FALSE, warning=FALSE}
+N_bootstrap_replicates <- 10 # only 10 replicates to keep execution fast
+
+HK_estimates <- get_block_bootstrapped_estimate(
   incidence,
+  N_bootstrap_replicates = N_bootstrap_replicates,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
+  uncertainty_summary_method = "bagged mean - CI from bootstrap estimates",
   delay_incubation = distribution_incubation,
   delay_onset_to_report = HK_delay_data,
   estimation_window = estimation_window,
   mean_serial_interval = mean_serial_interval,
-  std_serial_interval  = std_serial_interval,
-  output_Re_only = FALSE,
+  std_serial_interval = std_serial_interval,
   ref_date = start_date,
   time_step = "day"
 )
 
 head(HK_estimates)
 ```
+
+
 ```{r, fig.width=7, fig.height=4}
 library(ggplot2)
-ggplot(HK_estimates, aes(x = date, y = R_mean)) +
+ggplot(HK_estimates, aes(x = date, y = Re_estimate)) +
   geom_line(lwd=  1.1) +
+  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.15, colour = NA) +
   scale_x_date(date_breaks = "1 month", 
                date_labels = '%b\n%Y') +
   ylab("Reproductive number") +

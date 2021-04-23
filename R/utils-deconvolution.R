@@ -109,7 +109,8 @@
 #'
 #' @return
 .get_initial_deconvolution_shift <- function(delay_distribution_vector){
-    initial_shift <- ceiling(min(which(cumsum(delay_distribution_vector) > 0.5)) - 1)
+    initial_shift <- ceiling(min(which(cumsum(delay_distribution_vector) > 0.5))) - 1
+    initial_shift <- max(initial_shift, 0, na.rm = TRUE)
     return(initial_shift)
 }
 
