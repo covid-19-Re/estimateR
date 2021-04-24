@@ -26,7 +26,11 @@ estimate_Re <- function( incidence_data,
 
   input <- .get_module_input(incidence_data)
 
-  dots <- ifelse(...length() > 0, list(), list(...))
+  if(...length() > 0) {
+    dots <- list(...)
+  } else {
+    dots <- list()
+  }
 
   if(estimation_method == "EpiEstim sliding window") {
     EpiEstim_args <- names(formals(estimate_Re_EpiEstim_sliding_window))

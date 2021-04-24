@@ -196,7 +196,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
   #TODO fix issue with what happens when n_time_steps <= threshold_right_truncation: we shouldn't go until n_time_steps
   #TODO test what happens when n_time_steps <= threshold_right_truncation
-  last_varying_col <- ifelse(n_time_steps > threshold_right_truncation, n_time_steps - threshold_right_truncation, n_time_steps)
+  last_varying_col <- dplyr::if_else(n_time_steps > threshold_right_truncation, n_time_steps - threshold_right_truncation, n_time_steps)
 
   distribution_list <- vector(mode = "list", length = last_varying_col)
 

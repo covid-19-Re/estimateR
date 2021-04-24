@@ -19,6 +19,8 @@ values through time from the reconstructed infection timings.
 Options are "EpiEstim sliding window".}
 
 \item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
+
+\item{...}{Additional parameters. TODO add details}
 }
 \value{
 a module output object (subject to change)

@@ -34,7 +34,11 @@ deconvolve_incidence <- function( incidence_data,
 
   input <- .get_module_input(incidence_data)
 
-  dots <- ifelse(...length() > 0, list(), list(...))
+  if(...length() > 0) {
+    dots <- list(...)
+  } else {
+    dots <- list()
+  }
 
   convolution_args <- names(formals(convolve_delay_inputs))
 

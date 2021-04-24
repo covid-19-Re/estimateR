@@ -4,6 +4,7 @@ test_that("get_bootstrap_replicate outputs difference values with same median an
 
   expect_bootstrapped_diff_bounded_by_original_diff <- function(...) {
     data_points_incl <- 21
+    degree <- 1
     original_values <- sample.int(1000, size = 10000, replace= TRUE)
 
     log_original <- log(original_values + 1)
@@ -11,9 +12,10 @@ test_that("get_bootstrap_replicate outputs difference values with same median an
 
     diff_smoothed_original <- log_original - smoothed_log
 
-    bootstrap_replicate <- get_bootstrap_replicate(original_values,
+    bootstrap_replicate <- get_bootstrap_replicate(incidence_data = original_values,
                                                    bootstrapping_method = "non-parametric block boostrap",
                                                    data_points_incl = data_points_incl,
+                                                   degree = degree,
                                                    round_incidence = FALSE)
 
     log_bootstrap <- log(bootstrap_replicate + 1)

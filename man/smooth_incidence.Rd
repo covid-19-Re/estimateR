@@ -20,7 +20,7 @@ Options are: "LOESS", implemented in \code{\link{smooth_LOESS}}.}
 \item{simplify_output}{boolean. Return a numeric vector instead of module
 output object if output offset is zero? TODO to be described better.}
 
-\item{...}{Additional parameters
+\item{...}{Additional parameters TODO add details
 passed to the function implementing the chosen \code{smoothing_method}.}
 }
 \value{

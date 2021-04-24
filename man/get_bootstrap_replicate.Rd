@@ -12,13 +12,11 @@ get_bootstrap_replicate(
 )
 }
 \arguments{
-\item{incidence_data}{Format still to define.}
-
-\item{bootstrapping_method}{string. Options are "non-parametric block boostrap"}
+\item{incidence_data}{TODO Format still to define.}
 
 \item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
 
-\item{...}{Extra parameters to pass to the smoothing function}
+\item{...}{Additional parameters. TODO add details}
 }
 \value{
 a module output object. A boostrapped replicate.
@@ -31,10 +29,4 @@ In future versions, the user will be able to choose between different
 bootstrapping procedures.
 For now, only one bootstrapping function is implemented.
 It performs a non-parametric block bootstrapping.
-}
-\details{
-#TODO specify input format
-}
-\examples{
-#TODO add examples
 }

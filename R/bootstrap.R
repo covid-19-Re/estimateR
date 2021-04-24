@@ -23,7 +23,11 @@ get_bootstrap_replicate <- function( incidence_data,
 
   input <- .get_module_input(incidence_data)
 
-  dots <- ifelse(...length() > 0, list(), list(...))
+  if(...length() > 0) {
+    dots <- list(...)
+  } else {
+    dots <- list()
+  }
 
   if(bootstrapping_method == "non-parametric block boostrap") {
     block_bootstrap_args <- names(formals(block_bootstrap))
