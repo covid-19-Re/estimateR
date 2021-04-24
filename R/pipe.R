@@ -103,7 +103,14 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 
   bootstrapped_estimates <- dplyr::bind_rows(bootstrapping_results)
 
-  estimates_with_uncertainty <- summarise_uncertainty(bootstrapped_estimates = bootstrapped_estimates,
+  original_estimates <- bootstrapped_estimates %>%
+    dplyr::filter(.data$bootstrap_id == 0)
+
+  bootstrapped_estimates <- bootstrapped_estimates %>%
+    dplyr::filter(.data$bootstrap_id > 0)
+
+  estimates_with_uncertainty <- summarise_uncertainty(original_estimates = original_estimates,
+                                                      bootstrapped_estimates = bootstrapped_estimates,
                                                       uncertainty_summary_method = uncertainty_summary_method,
                                                       Re_estimate_col = "R_mean",
                                                       bootstrap_id_col = "bootstrap_id",

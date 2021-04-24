@@ -16,7 +16,7 @@
 #'
 #' @examples
 summarise_uncertainty <- function(bootstrapped_estimates,
-                                  original_estimates = NA,
+                                  original_estimates = NULL,
                                   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
                                   Re_estimate_col = "R_mean",
                                   bootstrap_id_col = "bootstrap_id",
@@ -37,16 +37,16 @@ summarise_uncertainty <- function(bootstrapped_estimates,
 
   bootstrapped_estimates <- bootstrapped_estimates %>%
     dplyr::rename(!!Re_estimate_col := .data[[old_Re_estimate_col]],
-           bootstrap_id = .data[[bootstrap_id_col]])
+                  bootstrap_id = .data[[bootstrap_id_col]])
 
-  if(!is.na(original_estimates)) {
+  if(!is.null(original_estimates)) {
     original_estimates <- original_estimates %>%
       dplyr::rename(!!Re_estimate_col := .data[[old_Re_estimate_col]])
   }
 
   if(uncertainty_summary_method == "original estimate - CI from bootstrap estimates") {
 
-    if(is.na(original_estimates)) {
+    if( is.null(original_estimates) ) {
       stop("'original_estimates' must be provided when using uncertainty method
            'original estimate - CI from bootstrap estimates'")
     }
@@ -55,26 +55,26 @@ summarise_uncertainty <- function(bootstrapped_estimates,
       dplyr::rename(!!Re_estimate_col := .data[[Re_estimate_col]])
 
     return(.summarise_CI_bootstrap(central_estimates = original_estimates,
-                                  bootstrapped_estimates = bootstrapped_estimates,
-                                  Re_estimate_col = Re_estimate_col,
-                                  bootstrap_id_col = bootstrap_id_col,
-                                  time_step = time_step))
+                                   bootstrapped_estimates = bootstrapped_estimates,
+                                   Re_estimate_col = Re_estimate_col,
+                                   bootstrap_id_col = bootstrap_id_col,
+                                   time_step = time_step))
 
   } else if (uncertainty_summary_method == "bagged mean - CI from bootstrap estimates") {
 
-      central_estimates <- .summarise_bagged_mean(original_estimates = original_estimates,
-                                            bootstrapped_estimates = bootstrapped_estimates,
-                                            Re_estimate_col = Re_estimate_col,
-                                            bootstrap_id_col = bootstrap_id_col,
-                                            time_step = time_step)
+    central_estimates <- .summarise_bagged_mean(original_estimates = original_estimates,
+                                                bootstrapped_estimates = bootstrapped_estimates,
+                                                Re_estimate_col = Re_estimate_col,
+                                                bootstrap_id_col = bootstrap_id_col,
+                                                time_step = time_step)
 
-      Re_estimate <- .summarise_CI_bootstrap(central_estimates = central_estimates,
-                                             bootstrapped_estimates = bootstrapped_estimates,
-                                             Re_estimate_col = Re_estimate_col,
-                                             bootstrap_id_col = bootstrap_id_col,
-                                             time_step = time_step)
+    Re_estimate <- .summarise_CI_bootstrap(central_estimates = central_estimates,
+                                           bootstrapped_estimates = bootstrapped_estimates,
+                                           Re_estimate_col = Re_estimate_col,
+                                           bootstrap_id_col = bootstrap_id_col,
+                                           time_step = time_step)
 
-      return(Re_estimate)
+    return(Re_estimate)
   } else {
     stop("Uncertainty summary method is unknown.")
   }
@@ -95,15 +95,16 @@ summarise_uncertainty <- function(bootstrapped_estimates,
 #' @return
 .summarise_CI_bootstrap <- function(central_estimates,
                                     bootstrapped_estimates,
-                                   alpha = 0.95,
-                                   Re_estimate_col = Re_estimate_col,
-                                   bootstrap_id_col = bootstrap_id_col,
-                                   time_step = "day"){
+                                    alpha = 0.95,
+                                    Re_estimate_col = Re_estimate_col,
+                                    bootstrap_id_col = bootstrap_id_col,
+                                    time_step = "day"){
 
   high_quantile <- 1-(1-alpha)/2
 
   central_estimates <- central_estimates %>%
-    dplyr::filter(!is.na(.data[[Re_estimate_col]]))
+    dplyr::filter(!is.na(.data[[Re_estimate_col]]), !is.na(.data$date)) %>%
+    dplyr::select(.data$date, .data[[Re_estimate_col]])
 
   estimate_with_uncertainty <- bootstrapped_estimates %>%
     dplyr::filter(!is.na(.data[[Re_estimate_col]]), !is.na(.data$date)) %>%
@@ -121,7 +122,6 @@ summarise_uncertainty <- function(bootstrapped_estimates,
   return(estimate_with_uncertainty)
 }
 
-
 #TODO document
 #' Title
 #'
@@ -131,32 +131,30 @@ summarise_uncertainty <- function(bootstrapped_estimates,
 #'
 #' @return
 .summarise_bagged_mean <- function(original_estimates,
-                                  bootstrapped_estimates,
-                                  Re_estimate_col = Re_estimate_col,
-                                  bootstrap_id_col = bootstrap_id_col,
-                                  time_step = "day") {
+                                   bootstrapped_estimates,
+                                   Re_estimate_col = Re_estimate_col,
+                                   bootstrap_id_col = bootstrap_id_col,
+                                   time_step = "day") {
 
 
   bootstrapped_estimates <- bootstrapped_estimates %>%
     dplyr::filter(!is.na(.data[[Re_estimate_col]]), !is.na(.data$date)) %>%
     dplyr::select(.data$date, .data[[Re_estimate_col]])
 
-  if(!is.na(original_estimates)) {
-      original_estimates <- original_estimates %>%
-        dplyr::filter(!is.na(.data[[Re_estimate_col]]), !is.na(.data$date)) %>%
-        dplyr::select(.data$date, .data[[Re_estimate_col]])
+  if(!is.null(original_estimates)) {
+    original_estimates <- original_estimates %>%
+      dplyr::filter(!is.na(.data[[Re_estimate_col]]), !is.na(.data$date)) %>%
+      dplyr::select(.data$date, .data[[Re_estimate_col]])
 
-      bootstrapped_estimates <- bootstrapped_estimates %>%
-        dplyr::bind_rows(original_estimates)
+    bootstrapped_estimates <- bootstrapped_estimates %>%
+      dplyr::bind_rows(original_estimates)
   }
 
   bagged_mean_estimate <- bootstrapped_estimates %>%
     dplyr::group_by(.data$date) %>%
     dplyr::summarize(!!Re_estimate_col := mean(.data[[Re_estimate_col]]),
                      .groups = "drop") %>%
-    tidyr::complete(date = seq.Date(min(.data$date), max(.data$date), by = time_step),
-                    fill = list(Re_estimate = NA))
+    tidyr::complete(date = seq.Date(min(.data$date), max(.data$date), by = time_step))
 
   return(bagged_mean_estimate)
 }
-
