@@ -10,7 +10,7 @@ test_that("smooth_deconvolve_estimate yields consistent results on a toy example
                           0.019,0.01,0.005,0.003,
                           0.001,0.001)
 
-  estimates <- smooth_deconvolve_estimate(toy_incidence_data,
+  estimates <- smooth_deconvolve_estimate(incidence_data = toy_incidence_data,
                                          smoothing_method = "LOESS",
                                          deconvolution_method = "Richardson-Lucy delay distribution",
                                          estimation_method = "EpiEstim sliding window",
@@ -51,7 +51,7 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
   scale_onset_to_report <- 1.3
   delay_onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
 
-  estimates <- get_block_bootstrapped_estimate(toy_incidence_data,
+  estimates <- get_block_bootstrapped_estimate(incidence_data = toy_incidence_data,
                                                N_bootstrap_replicates = 100,
                                               smoothing_method = "LOESS",
                                               deconvolution_method = "Richardson-Lucy delay distribution",
@@ -89,7 +89,7 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
   expect_equal(estimates$CI_down, reference_CI_down_values, tolerance = 1E-1)
   expect_equal(estimates$CI_up, reference_CI_up_values, tolerance = 1E-1)
 
-  estimates <- get_block_bootstrapped_estimate(toy_incidence_data,
+  estimates <- get_block_bootstrapped_estimate(incidence_data = toy_incidence_data,
                                                N_bootstrap_replicates = 100,
                                                smoothing_method = "LOESS",
                                                deconvolution_method = "Richardson-Lucy delay distribution",

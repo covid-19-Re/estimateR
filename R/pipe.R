@@ -31,7 +31,7 @@
 #'
 #' @return tibble. Re estimations along with results from each pipeline step.
 #' @export
-get_block_bootstrapped_estimate <- function(incidence_vector,
+get_block_bootstrapped_estimate <- function(incidence_data,
                                             N_bootstrap_replicates = 100,
                                             smoothing_method = "LOESS",
                                             deconvolution_method = "Richardson-Lucy delay distribution",
@@ -56,9 +56,9 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
   # Prepare delay distribution vector or matrix early on as it spares the need to redo the same operation for each bootstrap replicate
   total_delay_distribution <- convolve_delay_inputs(delay_incubation,
                                                     delay_onset_to_report,
-                                                    n_report_time_steps = length(incidence_vector))
+                                                    n_report_time_steps = length(incidence_data))
 
-  original_result <- smooth_deconvolve_estimate(incidence_vector,
+  original_result <- smooth_deconvolve_estimate(incidence_data,
                                                 smoothing_method = smoothing_method,
                                                 deconvolution_method = deconvolution_method,
                                                 estimation_method = estimation_method,
@@ -80,7 +80,7 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 
     utils::setTxtProgressBar(progress_bar, i)
 
-    bootstrapped_incidence <- get_bootstrap_replicate(incidence_data = incidence_vector,
+    bootstrapped_incidence <- get_bootstrap_replicate(incidence_data = incidence_data,
                                                       bootstrapping_method = "non-parametric block boostrap")
 
     bootstrapping_result <- smooth_deconvolve_estimate(bootstrapped_incidence,
@@ -138,9 +138,9 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 #'
 #'#TODO clarify input
 #'
-#' @param incidence_vector numeric.
+#' @param incidence_data numeric. TODO define acceptable format
 #' @param smoothing_method string. Method used to smooth the original incidence data.
-#'  Options are: "LOESS".
+#'  Options are: "LOESS", implemented in \code{\link{smooth_LOESS}}.
 #' @param deconvolution_method string. Method used to infer timings of infection
 #' events from the original incidence data (aka deconvolution).
 #' Options are "Richardson-Lucy delay distribution".
@@ -152,16 +152,16 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 #' @param estimation_window integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.
 #' @param mean_serial_interval numeric. see \code{\link{estimate_Re}}
 #' @param std_serial_interval numeric. see \code{\link{estimate_Re}}
-#' @param mean_Re_prior numeric. Mean of prior distribution on Re
-#' @param verbose boolean. see \code{\link{deconvolve_incidence}}
+#' @param mean_Re_prior numeric value. Mean of prior distribution on Re.
+#' @param verbose boolean. Print verbose output?
 #' @param output_Re_only boolean. Should the output only contain Re estimates? (as opposed to containing results for each intermediate step)
-#' @param ref_date Date. Optional. Date of the first data entry in \code{incidence_vector}
-#' @param time_step string. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
+#' @param ref_date Date. Optional. Date of the first data entry in \code{incidence_data}
+#' @param time_step string. Time between two consecutive incidence datapoints. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
 #'
 #'#TODO add details on output formatting
 #' @return effective reproductive number estimates through time.
 #' @export
-smooth_deconvolve_estimate <- function(incidence_vector,
+smooth_deconvolve_estimate <- function(incidence_data,
                                        smoothing_method = "LOESS",
                                        deconvolution_method = "Richardson-Lucy delay distribution",
                                        estimation_method = "EpiEstim sliding window",
@@ -176,7 +176,7 @@ smooth_deconvolve_estimate <- function(incidence_vector,
                                        time_step = "day",
                                        verbose = FALSE) {
 
-  smoothed_incidence <- smooth_incidence(incidence_data = incidence_vector,
+  smoothed_incidence <- smooth_incidence(incidence_data = incidence_data,
                                          smoothing_method = smoothing_method)
 
   deconvolved_incidence <- deconvolve_incidence(incidence_data = smoothed_incidence,
@@ -198,7 +198,7 @@ smooth_deconvolve_estimate <- function(incidence_vector,
     return(estimated_Re)
   } else {
     merged_results <- merge_outputs(
-      list("observed_incidence" = incidence_vector,
+      list("observed_incidence" = incidence_data,
            "smoothed_incidence" = smoothed_incidence,
            "deconvolved_incidence" = deconvolved_incidence,
            "R_mean" = estimated_Re),

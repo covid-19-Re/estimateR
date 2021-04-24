@@ -5,7 +5,7 @@
 \title{Estimate Re from incidence and estimate uncertainty with block-bootstrapping}
 \usage{
 get_block_bootstrapped_estimate(
-  incidence_vector,
+  incidence_data,
   N_bootstrap_replicates = 100,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
@@ -23,12 +23,12 @@ get_block_bootstrapped_estimate(
 )
 }
 \arguments{
-\item{incidence_vector}{numeric.}
+\item{incidence_data}{numeric. TODO define acceptable format}
 
 \item{N_bootstrap_replicates}{integer. Number of bootstrap samples.}
 
 \item{smoothing_method}{string. Method used to smooth the original incidence data.
-Options are: "LOESS".}
+Options are: "LOESS", implemented in \code{\link{smooth_LOESS}}.}
 
 \item{deconvolution_method}{string. Method used to infer timings of infection
 events from the original incidence data (aka deconvolution).
@@ -46,15 +46,15 @@ Options are "EpiEstim sliding window".}
 
 \item{std_serial_interval}{numeric. see \code{\link{estimate_Re}}}
 
-\item{mean_Re_prior}{numeric. Mean of prior distribution on Re}
+\item{mean_Re_prior}{numeric value. Mean of prior distribution on Re.}
 
-\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_vector}}
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
-\item{time_step}{string. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
+\item{time_step}{string. Time between two consecutive incidence datapoints. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
 
 #TODO add details on output formatting}
 
-\item{verbose}{boolean. see \code{\link{deconvolve_incidence}}}
+\item{verbose}{boolean. Print verbose output?}
 }
 \value{
 tibble. Re estimations along with results from each pipeline step.

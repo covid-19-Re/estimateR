@@ -5,7 +5,7 @@
 \title{Estimate Re from incidence data}
 \usage{
 smooth_deconvolve_estimate(
-  incidence_vector,
+  incidence_data,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
@@ -22,10 +22,10 @@ smooth_deconvolve_estimate(
 )
 }
 \arguments{
-\item{incidence_vector}{numeric.}
+\item{incidence_data}{numeric. TODO define acceptable format}
 
 \item{smoothing_method}{string. Method used to smooth the original incidence data.
-Options are: "LOESS".}
+Options are: "LOESS", implemented in \code{\link{smooth_LOESS}}.}
 
 \item{deconvolution_method}{string. Method used to infer timings of infection
 events from the original incidence data (aka deconvolution).
@@ -41,17 +41,17 @@ Options are "EpiEstim sliding window".}
 
 \item{std_serial_interval}{numeric. see \code{\link{estimate_Re}}}
 
-\item{mean_Re_prior}{numeric. Mean of prior distribution on Re}
+\item{mean_Re_prior}{numeric value. Mean of prior distribution on Re.}
 
 \item{output_Re_only}{boolean. Should the output only contain Re estimates? (as opposed to containing results for each intermediate step)}
 
-\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_vector}}
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
-\item{time_step}{string. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
+\item{time_step}{string. Time between two consecutive incidence datapoints. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
 
 #TODO add details on output formatting}
 
-\item{verbose}{boolean. see \code{\link{deconvolve_incidence}}}
+\item{verbose}{boolean. Print verbose output?}
 }
 \value{
 effective reproductive number estimates through time.
