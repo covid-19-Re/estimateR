@@ -29,7 +29,3 @@ module output. Smoothed incidence.
 \description{
 Currently only LOESS smoothing (smoothing_method = "LOESS") is implemented.
 }
-\details{
-#TODO specify input format #TODO figure out how to document additional parms
-for internal functions
-}

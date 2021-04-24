@@ -14,18 +14,27 @@
 #'
 #' @param incidence_data Format still to define.
 #' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
-#' @param ...
+#' @param ... Additional parameters. TODO add details
 #' @inheritParams smooth_deconvolve_estimate
 #'
 #' @return a module output object (subject to change)
 #' @export
-#'
-estimate_Re <- function( incidence_data, estimation_method = "EpiEstim sliding window", simplify_output = TRUE, ... ) {
+estimate_Re <- function( incidence_data,
+                         estimation_method = "EpiEstim sliding window",
+                         simplify_output = TRUE,
+                         ... ) {
 
   input <- .get_module_input(incidence_data)
 
+  dots <- ifelse(...length() > 0, list(), list(...))
+
   if(estimation_method == "EpiEstim sliding window") {
-    Re_estimate <- .estimate_Re_EpiEstim_sliding_window(input, ... )
+    EpiEstim_args <- names(formals(estimate_Re_EpiEstim_sliding_window))
+
+    Re_estimate <- do.call(
+      'estimate_Re_EpiEstim_sliding_window',
+      c(list(incidence_input = input), dots[names(dots) %in% EpiEstim_args])
+    )
   } else {
     Re_estimate <- .make_empty_module_output()
   }
@@ -38,6 +47,7 @@ estimate_Re <- function( incidence_data, estimation_method = "EpiEstim sliding w
 }
 
 
+#TODO polish doc
 #' Estimate Re with EpiEstim using a sliding window
 #'
 #' The Re value reported for time t corresponds to the value estimated
@@ -47,12 +57,13 @@ estimate_Re <- function( incidence_data, estimation_method = "EpiEstim sliding w
 #' @param incidence_input module input object. Time series of infections.
 #' @param minimul_cumul_incidence Numeric scalar. Minimum number of cumulated infections before starting the Re estimation
 #' @param estimation_window Integer scalar. Number of data points over which to assume Re to be constant.
-#' @param mean_serial_interval Numeric positive scalar. "mean_si" for EpiEstim::estimate_R
-#' @param std_serial_interval Numeric positive scalar. "std_si" for EpiEstim::estimate_R
-#' @param mean_Re_prior Numeric positive scalar. "mean prior" for EpiEstim::estimate_R
+#' @param mean_serial_interval Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}
+#' @param std_serial_interval Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}
+#' @param mean_Re_prior Numeric positive scalar. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}
 #'
 #' @return module output object. mean of Re estimates
-.estimate_Re_EpiEstim_sliding_window <- function(incidence_input,
+#' @export
+estimate_Re_EpiEstim_sliding_window <- function(incidence_input,
                         minimul_cumul_incidence = 0,
                         estimation_window = 3,
                         mean_serial_interval = 4.8,

@@ -4,6 +4,8 @@
 
 #TODO redo doc
 #TODO figure out input format
+#TODO put all common parms in estimateR.R
+#TODO add details on additional parameters
 #' Infer Infection Events Dates from Delayed Observation
 #'
 #' This function reconstructs an incidence of infection events from incidence data representing delayed observations.
@@ -12,14 +14,11 @@
 #' a vector of infection events from input data representing delayed observations.
 #'
 #' @param incidence_data numeric.
-#' @param deconvolution_method string. Options are "Richardson-Lucy delay distribution"
 #' @param delay_incubation
 #' @param delay_onset_to_report
 #' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
-#' @param ...
-#' @param start_date
-#' @param time_step
-#' @param min_number_cases
+#' @param ... Additional parameters.
+#' @inheritParams smooth_deconvolve_estimate
 #'
 #' @return module output object.
 #' @export
@@ -30,28 +29,33 @@ deconvolve_incidence <- function( incidence_data,
                                   deconvolution_method = "Richardson-Lucy delay distribution",
                                   delay_incubation,
                                   delay_onset_to_report = c(1.0),
-                                  start_date = NULL,
-                                  time_step = "day",
-                                  min_number_cases = NULL,
                                   simplify_output = TRUE,
                                   ... ) {
 
   input <- .get_module_input(incidence_data)
 
-  #TODO if delay_onset_to_report is c(1.0) then skip convolution step.
+  dots <- ifelse(...length() > 0, list(), list(...))
 
-  #TODO generalize this to a list of delay inputs
-  total_delay_distribution <- convolve_delay_inputs(delay_incubation,
-                                                    delay_onset_to_report,
-                                                    n_report_time_steps = .get_input_length(input),
-                                                    start_date = start_date,
-                                                    time_step = time_step,
-                                                    min_number_cases = min_number_cases)
+  convolution_args <- names(formals(convolve_delay_inputs))
+
+  #TODO generalize this to a list of inputs (and skip if only one delay)
+  total_delay_distribution <- do.call(
+    'convolve_delay_inputs',
+    c(list(delay_incubation = delay_incubation,#TODO continue
+           delay_onset_to_report = delay_onset_to_report,
+           n_report_time_steps = .get_input_length(input)),
+      dots[names(dots) %in% convolution_args])
+  )
 
   if(deconvolution_method == "Richardson-Lucy delay distribution") {
-    deconvolved_incidence <- .deconvolve_incidence_Richardson_Lucy(input,
-                                                                   delay_distribution = total_delay_distribution,
-                                                                   ... )
+    RL_deconvolution_args <- names(formals(deconvolve_incidence_Richardson_Lucy))
+
+    deconvolved_incidence <- do.call(
+      'deconvolve_incidence_Richardson_Lucy',
+      c(list(incidence_input = input,
+             delay_distribution = total_delay_distribution),
+        dots[names(dots) %in% RL_deconvolution_args])
+    )
   } else {
     deconvolved_incidence <-  .make_empty_module_output()
   }
@@ -63,6 +67,7 @@ deconvolve_incidence <- function( incidence_data,
   return(deconvolved_incidence)
 }
 
+#TODO improve doc
 #' Deconvolve the incidence input with the Richardson-Lucy (R-L) algorithm
 #'
 #' @param incidence_input module input object.
@@ -72,7 +77,8 @@ deconvolve_incidence <- function( incidence_data,
 #' @param verbose Boolean. Print verbose output?
 #'
 #' @return module output object. Deconvolved incidence.
-.deconvolve_incidence_Richardson_Lucy <- function(
+#' @export
+deconvolve_incidence_Richardson_Lucy <- function(
   incidence_input,
   delay_distribution,
   threshold_chi_squared = 1,

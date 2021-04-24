@@ -3,6 +3,7 @@
 export(build_delay_distribution)
 export(convolve_delay_inputs)
 export(deconvolve_incidence)
+export(deconvolve_incidence_Richardson_Lucy)
 export(estimate_Re)
 export(generate_delay_data)
 export(get_block_bootstrapped_estimate)

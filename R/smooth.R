@@ -6,7 +6,7 @@
 #'
 #'@param simplify_output boolean. Return a numeric vector instead of module
 #'  output object if output offset is zero? TODO to be described better.
-#'@param ... Additional parameters
+#'@param ... Additional parameters TODO add details
 #'passed to the function implementing the chosen \code{smoothing_method}.
 #'@inheritParams smooth_deconvolve_estimate
 #'
