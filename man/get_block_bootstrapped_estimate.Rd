@@ -5,7 +5,7 @@
 \title{Estimate Re from incidence and estimate uncertainty with block-bootstrapping}
 \usage{
 get_block_bootstrapped_estimate(
-  incidence_vector,
+  incidence_data,
   N_bootstrap_replicates = 100,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
@@ -13,22 +13,21 @@ get_block_bootstrapped_estimate(
   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
   delay_incubation,
   delay_onset_to_report = c(1),
-  estimation_window = 3,
   mean_serial_interval = 4.8,
   std_serial_interval = 2.3,
-  mean_Re_prior = 1,
   ref_date = NULL,
   time_step = "day",
-  verbose = FALSE
+  verbose = FALSE,
+  ...
 )
 }
 \arguments{
-\item{incidence_vector}{numeric.}
+\item{incidence_data}{numeric. TODO define acceptable format}
 
 \item{N_bootstrap_replicates}{integer. Number of bootstrap samples.}
 
 \item{smoothing_method}{string. Method used to smooth the original incidence data.
-Options are: "LOESS".}
+Options are: "LOESS", implemented in \code{\link{smooth_LOESS}}.}
 
 \item{deconvolution_method}{string. Method used to infer timings of infection
 events from the original incidence data (aka deconvolution).
@@ -40,21 +39,17 @@ Options are "EpiEstim sliding window".}
 
 \item{uncertainty_summary_method}{string. 'NONE' or one of the possible strings in \code{\link{summarise_uncertainty}}}
 
-\item{estimation_window}{integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.}
-
 \item{mean_serial_interval}{numeric. see \code{\link{estimate_Re}}}
 
 \item{std_serial_interval}{numeric. see \code{\link{estimate_Re}}}
 
-\item{mean_Re_prior}{numeric. Mean of prior distribution on Re}
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
-\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_vector}}
+\item{time_step}{string. Time between two consecutive incidence datapoints. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
 
-\item{time_step}{string. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
+\item{verbose}{boolean. Print verbose output?
 
 #TODO add details on output formatting}
-
-\item{verbose}{boolean. see \code{\link{deconvolve_incidence}}}
 }
 \value{
 tibble. Re estimations along with results from each pipeline step.

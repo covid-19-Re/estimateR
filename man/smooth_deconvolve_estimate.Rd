@@ -5,27 +5,26 @@
 \title{Estimate Re from incidence data}
 \usage{
 smooth_deconvolve_estimate(
-  incidence_vector,
+  incidence_data,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
   delay_incubation,
   delay_onset_to_report = c(1),
-  estimation_window = 3,
   mean_serial_interval = 4.8,
   std_serial_interval = 2.3,
-  mean_Re_prior = 1,
-  output_Re_only = TRUE,
   ref_date = NULL,
   time_step = "day",
-  verbose = FALSE
+  output_Re_only = TRUE,
+  verbose = FALSE,
+  ...
 )
 }
 \arguments{
-\item{incidence_vector}{numeric.}
+\item{incidence_data}{numeric. TODO define acceptable format}
 
 \item{smoothing_method}{string. Method used to smooth the original incidence data.
-Options are: "LOESS".}
+Options are: "LOESS", implemented in \code{\link{smooth_LOESS}}.}
 
 \item{deconvolution_method}{string. Method used to infer timings of infection
 events from the original incidence data (aka deconvolution).
@@ -35,23 +34,21 @@ Options are "Richardson-Lucy delay distribution".}
 values through time from the reconstructed infection timings.
 Options are "EpiEstim sliding window".}
 
-\item{estimation_window}{integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.}
-
 \item{mean_serial_interval}{numeric. see \code{\link{estimate_Re}}}
 
 \item{std_serial_interval}{numeric. see \code{\link{estimate_Re}}}
 
-\item{mean_Re_prior}{numeric. Mean of prior distribution on Re}
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
+
+\item{time_step}{string. Time between two consecutive incidence datapoints. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
 
 \item{output_Re_only}{boolean. Should the output only contain Re estimates? (as opposed to containing results for each intermediate step)}
 
-\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_vector}}
-
-\item{time_step}{string. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
+\item{verbose}{boolean. Print verbose output?
 
 #TODO add details on output formatting}
 
-\item{verbose}{boolean. see \code{\link{deconvolve_incidence}}}
+\item{estimation_window}{integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.}
 }
 \value{
 effective reproductive number estimates through time.

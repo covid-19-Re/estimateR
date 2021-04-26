@@ -9,18 +9,13 @@
 #' For now, only one bootstrapping function is implemented.
 #' It performs a non-parametric block bootstrapping.
 #'
-#'#TODO specify input format
-#'
-#' @param incidence_data Format still to define.
-#' @param bootstrapping_method string. Options are "non-parametric block boostrap"
+#' @param incidence_data TODO Format still to define.
 #' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
-#' @param ... Extra parameters to pass to the smoothing function
+#' @param ... Additional parameters. TODO add details
+#' @inheritParams smooth_deconvolve_estimate
 #'
 #' @return a module output object. A boostrapped replicate.
 #' @export
-#'
-#' @examples
-#' #TODO add examples
 get_bootstrap_replicate <- function( incidence_data,
                                      bootstrapping_method = "non-parametric block boostrap",
                                      simplify_output = TRUE,
@@ -33,8 +28,19 @@ get_bootstrap_replicate <- function( incidence_data,
   
   input <- .get_module_input(incidence_data)
 
+  if(...length() > 0) {
+    dots <- list(...)
+  } else {
+    dots <- list()
+  }
+
   if(bootstrapping_method == "non-parametric block boostrap") {
-    bootstrapped_incidence <- .block_bootstrap(input, ... )
+    block_bootstrap_args <- names(formals(block_bootstrap))
+
+    bootstrapped_incidence <- do.call(
+      'block_bootstrap',
+      c(list(incidence_input = input), dots[names(dots) %in% block_bootstrap_args])
+    )
   } else {
     bootstrapped_incidence <- .make_empty_module_output()
   }
@@ -47,6 +53,7 @@ get_bootstrap_replicate <- function( incidence_data,
 }
 
 
+#TODO polish doc (inclding details on use of LOESS)
 #' Apply block-bootstrapping procedure to module input
 #'
 #'\code{.block_bootstrap} returns a block-bootstrapped replicate
@@ -57,16 +64,17 @@ get_bootstrap_replicate <- function( incidence_data,
 #'
 #' @param incidence_input module input. Original incidence to bootstrap over.
 #' @param block_size integer. Size of a bootstrapping block.
-#' @param data_points_incl integer. Window size for LOESS smoothing, see \link{smooth_incidence}.
 #' @param round_incidence boolean. Round the bootstrapped incidence?
+#' @inheritParams smooth_LOESS
 #'
 #' @return a module output object
-.block_bootstrap <- function(incidence_input, block_size = 10, data_points_incl = 21, round_incidence = TRUE) {
+#' @export
+block_bootstrap <- function(incidence_input, block_size = 10, data_points_incl = 21, degree = 1, round_incidence = TRUE) {
 
   incidence_vector <- .get_values(incidence_input)
 
   log_original <-log(incidence_vector + 1)
-  smoothed_log <- smooth_incidence(log_original, smoothing_method = "LOESS", data_points_incl = data_points_incl)
+  smoothed_log <- smooth_incidence(log_original, smoothing_method = "LOESS", data_points_incl = data_points_incl, degree = degree)
   diff_smoothed_original <- log_original - smoothed_log
 
   bootstrapped_diff <- .block_bootstrap_overlap_func(diff_smoothed_original, block_size)

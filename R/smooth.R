@@ -1,16 +1,13 @@
 #TODO figure out how to deal with sometimes having incidence that needs to be left-padded with zeroes and sometimes not
 
-#TODO improve doc (improve doc of LOESS option and additional parameters.)
 #'Smooth noisy incidence data
 #'
 #'Currently only LOESS smoothing (smoothing_method = "LOESS") is implemented.
 #'
-#'#TODO specify input format #TODO figure out how to document additional parms
-#'for internal functions
-#'@param incidence_data numeric.
 #'@param simplify_output boolean. Return a numeric vector instead of module
-#'  output object if output offset is zero?
-#'@param ... Additional parameters
+#'  output object if output offset is zero? TODO to be described better.
+#'@param ... Additional parameters TODO add details
+#'passed to the function implementing the chosen \code{smoothing_method}.
 #'@inheritParams smooth_deconvolve_estimate
 #'
 #'@return module output. Smoothed incidence.
@@ -25,8 +22,19 @@ smooth_incidence <- function(incidence_data,
   
   input <- .get_module_input(incidence_data)
 
+  if(...length() > 0) {
+    dots <- list(...)
+  } else {
+    dots <- list()
+  }
+
+
   if(smoothing_method == "LOESS") {
-    smoothed_incidence <- .smooth_LOESS(input, ...)
+    LOESS_args <- names(formals(smooth_LOESS))
+    smoothed_incidence <- do.call(
+      'smooth_LOESS',
+      c(list(incidence_input = input), dots[names(dots) %in% LOESS_args])
+    )
   } else {
     smoothed_incidence <- .make_empty_module_output()
   }
@@ -40,7 +48,12 @@ smooth_incidence <- function(incidence_data,
 
 #' LOESS smoothing function
 #'
-#' see help for \code{\link[stats]{loess}} for more details.
+#' Prefer the use of the wrapper function \code{smooth_incidence(..., smoothing_method = "LOESS")}
+#' instead of \code{smooth_LOESS}.
+#'
+#' This function implements the LOESS method for smoothing noisy data.
+#' It is essentially a wrapper around \code{\link[stats]{loess}}.
+#' See the help section for \code{\link[stats]{loess}} for details on LOESS.
 #'
 #' #TODO add details on how data_points_incl relates to span.
 #'
@@ -49,8 +62,8 @@ smooth_incidence <- function(incidence_data,
 #' @param degree integer. LOESS degree.
 #'
 #' @return module output. Smoothed incidence.
-.smooth_LOESS <- function(incidence_input, data_points_incl = 21, degree = 1) {
-  
+#' @export
+smooth_LOESS <- function(incidence_input, data_points_incl = 21, degree = 1) {
   incidence_vector <- .get_values(incidence_input)
 
   n_points <- length(incidence_vector)

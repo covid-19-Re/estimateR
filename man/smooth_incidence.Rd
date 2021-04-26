@@ -12,23 +12,20 @@ smooth_incidence(
 )
 }
 \arguments{
-\item{incidence_data}{numeric.}
+\item{incidence_data}{numeric. TODO define acceptable format}
 
 \item{smoothing_method}{string. Method used to smooth the original incidence data.
-Options are: "LOESS".}
+Options are: "LOESS", implemented in \code{\link{smooth_LOESS}}.}
 
 \item{simplify_output}{boolean. Return a numeric vector instead of module
-output object if output offset is zero?}
+output object if output offset is zero? TODO to be described better.}
 
-\item{...}{Additional parameters}
+\item{...}{Additional parameters TODO add details
+passed to the function implementing the chosen \code{smoothing_method}.}
 }
 \value{
 module output. Smoothed incidence.
 }
 \description{
 Currently only LOESS smoothing (smoothing_method = "LOESS") is implemented.
-}
-\details{
-#TODO specify input format #TODO figure out how to document additional parms
-for internal functions
 }

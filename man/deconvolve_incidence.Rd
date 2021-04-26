@@ -9,9 +9,6 @@ deconvolve_incidence(
   deconvolution_method = "Richardson-Lucy delay distribution",
   delay_incubation,
   delay_onset_to_report = c(1),
-  start_date = NULL,
-  time_step = "day",
-  min_number_cases = NULL,
   simplify_output = TRUE,
   ...
 )
@@ -19,11 +16,13 @@ deconvolve_incidence(
 \arguments{
 \item{incidence_data}{numeric.}
 
-\item{deconvolution_method}{string. Options are "Richardson-Lucy delay distribution"}
-
-\item{min_number_cases}{}
+\item{deconvolution_method}{string. Method used to infer timings of infection
+events from the original incidence data (aka deconvolution).
+Options are "Richardson-Lucy delay distribution".}
 
 \item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
+
+\item{...}{Additional parameters.}
 }
 \value{
 module output object.
