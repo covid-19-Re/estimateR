@@ -36,6 +36,3 @@ of cases over which to build empirical delay distribution}
 \description{
 Title
 }
-\examples{
-#TODO add example
-}

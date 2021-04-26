@@ -159,6 +159,7 @@
   }
 }
 
+#TODO change start_date to ref_date or vice versa
 #TODO allow for list of distributions as input
 #TODO generalize this to a list of inputs
 #TODO fill in doc
@@ -177,9 +178,6 @@
 #'
 #' @return
 #' @export
-#'
-#' @examples
-#' #TODO add example
 convolve_delay_inputs <- function(delay_incubation,
                                   delay_onset_to_report,
                                   n_report_time_steps = 0,

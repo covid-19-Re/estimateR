@@ -13,13 +13,12 @@ get_block_bootstrapped_estimate(
   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
   delay_incubation,
   delay_onset_to_report = c(1),
-  estimation_window = 3,
   mean_serial_interval = 4.8,
   std_serial_interval = 2.3,
-  mean_Re_prior = 1,
   ref_date = NULL,
   time_step = "day",
-  verbose = FALSE
+  verbose = FALSE,
+  ...
 )
 }
 \arguments{
@@ -40,21 +39,17 @@ Options are "EpiEstim sliding window".}
 
 \item{uncertainty_summary_method}{string. 'NONE' or one of the possible strings in \code{\link{summarise_uncertainty}}}
 
-\item{estimation_window}{integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.}
-
 \item{mean_serial_interval}{numeric. see \code{\link{estimate_Re}}}
 
 \item{std_serial_interval}{numeric. see \code{\link{estimate_Re}}}
 
-\item{mean_Re_prior}{numeric value. Mean of prior distribution on Re.}
-
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
-\item{time_step}{string. Time between two consecutive incidence datapoints. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
+\item{time_step}{string. Time between two consecutive incidence datapoints. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+
+\item{verbose}{boolean. Print verbose output?
 
 #TODO add details on output formatting}
-
-\item{verbose}{boolean. Print verbose output?}
 }
 \value{
 tibble. Re estimations along with results from each pipeline step.

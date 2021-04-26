@@ -7,6 +7,7 @@
 #TODO generalize get_block_bootstrapped_estimate to any bootstrapping that works the same way (parallel estimation and summary as a final step)
 
 #TODO expand on the output
+#TODO test that '...' are passed (for instance block_size to block_bootstrap)
 #' Estimate Re from incidence and estimate uncertainty with block-bootstrapping
 #'
 #' An estimation of the effective reproductive number through time is made with \code{smooth_deconvolve_estimate}
@@ -39,38 +40,72 @@ get_block_bootstrapped_estimate <- function(incidence_data,
                                             uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
                                             delay_incubation,
                                             delay_onset_to_report = c(1.0),
-                                            estimation_window = 3,
                                             mean_serial_interval = 4.8,
                                             std_serial_interval  = 2.3,
-                                            mean_Re_prior = 1,
                                             ref_date = NULL,
                                             time_step = "day",
-                                            verbose = FALSE){
+                                            verbose = FALSE,
+                                            ...){
 
-  #TODO if verbose:set up
+  if(...length() > 0) {
+    dots <- list(...)
+  } else {
+    dots <- list()
+  }
+
+  smoothing_module_args <- names(formals(smooth_incidence))
+  deconvolution_module_args <- names(formals(smooth_incidence))
+  estimate_Re_module_args <- names(formals(estimate_Re))
+  bootstrap_module_args <- c(names(formals(get_bootstrap_replicate)), names(formals(block_bootstrap)))
+  uncertainty_args <- names(formals(summarise_uncertainty))
+
+  #TODO work on way to grab additional arguments of module function
+  # improve on what is done below by outsourcing to utility function
+  if(smoothing_method == "LOESS" &&
+     deconvolution_method == "Richardson-Lucy delay distribution" &&
+     estimation_method == "EpiEstim sliding window") {
+    LOESS_args <- names(formals(smooth_LOESS))
+    RL_deconvolution_args <- names(formals(deconvolve_incidence_Richardson_Lucy))
+    EpiEstim_args <- names(formals(estimate_Re_EpiEstim_sliding_window))
+    convolution_args <- names(formals(convolve_delay_inputs))
+  } else {
+    stop("Unknown method.")
+  }
+
+  smooth_deconvolve_estimate_args <- c(smoothing_module_args, LOESS_args,
+                                       deconvolution_module_args, RL_deconvolution_args,
+                                       estimate_Re_module_args, EpiEstim_args)
 
   # Display progress bar
   progress_bar <- utils::txtProgressBar(min = 0, max = N_bootstrap_replicates + 1, style = 3)
   utils::setTxtProgressBar(progress_bar, 0)
 
   # Prepare delay distribution vector or matrix early on as it spares the need to redo the same operation for each bootstrap replicate
-  total_delay_distribution <- convolve_delay_inputs(delay_incubation,
-                                                    delay_onset_to_report,
-                                                    n_report_time_steps = length(incidence_data))
+  total_delay_distribution <- do.call(
+    'convolve_delay_inputs',
+    c(list(delay_incubation = delay_incubation,
+           delay_onset_to_report = delay_onset_to_report,
+           n_report_time_steps = length(incidence_data),
+           start_date = ref_date,
+           time_step = time_step),
+      dots[names(dots) %in% convolution_args])
+  )
 
-  original_result <- smooth_deconvolve_estimate(incidence_data,
-                                                smoothing_method = smoothing_method,
-                                                deconvolution_method = deconvolution_method,
-                                                estimation_method = estimation_method,
-                                                delay_incubation = total_delay_distribution,
-                                                estimation_window = estimation_window,
-                                                mean_serial_interval = mean_serial_interval,
-                                                std_serial_interval  = std_serial_interval,
-                                                mean_Re_prior = mean_Re_prior,
-                                                ref_date = ref_date,
-                                                time_step = time_step,
-                                                output_Re_only = FALSE,
-                                                verbose = verbose)
+  original_result <- do.call(
+    'smooth_deconvolve_estimate',
+    c(list(incidence_data = incidence_data,
+           smoothing_method = smoothing_method,
+           deconvolution_method = deconvolution_method,
+           estimation_method = estimation_method,
+           delay_incubation = total_delay_distribution,
+           mean_serial_interval = mean_serial_interval,
+           std_serial_interval  = std_serial_interval,
+           ref_date = ref_date,
+           time_step = time_step,
+           output_Re_only = FALSE,
+           verbose = verbose),
+      dots[names(dots) %in% smooth_deconvolve_estimate_args])
+  )
 
   original_result$bootstrap_id <- 0
 
@@ -80,21 +115,28 @@ get_block_bootstrapped_estimate <- function(incidence_data,
 
     utils::setTxtProgressBar(progress_bar, i)
 
-    bootstrapped_incidence <- get_bootstrap_replicate(incidence_data = incidence_data,
-                                                      bootstrapping_method = "non-parametric block boostrap")
+    bootstrapped_incidence <- do.call(
+      'get_bootstrap_replicate',
+      c(list(incidence_data = incidence_data,
+             bootstrapping_method = "non-parametric block boostrap"),
+        dots[names(dots) %in% bootstrap_module_args])
+    )
 
-    bootstrapping_result <- smooth_deconvolve_estimate(bootstrapped_incidence,
-                                                       smoothing_method = smoothing_method,
-                                                       deconvolution_method = deconvolution_method,
-                                                       estimation_method = estimation_method,
-                                                       delay_incubation = total_delay_distribution,
-                                                       mean_serial_interval = mean_serial_interval,
-                                                       std_serial_interval  = std_serial_interval,
-                                                       estimation_window = estimation_window,
-                                                       ref_date = ref_date,
-                                                       time_step = time_step,
-                                                       output_Re_only = FALSE,
-                                                       verbose = verbose)
+    bootstrapping_result <- do.call(
+      'smooth_deconvolve_estimate',
+      c(list(incidence_data = bootstrapped_incidence,
+             smoothing_method = smoothing_method,
+             deconvolution_method = deconvolution_method,
+             estimation_method = estimation_method,
+             delay_incubation = total_delay_distribution,
+             mean_serial_interval = mean_serial_interval,
+             std_serial_interval  = std_serial_interval,
+             ref_date = ref_date,
+             time_step = time_step,
+             output_Re_only = FALSE,
+             verbose = verbose),
+        dots[names(dots) %in% smooth_deconvolve_estimate_args])
+    )
 
     bootstrapping_result$bootstrap_id <- i
 
@@ -152,11 +194,10 @@ get_block_bootstrapped_estimate <- function(incidence_data,
 #' @param estimation_window integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.
 #' @param mean_serial_interval numeric. see \code{\link{estimate_Re}}
 #' @param std_serial_interval numeric. see \code{\link{estimate_Re}}
-#' @param mean_Re_prior numeric value. Mean of prior distribution on Re.
-#' @param verbose boolean. Print verbose output?
-#' @param output_Re_only boolean. Should the output only contain Re estimates? (as opposed to containing results for each intermediate step)
 #' @param ref_date Date. Optional. Date of the first data entry in \code{incidence_data}
 #' @param time_step string. Time between two consecutive incidence datapoints. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
+#' @param output_Re_only boolean. Should the output only contain Re estimates? (as opposed to containing results for each intermediate step)
+#' @param verbose boolean. Print verbose output?
 #'
 #'#TODO add details on output formatting
 #' @return effective reproductive number estimates through time.
@@ -167,43 +208,80 @@ smooth_deconvolve_estimate <- function(incidence_data,
                                        estimation_method = "EpiEstim sliding window",
                                        delay_incubation,
                                        delay_onset_to_report = c(1.0),
-                                       estimation_window = 3,
                                        mean_serial_interval = 4.8,
                                        std_serial_interval  = 2.3,
-                                       mean_Re_prior = 1,
-                                       output_Re_only = TRUE,
                                        ref_date = NULL,
                                        time_step = "day",
-                                       verbose = FALSE) {
+                                       output_Re_only = TRUE,
+                                       verbose = FALSE,
+                                       ...) {
 
-  smoothed_incidence <- smooth_incidence(incidence_data = incidence_data,
-                                         smoothing_method = smoothing_method)
+  if(...length() > 0) {
+    dots <- list(...)
+  } else {
+    dots <- list()
+  }
 
-  deconvolved_incidence <- deconvolve_incidence(incidence_data = smoothed_incidence,
-                                                deconvolution_method = deconvolution_method,
-                                                delay_incubation = delay_incubation,
-                                                delay_onset_to_report = delay_onset_to_report,
-                                                start_date = ref_date,
-                                                time_step = time_step,
-                                                verbose = verbose)
+  smoothing_module_args <- names(formals(smooth_incidence))
+  deconvolution_module_args <- names(formals(smooth_incidence))
+  estimate_Re_module_args <- names(formals(estimate_Re))
 
-  estimated_Re <- estimate_Re(incidence_data = deconvolved_incidence,
-                              estimation_method = estimation_method,
-                              estimation_window = estimation_window,
-                              mean_serial_interval = mean_serial_interval,
-                              std_serial_interval = std_serial_interval,
-                              mean_Re_prior = mean_Re_prior)
+  #TODO work on way to grab additional arguments of module function
+  # improve on what is done below by outsourcing to utility function
+  if(smoothing_method == "LOESS" &&
+     deconvolution_method == "Richardson-Lucy delay distribution" &&
+     estimation_method == "EpiEstim sliding window") {
+    LOESS_args <- names(formals(smooth_LOESS))
+    RL_deconvolution_args <- names(formals(deconvolve_incidence_Richardson_Lucy))
+    EpiEstim_args <- names(formals(estimate_Re_EpiEstim_sliding_window))
+    convolution_args <- names(formals(convolve_delay_inputs))
+  } else {
+    stop("Unknown method.")
+  }
+
+  smoothed_incidence <- do.call(
+    'smooth_incidence',
+    c(list(incidence_data = incidence_data,
+           smoothing_method = smoothing_method),
+      dots[names(dots) %in% c(smoothing_module_args, LOESS_args)])
+  )
+
+  deconvolved_incidence <- do.call(
+    'deconvolve_incidence',
+    c(list(incidence_data = smoothed_incidence,
+           deconvolution_method = deconvolution_method,
+           delay_incubation = delay_incubation,
+           delay_onset_to_report = delay_onset_to_report,
+           verbose = verbose),
+      dots[names(dots) %in% c(deconvolution_module_args, RL_deconvolution_args, convolution_args)]
+      )
+  )
+
+  estimated_Re <- do.call(
+    'estimate_Re',
+    c(list(incidence_data = deconvolved_incidence,
+           estimation_method = estimation_method,
+           mean_serial_interval = mean_serial_interval,
+           std_serial_interval = std_serial_interval),
+      dots[names(dots) %in% c(estimate_Re_module_args, EpiEstim_args)])
+  )
 
   if(output_Re_only) {
     return(estimated_Re)
   } else {
-    merged_results <- merge_outputs(
-      list("observed_incidence" = incidence_data,
-           "smoothed_incidence" = smoothed_incidence,
+    merging_args <- names(formals(merge_outputs))
+
+    merged_results <- do.call(
+      'merge_outputs',
+      c(list(output_list =
+               list("observed_incidence" = incidence_data,
+            "smoothed_incidence" = smoothed_incidence,
            "deconvolved_incidence" = deconvolved_incidence,
            "R_mean" = estimated_Re),
-      ref_date = ref_date,
-      time_step = time_step)
+           ref_date = ref_date,
+           time_step = time_step),
+        dots[names(dots) %in% merging_args])
+    )
 
     return(merged_results)
   }

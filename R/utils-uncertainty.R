@@ -13,8 +13,6 @@
 #'
 #' @return dataframe containing Re estimates and confidence interval boundaries.
 #' @export
-#'
-#' @examples
 summarise_uncertainty <- function(bootstrapped_estimates,
                                   original_estimates = NULL,
                                   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
