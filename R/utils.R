@@ -254,7 +254,6 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #' @param parameter_name string containing the name of the parameter to be tested
 #'
 #' @return a boolean value. (TRUE if string_user_input is an accepted value. Throws an error otherwise)
-# TODO maybe add "" or , in between accepted parameter values in error message
 .is_value_in_accepted_values_vector <- function(string_user_input, parameter_name){
   if(!is.character(string_user_input)){
     stop(paste("Expected parameter", parameter_name, "to be a string."))
@@ -307,9 +306,10 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #' - or is a list with two elements: $values: numeric vector with values > 0
 #'                                   $index_offset: integer 
 #'
-#' @param user_input the vector/list the user passed as a parameter, to be tested
+#' @param module_object the vector/list the user passed as a parameter, to be tested
+#' @param parameter_name string containing the original parameter name in the function that was called by the user. This is used for writing informative error messages. 
 #'
-#' @return TRUE if user_input is a valid module input. Throws an informative error otherwise.
+#' @return TRUE if module_object is a valid module input. Throws an error otherwise.
 .is_valid_module_input <- function(module_object, parameter_name){
   if(is.list(module_object)){
     if("values" %!in% names(module_object)){
@@ -339,14 +339,24 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   return(TRUE)
 }
 
-#' TODO: fill in 
+#' Utility function that checks if a given matrix is a valid delay distribution matrix.
+#' For this, the matrix needs to fulfill the following conditions:
+#'     - is a numeric matrix
+#'     - has no values <0
+#'     - is a lower triangular matrix
+#'     - no column sums up to more than 1
+#'     - no NA values
+#'     - is a square matrix
+#'     - the size of the matrix is greater than the length of the incidence data
+#' 
 #' TODO: can it have values on diagonal?
-#' TODO: test
-#' question: ask whether to keep throw error behavior or add a throw=True argument to the function?
-#' @param delay_matrix 
+#' 
+#' @param delay_matrix matrix to be tested
+#' @param incidence_data_length the length of the incidence data 
 #'
-#' @return
-.is_delay_distribution_matrix <- function(delay_matrix, incidence_data_length){
+#' @return TRUE if all tests were passed. Throws an error otherwise
+#' 
+.check_is_delay_distribution_matrix <- function(delay_matrix, incidence_data_length){
   if(!is.matrix(delay_matrix) || !is.numeric(delay_matrix)){
     stop("The delay distribution object needs to be a numeric matrix.")
   }
@@ -377,6 +387,39 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   
   return(TRUE)
   
+}
+
+#' Utility function that checks whether a user input is a valid delay object. This means it can be one of the following:
+#'      - a probability distribution vector: a numeric vector with no NA or negative values, whose entries sum up to 1
+#'      - an empirical delay data: a data frame with two columns: event_date and report_delay. The columns cannot contain NA values. report_delay only contains non-negative values
+#'      - a delay distribution matrix (see conditions above)
+#'
+#' @param delay_object user inputted object to be tested
+#' @param parameter_name string containing the original parameter name in the function that was called by the user. This is used for writing informative error messages. 
+#' @
+#'
+#' @return
+.is_valid_delay_object <- function(delay_object, parameter_name, length_of_incidence_data){
+
+  if(.is_numeric_vector(delay_object)){
+    
+    .check_is_probability_distr_vector(delay_object)
+  
+  } else if(is.data.frame(delay_object)){
+    
+    .check_is_empirical_delay_data(delay_object)
+    
+  } else if(is.matrix(delay_object)){
+    
+    .check_is_delay_distribution_matrix(delay_object, length_of_incidence_data)
+    
+  } else {
+    stop(paste("Invalid", parameter_name, "input.", parameter_name, "must be either:
+         a numeric vector representing a discretized probability distribution,
+         or a matrix representing discretized probability distributions,
+         or a distribution object (e.g. list(name = 'gamma', scale = X, shape = Y)),
+         or empirical delay data."))
+  }
 }
 
 #' TODO fill in
@@ -421,6 +464,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   return(TRUE)
 }
 
+
 #' Utility function that checks that the values the user passed when calling a function are valid
 #' Returns TRUE if all checks were passed.
 #' @param user_inputs list of all arguments with which the tested function was called (can be obtain via "as.list(environment()")
@@ -428,9 +472,13 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #' @return TRUE if all checks were passed. Throws an error otherwise
 .are_valid_argument_values <- function(user_inputs){
   for(i in 1:length(user_inputs)){
-    user_input <- user_inputs[[i]]$user_input 
-    input_type <- user_inputs[[i]]$input_type
-    parameter_name <- user_inputs[[i]]$parameter_name
+    user_input <- user_inputs[[i]][[1]] 
+    input_type <- user_inputs[[i]][[2]]
+    parameter_name <- deparse(substitute(user_inputs)[[i+1]][[2]])
+    if(length(user_inputs[[i]]) > 2){
+      additional_function_parameter <- user_inputs[[i]][[3]] 
+    }
+    
     switch (input_type,
         "smoothing_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
         "deconvolution_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
@@ -440,7 +488,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
         "time_step" = .is_value_valid_time_step(user_input, parameter_name),
         "module_input" = .is_valid_module_input(user_input, parameter_name),
         "boolean" = .check_class_parameter_name(user_input,"logical", parameter_name),
-        "empirical_delay_data" = .check_is_empirical_delay_data(user_input),
+        "delay_object" = .is_valid_delay_object(user_input, parameter_name, additional_function_parameter),
         "numeric" = .check_class_parameter_name(user_input,"numeric", parameter_name),
         "null_or_date" = .check_if_null_or_belongs_to_class(user_input, "Date", parameter_name),
         "null_or_numeric" = .check_if_null_or_belongs_to_class(user_input, "numeric", parameter_name)
@@ -449,3 +497,19 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   return(TRUE)
 }
 
+#test ...
+library(ellipsis)
+.inner_funct_1 <- function(a="not specified", ...){
+  print(paste("a is", a))
+  print(paste("b is", b))
+}
+.inner_funct_2 <- function(b="not specified", ...){
+  print(paste("b is", b))
+}
+
+.dummy_function <- function(...){
+  check_dots_used()
+  .inner_funct_1(...)
+  .inner_funct_2(...)
+    
+}

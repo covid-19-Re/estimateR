@@ -22,9 +22,9 @@
 #'
 estimate_Re <- function( incidence_data, estimation_method = "EpiEstim sliding window", simplify_output = TRUE, ... ) {
 
-  .are_valid_argument_values(list(list(user_input = incidence_data, input_type = "module_input", parameter_name = "incidence_data"),
-                                  list(user_input=estimation_method, input_type="estimation_method", parameter_name="estimation_method"),
-                                  list(user_input=simplify_output, input_type="boolean", parameter_name="simplify_output")))
+  .are_valid_argument_values(list(list(incidence_data, "module_input"),
+                                  list(estimation_method, "estimation_method"),
+                                  list(simplify_output, "boolean")))
   
   
   input <- .get_module_input(incidence_data)
