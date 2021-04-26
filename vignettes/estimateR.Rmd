@@ -204,5 +204,16 @@ estimates <- get_block_bootstrapped_estimate(toy_incidence_data,
 
 head(estimates)
 ```
-
+```{r, fig.width=7, fig.height=4}
+library(ggplot2)
+ggplot(estimates, aes(x = date, y = Re_estimate)) +
+  geom_line(lwd=  1.1) +
+  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.15, colour = NA) +
+  scale_x_date(date_breaks = "1 day", 
+               date_labels = '%b\n%d') +
+  ylab("Reproductive number") +
+  coord_cartesian(ylim = c(0, 3.7)) +
+  xlab("") +
+  theme_bw()
+```
 

@@ -5,10 +5,10 @@
 \title{Title}
 \usage{
 .summarise_bagged_mean(
+  original_estimates,
   bootstrapped_estimates,
-  include_original_estimates = TRUE,
-  Re_estimate_col = "R_mean",
-  bootstrap_id_col = "bootstrap_id",
+  Re_estimate_col = Re_estimate_col,
+  bootstrap_id_col = bootstrap_id_col,
   time_step = "day"
 )
 }

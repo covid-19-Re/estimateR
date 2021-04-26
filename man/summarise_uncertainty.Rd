@@ -6,6 +6,7 @@
 \usage{
 summarise_uncertainty(
   bootstrapped_estimates,
+  original_estimates = NULL,
   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
   Re_estimate_col = "R_mean",
   bootstrap_id_col = "bootstrap_id",

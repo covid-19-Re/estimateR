@@ -6,6 +6,7 @@
 
 #TODO generalize get_block_bootstrapped_estimate to any bootstrapping that works the same way (parallel estimation and summary as a final step)
 
+#TODO expand on the output
 #' Estimate Re from incidence and estimate uncertainty with block-bootstrapping
 #'
 #' An estimation of the effective reproductive number through time is made with \code{smooth_deconvolve_estimate}
@@ -24,29 +25,12 @@
 #'
 #' #TODO clarify input
 #'
-#' @param incidence_vector numeric
 #' @param N_bootstrap_replicates integer. Number of bootstrap samples.
-#' @param smoothing_method string. see \code{\link{smooth_incidence}}.
-#' @param deconvolution_method string. see \code{\link{deconvolve_incidence}}
-#' @param estimation_method string. see \code{\link{estimate_Re}}
 #' @param uncertainty_summary_method string. 'NONE' or one of the possible strings in \code{\link{summarise_uncertainty}}
-#' @param delay_incubation #TODO fill in doc
-#' @param delay_onset_to_report #TODO fill in doc
-#' @param estimation_window integer. Only used if \code{estimation_method = "EpiEstim sliding window"}.
-#'  see \code{\link{estimate_Re}}
-#' @param mean_serial_interval numeric. see \code{\link{estimate_Re}}
-#' @param std_serial_interval numeric. see \code{\link{estimate_Re}}
-#' @param mean_Re_prior numeric. Mean of prior distribution on Re
-#' @param verbose boolean. see \code{\link{deconvolve_incidence}}
-#' @param ref_date Date. Optional. Date of the first data entry in \code{incidence_vector}
-#' @param time_step string. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
+#' @inheritParams smooth_deconvolve_estimate
 #'
-#'#TODO expand on the output
 #' @return tibble. Re estimations along with results from each pipeline step.
 #' @export
-#'
-#' @examples
-#' #TODO add examples
 get_block_bootstrapped_estimate <- function(incidence_vector,
                                             N_bootstrap_replicates = 100,
                                             smoothing_method = "LOESS",
@@ -63,6 +47,7 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                             time_step = "day",
                                             verbose = FALSE){
 
+  #TODO if verbose:set up
 
   .are_valid_argument_values(list(list(user_input = incidence_vector, input_type = "module_input", parameter_name = "incidence_vector"),
                                   list(user_input=N_bootstrap_replicates, input_type="numeric", parameter_name="N_bootstrap_replicates"),
@@ -80,6 +65,10 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                   list(user_input=time_step, input_type="time_step", parameter_name="time_step"),
                                   list(user_input=verbose, input_type="boolean", parameter_name="verbose")))
   
+  # Display progress bar
+  progress_bar <- utils::txtProgressBar(min = 0, max = N_bootstrap_replicates + 1, style = 3)
+  utils::setTxtProgressBar(progress_bar, 0)
+
   # Prepare delay distribution vector or matrix early on as it spares the need to redo the same operation for each bootstrap replicate
   total_delay_distribution <- convolve_delay_inputs(delay_incubation,
                                                     delay_onset_to_report,
@@ -105,6 +94,8 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 
   for(i in 1:N_bootstrap_replicates) {
 
+    utils::setTxtProgressBar(progress_bar, i)
+
     bootstrapped_incidence <- get_bootstrap_replicate(incidence_data = incidence_vector,
                                                       bootstrapping_method = "non-parametric block boostrap")
 
@@ -128,11 +119,22 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 
   bootstrapped_estimates <- dplyr::bind_rows(bootstrapping_results)
 
-  estimates_with_uncertainty <- summarise_uncertainty(bootstrapped_estimates = bootstrapped_estimates,
+  original_estimates <- bootstrapped_estimates %>%
+    dplyr::filter(.data$bootstrap_id == 0)
+
+  bootstrapped_estimates <- bootstrapped_estimates %>%
+    dplyr::filter(.data$bootstrap_id > 0)
+
+  estimates_with_uncertainty <- summarise_uncertainty(original_estimates = original_estimates,
+                                                      bootstrapped_estimates = bootstrapped_estimates,
                                                       uncertainty_summary_method = uncertainty_summary_method,
                                                       Re_estimate_col = "R_mean",
                                                       bootstrap_id_col = "bootstrap_id",
                                                       time_step = time_step)
+
+  # Close progress bar
+  utils::setTxtProgressBar(progress_bar, N_bootstrap_replicates + 1)
+  close(progress_bar)
 
   return(estimates_with_uncertainty)
 }
@@ -152,14 +154,18 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 #'
 #'#TODO clarify input
 #'
-#' @param incidence_vector numeric
-#' @param smoothing_method string. see \code{\link{smooth_incidence}}.
-#' @param deconvolution_method string. see \code{\link{deconvolve_incidence}}
-#' @param estimation_method string. see \code{\link{estimate_Re}}
+#' @param incidence_vector numeric.
+#' @param smoothing_method string. Method used to smooth the original incidence data.
+#'  Options are: "LOESS".
+#' @param deconvolution_method string. Method used to infer timings of infection
+#' events from the original incidence data (aka deconvolution).
+#' Options are "Richardson-Lucy delay distribution".
+#' @param estimation_method string. Method used to estimate reproductive number
+#' values through time from the reconstructed infection timings.
+#' Options are "EpiEstim sliding window".
 #' @param delay_incubation
 #' @param delay_onset_to_report
 #' @param estimation_window integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.
-#'  see \code{\link{estimate_Re}}
 #' @param mean_serial_interval numeric. see \code{\link{estimate_Re}}
 #' @param std_serial_interval numeric. see \code{\link{estimate_Re}}
 #' @param mean_Re_prior numeric. Mean of prior distribution on Re
@@ -171,9 +177,6 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
 #'#TODO add details on output formatting
 #' @return effective reproductive number estimates through time.
 #' @export
-#'
-#' @examples
-#' #TODO add examples
 smooth_deconvolve_estimate <- function(incidence_vector,
                                        smoothing_method = "LOESS",
                                        deconvolution_method = "Richardson-Lucy delay distribution",

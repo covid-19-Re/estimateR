@@ -12,7 +12,8 @@
 #'
 #' @return TRUE if no error was raised.
 .check_is_probability_distr_vector <- function(distribution, tolerate_NAs = FALSE, tolerance_on_sum = 1E-3) {
-  .check_class(distribution, "numeric")
+
+  .check_class(distribution, "vector", mode = "numeric")
 
   if( !tolerate_NAs && any(is.na(distribution)) ) {
     stop("Not a proper delay distribution vector. Contains one or more NAs.")
@@ -32,15 +33,34 @@
 #' Check whether the class of an object is as expected
 #'
 #' @param object An object whose class needs checking,
-#' @param proper_class A string describing the desired class of 'object'.
+#' @param proper_class A string describing the desired class of \code{object}.
+#' @param mode Optional. A string describing the desired mode of \code{object}.
+#' Use only if \code{proper_class} is \code{vector}. Mode cannot be \code{Date}.
+#' Use \code{proper_class = "Date"} for checking class of \code{Date vector}.
 #'
 #' @return TRUE if no error is thrown.
-.check_class <- function(object, proper_class){
-  if (class(proper_class) != "character" || length(proper_class) > 1 ) {
+.check_class <- function(object, proper_class, mode = "any"){
+  if ("character" %!in% class(proper_class) || length(proper_class) > 1 ) {
     stop("'proper_class' must be a single string.")
   }
 
-  # testing function
+  if ("character" %!in% class(mode) || length(mode) > 1 ) {
+    stop("'mode' must be a single string.")
+  }
+
+  if(proper_class == "vector") {
+    if(mode == "Date") {
+      stop("Mode cannot be 'Date'.")
+    }
+
+    if(!is.vector(object, mode = mode)) {
+      stop(paste0(deparse(substitute(object)), " must be a ", mode, " vector."))
+    }
+
+    return(TRUE)
+  }
+
+  # validation function
   is_proper_class <- get(paste0("is.", proper_class), envir = loadNamespace("lubridate")) # need lubridate in case proper_class is Date
 
   if (!is_proper_class(object)) {
@@ -115,7 +135,7 @@
     if ("report_delay" %!in% colnames(delay)) {
       stop("Missing 'report_delay' column in dataframe.")
     }
-    .check_class(delay$report_delay, "numeric")
+    .check_class(delay$report_delay, "vector", mode = "numeric")
 
     if( any(is.na(delay$event_date)) || any(is.na(delay$report_delay)) ){
       stop("Empirical delay data contains NA values.")
@@ -130,4 +150,14 @@
   } else {
   return(FALSE)
   }
+}
+
+
+#' Check if object is numeric vector.
+#'
+#' @param object Any object.
+#'
+#' @return TRUE if numeric vector, FALSE otherwise
+.is_numeric_vector <- function(object){
+  return(is.vector(object, mode = "numeric"))
 }

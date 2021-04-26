@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-convolution.R
 \name{.convolve_delay_distribution_vector_with_matrix}
 \alias{.convolve_delay_distribution_vector_with_matrix}
-\title{Title}
+\title{Convolve a delay distribution vector with a delay distribution matrix}
 \usage{
 .convolve_delay_distribution_vector_with_matrix(
   vector_a,
@@ -11,11 +11,16 @@
 )
 }
 \arguments{
-\item{vector_first}{a boolean. Delay described in vector is applied before delay described in matrix}
+\item{vector_a}{discretized delay distribution vector}
+
+\item{matrix_b}{discretized delay distribution matrix}
+
+\item{vector_first}{Is the delay described by \code{vector_a} happen before
+the one from \code{matrix_b} or is it the opposite?}
 }
 \value{
-square matrix. Delay distribution matrix
+discretized delay distribution matrix
 }
 \description{
-Title
+Convolve a delay distribution vector with a delay distribution matrix
 }

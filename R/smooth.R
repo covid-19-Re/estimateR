@@ -1,22 +1,20 @@
 #TODO figure out how to deal with sometimes having incidence that needs to be left-padded with zeroes and sometimes not
 
-#' Smooth Noisy Incidence Data
+#TODO improve doc (improve doc of LOESS option and additional parameters.)
+#'Smooth noisy incidence data
 #'
-#' Currently only LOESS smoothing (smoothing_method = "LOESS")
-#' is implemented.
+#'Currently only LOESS smoothing (smoothing_method = "LOESS") is implemented.
 #'
-#'#TODO specify input format
-#'#TODO figure out how to document additional parms for internal functions
-#' @param incidence_data numeric.
-#' @param smoothing_method string. Options are "LOESS".
-#' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
-#' @param ... Additional parameters
+#'#TODO specify input format #TODO figure out how to document additional parms
+#'for internal functions
+#'@param incidence_data numeric.
+#'@param simplify_output boolean. Return a numeric vector instead of module
+#'  output object if output offset is zero?
+#'@param ... Additional parameters
+#'@inheritParams smooth_deconvolve_estimate
 #'
-#' @return module output. Smoothed incidence.
-#' @export
-#'
-#' @examples
-#' #TODO add examples
+#'@return module output. Smoothed incidence.
+#'@export
 smooth_incidence <- function(incidence_data,
                              smoothing_method = "LOESS",
                              simplify_output = TRUE,

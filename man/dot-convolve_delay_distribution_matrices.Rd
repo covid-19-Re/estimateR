@@ -2,18 +2,19 @@
 % Please edit documentation in R/utils-convolution.R
 \name{.convolve_delay_distribution_matrices}
 \alias{.convolve_delay_distribution_matrices}
-\title{Title}
+\title{Convolve two delay distribution matrices}
 \usage{
 .convolve_delay_distribution_matrices(matrix_a, matrix_b)
 }
 \arguments{
-\item{matrix_a}{square numeric matrix}
+\item{matrix_a}{first delay distribution matrix}
 
-\item{matrix_b}{square numeric matrix}
+\item{matrix_b}{second delay distribution matrix}
 }
 \value{
-square matrix. Convolved matrix of time-varying delays.
+convolved discretized delay distribution matrix
 }
 \description{
 Note that this convolution operation is not commutative!
+The order matters: here the delay implied by matrix_a happens first.
 }

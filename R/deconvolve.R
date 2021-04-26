@@ -3,14 +3,13 @@
 #TODO add parameter to allow delay_distribution to not sum up to 1 if not waiting time distribution (e.g. shedding load distribution)
 
 #TODO redo doc
+#TODO figure out input format
 #' Infer Infection Events Dates from Delayed Observation
 #'
 #' This function reconstructs an incidence of infection events from incidence data representing delayed observations.
 #' The assumption made is that delayed observations represent the convolution of the infections with a delay distribution.
 #' \code{deconvolve_incidence} implements a deconvolution algorithm (Richardson-Lucy) to reconstruct
 #' a vector of infection events from input data representing delayed observations.
-#'
-#'#TODO figure out input format
 #'
 #' @param incidence_data numeric.
 #' @param deconvolution_method string. Options are "Richardson-Lucy delay distribution"
@@ -48,6 +47,8 @@ deconvolve_incidence <- function( incidence_data,
   
   
   input <- .get_module_input(incidence_data)
+
+  #TODO if delay_onset_to_report is c(1.0) then skip convolution step.
 
   #TODO generalize this to a list of delay inputs
   total_delay_distribution <- convolve_delay_inputs(delay_incubation,
@@ -94,8 +95,7 @@ deconvolve_incidence <- function( incidence_data,
   # Test delay_distribution input
   #TODO apply proper validation step
   if(NCOL(delay_distribution) != 1 && NCOL(delay_distribution) != NROW(delay_distribution)) {
-    #TODO cast proper error
-    print("Delay distribution input must be a vector or square matrix")
+    stop("Delay distribution input must be a vector or square matrix")
   }
 
   length_original_vector <- length(incidence_vector)

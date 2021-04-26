@@ -34,9 +34,6 @@ The assumption made is that delayed observations represent the convolution of th
 \code{deconvolve_incidence} implements a deconvolution algorithm (Richardson-Lucy) to reconstruct
 a vector of infection events from input data representing delayed observations.
 }
-\details{
-#TODO figure out input format
-}
 \examples{
 #TODO add examples
 }

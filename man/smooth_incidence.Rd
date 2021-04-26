@@ -2,7 +2,7 @@
 % Please edit documentation in R/smooth.R
 \name{smooth_incidence}
 \alias{smooth_incidence}
-\title{Smooth Noisy Incidence Data}
+\title{Smooth noisy incidence data}
 \usage{
 smooth_incidence(
   incidence_data,
@@ -14,9 +14,11 @@ smooth_incidence(
 \arguments{
 \item{incidence_data}{numeric.}
 
-\item{smoothing_method}{string. Options are "LOESS".}
+\item{smoothing_method}{string. Method used to smooth the original incidence data.
+Options are: "LOESS".}
 
-\item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
+\item{simplify_output}{boolean. Return a numeric vector instead of module
+output object if output offset is zero?}
 
 \item{...}{Additional parameters}
 }
@@ -24,13 +26,9 @@ smooth_incidence(
 module output. Smoothed incidence.
 }
 \description{
-Currently only LOESS smoothing (smoothing_method = "LOESS")
-is implemented.
+Currently only LOESS smoothing (smoothing_method = "LOESS") is implemented.
 }
 \details{
-#TODO specify input format
-#TODO figure out how to document additional parms for internal functions
-}
-\examples{
-#TODO add examples
+#TODO specify input format #TODO figure out how to document additional parms
+for internal functions
 }

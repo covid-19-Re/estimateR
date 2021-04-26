@@ -23,24 +23,24 @@ get_block_bootstrapped_estimate(
 )
 }
 \arguments{
-\item{incidence_vector}{numeric}
+\item{incidence_vector}{numeric.}
 
 \item{N_bootstrap_replicates}{integer. Number of bootstrap samples.}
 
-\item{smoothing_method}{string. see \code{\link{smooth_incidence}}.}
+\item{smoothing_method}{string. Method used to smooth the original incidence data.
+Options are: "LOESS".}
 
-\item{deconvolution_method}{string. see \code{\link{deconvolve_incidence}}}
+\item{deconvolution_method}{string. Method used to infer timings of infection
+events from the original incidence data (aka deconvolution).
+Options are "Richardson-Lucy delay distribution".}
 
-\item{estimation_method}{string. see \code{\link{estimate_Re}}}
+\item{estimation_method}{string. Method used to estimate reproductive number
+values through time from the reconstructed infection timings.
+Options are "EpiEstim sliding window".}
 
 \item{uncertainty_summary_method}{string. 'NONE' or one of the possible strings in \code{\link{summarise_uncertainty}}}
 
-\item{delay_incubation}{#TODO fill in doc}
-
-\item{delay_onset_to_report}{#TODO fill in doc}
-
-\item{estimation_window}{integer. Only used if \code{estimation_method = "EpiEstim sliding window"}.
-see \code{\link{estimate_Re}}}
+\item{estimation_window}{integer. Only use if \code{estimation_method = "EpiEstim sliding window"}.}
 
 \item{mean_serial_interval}{numeric. see \code{\link{estimate_Re}}}
 
@@ -52,7 +52,7 @@ see \code{\link{estimate_Re}}}
 
 \item{time_step}{string. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)
 
-#TODO expand on the output}
+#TODO add details on output formatting}
 
 \item{verbose}{boolean. see \code{\link{deconvolve_incidence}}}
 }
@@ -76,7 +76,4 @@ In latter case, the first waiting time distribution does not need to correspond 
 but it must in any case correspond to the delay between infection and case observation.
 
 #TODO clarify input
-}
-\examples{
-#TODO add examples
 }
