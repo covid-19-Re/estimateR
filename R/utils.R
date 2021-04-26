@@ -248,12 +248,11 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 }
 
 
-#' Utility function that checks if a specific user given parameter value is among the accepted ones, in which case it returns TRUE
+#' @description Utility function that checks if a specific user given parameter value is among the accepted ones, in which case it returns TRUE
 #' Throws an error otherwise.
-#' @param string_user_input string containing the value that the user passed for the tested parameter
-#' @param parameter_name string containing the name of the parameter to be tested
+#' @inherit validation_utility_params
+#' 
 #'
-#' @return a boolean value. (TRUE if string_user_input is an accepted value. Throws an error otherwise)
 .is_value_in_accepted_values_vector <- function(string_user_input, parameter_name){
   if(!is.character(string_user_input)){
     stop(paste("Expected parameter", parameter_name, "to be a string."))
@@ -265,13 +264,10 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 }
 
 
-#' Utility function that checks if a specific user given parameter value an accepted time_step, in which case it returns TRUE
-#' Throws an error otherwise.
-#' @param string_user_input string containing the value that the user passed for the tested parameter
-#' @param parameter_name string containing the name of the parameter to be tested
+#' @description Utility function that checks if a specific user given parameter value an accepted time_step, in which case it returns TRUE
+#' An accepted time_step is considered to be: <<A character string, containing one of "day", "week", "month", "quarter" or "year". This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>> (from \link{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
+#' @inherit validation_utility_params
 #' 
-#' @return a boolean value. (TRUE if string_user_input is an accepted time_step. Throws an error otherwise)
-#' An accepted time_step is considered to be: <<A character string, containing one of "day", "week", "month", "quarter" or "year". This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>> (from https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date)
 .is_value_valid_time_step <- function(string_user_input, parameter_name){
   if(!is.character(string_user_input)){
     stop(paste("Expected parameter", parameter_name, "to be a string."))
@@ -284,8 +280,9 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 }
 
 
-#' Utility function to determine whether an object is a numeric vector with all positive (or zero) values.
-#'
+#' @description Utility function to determine whether an object is a numeric vector with all positive (or zero) values.
+#' 
+#' @inherit validation_utility_params
 #' @param vector vector to be tested
 #'
 #' @return boolean. TRUE if vector is a positive numeric vector. FALSE otherwise
@@ -301,35 +298,34 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 }
 
 
-#' Utility function that checks if a user input respects one the following criteria:
-#' - is either a numeric vector with values > 0
-#' - or is a list with two elements: $values: numeric vector with values > 0
-#'                                   $index_offset: integer 
+#' @description Utility function that checks if a user input is one of:
+#' \itemize{
+#'     \item a numeric vector with values > 0
+#'     \item a list with two elements: \code{values} (a numeric vector with values > 0) and \code{index_offset} (an integer)   
+#' }
+#' @inherit validation_utility_params
+#' @param module_input_object the vector/list the user passed as a parameter, to be tested
 #'
-#' @param module_object the vector/list the user passed as a parameter, to be tested
-#' @param parameter_name string containing the original parameter name in the function that was called by the user. This is used for writing informative error messages. 
-#'
-#' @return TRUE if module_object is a valid module input. Throws an error otherwise.
-.is_valid_module_input <- function(module_object, parameter_name){
-  if(is.list(module_object)){
-    if("values" %!in% names(module_object)){
+.is_valid_module_input <- function(module_input_object, parameter_name){
+  if(is.list(module_input_object)){
+    if("values" %!in% names(module_input_object)){
       stop(paste("When passed as a list,", parameter_name, "has to contain a $values element."))
     }
     
-    if("index_offset" %!in% names(module_object)){
+    if("index_offset" %!in% names(module_input_object)){
       stop(paste("When passed as a list,", parameter_name, "has to contain a $index_offset element."))
     } 
     
-    if(!.is_positive_numeric_vector(module_object$values)){
+    if(!.is_positive_numeric_vector(module_input_object$values)){
       stop(paste("The $values element of", parameter_name, "has to be a numeric vector with values greater or equal to 0."))
     }
     
-    if(module_object$index_offset != as.integer(module_object$index_offset)){ #if index_offset is not an integer
+    if(module_input_object$index_offset != as.integer(module_input_object$index_offset)){ #if index_offset is not an integer
       stop(paste("The $index_offset element of", parameter_name, "has to be an integer."))
     } 
     
-  } else if(is.numeric(module_object)){
-    if(!.is_positive_numeric_vector(module_object)){
+  } else if(is.numeric(module_input_object)){
+    if(!.is_positive_numeric_vector(module_input_object)){
       stop(paste(parameter_name, "has to be a numeric vector with values greater or equal to 0."))
     }
     
@@ -339,22 +335,20 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   return(TRUE)
 }
 
-#' Utility function that checks if a given matrix is a valid delay distribution matrix.
+#' @description Utility function that checks if a given matrix is a valid delay distribution matrix.
 #' For this, the matrix needs to fulfill the following conditions:
-#'     - is a numeric matrix
-#'     - has no values <0
-#'     - is a lower triangular matrix
-#'     - no column sums up to more than 1
-#'     - no NA values
-#'     - is a square matrix
-#'     - the size of the matrix is greater than the length of the incidence data
+#' \itemize{ 
+#'     \item is a numeric matrix
+#'     \item has no values < 0
+#'     \item is a lower triangular matrix
+#'     \item no column sums up to more than 1
+#'     \item no NA values
+#'     \item is a square matrix
+#'     \item the size of the matrix is greater than the length of the incidence data
+#' }
 #' 
-#' TODO: can it have values on diagonal?
-#' 
-#' @param delay_matrix matrix to be tested
-#' @param incidence_data_length the length of the incidence data 
-#'
-#' @return TRUE if all tests were passed. Throws an error otherwise
+#' @inherit validation_utility_params
+#' @param delay_matrix A matrix to be tested
 #' 
 .check_is_delay_distribution_matrix <- function(delay_matrix, incidence_data_length){
   if(!is.matrix(delay_matrix) || !is.numeric(delay_matrix)){
@@ -373,7 +367,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
     stop("The delay distribution matrix needs to be square.")
   }
     
-  if(!all(delay_matrix == delay_matrix*lower.tri(delay_matrix))){ #check if matrix is lower triangular
+  if(!all(delay_matrix == delay_matrix*lower.tri(delay_matrix, diag = TRUE))){ #check if matrix is lower triangular
     stop("The delay distribution matrix needs to be lower triangular.")
   }
   
@@ -389,17 +383,16 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   
 }
 
-#' Utility function that checks whether a user input is a valid delay object. This means it can be one of the following:
-#'      - a probability distribution vector: a numeric vector with no NA or negative values, whose entries sum up to 1
-#'      - an empirical delay data: a data frame with two columns: event_date and report_delay. The columns cannot contain NA values. report_delay only contains non-negative values
-#'      - a delay distribution matrix (see conditions above)
-#'
+#' @description Utility function that checks whether a user input is a valid delay object. This means it can be one of the following: 
+#'      \itemize{
+#'         \item a probability distribution vector: a numeric vector with no \code{NA} or negative values, whose entries sum up to 1
+#'         \item an empirical delay data: a data frame with two columns: \code{event_date} and \code{report_delay}. The columns cannot contain \code{NA} values. \code{report_delay} only contains non-negative values
+#'         \item a delay distribution matrix (as described in \code{\link{.check_is_delay_distribution_matrix}})
+#'      }
+#' @inherit validation_utility_params
 #' @param delay_object user inputted object to be tested
-#' @param parameter_name string containing the original parameter name in the function that was called by the user. This is used for writing informative error messages. 
-#' @
 #'
-#' @return
-.is_valid_delay_object <- function(delay_object, parameter_name, length_of_incidence_data){
+.is_valid_delay_object <- function(delay_object, parameter_name, incidence_data_length){
 
   if(.is_numeric_vector(delay_object)){
     
@@ -411,7 +404,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
     
   } else if(is.matrix(delay_object)){
     
-    .check_is_delay_distribution_matrix(delay_object, length_of_incidence_data)
+    .check_is_delay_distribution_matrix(delay_object, incidence_data_length)
     
   } else {
     stop(paste("Invalid", parameter_name, "input.", parameter_name, "must be either:
@@ -420,18 +413,16 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
          or a distribution object (e.g. list(name = 'gamma', scale = X, shape = Y)),
          or empirical delay data."))
   }
+  return(TRUE)
 }
 
-#' TODO fill in
+#' @description  Utility function to check whether an object belongs to a particular class. 
+#' Wrapper function over \code{\link{.check_class}} needed because, being called from \code{\link{.are_valid_argument_values}},
+#' the parameter name will not be the same as the one from the original function.
+#' 
+#' @inherit validation_utility_params
+#' @inherit .check_class
 #'
-#' @param object 
-#' @param proper_class 
-#' @param parameter_name 
-#'
-#' @return
-#' @export
-#'
-#' @examples
 .check_class_parameter_name <- function(object, proper_class, parameter_name){
   tryCatch(
     {
@@ -447,16 +438,11 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   return(TRUE)
 }
 
-#' TODO fill in
+#' @description Utility function to check whether an object is null or belongs to a particular class.
 #'
-#' @param object 
-#' @param proper_class 
-#' @param parameter_name 
-#'
-#' @return
-#' @export
-#'
-#' @examples
+#' @inherit validation_utility_params
+#' @inherit .check_class
+#' 
 .check_if_null_or_belongs_to_class <- function(object, proper_class, parameter_name){
   if(!is.null(object)){
     .check_class_parameter_name(object, proper_class, parameter_name)
@@ -465,11 +451,11 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 }
 
 
-#' Utility function that checks that the values the user passed when calling a function are valid
-#' Returns TRUE if all checks were passed.
-#' @param user_inputs list of all arguments with which the tested function was called (can be obtain via "as.list(environment()")
+#' @description Utility function that checks that the values the user passed when calling a function are valid.
 #' 
-#' @return TRUE if all checks were passed. Throws an error otherwise
+#' @inherit validation_utility_params
+#' @param user_inputs A list of lists with two elements: the first is the value of the parameter to be tested. The second is the expected type of that parameter.
+#' 
 .are_valid_argument_values <- function(user_inputs){
   for(i in 1:length(user_inputs)){
     user_input <- user_inputs[[i]][[1]] 
@@ -495,21 +481,4 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
     )
   }
   return(TRUE)
-}
-
-#test ...
-library(ellipsis)
-.inner_funct_1 <- function(a="not specified", ...){
-  print(paste("a is", a))
-  print(paste("b is", b))
-}
-.inner_funct_2 <- function(b="not specified", ...){
-  print(paste("b is", b))
-}
-
-.dummy_function <- function(...){
-  check_dots_used()
-  .inner_funct_1(...)
-  .inner_funct_2(...)
-    
 }
