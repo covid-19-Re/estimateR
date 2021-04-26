@@ -59,17 +59,27 @@ get_block_bootstrapped_estimate <- function(incidence_vector,
                                             mean_serial_interval = 4.8,
                                             std_serial_interval  = 2.3,
                                             mean_Re_prior = 1,
-                                            ref_date = NULL,
+                                            ref_date = NULL, 
                                             time_step = "day",
                                             verbose = FALSE){
 
 
   .are_valid_argument_values(list(list(user_input = incidence_vector, input_type = "module_input", parameter_name = "incidence_vector"),
+                                  list(user_input=N_bootstrap_replicates, input_type="numeric", parameter_name="N_bootstrap_replicates"),
                                   list(user_input=smoothing_method, input_type="smoothing_method", parameter_name="smoothing_method"),
                                   list(user_input=deconvolution_method, input_type="deconvolution_method", parameter_name="deconvolution_method"),
                                   list(user_input=estimation_method, input_type="estimation_method", parameter_name="estimation_method"),
+                                  list(user_input=uncertainty_summary_method, input_type="uncertainty_summary_method", parameter_name="uncertainty_summary_method"),
+                                  list(user_input=delay_incubation, input_type="empirical_delay_data", parameter_name="delay_incubation"),
+                                  list(user_input=delay_onset_to_report, input_type="empirical_delay_data", parameter_name="delay_onset_to_report"),
+                                  list(user_input=estimation_window, input_type="numeric", parameter_name="estimation_window"),
+                                  list(user_input=mean_serial_interval, input_type="numeric", parameter_name="mean_serial_interval"),
+                                  list(user_input=std_serial_interval, input_type="numeric", parameter_name="std_serial_interval"),
+                                  list(user_input=mean_Re_prior, input_type="numeric", parameter_name="mean_Re_prior"),
+                                  list(user_input=ref_date, input_type="null_or_date", parameter_name="ref_date"),
                                   list(user_input=time_step, input_type="time_step", parameter_name="time_step"),
-                                  list(user_input=delay_incubation, input_type="empirical_delay_data", parameter_name="delay_incubation")))
+                                  list(user_input=verbose, input_type="boolean", parameter_name="verbose")))
+  
   # Prepare delay distribution vector or matrix early on as it spares the need to redo the same operation for each bootstrap replicate
   total_delay_distribution <- convolve_delay_inputs(delay_incubation,
                                                     delay_onset_to_report,
@@ -179,10 +189,20 @@ smooth_deconvolve_estimate <- function(incidence_vector,
                                        time_step = "day",
                                        verbose = FALSE) {
 
-  .are_valid_argument_values(list(list(user_input=smoothing_method, input_type="smoothing_method"),
-                                  list(user_input=deconvolution_method, input_type="deconvolution_method"),
-                                  list(user_input=estimation_method, input_type="estimation_method"),
-                                  list(user_input=time_step, input_type="time_step")))
+  .are_valid_argument_values(list(list(user_input = incidence_vector, input_type = "module_input", parameter_name = "incidence_vector"),
+                                  list(user_input=smoothing_method, input_type="smoothing_method", parameter_name="smoothing_method"),
+                                  list(user_input=deconvolution_method, input_type="deconvolution_method", parameter_name="deconvolution_method"),
+                                  list(user_input=estimation_method, input_type="estimation_method", parameter_name="estimation_method"),
+                                  list(user_input=delay_incubation, input_type="empirical_delay_data", parameter_name="delay_incubation"),
+                                  list(user_input=delay_onset_to_report, input_type="empirical_delay_data", parameter_name="delay_onset_to_report"),
+                                  list(user_input=estimation_window, input_type="numeric", parameter_name="estimation_window"),
+                                  list(user_input=mean_serial_interval, input_type="numeric", parameter_name="mean_serial_interval"),
+                                  list(user_input=std_serial_interval, input_type="numeric", parameter_name="std_serial_interval"),
+                                  list(user_input=mean_Re_prior, input_type="numeric", parameter_name="mean_Re_prior"),
+                                  list(user_input=output_Re_only, input_type="boolean", parameter_name="output_Re_only"),
+                                  list(user_input=ref_date, input_type="null_or_date", parameter_name="ref_date"),
+                                  list(user_input=time_step, input_type="time_step", parameter_name="time_step"),
+                                  list(user_input=verbose, input_type="boolean", parameter_name="verbose")))
   
   smoothed_incidence <- smooth_incidence(incidence_data = incidence_vector,
                                          smoothing_method = smoothing_method)

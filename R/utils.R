@@ -15,7 +15,8 @@
 accepted_parameter_value <- list(smoothing_method = c("LOESS"),
                                  deconvolution_method = c("Richardson-Lucy delay distribution"),
                                  estimation_method = c("EpiEstim sliding window"),
-                                 bootstrapping_method = c("non-parametric block boostrap"))
+                                 bootstrapping_method = c("non-parametric block boostrap"),
+                                 uncertainty_summary_method = c("original estimate - CI from bootstrap estimates"))
 
 
 #' Merge multiple module outputs into tibble
@@ -403,6 +404,23 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   return(TRUE)
 }
 
+#' TODO fill in
+#'
+#' @param object 
+#' @param proper_class 
+#' @param parameter_name 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+.check_if_null_or_belongs_to_class <- function(object, proper_class, parameter_name){
+  if(!is.null(object)){
+    .check_class_parameter_name(object, proper_class, parameter_name)
+  }
+  return(TRUE)
+}
+
 #' Utility function that checks that the values the user passed when calling a function are valid
 #' Returns TRUE if all checks were passed.
 #' @param user_inputs list of all arguments with which the tested function was called (can be obtain via "as.list(environment()")
@@ -417,11 +435,15 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
         "smoothing_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
         "deconvolution_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
         "estimation_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+        "uncertainty_summary_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
         "bootstrapping_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
         "time_step" = .is_value_valid_time_step(user_input, parameter_name),
         "module_input" = .is_valid_module_input(user_input, parameter_name),
         "boolean" = .check_class_parameter_name(user_input,"logical", parameter_name),
-        "empirical_delay_data" = .check_is_empirical_delay_data(user_input)
+        "empirical_delay_data" = .check_is_empirical_delay_data(user_input),
+        "numeric" = .check_class_parameter_name(user_input,"numeric", parameter_name),
+        "null_or_date" = .check_if_null_or_belongs_to_class(user_input, "Date", parameter_name),
+        "null_or_numeric" = .check_if_null_or_belongs_to_class(user_input, "numeric", parameter_name)
     )
   }
   return(TRUE)

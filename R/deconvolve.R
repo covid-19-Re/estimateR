@@ -31,14 +31,21 @@ deconvolve_incidence <- function( incidence_data,
                                   deconvolution_method = "Richardson-Lucy delay distribution",
                                   delay_incubation,
                                   delay_onset_to_report = c(1.0),
-                                  start_date = NULL,
+                                  start_date = NULL, 
                                   time_step = "day",
                                   min_number_cases = NULL,
                                   simplify_output = TRUE,
                                   ... ) {
   
-  .are_valid_argument_values(list(list(user_input=deconvolution_method, input_type="deconvolution_method"),
-                                  list(user_input=time_step, input_type="time_step")))
+  .are_valid_argument_values(list(list(user_input = incidence_data, input_type = "module_input", parameter_name = "incidence_data"),
+                                  list(user_input=deconvolution_method, input_type="deconvolution_method", parameter_name="deconvolution_method"),
+                                  list(user_input=delay_incubation, input_type="empirical_delay_data", parameter_name="delay_incubation"),
+                                  list(user_input=delay_onset_to_report, input_type="empirical_delay_data", parameter_name="delay_onset_to_report"),
+                                  list(user_input=start_date, input_type="null_or_date", parameter_name="start_date"),
+                                  list(user_input=time_step, input_type="time_step", parameter_name="time_step"),
+                                  list(user_input=min_number_cases, input_type="null_or_numeric", parameter_name="min_number_cases"),
+                                  list(user_input=simplify_output, input_type="boolean", parameter_name="simplify_output")))
+  
   
   input <- .get_module_input(incidence_data)
 
