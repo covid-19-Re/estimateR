@@ -13,46 +13,72 @@ get_block_bootstrapped_estimate(
   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
   delay_incubation,
   delay_onset_to_report = c(1),
-  mean_serial_interval = 4.8,
-  std_serial_interval = 2.3,
   ref_date = NULL,
   time_step = "day",
-  verbose = FALSE,
   ...
 )
 }
 \arguments{
-\item{incidence_data}{numeric. TODO define acceptable format}
+\item{incidence_data}{numeric vector. Incidence data (TODO improve definition)}
 
 \item{N_bootstrap_replicates}{integer. Number of bootstrap samples.}
 
 \item{smoothing_method}{string. Method used to smooth the original incidence data.
-Options are: "LOESS", implemented in \code{\link{smooth_LOESS}}.}
+Available options are:
+\itemize{
+\item{'LOESS', implemented in \code{\link{.smooth_LOESS}}}
+}}
 
 \item{deconvolution_method}{string. Method used to infer timings of infection
-events from the original incidence data (aka deconvolution).
-Options are "Richardson-Lucy delay distribution".}
+events from the original incidence data (aka deconvolution step).
+Available options are:
+\itemize{
+\item{'Richardson-Lucy delay distribution',
+implemented in \code{\link{.deconvolve_incidence_Richardson_Lucy}}}
+}}
 
 \item{estimation_method}{string. Method used to estimate reproductive number
 values through time from the reconstructed infection timings.
-Options are "EpiEstim sliding window".}
+Available options are:
+\itemize{
+\item{'EpiEstim sliding window',
+implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
+}}
 
-\item{uncertainty_summary_method}{string. 'NONE' or one of the possible strings in \code{\link{summarise_uncertainty}}}
+\item{uncertainty_summary_method}{string. TODO continue here
+\itemize{
+\item{'original estimate - CI from bootstrap estimates'}
+\item{'bagged mean - CI from bootstrap estimates'}
+} 'NONE' if no summary of bootstrap estimates is made
+or one of the possible strings in \code{\link{summarise_uncertainty}}}
 
-\item{mean_serial_interval}{numeric. see \code{\link{estimate_Re}}}
+\item{delay_incubation}{TODO add details}
 
-\item{std_serial_interval}{numeric. see \code{\link{estimate_Re}}}
+\item{delay_onset_to_report}{TODO add details}
 
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
-\item{time_step}{string. Time between two consecutive incidence datapoints. "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+\item{time_step}{string. Time between two consecutive incidence datapoints.
+"day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
 
-\item{verbose}{boolean. Print verbose output?
-
-#TODO add details on output formatting}
+\item{...}{
+  Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}
+  \describe{
+    \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.}
+    \item{\code{degree}}{integer. LOESS degree.}
+    \item{\code{delay_distribution}}{numeric square matrix or vector. TODO refactor to estimateR}
+    \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
+    \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
+    \item{\code{verbose}}{Boolean. Print verbose output?}
+    \item{\code{minimul_cumul_incidence}}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
+    \item{\code{estimation_window}}{Integer scalar. Number of data points over which to assume Re to be constant.}
+    \item{\code{mean_serial_interval}}{Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{std_serial_interval}}{Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{mean_Re_prior}}{Numeric positive scalar. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+  }}
 }
 \value{
-tibble. Re estimations along with results from each pipeline step.
+tibble. Re estimations along with results from each pipeline step. TODO add details
 }
 \description{
 An estimation of the effective reproductive number through time is made with \code{smooth_deconvolve_estimate}
@@ -69,6 +95,4 @@ The second (optional) waiting time corresponds to the delay between the onset of
 If this second waiting time is omitted, observation is assumed to have happened at the end of the first waiting time.
 In latter case, the first waiting time distribution does not need to correspond to an incubation period per se,
 but it must in any case correspond to the delay between infection and case observation.
-
-#TODO clarify input
 }

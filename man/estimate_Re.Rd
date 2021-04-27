@@ -12,27 +12,36 @@ estimate_Re(
 )
 }
 \arguments{
-\item{incidence_data}{Format still to define.}
+\item{incidence_data}{numeric vector. Incidence data (TODO improve definition)}
 
 \item{estimation_method}{string. Method used to estimate reproductive number
 values through time from the reconstructed infection timings.
-Options are "EpiEstim sliding window".}
+Available options are:
+\itemize{
+\item{'EpiEstim sliding window',
+implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
+}}
 
-\item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
+\item{simplify_output}{boolean. Return a numeric vector instead of module
+output object if output offset is zero? TODO to be described better.}
 
-\item{...}{Additional parameters. TODO add details}
+\item{...}{
+  Arguments passed on to \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}
+  \describe{
+    \item{\code{minimul_cumul_incidence}}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
+    \item{\code{estimation_window}}{Integer scalar. Number of data points over which to assume Re to be constant.}
+    \item{\code{mean_serial_interval}}{Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{std_serial_interval}}{Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{mean_Re_prior}}{Numeric positive scalar. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+  }}
 }
 \value{
-a module output object (subject to change)
+a module output object. Re estimates.
 }
 \description{
 The incidence data input should represent infections,
 as opposed to representing delayed observations of infections.
 If the incidence data represents delayed observations of infections
 then one should deconvolve it first with \code{deconvolve_incidence}.
-}
-\details{
-For now, only one Re estimation function is implemented.
-
-#TODO specify input format
+TODO add details on inner function, that it wraps around EpiEstim and so on.
 }

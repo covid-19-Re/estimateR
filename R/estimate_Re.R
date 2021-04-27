@@ -1,23 +1,17 @@
-#TODO replace mean/std serial interval inputs by a single input combining the two
-
-#TODO figure out output format
 #' Estimate effective reproductive number Re from incidence data
 #'
 #' The incidence data input should represent infections,
 #' as opposed to representing delayed observations of infections.
 #' If the incidence data represents delayed observations of infections
 #' then one should deconvolve it first with \code{deconvolve_incidence}.
+#' TODO add details on inner function, that it wraps around EpiEstim and so on.
 #'
-#' For now, only one Re estimation function is implemented.
 #'
-#' #TODO specify input format
+#' @inheritParams module_methods
+#' @inheritParams module_structure
+#' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
 #'
-#' @param incidence_data Format still to define.
-#' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
-#' @param ... Additional parameters. TODO add details
-#' @inheritParams smooth_deconvolve_estimate
-#'
-#' @return a module output object (subject to change)
+#' @return a module output object. Re estimates.
 #' @export
 estimate_Re <- function( incidence_data,
                          estimation_method = "EpiEstim sliding window",
@@ -29,20 +23,14 @@ estimate_Re <- function( incidence_data,
                                   list(simplify_output, "boolean")))
   
   
+  dots_args <- .get_dots_as_list(...)
   input <- .get_module_input(incidence_data)
 
-  if(...length() > 0) {
-    dots <- list(...)
-  } else {
-    dots <- list()
-  }
-
   if(estimation_method == "EpiEstim sliding window") {
-    EpiEstim_args <- names(formals(estimate_Re_EpiEstim_sliding_window))
-
     Re_estimate <- do.call(
-      'estimate_Re_EpiEstim_sliding_window',
-      c(list(incidence_input = input), dots[names(dots) %in% EpiEstim_args])
+      '.estimate_Re_EpiEstim_sliding_window',
+      c(list(incidence_input = input),
+        .get_shared_args(.estimate_Re_EpiEstim_sliding_window, dots_args))
     )
   } else {
     Re_estimate <- .make_empty_module_output()
@@ -63,16 +51,15 @@ estimate_Re <- function( incidence_data,
 #' when assuming that is Re is constant over e.g. (T-3, T-2, T-1, T),
 #' for a sliding window of 4 time steps.
 #'
-#' @param incidence_input module input object. Time series of infections.
 #' @param minimul_cumul_incidence Numeric scalar. Minimum number of cumulated infections before starting the Re estimation
 #' @param estimation_window Integer scalar. Number of data points over which to assume Re to be constant.
 #' @param mean_serial_interval Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}
 #' @param std_serial_interval Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}
 #' @param mean_Re_prior Numeric positive scalar. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}
+#' @inheritParams inner_module
 #'
 #' @return module output object. mean of Re estimates
-#' @export
-estimate_Re_EpiEstim_sliding_window <- function(incidence_input,
+.estimate_Re_EpiEstim_sliding_window <- function(incidence_input,
                         minimul_cumul_incidence = 0,
                         estimation_window = 3,
                         mean_serial_interval = 4.8,
