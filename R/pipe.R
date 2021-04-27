@@ -48,16 +48,15 @@ get_block_bootstrapped_estimate <- function(incidence_data,
                                             ...){
 
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
-                            list(N_bootstrap_replicates, "numeric"),
+                            list(N_bootstrap_replicates, "non_negative_number"),
                             list(smoothing_method, "smoothing_method"),
                             list(deconvolution_method, "deconvolution_method"),
                             list(estimation_method, "estimation_method"),
                             list(uncertainty_summary_method, "uncertainty_summary_method"),
-                            list(delay_incubation, "empirical_delay_data"),
-                            list(delay_onset_to_report, "empirical_delay_data"),
-                            list(estimation_window, "numeric"),
-                            list(mean_serial_interval, "numeric"),
-                            list(std_serial_interval, "numeric"),
+                            list(delay_incubation, "delay_object", .get_input_length(incidence_data)),
+                            list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)),
+                            list(mean_serial_interval, "number"),
+                            list(std_serial_interval, "number"),
                             list(ref_date, "null_or_date"),
                             list(time_step, "time_step"),
                             list(verbose, "boolean")))
@@ -232,14 +231,14 @@ smooth_deconvolve_estimate <- function(incidence_data,
                                        verbose = FALSE,
                                        ...) {
 
-  .are_valid_argument_values(list(list(incidence_data, "module_input"),
+.are_valid_argument_values(list(list(incidence_data, "module_input"),
                                   list(smoothing_method, "smoothing_method"),
                                   list(deconvolution_method, "deconvolution_method"),
                                   list(estimation_method, "estimation_method"),
-                                  list(delay_incubation, "delay_object", length(incidence_vector)), # need to pass length of incidence data as well in order 
-                                  list(delay_onset_to_report, "delay_object", length(incidence_vector)), # to validate when the delay is passed as a matrix
-                                  list(mean_serial_interval, "numeric"),
-                                  list(std_serial_interval, "numeric"),
+                                  list(delay_incubation, "delay_object", .get_input_length(incidence_data)), # need to pass length of incidence data as well in order 
+                                  list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)), # to validate when the delay is passed as a matrix
+                                  list(mean_serial_interval, "number"),
+                                  list(std_serial_interval, "number"),
                                   list(ref_date, "null_or_date"),
                                   list(time_step, "time_step"),
                                   list(output_Re_only, "boolean"),

@@ -16,7 +16,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
                                  deconvolution_method = c("Richardson-Lucy delay distribution"),
                                  estimation_method = c("EpiEstim sliding window"),
                                  bootstrapping_method = c("non-parametric block boostrap"),
-                                 uncertainty_summary_method = c("original estimate - CI from bootstrap estimates"))
+                                 uncertainty_summary_method = c("original estimate - CI from bootstrap estimates", "bagged mean - CI from bootstrap estimates"))
 
 
 #' Merge multiple module outputs into tibble
@@ -258,7 +258,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
     stop(paste("Expected parameter", parameter_name, "to be a string."))
   }
   if(!(string_user_input %in% accepted_parameter_value[[parameter_name]])){
-    stop(paste("Expected parameter", parameter_name, "to have one of the following values:", toString(accepted_parameter_value[[parameter_name]]),"."))
+    stop(paste("Expected parameter", parameter_name, "to have one of the following values:", toString(accepted_parameter_value[[parameter_name]]),". Given input was:", string_user_input))
   }
   return(TRUE)
 }
@@ -288,7 +288,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #' @return boolean. TRUE if vector is a positive numeric vector. FALSE otherwise
 
 .is_positive_numeric_vector <- function(vector){
-  if(!is.numeric(vector)){
+  if(!is.vector(vector, mode="numeric")){
     return(FALSE)
   }
   if(!all(vector >= 0)){
@@ -388,12 +388,13 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #'         \item a probability distribution vector: a numeric vector with no \code{NA} or negative values, whose entries sum up to 1
 #'         \item an empirical delay data: a data frame with two columns: \code{event_date} and \code{report_delay}. The columns cannot contain \code{NA} values. \code{report_delay} only contains non-negative values
 #'         \item a delay distribution matrix (as described in \code{\link{.check_is_delay_distribution_matrix}})
+#'         \item a distribution object (e.g. list(name = 'gamma', scale = X, shape = Y))
 #'      }
 #' @inherit validation_utility_params
 #' @param delay_object user inputted object to be tested
 #'
 .is_valid_delay_object <- function(delay_object, parameter_name, incidence_data_length){
-
+  
   if(.is_numeric_vector(delay_object)){
     
     .check_is_probability_distr_vector(delay_object)
@@ -405,6 +406,10 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   } else if(is.matrix(delay_object)){
     
     .check_is_delay_distribution_matrix(delay_object, incidence_data_length)
+    
+  } else if(is.list(delay_object)){
+    
+    .is_valid_distribution(delay_object)
     
   } else {
     stop(paste("Invalid", parameter_name, "input.", parameter_name, "must be either:
@@ -423,13 +428,13 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #' @inherit validation_utility_params
 #' @inherit .check_class
 #'
-.check_class_parameter_name <- function(object, proper_class, parameter_name){
+.check_class_parameter_name <- function(object, proper_class, parameter_name, mode = "any"){
   tryCatch(
     {
       if(is.na(object)){
         stop("Object was NA") # This error message is never shown. Overwritten below. 
       }
-      .check_class(object, proper_class)
+      .check_class(object, proper_class, mode)
     },
     error=function(error) {
       stop(paste("Expected parameter", parameter_name, "to be of type", proper_class, "and not NA."))
@@ -443,13 +448,44 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #' @inherit validation_utility_params
 #' @inherit .check_class
 #' 
-.check_if_null_or_belongs_to_class <- function(object, proper_class, parameter_name){
+.check_if_null_or_belongs_to_class <- function(object, proper_class, parameter_name, mode="any"){
   if(!is.null(object)){
-    .check_class_parameter_name(object, proper_class, parameter_name)
+    .check_class_parameter_name(object, proper_class, parameter_name, mode)
   }
   return(TRUE)
 }
 
+
+#' @description Utility function to check whether an object is a number.
+#'
+#' @inherit validation_utility_params
+#' @param number The value to be tested
+#' 
+.check_if_number <- function(number, parameter_name){
+  if(!is.numeric(number)){
+    stop(paste(parameter_name, "is expected to be a number."))
+  }
+  if(length(number) > 1){
+    stop(paste(parameter_name, "is expected to be a number."))
+  }
+  return(TRUE)
+}
+
+
+#' @description Utility function to check whether an object is a positive number or 0.
+#'
+#' @inherit validation_utility_params
+#' @inherit  .check_if_number
+#' 
+.check_if_non_negative_number <- function(number, parameter_name){
+  .check_if_number(number, parameter_name)
+  
+  if(number < 0){
+    stop(paste(parameter_name, "is expected to be positive."))
+  }
+  
+  return(TRUE)
+}
 
 #' @description Utility function that checks that the values the user passed when calling a function are valid.
 #' 
@@ -475,9 +511,11 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
         "module_input" = .is_valid_module_input(user_input, parameter_name),
         "boolean" = .check_class_parameter_name(user_input,"logical", parameter_name),
         "delay_object" = .is_valid_delay_object(user_input, parameter_name, additional_function_parameter),
-        "numeric" = .check_class_parameter_name(user_input,"numeric", parameter_name),
+        "number" = .check_if_number(user_input, parameter_name),
+        "non_negative_number" = .check_if_non_negative_number(user_input, parameter_name),
         "null_or_date" = .check_if_null_or_belongs_to_class(user_input, "Date", parameter_name),
-        "null_or_numeric" = .check_if_null_or_belongs_to_class(user_input, "numeric", parameter_name)
+        "null_or_numeric" = .check_if_null_or_belongs_to_class(user_input, "numeric", parameter_name),
+        stop(paste("Checking function for type", input_type, "not found."))
     )
   }
   return(TRUE)

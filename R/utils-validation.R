@@ -19,7 +19,7 @@
     stop("Not a proper delay distribution vector. Contains one or more NAs.")
   }
 
-  if( !all.equal(1, sum(distribution, na.rm = TRUE ), tolerance = tolerance_on_sum) ) {
+  if( !isTRUE(all.equal(1, sum(distribution, na.rm = TRUE ), tolerance = tolerance_on_sum))){
     stop("Not a proper delay distribution vector. Does not sum to 1.")
   }
 

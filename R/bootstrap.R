@@ -71,6 +71,12 @@ get_bootstrap_replicate <- function( incidence_data,
 #' @export
 block_bootstrap <- function(incidence_input, block_size = 10, data_points_incl = 21, degree = 1, round_incidence = TRUE) {
 
+  .are_valid_argument_values(list(list(incidence_input, "module_input"),
+                                  list(block_size, "non_negative_number"),
+                                  list(data_points_incl, "non_negative_number"),
+                                  list(degree, "non_negative_number"),
+                                  list(round_incidence, "boolean")))
+  
   incidence_vector <- .get_values(incidence_input)
 
   log_original <-log(incidence_vector + 1)

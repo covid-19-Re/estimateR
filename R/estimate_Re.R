@@ -79,6 +79,13 @@ estimate_Re_EpiEstim_sliding_window <- function(incidence_input,
                         std_serial_interval  = 2.3,
                         mean_Re_prior = 1) {
 
+  .are_valid_argument_values(list(list(incidence_input, "module_input"),
+                                  list(minimul_cumul_incidence, "number"),
+                                  list(estimation_window, "number"),
+                                  list(mean_serial_interval, "number"),
+                                  list(std_serial_interval, "number"),
+                                  list(mean_Re_prior, "number")))
+  
   incidence_vector <- .get_values(incidence_input)
 
   # Ensure that incidence_vector has no NA or negative values

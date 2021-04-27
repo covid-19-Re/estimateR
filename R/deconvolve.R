@@ -34,8 +34,8 @@ deconvolve_incidence <- function( incidence_data,
   
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
                                   list(deconvolution_method, "deconvolution_method"),
-                                  list(delay_incubation, "empirical_delay_data"),
-                                  list(delay_onset_to_report, "empirical_delay_data"),
+                                  list(delay_incubation, "delay_object", .get_input_length(incidence_data)),
+                                  list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)),
                                   list(simplify_output, "boolean")))
   
   
@@ -96,6 +96,12 @@ deconvolve_incidence_Richardson_Lucy <- function(
   max_iterations = 100,
   verbose = FALSE
 ) {
+  
+  .are_valid_argument_values(list(list(incidence_input, "module_input"),
+                                  list(delay_distribution, "delay_object", .get_input_length(incidence_input)),
+                                  list(threshold_chi_squared, "number"),
+                                  list(max_iterations, "number"),
+                                  list(verbose, "boolean")))
 
   incidence_vector <- .get_values(incidence_input)
 
