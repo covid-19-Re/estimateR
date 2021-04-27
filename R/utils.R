@@ -539,7 +539,6 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
         "number" = .check_if_number(user_input, parameter_name),
         "non_negative_number" = .check_if_non_negative_number(user_input, parameter_name),
         "null_or_date" = .check_if_null_or_belongs_to_class(user_input, "Date", parameter_name),
-        "null_or_numeric" = .check_if_null_or_belongs_to_class(user_input, "numeric", parameter_name),
         stop(paste("Checking function for type", input_type, "not found."))
     )
   }
