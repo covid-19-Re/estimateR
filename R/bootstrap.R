@@ -64,12 +64,6 @@ get_bootstrap_replicate <- function( incidence_data,
 #'
 #' @return a module output object. bootstrapped incidence.
 .block_bootstrap <- function(incidence_input, round_incidence = TRUE, smoothing_method = "LOESS", ...) {
-
-  .are_valid_argument_values(list(list(incidence_input, "module_input"),
-                                  list(block_size, "non_negative_number"),
-                                  list(data_points_incl, "non_negative_number"),
-                                  list(degree, "non_negative_number"),
-                                  list(round_incidence, "boolean")))
   
   dots_args <- .get_dots_as_list(...)
 
