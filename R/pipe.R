@@ -43,8 +43,8 @@ get_block_bootstrapped_estimate <- function(incidence_data,
   dots_args <- .get_dots_as_list(...)
 
   # Display progress bar
-  progress_bar <- utils::txtProgressBar(min = 0, max = N_bootstrap_replicates + 1, style = 3)
-  utils::setTxtProgressBar(progress_bar, 0)
+  # progress_bar <- utils::txtProgressBar(min = 0, max = N_bootstrap_replicates + 1, style = 3)
+  # utils::setTxtProgressBar(progress_bar, 0)
 
   # Prepare delay distribution vector or matrix early on as it spares the need to redo the same operation for each bootstrap replicate
   total_delay_distribution <- do.call(
@@ -82,7 +82,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
 
   for(i in 1:N_bootstrap_replicates) {
 
-    utils::setTxtProgressBar(progress_bar, i)
+    # utils::setTxtProgressBar(progress_bar, i)
 
     bootstrapped_incidence <- do.call(
       'get_bootstrap_replicate',
@@ -128,8 +128,8 @@ get_block_bootstrapped_estimate <- function(incidence_data,
                                                       time_step = time_step)
 
   # Close progress bar
-  utils::setTxtProgressBar(progress_bar, N_bootstrap_replicates + 1)
-  close(progress_bar)
+  # utils::setTxtProgressBar(progress_bar, N_bootstrap_replicates + 1)
+  # close(progress_bar)
 
   return(estimates_with_uncertainty)
 }

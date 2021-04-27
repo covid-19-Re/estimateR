@@ -39,7 +39,7 @@ values through time from the reconstructed infection timings.
 Available options are:
 \itemize{
 \item{'EpiEstim sliding window',
-implemented in \code{\link{estimate_Re_EpiEstim_sliding_window}}}
+implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
 }}
 
 \item{delay_incubation}{TODO add details}
