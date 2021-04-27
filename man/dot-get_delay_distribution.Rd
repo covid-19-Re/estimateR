@@ -2,16 +2,30 @@
 % Please edit documentation in R/utils-distribution.R
 \name{.get_delay_distribution}
 \alias{.get_delay_distribution}
-\title{Title}
+\title{Return probability distribution vector}
 \usage{
 .get_delay_distribution(delay, ...)
 }
 \arguments{
-\item{...}{}
+\item{delay}{list or vector. Delay distribution to transform or validate
+into a vector of discretized probability distribution.}
+
+\item{...}{
+  Arguments passed on to \code{\link[=build_delay_distribution]{build_delay_distribution}}
+  \describe{
+    \item{\code{max_quantile}}{numeric value between 0 and 1.
+Upper quantile reached by the last element in the discretized distribution vector.}
+    \item{\code{offset_by_one}}{boolean.
+Set to TRUE if \code{distribution} represent the fit of data that was offset by one
+(\code{fitted_data = original_data + 1}) to accommodate zeroes in \code{original_data}.}
+  }}
 }
 \value{
-
+vector of discretized probability distribution.
 }
 \description{
-Title
+Can take a \code{distribution} list or a probability distribution vector.
+In the first case, this function builds and return the vector of discretized probability distribution.
+In the second case, it checks that \code{delay} is a valid discretized probability distribution and returns it.
+See \code{\link{build_delay_distribution}} for details on the \code{distribution} list format.
 }

@@ -2,16 +2,22 @@
 % Please edit documentation in R/utils-distribution.R
 \name{.sample_from_distribution}
 \alias{.sample_from_distribution}
-\title{Title}
+\title{Draw samples from a probability distribution.}
 \usage{
 .sample_from_distribution(distribution, n)
 }
 \arguments{
-\item{n}{}
+\item{distribution}{list. probability distribution specified in list format
+e.g. list(name = "gamma", shape = 2, scale = 4).
+The \code{distribution} list must contain a 'name' element, this element must be  a string and
+correspond to one of the types of \code{\link[stats:Distributions]{distributions}} supported in the \link[stats]{Distributions} package.
+\code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.}
+
+\item{n}{integer. Number of samples to draw.}
 }
 \value{
-
+vector containing \code{n} samples of \code{distribution}
 }
 \description{
-Title
+Draw samples from a probability distribution.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-distribution.R
 \name{build_delay_distribution}
 \alias{build_delay_distribution}
-\title{Build a delay distribution vector}
+\title{Build a discretized probability distribution vector from a delay distribution}
 \usage{
 build_delay_distribution(
   distribution,
@@ -11,18 +11,22 @@ build_delay_distribution(
 )
 }
 \arguments{
-\item{distribution}{distribution in list format e.g. list(name = "gamma", shape = 2, scale = 4)}
+\item{distribution}{list. probability distribution specified in list format
+e.g. list(name = "gamma", shape = 2, scale = 4).
+The \code{distribution} list must contain a 'name' element, this element must be  a string and
+correspond to one of the types of \code{\link[stats:Distributions]{distributions}} supported in the \link[stats]{Distributions} package.
+\code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.}
 
-\item{max_quantile}{numeric value between 0 and 1. TODO write what max_quantile does}
+\item{max_quantile}{numeric value between 0 and 1.
+Upper quantile reached by the last element in the discretized distribution vector.}
 
-\item{offset_by_one}{boolean. Gamma distribution comes from fit on (raw_data + 1) to accommodate zeroes in the raw_data.}
+\item{offset_by_one}{boolean.
+Set to TRUE if \code{distribution} represent the fit of data that was offset by one
+(\code{fitted_data = original_data + 1}) to accommodate zeroes in \code{original_data}.}
 }
 \value{
-numeric vector.
+vector containing the discretized probability distribution vector of \code{distribution}.
 }
 \description{
-Build a delay distribution vector
-}
-\examples{
-#TODO add example
+Build a discretized probability distribution vector from a delay distribution
 }

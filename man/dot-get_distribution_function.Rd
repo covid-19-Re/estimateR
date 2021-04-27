@@ -2,16 +2,22 @@
 % Please edit documentation in R/utils-distribution.R
 \name{.get_distribution_function}
 \alias{.get_distribution_function}
-\title{Title}
+\title{Get distribution function}
 \usage{
 .get_distribution_function(distribution, function_prefix)
 }
 \arguments{
-\item{function_prefix}{}
+\item{distribution}{list. probability distribution specified in list format
+e.g. list(name = "gamma", shape = 2, scale = 4).
+The \code{distribution} list must contain a 'name' element, this element must be  a string and
+correspond to one of the types of \code{\link[stats:Distributions]{distributions}} supported in the \link[stats]{Distributions} package.
+\code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.}
+
+\item{function_prefix}{character. 'd', 'q', 'p' or 'r'. see \code{\link[stats:Distributions]{stats::Distributions}}}
 }
 \value{
-
+Density, distribution function, quantile function or random generation function for \code{distribution}
 }
 \description{
-Title
+Get distribution function
 }

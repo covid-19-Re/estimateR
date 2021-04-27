@@ -2,16 +2,22 @@
 % Please edit documentation in R/utils-distribution.R
 \name{.get_right_boundary_for_distribution_vector}
 \alias{.get_right_boundary_for_distribution_vector}
-\title{Title}
+\title{Get the number of steps before a quantile is reached.}
 \usage{
 .get_right_boundary_for_distribution_vector(distribution, max_quantile)
 }
 \arguments{
-\item{max_quantile}{}
+\item{distribution}{list. probability distribution specified in list format
+e.g. list(name = "gamma", shape = 2, scale = 4).
+The \code{distribution} list must contain a 'name' element, this element must be  a string and
+correspond to one of the types of \code{\link[stats:Distributions]{distributions}} supported in the \link[stats]{Distributions} package.
+\code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.}
+
+\item{max_quantile}{numeric value. Upper quantile that needs to be reached.}
 }
 \value{
-
+number of time steps required to for the probability distribution to reach \code{max_quantile}
 }
 \description{
-Title
+Get the number of steps before a quantile is reached.
 }

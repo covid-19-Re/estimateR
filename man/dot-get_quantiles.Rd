@@ -2,16 +2,22 @@
 % Please edit documentation in R/utils-distribution.R
 \name{.get_quantiles}
 \alias{.get_quantiles}
-\title{Title}
+\title{Obtain quantile values for a distribution}
 \usage{
 .get_quantiles(distribution, p)
 }
 \arguments{
-\item{p}{}
+\item{distribution}{list. probability distribution specified in list format
+e.g. list(name = "gamma", shape = 2, scale = 4).
+The \code{distribution} list must contain a 'name' element, this element must be  a string and
+correspond to one of the types of \code{\link[stats:Distributions]{distributions}} supported in the \link[stats]{Distributions} package.
+\code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.}
+
+\item{p}{vector of probabilities}
 }
 \value{
-
+vector of quantiles
 }
 \description{
-Title
+Obtain quantile values for a distribution
 }
