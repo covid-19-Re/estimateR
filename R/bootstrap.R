@@ -1,4 +1,3 @@
-
 #' Obtain a bootstrap replicate from incidence data
 #'
 #' Apply a bootstrapping procedure on some original incidence data.
@@ -9,10 +8,9 @@
 #' For now, only one bootstrapping function is implemented.
 #' It performs a non-parametric block bootstrapping.
 #'
-#' @param incidence_data TODO Format still to define.
-#' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
-#' @param ... Additional parameters. TODO add details
-#' @inheritParams smooth_deconvolve_estimate
+#' @inheritParams module_methods
+#' @inheritParams module_structure
+#' @inheritDotParams .block_bootstrap -incidence_input
 #'
 #' @return a module output object. A boostrapped replicate.
 #' @export
@@ -21,20 +19,17 @@ get_bootstrap_replicate <- function( incidence_data,
                                      simplify_output = TRUE,
                                      ... ) {
 
+  dots_args <- .get_dots_as_list(...)
   input <- .get_module_input(incidence_data)
 
-  if(...length() > 0) {
-    dots <- list(...)
-  } else {
-    dots <- list()
-  }
-
   if(bootstrapping_method == "non-parametric block boostrap") {
-    block_bootstrap_args <- names(formals(block_bootstrap))
-
     bootstrapped_incidence <- do.call(
-      'block_bootstrap',
-      c(list(incidence_input = input), dots[names(dots) %in% block_bootstrap_args])
+      '.block_bootstrap',
+      c(list(incidence_input = input),
+        .get_shared_args(list(.block_bootstrap,
+                              .block_bootstrap_overlap_func,
+                              .smooth_LOESS),
+                         dots_args))
     )
   } else {
     bootstrapped_incidence <- .make_empty_module_output()
@@ -47,8 +42,6 @@ get_bootstrap_replicate <- function( incidence_data,
   return(bootstrapped_incidence)
 }
 
-
-#TODO polish doc (inclding details on use of LOESS)
 #' Apply block-bootstrapping procedure to module input
 #'
 #'\code{.block_bootstrap} returns a block-bootstrapped replicate
@@ -57,22 +50,34 @@ get_bootstrap_replicate <- function( incidence_data,
 #'This function works by resampling blocks of differences (on the log-scale)
 #' between the original data and a smoothed version of the original data.
 #'
-#' @param incidence_input module input. Original incidence to bootstrap over.
-#' @param block_size integer. Size of a bootstrapping block.
 #' @param round_incidence boolean. Round the bootstrapped incidence?
-#' @inheritParams smooth_LOESS
+#' @inheritParams module_methods
+#' @inheritParams inner_module
+#' @inheritDotParams .block_bootstrap_overlap_func -incidence_vector
+#' @inheritDotParams smooth_incidence -simplify_output -incidence_data
 #'
-#' @return a module output object
-#' @export
-block_bootstrap <- function(incidence_input, block_size = 10, data_points_incl = 21, degree = 1, round_incidence = TRUE) {
+#' @return a module output object. bootstrapped incidence.
+.block_bootstrap <- function(incidence_input, round_incidence = TRUE, smoothing_method = "LOESS", ...) {
 
+  dots_args <- .get_dots_as_list(...)
   incidence_vector <- .get_values(incidence_input)
 
   log_original <-log(incidence_vector + 1)
-  smoothed_log <- smooth_incidence(log_original, smoothing_method = "LOESS", data_points_incl = data_points_incl, degree = degree)
+
+  smoothed_log <- do.call(
+    'smooth_incidence',
+    c(list(incidence_data = log_original,
+           smoothing_method = smoothing_method),
+      .get_shared_args(.smooth_LOESS, dots_args))
+  )
+
   diff_smoothed_original <- log_original - smoothed_log
 
-  bootstrapped_diff <- .block_bootstrap_overlap_func(diff_smoothed_original, block_size)
+  bootstrapped_diff <- do.call(
+    '.block_bootstrap_overlap_func',
+    c(list(incidence_vector = diff_smoothed_original),
+      .get_shared_args(.block_bootstrap_overlap_func, dots_args))
+  )
 
   bootstrapped_incidence <- exp(bootstrapped_diff + smoothed_log) -1
 
@@ -89,7 +94,7 @@ block_bootstrap <- function(incidence_input, block_size = 10, data_points_incl =
 #'
 #' Builds a bootstrapped vector of errors.
 #'
-#' @param incidence_vector module input. Original incidence to bootstrap over.
+#' @param incidence_vector numeric vector. Original incidence to bootstrap over.
 #' @param block_size integer. Size of a bootstrapping block.
 #' @param keep_weekdays_aligned boolean. Set to FALSE if not daily incidence, or if no weekly noise pattern.
 #'

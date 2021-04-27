@@ -1,11 +1,3 @@
-#TODO replace delay_incubation and delay_onset_to_report by list of delays
-
-#TODO add parameter to allow delay_distribution to not sum up to 1 if not waiting time distribution (e.g. shedding load distribution)
-
-#TODO redo doc
-#TODO figure out input format
-#TODO put all common parms in estimateR.R
-#TODO add details on additional parameters
 #' Infer Infection Events Dates from Delayed Observation
 #'
 #' This function reconstructs an incidence of infection events from incidence data representing delayed observations.
@@ -13,18 +5,14 @@
 #' \code{deconvolve_incidence} implements a deconvolution algorithm (Richardson-Lucy) to reconstruct
 #' a vector of infection events from input data representing delayed observations.
 #'
-#' @param incidence_data numeric.
-#' @param delay_incubation
-#' @param delay_onset_to_report
-#' @param simplify_output boolean. Return a numeric vector instead of module output object if output offset is zero.
-#' @param ... Additional parameters.
-#' @inheritParams smooth_deconvolve_estimate
+#' @inheritParams module_methods
+#' @inheritParams module_structure
+#' @inheritParams delay_high
+#' @inheritDotParams convolve_delay_inputs
+#' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #'
-#' @return module output object.
+#' @return module output object. Inferred incidence of infection events.
 #' @export
-#'
-#' @examples
-#' #TODO add examples
 deconvolve_incidence <- function( incidence_data,
                                   deconvolution_method = "Richardson-Lucy delay distribution",
                                   delay_incubation,
@@ -32,33 +20,25 @@ deconvolve_incidence <- function( incidence_data,
                                   simplify_output = TRUE,
                                   ... ) {
 
+  dots_args <- .get_dots_as_list(...)
   input <- .get_module_input(incidence_data)
 
-  if(...length() > 0) {
-    dots <- list(...)
-  } else {
-    dots <- list()
-  }
-
-  convolution_args <- names(formals(convolve_delay_inputs))
-
-  #TODO generalize this to a list of inputs (and skip if only one delay)
+  #TODO skip convolution if only one delay
   total_delay_distribution <- do.call(
     'convolve_delay_inputs',
-    c(list(delay_incubation = delay_incubation,#TODO continue
+    c(list(delay_incubation = delay_incubation,
            delay_onset_to_report = delay_onset_to_report,
            n_report_time_steps = .get_input_length(input)),
-      dots[names(dots) %in% convolution_args])
+      .get_shared_args(convolve_delay_inputs, dots_args))
   )
 
   if(deconvolution_method == "Richardson-Lucy delay distribution") {
-    RL_deconvolution_args <- names(formals(deconvolve_incidence_Richardson_Lucy))
 
     deconvolved_incidence <- do.call(
-      'deconvolve_incidence_Richardson_Lucy',
+      '.deconvolve_incidence_Richardson_Lucy',
       c(list(incidence_input = input,
              delay_distribution = total_delay_distribution),
-        dots[names(dots) %in% RL_deconvolution_args])
+        .get_shared_args(.deconvolve_incidence_Richardson_Lucy, dots_args))
     )
   } else {
     deconvolved_incidence <-  .make_empty_module_output()
@@ -71,18 +51,17 @@ deconvolve_incidence <- function( incidence_data,
   return(deconvolved_incidence)
 }
 
-#TODO improve doc
+#TODO rework on verbosity
 #' Deconvolve the incidence input with the Richardson-Lucy (R-L) algorithm
 #'
-#' @param incidence_input module input object.
-#' @param delay_distribution numeric square matrix or vector.
-#' @param threshold_chi_squared numeric. Threshold for chi-squared values under which the R-L algo stops.
-#' @param max_iterations integer. Maximum threshold for the number of iterations in the Richardson-Lucy algo.
-#' @param verbose Boolean. Print verbose output?
+#' @inheritParams inner_module
+#' @inheritParams universal_params
+#' @param delay_distribution numeric square matrix or vector. TODO refactor to estimateR
+#' @param threshold_chi_squared numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.
+#' @param max_iterations integer. Maximum threshold for the number of iterations in the R-L algorithm.
 #'
 #' @return module output object. Deconvolved incidence.
-#' @export
-deconvolve_incidence_Richardson_Lucy <- function(
+.deconvolve_incidence_Richardson_Lucy <- function(
   incidence_input,
   delay_distribution,
   threshold_chi_squared = 1,

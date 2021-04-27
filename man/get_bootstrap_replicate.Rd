@@ -12,11 +12,21 @@ get_bootstrap_replicate(
 )
 }
 \arguments{
-\item{incidence_data}{TODO Format still to define.}
+\item{incidence_data}{numeric vector. Incidence data (TODO improve definition)}
 
-\item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
+\item{simplify_output}{boolean. Return a numeric vector instead of module
+output object if output offset is zero? TODO to be described better.}
 
-\item{...}{Additional parameters. TODO add details}
+\item{...}{
+  Arguments passed on to \code{\link[=.block_bootstrap]{.block_bootstrap}}
+  \describe{
+    \item{\code{round_incidence}}{boolean. Round the bootstrapped incidence?}
+    \item{\code{smoothing_method}}{string. Method used to smooth the original incidence data.
+Available options are:
+\itemize{
+\item{'LOESS', implemented in \code{\link{.smooth_LOESS}}}
+}}
+  }}
 }
 \value{
 a module output object. A boostrapped replicate.

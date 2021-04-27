@@ -14,25 +14,46 @@ deconvolve_incidence(
 )
 }
 \arguments{
-\item{incidence_data}{numeric.}
+\item{incidence_data}{numeric vector. Incidence data (TODO improve definition)}
 
 \item{deconvolution_method}{string. Method used to infer timings of infection
-events from the original incidence data (aka deconvolution).
-Options are "Richardson-Lucy delay distribution".}
+events from the original incidence data (aka deconvolution step).
+Available options are:
+\itemize{
+\item{'Richardson-Lucy delay distribution',
+implemented in \code{\link{.deconvolve_incidence_Richardson_Lucy}}}
+}}
 
-\item{simplify_output}{boolean. Return a numeric vector instead of module output object if output offset is zero.}
+\item{delay_incubation}{TODO add details}
 
-\item{...}{Additional parameters.}
+\item{delay_onset_to_report}{TODO add details}
+
+\item{simplify_output}{boolean. Return a numeric vector instead of module
+output object if output offset is zero? TODO to be described better.}
+
+\item{...}{
+  Arguments passed on to \code{\link[=convolve_delay_inputs]{convolve_delay_inputs}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}
+  \describe{
+    \item{\code{n_report_time_steps}}{Integer value required if}
+    \item{\code{start_date}}{Optional. Date of the first incidence data point.}
+    \item{\code{time_step}}{Size of time step used in delays. String in the format:
+"day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for
+details)}
+    \item{\code{min_number_cases}}{Use only if an input is empirical delay data. Number
+of cases over which to build empirical delay distribution}
+    \item{\code{upper_quantile_threshold}}{Value between 0 and 1. Quantile}
+    \item{\code{delay_distribution}}{numeric square matrix or vector. TODO refactor to estimateR}
+    \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
+    \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
+    \item{\code{verbose}}{Boolean. Print verbose output?}
+  }}
 }
 \value{
-module output object.
+module output object. Inferred incidence of infection events.
 }
 \description{
 This function reconstructs an incidence of infection events from incidence data representing delayed observations.
 The assumption made is that delayed observations represent the convolution of the infections with a delay distribution.
 \code{deconvolve_incidence} implements a deconvolution algorithm (Richardson-Lucy) to reconstruct
 a vector of infection events from input data representing delayed observations.
-}
-\examples{
-#TODO add examples
 }

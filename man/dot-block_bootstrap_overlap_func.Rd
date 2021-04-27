@@ -11,7 +11,7 @@
 )
 }
 \arguments{
-\item{incidence_vector}{module input. Original incidence to bootstrap over.}
+\item{incidence_vector}{numeric vector. Original incidence to bootstrap over.}
 
 \item{block_size}{integer. Size of a bootstrapping block.}
 

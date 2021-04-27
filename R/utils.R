@@ -239,5 +239,30 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   cat(paste0("c(",paste(round(a, digits = digits), collapse=","), ")"))
 }
 
+#TODO doc
+.get_dots_as_list <- function(...){
+  if(...length() > 0) {
+    dots_args <- list(...)
+  } else {
+    dots_args <- list()
+  }
+  return(dots_args)
+}
+
+#TODO doc
+.get_arg_names <- function(func){
+  return(names(formals(func)))
+}
+
+#TODO doc
+.get_shared_args <- function(func_list, dots_args){
+  if(is.function(func_list)) {
+    func_arg_names <- .get_arg_names(func_list)
+  } else if(is.list(func_list)) {
+    func_arg_names <- unlist(lapply(func_list, .get_arg_names))
+  }
+  return(dots_args[names(dots_args) %in% func_arg_names])
+}
+
 
 
