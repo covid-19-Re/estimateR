@@ -131,9 +131,9 @@ of the incidence. Incidence should be a vector of non-negative values</p>
 
     <pre class="usage"><span class='fu'>.block_bootstrap</span><span class='op'>(</span>
   <span class='va'>incidence_input</span>,
-  block_size <span class='op'>=</span> <span class='fl'>10</span>,
-  data_points_incl <span class='op'>=</span> <span class='fl'>21</span>,
-  round_incidence <span class='op'>=</span> <span class='cn'>TRUE</span>
+  round_incidence <span class='op'>=</span> <span class='cn'>TRUE</span>,
+  smoothing_method <span class='op'>=</span> <span class='st'>"LOESS"</span>,
+  <span class='va'>...</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -141,25 +141,32 @@ of the incidence. Incidence should be a vector of non-negative values</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>incidence_input</th>
-      <td><p>module input. Original incidence to bootstrap over.</p></td>
-    </tr>
-    <tr>
-      <th>block_size</th>
-      <td><p>integer. Size of a bootstrapping block.</p></td>
-    </tr>
-    <tr>
-      <th>data_points_incl</th>
-      <td><p>integer. Window size for LOESS smoothing, see <a href='smooth_incidence.html'>smooth_incidence</a>.</p></td>
+      <td><p>module input object.</p></td>
     </tr>
     <tr>
       <th>round_incidence</th>
       <td><p>boolean. Round the bootstrapped incidence?</p></td>
     </tr>
+    <tr>
+      <th>smoothing_method</th>
+      <td><p>string. Method used to smooth the original incidence data.
+Available options are:</p><ul>
+<li><p>'LOESS', implemented in <code><a href='.smooth_LOESS.html'>.smooth_LOESS</a></code></p></li>
+</ul></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Arguments passed on to <code><a href='.block_bootstrap_overlap_func.html'>.block_bootstrap_overlap_func</a></code>, <code><a href='smooth_incidence.html'>smooth_incidence</a></code></p><dl>
+    <dt><code>block_size</code></dt><dd><p>integer. Size of a bootstrapping block.</p></dd>
+    <dt><code>keep_weekdays_aligned</code></dt><dd><p>boolean. Set to FALSE if not daily incidence, or if no weekly noise pattern.</p></dd>
+  
+</dl></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a module output object</p>
+    <p>a module output object. bootstrapped incidence.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>This function works by resampling blocks of differences (on the log-scale)

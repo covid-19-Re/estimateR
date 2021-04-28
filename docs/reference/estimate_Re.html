@@ -43,7 +43,8 @@
 <meta property="og:description" content="The incidence data input should represent infections,
 as opposed to representing delayed observations of infections.
 If the incidence data represents delayed observations of infections
-then one should deconvolve it first with deconvolve_incidence." />
+then one should deconvolve it first with deconvolve_incidence.
+TODO add details on inner function, that it wraps around EpiEstim and so on." />
 
 
 
@@ -130,7 +131,8 @@ then one should deconvolve it first with deconvolve_incidence." />
     <p>The incidence data input should represent infections,
 as opposed to representing delayed observations of infections.
 If the incidence data represents delayed observations of infections
-then one should deconvolve it first with <code>deconvolve_incidence</code>.</p>
+then one should deconvolve it first with <code>deconvolve_incidence</code>.
+TODO add details on inner function, that it wraps around EpiEstim and so on.</p>
     </div>
 
     <pre class="usage"><span class='fu'>estimate_Re</span><span class='op'>(</span>
@@ -145,33 +147,39 @@ then one should deconvolve it first with <code>deconvolve_incidence</code>.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>incidence_data</th>
-      <td><p>Format still to define.</p></td>
+      <td><p>numeric vector. Incidence data (TODO improve definition)</p></td>
     </tr>
     <tr>
       <th>estimation_method</th>
-      <td><p>string. Options are "EpiEstim sliding window".</p></td>
+      <td><p>string. Method used to estimate reproductive number
+values through time from the reconstructed infection timings.
+Available options are:</p><ul>
+<li><p>'EpiEstim sliding window',
+implemented in <code><a href='.estimate_Re_EpiEstim_sliding_window.html'>.estimate_Re_EpiEstim_sliding_window</a></code></p></li>
+</ul></td>
     </tr>
     <tr>
       <th>simplify_output</th>
-      <td><p>boolean. Return a numeric vector instead of module output object if output offset is zero.</p></td>
+      <td><p>boolean. Return a numeric vector instead of module
+output object if output offset is zero? TODO to be described better.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>#TODO figure out output format</p></td>
+      <td><p>Arguments passed on to <code><a href='.estimate_Re_EpiEstim_sliding_window.html'>.estimate_Re_EpiEstim_sliding_window</a></code></p><dl>
+    <dt><code>minimul_cumul_incidence</code></dt><dd><p>Numeric scalar. Minimum number of cumulated infections before starting the Re estimation</p></dd>
+    <dt><code>estimation_window</code></dt><dd><p>Integer scalar. Number of data points over which to assume Re to be constant.</p></dd>
+    <dt><code>mean_serial_interval</code></dt><dd><p>Numeric positive scalar. <code>mean_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
+    <dt><code>std_serial_interval</code></dt><dd><p>Numeric positive scalar. <code>std_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
+    <dt><code>mean_Re_prior</code></dt><dd><p>Numeric positive scalar. <code>mean prior</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
+  
+</dl></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a module output object (subject to change)</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <p>a module output object. Re estimates.</p>
 
-    <p>For now, only one Re estimation function is implemented.</p>
-<p>#TODO specify input format</p>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>#TODO add examples</span>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

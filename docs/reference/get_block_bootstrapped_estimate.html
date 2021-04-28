@@ -136,7 +136,7 @@ built from the distribution of bootstrapped estimates.</p>
     </div>
 
     <pre class="usage"><span class='fu'>get_block_bootstrapped_estimate</span><span class='op'>(</span>
-  <span class='va'>incidence_vector</span>,
+  <span class='va'>incidence_data</span>,
   N_bootstrap_replicates <span class='op'>=</span> <span class='fl'>100</span>,
   smoothing_method <span class='op'>=</span> <span class='st'>"LOESS"</span>,
   deconvolution_method <span class='op'>=</span> <span class='st'>"Richardson-Lucy delay distribution"</span>,
@@ -144,21 +144,17 @@ built from the distribution of bootstrapped estimates.</p>
   uncertainty_summary_method <span class='op'>=</span> <span class='st'>"original estimate - CI from bootstrap estimates"</span>,
   <span class='va'>delay_incubation</span>,
   delay_onset_to_report <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>,
-  estimation_window <span class='op'>=</span> <span class='fl'>3</span>,
-  mean_serial_interval <span class='op'>=</span> <span class='fl'>4.8</span>,
-  std_serial_interval <span class='op'>=</span> <span class='fl'>2.3</span>,
-  mean_Re_prior <span class='op'>=</span> <span class='fl'>1</span>,
   ref_date <span class='op'>=</span> <span class='cn'>NULL</span>,
   time_step <span class='op'>=</span> <span class='st'>"day"</span>,
-  verbose <span class='op'>=</span> <span class='cn'>FALSE</span>
+  <span class='va'>...</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>incidence_vector</th>
-      <td><p>numeric</p></td>
+      <th>incidence_data</th>
+      <td><p>numeric vector. Incidence data (TODO improve definition)</p></td>
     </tr>
     <tr>
       <th>N_bootstrap_replicates</th>
@@ -166,63 +162,76 @@ built from the distribution of bootstrapped estimates.</p>
     </tr>
     <tr>
       <th>smoothing_method</th>
-      <td><p>string. see <code><a href='smooth_incidence.html'>smooth_incidence</a></code>.</p></td>
+      <td><p>string. Method used to smooth the original incidence data.
+Available options are:</p><ul>
+<li><p>'LOESS', implemented in <code><a href='.smooth_LOESS.html'>.smooth_LOESS</a></code></p></li>
+</ul></td>
     </tr>
     <tr>
       <th>deconvolution_method</th>
-      <td><p>string. see <code><a href='deconvolve_incidence.html'>deconvolve_incidence</a></code></p></td>
+      <td><p>string. Method used to infer timings of infection
+events from the original incidence data (aka deconvolution step).
+Available options are:</p><ul>
+<li><p>'Richardson-Lucy delay distribution',
+implemented in <code><a href='.deconvolve_incidence_Richardson_Lucy.html'>.deconvolve_incidence_Richardson_Lucy</a></code></p></li>
+</ul></td>
     </tr>
     <tr>
       <th>estimation_method</th>
-      <td><p>string. see <code><a href='estimate_Re.html'>estimate_Re</a></code></p></td>
+      <td><p>string. Method used to estimate reproductive number
+values through time from the reconstructed infection timings.
+Available options are:</p><ul>
+<li><p>'EpiEstim sliding window',
+implemented in <code><a href='.estimate_Re_EpiEstim_sliding_window.html'>.estimate_Re_EpiEstim_sliding_window</a></code></p></li>
+</ul></td>
     </tr>
     <tr>
       <th>uncertainty_summary_method</th>
-      <td><p>string. 'NONE' or one of the possible strings in <code><a href='summarise_uncertainty.html'>summarise_uncertainty</a></code></p></td>
+      <td><p>string. TODO continue here</p><ul>
+<li><p>'original estimate - CI from bootstrap estimates'</p></li>
+<li><p>'bagged mean - CI from bootstrap estimates'</p></li>
+</ul><p>'NONE' if no summary of bootstrap estimates is made
+or one of the possible strings in <code><a href='summarise_uncertainty.html'>summarise_uncertainty</a></code></p></td>
     </tr>
     <tr>
       <th>delay_incubation</th>
-      <td><p>#TODO fill in doc</p></td>
+      <td><p>TODO add details</p></td>
     </tr>
     <tr>
       <th>delay_onset_to_report</th>
-      <td><p>#TODO fill in doc</p></td>
-    </tr>
-    <tr>
-      <th>estimation_window</th>
-      <td><p>integer. Only used if <code>estimation_method = "EpiEstim sliding window"</code>.
-see <code><a href='estimate_Re.html'>estimate_Re</a></code></p></td>
-    </tr>
-    <tr>
-      <th>mean_serial_interval</th>
-      <td><p>numeric. see <code><a href='estimate_Re.html'>estimate_Re</a></code></p></td>
-    </tr>
-    <tr>
-      <th>std_serial_interval</th>
-      <td><p>numeric. see <code><a href='estimate_Re.html'>estimate_Re</a></code></p></td>
-    </tr>
-    <tr>
-      <th>mean_Re_prior</th>
-      <td><p>numeric. Mean of prior distribution on Re</p></td>
+      <td><p>TODO add details</p></td>
     </tr>
     <tr>
       <th>ref_date</th>
-      <td><p>Date. Optional. Date of the first data entry in <code>incidence_vector</code></p></td>
+      <td><p>Date. Optional. Date of the first data entry in <code>incidence_data</code></p></td>
     </tr>
     <tr>
       <th>time_step</th>
-      <td><p>string. "day", "2 days", "week", "year"... (see <code><a href='https://rdrr.io/r/base/seq.Date.html'>seq.Date</a></code> for details)</p>
-<p>#TODO expand on the output</p></td>
+      <td><p>string. Time between two consecutive incidence datapoints.
+"day", "2 days", "week", "year"... (see <code><a href='https://rdrr.io/r/base/seq.Date.html'>seq.Date</a></code> for details)</p></td>
     </tr>
     <tr>
-      <th>verbose</th>
-      <td><p>boolean. see <code><a href='deconvolve_incidence.html'>deconvolve_incidence</a></code></p></td>
+      <th>...</th>
+      <td><p>Arguments passed on to <code><a href='.smooth_LOESS.html'>.smooth_LOESS</a></code>, <code><a href='.deconvolve_incidence_Richardson_Lucy.html'>.deconvolve_incidence_Richardson_Lucy</a></code>, <code><a href='.estimate_Re_EpiEstim_sliding_window.html'>.estimate_Re_EpiEstim_sliding_window</a></code></p><dl>
+    <dt><code>data_points_incl</code></dt><dd><p>integer. Size of the window used in the LOESS algorithm.</p></dd>
+    <dt><code>degree</code></dt><dd><p>integer. LOESS degree.</p></dd>
+    <dt><code>delay_distribution</code></dt><dd><p>numeric square matrix or vector. TODO refactor to estimateR</p></dd>
+    <dt><code>threshold_chi_squared</code></dt><dd><p>numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.</p></dd>
+    <dt><code>max_iterations</code></dt><dd><p>integer. Maximum threshold for the number of iterations in the R-L algorithm.</p></dd>
+    <dt><code>verbose</code></dt><dd><p>Boolean. Print verbose output?</p></dd>
+    <dt><code>minimul_cumul_incidence</code></dt><dd><p>Numeric scalar. Minimum number of cumulated infections before starting the Re estimation</p></dd>
+    <dt><code>estimation_window</code></dt><dd><p>Integer scalar. Number of data points over which to assume Re to be constant.</p></dd>
+    <dt><code>mean_serial_interval</code></dt><dd><p>Numeric positive scalar. <code>mean_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
+    <dt><code>std_serial_interval</code></dt><dd><p>Numeric positive scalar. <code>std_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
+    <dt><code>mean_Re_prior</code></dt><dd><p>Numeric positive scalar. <code>mean prior</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
+  
+</dl></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>tibble. Re estimations along with results from each pipeline step.</p>
+    <p>tibble. Re estimations along with results from each pipeline step. TODO add details</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>A base assumption made here is that the delay between infection can be split into two independent delays
@@ -232,11 +241,7 @@ The second (optional) waiting time corresponds to the delay between the onset of
 If this second waiting time is omitted, observation is assumed to have happened at the end of the first waiting time.
 In latter case, the first waiting time distribution does not need to correspond to an incubation period per se,
 but it must in any case correspond to the delay between infection and case observation.</p>
-<p>#TODO clarify input</p>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>#TODO add examples</span>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

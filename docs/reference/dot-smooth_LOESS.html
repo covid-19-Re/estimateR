@@ -40,7 +40,8 @@
 
 
 <meta property="og:title" content="LOESS smoothing function — .smooth_LOESS" />
-<meta property="og:description" content="see help for loess for more details." />
+<meta property="og:description" content="Prefer the use of the wrapper function smooth_incidence(..., smoothing_method = &quot;LOESS&quot;)
+instead of .smooth_LOESS." />
 
 
 
@@ -124,7 +125,8 @@
     </div>
 
     <div class="ref-description">
-    <p>see help for <code><a href='https://rdrr.io/r/stats/loess.html'>loess</a></code> for more details.</p>
+    <p>Prefer the use of the wrapper function <code><a href='smooth_incidence.html'>smooth_incidence(..., smoothing_method = "LOESS")</a></code>
+instead of <code>.smooth_LOESS</code>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>.smooth_LOESS</span><span class='op'>(</span><span class='va'>incidence_input</span>, data_points_incl <span class='op'>=</span> <span class='fl'>21</span>, degree <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span></pre>
@@ -132,10 +134,6 @@
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>incidence_input</th>
-      <td><p>module input. Noisy incidence data to smooth.</p></td>
-    </tr>
     <tr>
       <th>data_points_incl</th>
       <td><p>integer. Size of the window used in the LOESS algorithm.</p></td>
@@ -148,10 +146,13 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>module output. Smoothed incidence.</p>
+    <p>module output. Smoothed incidence TODO add details.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>#TODO add details on how data_points_incl relates to span.</p>
+    <p>This function implements the LOESS method for smoothing noisy data.
+It is essentially a wrapper around <code><a href='https://rdrr.io/r/stats/loess.html'>loess</a></code>.
+See the help section for <code><a href='https://rdrr.io/r/stats/loess.html'>loess</a></code> for details on LOESS.</p>
+<p>#TODO add details on how data_points_incl relates to span.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

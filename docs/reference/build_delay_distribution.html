@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Build a delay distribution vector — build_delay_distribution • estimateR</title>
+<title>Build a discretized probability distribution vector from a delay distribution — build_delay_distribution • estimateR</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Build a delay distribution vector — build_delay_distribution" />
-<meta property="og:description" content="Build a delay distribution vector" />
+<meta property="og:title" content="Build a discretized probability distribution vector from a delay distribution — build_delay_distribution" />
+<meta property="og:description" content="Build a discretized probability distribution vector from a delay distribution" />
 
 
 
@@ -118,13 +118,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Build a delay distribution vector</h1>
+    <h1>Build a discretized probability distribution vector from a delay distribution</h1>
     
     <div class="hidden name"><code>build_delay_distribution.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Build a delay distribution vector</p>
+    <p>Build a discretized probability distribution vector from a delay distribution</p>
     </div>
 
     <pre class="usage"><span class='fu'>build_delay_distribution</span><span class='op'>(</span>
@@ -138,25 +138,29 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>distribution</th>
-      <td><p>distribution in list format e.g. list(name = "gamma", shape = 2, scale = 4)</p></td>
+      <td><p>list. probability distribution specified in list format
+e.g. list(name = "gamma", shape = 2, scale = 4).
+The <code>distribution</code> list must contain a 'name' element, this element must be  a string and
+correspond to one of the types of <code><a href='https://rdrr.io/r/stats/Distributions.html'>distributions</a></code> supported in the <a href='https://rdrr.io/r/stats/Distributions.html'>Distributions</a> package.
+<code>distribution</code> must also contain parameters for the specified distribution, in the form '<code>parameter_name=parameter_value</code>'.</p></td>
     </tr>
     <tr>
       <th>max_quantile</th>
-      <td><p>numeric value between 0 and 1. TODO write what max_quantile does</p></td>
+      <td><p>numeric value between 0 and 1.
+Upper quantile reached by the last element in the discretized distribution vector.</p></td>
     </tr>
     <tr>
       <th>offset_by_one</th>
-      <td><p>boolean. Gamma distribution comes from fit on (raw_data + 1) to accommodate zeroes in the raw_data.</p></td>
+      <td><p>boolean.
+Set to TRUE if <code>distribution</code> represent the fit of data that was offset by one
+(<code>fitted_data = original_data + 1</code>) to accommodate zeroes in <code>original_data</code>.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>numeric vector.</p>
+    <p>vector containing the discretized probability distribution vector of <code>distribution</code>.</p>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>#TODO add example</span>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

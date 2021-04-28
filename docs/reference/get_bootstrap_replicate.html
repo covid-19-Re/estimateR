@@ -151,32 +151,31 @@ It performs a non-parametric block bootstrapping.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>incidence_data</th>
-      <td><p>Format still to define.</p></td>
-    </tr>
-    <tr>
-      <th>bootstrapping_method</th>
-      <td><p>string. Options are "non-parametric block boostrap"</p></td>
+      <td><p>numeric vector. Incidence data (TODO improve definition)</p></td>
     </tr>
     <tr>
       <th>simplify_output</th>
-      <td><p>boolean. Return a numeric vector instead of module output object if output offset is zero.</p></td>
+      <td><p>boolean. Return a numeric vector instead of module
+output object if output offset is zero? TODO to be described better.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Extra parameters to pass to the smoothing function</p></td>
+      <td><p>Arguments passed on to <code><a href='.block_bootstrap.html'>.block_bootstrap</a></code></p><dl>
+    <dt><code>round_incidence</code></dt><dd><p>boolean. Round the bootstrapped incidence?</p></dd>
+    <dt><code>smoothing_method</code></dt><dd><p>string. Method used to smooth the original incidence data.
+Available options are:
+<ul>
+<li><p>'LOESS', implemented in <code><a href='.smooth_LOESS.html'>.smooth_LOESS</a></code></p></li>
+</ul></p></dd>
+  
+</dl></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>a module output object. A boostrapped replicate.</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>#TODO specify input format</p>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>#TODO add examples</span>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

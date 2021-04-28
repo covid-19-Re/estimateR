@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Smooth Noisy Incidence Data — smooth_incidence • estimateR</title>
+<title>Smooth noisy incidence data — smooth_incidence • estimateR</title>
 
 
 <!-- jquery -->
@@ -39,9 +39,8 @@
 
 
 
-<meta property="og:title" content="Smooth Noisy Incidence Data — smooth_incidence" />
-<meta property="og:description" content="Currently only LOESS smoothing (smoothing_method = &quot;LOESS&quot;)
-is implemented." />
+<meta property="og:title" content="Smooth noisy incidence data — smooth_incidence" />
+<meta property="og:description" content="Currently only LOESS smoothing (smoothing_method = &quot;LOESS&quot;) is implemented." />
 
 
 
@@ -119,14 +118,13 @@ is implemented." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Smooth Noisy Incidence Data</h1>
+    <h1>Smooth noisy incidence data</h1>
     
     <div class="hidden name"><code>smooth_incidence.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Currently only LOESS smoothing (smoothing_method = "LOESS")
-is implemented.</p>
+    <p>Currently only LOESS smoothing (<code>smoothing_method = "LOESS"</code>) is implemented.</p>
     </div>
 
     <pre class="usage"><span class='fu'>smooth_incidence</span><span class='op'>(</span>
@@ -141,33 +139,34 @@ is implemented.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>incidence_data</th>
-      <td><p>numeric.</p></td>
+      <td><p>numeric vector. Incidence data (TODO improve definition)</p></td>
     </tr>
     <tr>
       <th>smoothing_method</th>
-      <td><p>string. Options are "LOESS".</p></td>
+      <td><p>string. Method used to smooth the original incidence data.
+Available options are:</p><ul>
+<li><p>'LOESS', implemented in <code><a href='.smooth_LOESS.html'>.smooth_LOESS</a></code></p></li>
+</ul></td>
     </tr>
     <tr>
       <th>simplify_output</th>
-      <td><p>boolean. Return a numeric vector instead of module output object if output offset is zero.</p></td>
+      <td><p>boolean. Return a numeric vector instead of module
+output object if output offset is zero? TODO to be described better.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Additional parameters</p></td>
+      <td><p>Arguments passed on to <code><a href='.smooth_LOESS.html'>.smooth_LOESS</a></code></p><dl>
+    <dt><code>data_points_incl</code></dt><dd><p>integer. Size of the window used in the LOESS algorithm.</p></dd>
+    <dt><code>degree</code></dt><dd><p>integer. LOESS degree.</p></dd>
+  
+</dl></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>module output. Smoothed incidence.</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <p>module output. Smoothed incidence. TODO add details</p>
 
-    <p>#TODO specify input format
-#TODO figure out how to document additional parms for internal functions</p>
-
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>#TODO add examples</span>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
