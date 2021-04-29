@@ -18,6 +18,11 @@ estimate_Re <- function( incidence_data,
                          simplify_output = TRUE,
                          ... ) {
 
+  .are_valid_argument_values(list(list(incidence_data, "module_input"),
+                                  list(estimation_method, "estimation_method"),
+                                  list(simplify_output, "boolean")))
+  
+  
   dots_args <- .get_dots_as_list(...)
   input <- .get_module_input(incidence_data)
 
@@ -61,6 +66,13 @@ estimate_Re <- function( incidence_data,
                         std_serial_interval  = 2.3,
                         mean_Re_prior = 1) {
 
+  .are_valid_argument_values(list(list(incidence_input, "module_input"),
+                                  list(minimul_cumul_incidence, "non_negative_number"),
+                                  list(estimation_window, "number"),
+                                  list(mean_serial_interval, "number"),
+                                  list(std_serial_interval, "non_negative_number"),
+                                  list(mean_Re_prior, "number")))
+  
   incidence_vector <- .get_values(incidence_input)
 
   # Ensure that incidence_vector has no NA or negative values

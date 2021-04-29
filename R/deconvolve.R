@@ -19,6 +19,14 @@ deconvolve_incidence <- function( incidence_data,
                                   delay_onset_to_report = c(1.0),
                                   simplify_output = TRUE,
                                   ... ) {
+  
+  .are_valid_argument_values(list(list(incidence_data, "module_input"),
+                                  list(deconvolution_method, "deconvolution_method"),
+                                  list(delay_incubation, "delay_object", .get_input_length(incidence_data)),
+                                  list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)),
+                                  list(simplify_output, "boolean")))
+  
+  
 
   dots_args <- .get_dots_as_list(...)
   input <- .get_module_input(incidence_data)
@@ -68,6 +76,12 @@ deconvolve_incidence <- function( incidence_data,
   max_iterations = 100,
   verbose = FALSE
 ) {
+  
+  .are_valid_argument_values(list(list(incidence_input, "module_input"),
+                                  list(delay_distribution, "delay_object", .get_input_length(incidence_input)),
+                                  list(threshold_chi_squared, "non_negative_number"),
+                                  list(max_iterations, "non_negative_number"),
+                                  list(verbose, "boolean")))
 
   incidence_vector <- .get_values(incidence_input)
 

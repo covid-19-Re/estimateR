@@ -12,6 +12,10 @@ smooth_incidence <- function(incidence_data,
                              smoothing_method = "LOESS",
                              simplify_output = TRUE,
                              ...) {
+  .are_valid_argument_values(list(list(incidence_data, "module_input"),
+                                  list(smoothing_method, "smoothing_method"),
+                                  list(simplify_output, "boolean")))
+  
 
   dots_args <- .get_dots_as_list(...)
   input <- .get_module_input(incidence_data)
@@ -50,6 +54,11 @@ smooth_incidence <- function(incidence_data,
 #'
 #' @return module output. Smoothed incidence TODO add details.
 .smooth_LOESS <- function(incidence_input, data_points_incl = 21, degree = 1) {
+
+  .are_valid_argument_values(list(list(incidence_input, "module_input"),
+                                  list(data_points_incl, "non_negative_number"), #minimal test; may have additional requirements
+                                  list(degree, "non_negative_number"))) #minimal test; needs to be one of {0,1,2}, but stats::loess already throws if it isn't
+                                  
   incidence_vector <- .get_values(incidence_input)
 
   n_points <- length(incidence_vector)
