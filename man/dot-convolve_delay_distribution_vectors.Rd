@@ -7,7 +7,9 @@
 .convolve_delay_distribution_vectors(vector_a, vector_b)
 }
 \arguments{
-\item{vector_a, vector_b}{Discretized probability distribution vectors}
+\item{vector_a}{discretized probability distribution vector}
+
+\item{vector_b}{discretized probability distribution vector}
 }
 \value{
 discretized probability distribution vector

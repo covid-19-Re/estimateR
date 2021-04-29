@@ -3,17 +3,17 @@
 #' @importFrom rlang :=
 NULL
 
-
 #' Utility functions for input validity.
 #'
 #' @param string_user_input A string containing the value that the user passed for the tested string type parameter.
 #' @param parameter_name A string containing the name the tested parameter had in the initial function in which it was passed.
-#' @param incidence_data_length A number representing the length of the given incidence data. 
-#' 
+#' @param incidence_data_length A number representing the length of the given incidence data.
+#'
 #' @return TRUE if all tests were passed. Throws an error otherwise.
-#' 
+#'
 #' @name validation_utility_params
 NULL
+
 #' Module structure characteristics
 #'
 #' @param incidence_data numeric vector. Incidence data (TODO improve definition)
@@ -92,7 +92,6 @@ NULL
 #' @name module_methods
 NULL
 
-
 #' Distribution
 #'
 #' @param distribution list. probability distribution specified in list format
@@ -100,6 +99,8 @@ NULL
 #' The \code{distribution} list must contain a 'name' element, this element must be  a string and
 #' correspond to one of the types of \code{\link[stats:Distributions]{distributions}} supported in the \link[stats]{Distributions} package.
 #' \code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.
+#' @param vector_a,vector_b,delay_distribution_vector discretized probability distribution vector
+#' @param matrix_a,matrix_b discretized delay distribution matrix
 #'
 #' @name distribution
 NULL

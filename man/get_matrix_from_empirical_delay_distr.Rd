@@ -7,7 +7,7 @@
 get_matrix_from_empirical_delay_distr(
   empirical_delays,
   n_report_time_steps,
-  start_date = NULL,
+  ref_date = NULL,
   time_step = "day",
   min_number_cases = NULL,
   upper_quantile_threshold = 0.99,
@@ -16,24 +16,45 @@ get_matrix_from_empirical_delay_distr(
 )
 }
 \arguments{
-\item{empirical_delays}{tibble. format to be specified}
+\item{empirical_delays}{dataframe containing the empirical data. See Details section.}
 
 \item{n_report_time_steps}{integer. Length of incidence time series}
 
-\item{start_date}{Date. First date of incidence data}
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
-\item{time_step}{string. "day", "X days", "week", "month"... (see \code{\link[base]{seq.Date}} for details)}
+\item{time_step}{string. Time between two consecutive incidence datapoints.
+"day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
 
 \item{min_number_cases}{integer. Minimal number of cases to build empirical distribution from}
 
 \item{upper_quantile_threshold}{numeric. Between 0 and 1. TODO add details}
 }
 \value{
-
+a discretized delay distribution matrix.
 }
 \description{
-This matrix is required for the application of the Richardson-Lucy algorithm.
+This function takes a record of delays between events and their observations
+and builds a discretized delay distribution matrix from this record.
+The discretized delay distribution matrix
+is required for the application of the Richardson-Lucy algorithm.
+The main benefit of providing empirical delay data to an \code{estimateR} analysis,
+as opposed to specifiying a delay as a single distribution
+(whether a fitted or empirical distribution) is that the variability of
+the delays through time is used to inform the analysis and provide more accurate estimates.
+If the average of delays has shifted from 5 days to 3 days between the beginning and end
+of epidemic of interest, this will be reflected in the recorded empirical delays
+and will be accounted for by \code{estimateR} when estimating the reproductive number.
 }
-\examples{
-#TODO add example
+\details{
+\code{empirical_delays} must contain (at least) two columns.
+An 'event_date' column of type \code{Date}
+and a 'report_delay' column of type \code{numeric}.
+Each row represents the recording of a single delay between event and observation.
+Typically, the 'event' here is the onset of symptoms of the disease of interest.
+And the observation can be, for instance, case confirmation, hospital admission,
+admission to an ICU, or death, depending on what the incidence data represents.
+For a particular row, 'event_date' would then represent, for a single individual,
+the date at which symptoms appeared. And 'report_delay' would represent the number
+of time steps (as specified by \code{time_step}) until the observation was made
+for this same individual.
 }

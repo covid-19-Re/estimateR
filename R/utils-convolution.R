@@ -1,10 +1,9 @@
 
 #TODO add input validations in all utilities (create validation utilities when needed)
 
-
 #' Convolve two discretized probability distribution vectors.
 #'
-#' @param vector_a,vector_b Discretized probability distribution vectors
+#' @inheritParams distribution
 #'
 #' @return discretized probability distribution vector
 .convolve_delay_distribution_vectors <- function(vector_a, vector_b){
@@ -30,20 +29,14 @@
   return(vector_c)
 }
 
-# TODO document delay distribution matrix format
-# TODO if vector_first = FALSE is used, need to consider doing an operation equivalent to .left_augment_delay_distribution
 #' Convolve a delay distribution vector with a delay distribution matrix
 #'
-#' @param vector_a discretized delay distribution vector
-#' @param matrix_b discretized delay distribution matrix
-#' @param vector_first Is the delay described by \code{vector_a} happen before
-#'   the one from \code{matrix_b} or is it the opposite?
+#' @inheritParams distribution
+#' @param vector_first Does the delay described by \code{vector_a} happen before
+#'   the one from \code{matrix_b}?
 #'
 #' @return discretized delay distribution matrix
 .convolve_delay_distribution_vector_with_matrix <- function(vector_a, matrix_b, vector_first = TRUE){
-
-  .check_is_probability_distr_vector(vector_a)
-  #TODO test that matrix_b is a delay distribution matrix
 
   if( vector_first ) {
     # Increase size of matrix_b to account for the fact that the output matrix will be shifted in time by the vector_a delay
@@ -83,9 +76,9 @@
 #' Convolve two delay distribution matrices
 #'
 #' Note that this convolution operation is not commutative!
-#' The order matters: here the delay implied by matrix_a happens first.
-#' @param matrix_a first delay distribution matrix
-#' @param matrix_b second delay distribution matrix
+#' The order matters: here the delay implied by \code{matrix_a} happens first,
+#' then the one implied by \code{matrix_b}.
+#' @inheritParams distribution
 #'
 #' @return convolved discretized delay distribution matrix
 .convolve_delay_distribution_matrices <- function(matrix_a, matrix_b){
@@ -130,7 +123,7 @@
 .convolve_delay_distributions <- function(first_delay,
                                           second_delay) {
 
-  #TODO check that elements are either delay distribution vectors or matrices
+  #TODO check that elements are either delay distribution vectors or matrices: vaildate input
 
   if( .is_numeric_vector(first_delay) ){
     if ( .is_numeric_vector(second_delay) ){
@@ -159,44 +152,52 @@
   }
 }
 
-#TODO change start_date to ref_date or vice versa
-#TODO allow for list of distributions as input
 #TODO generalize this to a list of inputs
-#TODO fill in doc
-#' Title
+#TODO add details on what is returned (vector or matrix)
+#' Convolve delay inputs.
 #'
-#' @param delay_incubation Delay
-#' @param delay_onset_to_report
-#' @param n_report_time_steps Integer value required if
-#' @param start_date Optional. Date of the first incidence data point.
-#' @param time_step Size of time step used in delays. String in the format:
-#'   "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for
-#'   details)
-#' @param min_number_cases Use only if an input is empirical delay data. Number
-#'   of cases over which to build empirical delay distribution
-#' @param upper_quantile_threshold Value between 0 and 1. Quantile
+#' This function is flexible in the type of delay inputs it can handle.
+#' Each delay input can be one of:
+#' \itemize{
+#' \item{a list representing a distribution object}
+#' \item{a discretized delay distribution vector}
+#' \item{a discretized delay distribution matrix}
+#' \item{a dataframe containing empirical delay data}
+#' }
 #'
-#' @return
+#' see \code{\link{get_matrix_from_empirical_delay_distr}} for details on the format
+#' expected for the empirical delay data.
+#'
+#'
+#'
+#' @param delay_incubation Incubation delay. Flexible format.
+#' @param delay_onset_to_report Delay between symptom onset and report. Flexible format.
+#' @param n_report_time_steps integer. Length of incidence time series.
+#' Use only when providing empirical delay data.
+#' @inheritParams dating
+#' @inheritDotParams get_matrix_from_empirical_delay_distr -empirical_delays
+#'
+#' @return a discretized delay distribution vector or matrix.
 #' @export
 convolve_delay_inputs <- function(delay_incubation,
                                   delay_onset_to_report,
-                                  n_report_time_steps = 0,
-                                  start_date = NULL,
-                                  time_step = "day",
-                                  min_number_cases = NULL,
-                                  upper_quantile_threshold = 0.99){
+                                  n_report_time_steps,
+                                  ...){
+
+  dots_args <- .get_dots_as_list(...)
 
   #TODO put these tests below in a utility function
   if( .check_is_empirical_delay_data(delay_incubation) ){
     if(n_report_time_steps == 0) {
       stop("Empirical delay data input but 'n_time_steps' parameter was not set or set to zero.")
     }
-    delay_distribution_incubation <- get_matrix_from_empirical_delay_distr(empirical_delays = delay_incubation,
-                                                                           n_report_time_steps = n_report_time_steps,
-                                                                           start_date = start_date,
-                                                                           time_step = time_step,
-                                                                           min_number_cases = min_number_cases,
-                                                                           upper_quantile_threshold = upper_quantile_threshold)
+    delay_distribution_incubation <- do.call(
+      'get_matrix_from_empirical_delay_distr',
+      c(list(empirical_delays = delay_incubation,
+             n_report_time_steps = n_report_time_steps),
+        .get_shared_args(list(get_matrix_from_empirical_delay_distr), dots_args))
+    )
+
   } else if(is.matrix(delay_incubation)) {
     #TODO check that delay_incubation is actually a delay distribution matrix
     delay_distribution_incubation <- delay_incubation
@@ -214,12 +215,15 @@ convolve_delay_inputs <- function(delay_incubation,
     if(n_report_time_steps == 0) {
       stop("Empirical delay data input but 'n_report_time_steps' parameter was not set or set to zero.")
     }
-    delay_distribution_onset_to_report <- get_matrix_from_empirical_delay_distr(empirical_delays = delay_onset_to_report,
-                                                                                n_report_time_steps = n_report_time_steps,
-                                                                                start_date = start_date,
-                                                                                time_step = time_step,
-                                                                                min_number_cases = min_number_cases,
-                                                                                upper_quantile_threshold = upper_quantile_threshold)
+
+    delay_distribution_onset_to_report <- do.call(
+      'get_matrix_from_empirical_delay_distr',
+      c(list(empirical_delays = delay_onset_to_report,
+             n_report_time_steps = n_report_time_steps),
+        .get_shared_args(list(get_matrix_from_empirical_delay_distr), dots_args))
+    )
+
+
   } else if(is.matrix(delay_onset_to_report)) {
     #TODO check that delay_incubation is actually a delay distribution matrix
     delay_distribution_onset_to_report <- delay_onset_to_report

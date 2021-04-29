@@ -195,18 +195,18 @@ test_that(".get_delay_matrix_from_delay_distribution_parms returns valid output"
 
 test_that(".get_matrix_from_empirical_delay_distr returns valid output",{
   # First toy data test
-  start_date <- as.Date("2020-03-01")
+  ref_date <- as.Date("2020-03-01")
   time_series_length <- 100
 
   report_delays <- sample(c(0,0,1,1,1,1,2,2,2,2,2,3,3,3,4,4,4,5,5,6,7,8,9,10), 1000, replace = T)
-  event_dates <- sample(seq.Date(from = start_date, length.out = time_series_length, by = "day"), 1000, replace = T)
+  event_dates <- sample(seq.Date(from = ref_date, length.out = time_series_length, by = "day"), 1000, replace = T)
 
   empirical_delay_data <- tibble::tibble(event_date = event_dates,
                                          report_delay = report_delays) %>%
                           dplyr::arrange(event_date)
 
   empirical_matrix <- get_matrix_from_empirical_delay_distr(empirical_delays = empirical_delay_data,
-                                        start_date = start_date,
+                                        ref_date = ref_date,
                                         n_report_time_steps = 90,
                                         time_step = "day",
                                         min_number_cases = 10,
@@ -215,7 +215,7 @@ test_that(".get_matrix_from_empirical_delay_distr returns valid output",{
   expect_delay_matrix_sums_lte_1(empirical_matrix, full_cols = 50)
 
   # Second toy data test
-  start_date <- as.Date("2020-04-01")
+  ref_date <- as.Date("2020-04-01")
   n_days <- 50
   delay_increase <- 1.5
   shape_initial_delay <- 6
@@ -224,14 +224,14 @@ test_that(".get_matrix_from_empirical_delay_distr returns valid output",{
   seed <- 734
 
 
-  generated_empirical_delays <- generate_delay_data(origin_date = start_date,
+  generated_empirical_delays <- generate_delay_data(origin_date = ref_date,
                                                     n_time_steps = n_days,
                                                     delay_ratio_start_to_end = 1.5,
                                                     distribution_initial_delay = distribution_initial_delay,
                                                     seed = seed)
 
   empirical_delays_matrix <- get_matrix_from_empirical_delay_distr(empirical_delays = generated_empirical_delays,
-                                                                   start_date = start_date,
+                                                                   ref_date = ref_date,
                                                                    n_report_time_steps = 50,
                                                                    min_number_cases = 5)
 

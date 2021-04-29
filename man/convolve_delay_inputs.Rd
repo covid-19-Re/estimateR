@@ -2,37 +2,47 @@
 % Please edit documentation in R/utils-convolution.R
 \name{convolve_delay_inputs}
 \alias{convolve_delay_inputs}
-\title{Title}
+\title{Convolve delay inputs.}
 \usage{
 convolve_delay_inputs(
   delay_incubation,
   delay_onset_to_report,
-  n_report_time_steps = 0,
-  start_date = NULL,
-  time_step = "day",
-  min_number_cases = NULL,
-  upper_quantile_threshold = 0.99
+  n_report_time_steps,
+  ...
 )
 }
 \arguments{
-\item{delay_incubation}{Delay}
+\item{delay_incubation}{Incubation delay. Flexible format.}
 
-\item{n_report_time_steps}{Integer value required if}
+\item{delay_onset_to_report}{Delay between symptom onset and report. Flexible format.}
 
-\item{start_date}{Optional. Date of the first incidence data point.}
+\item{n_report_time_steps}{integer. Length of incidence time series.
+Use only when providing empirical delay data.}
 
-\item{time_step}{Size of time step used in delays. String in the format:
-"day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for
-details)}
-
-\item{min_number_cases}{Use only if an input is empirical delay data. Number
-of cases over which to build empirical delay distribution}
-
-\item{upper_quantile_threshold}{Value between 0 and 1. Quantile}
+\item{...}{
+  Arguments passed on to \code{\link[=get_matrix_from_empirical_delay_distr]{get_matrix_from_empirical_delay_distr}}
+  \describe{
+    \item{\code{min_number_cases}}{integer. Minimal number of cases to build empirical distribution from}
+    \item{\code{upper_quantile_threshold}}{numeric. Between 0 and 1. TODO add details}
+    \item{\code{ref_date}}{Date. Optional. Date of the first data entry in \code{incidence_data}}
+    \item{\code{time_step}}{string. Time between two consecutive incidence datapoints.
+"day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+  }}
 }
 \value{
-
+a discretized delay distribution vector or matrix.
 }
 \description{
-Title
+This function is flexible in the type of delay inputs it can handle.
+Each delay input can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}
+}
+\details{
+see \code{\link{get_matrix_from_empirical_delay_distr}} for details on the format
+expected for the empirical delay data.
 }

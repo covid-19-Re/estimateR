@@ -7,7 +7,7 @@
 .get_initial_deconvolution_shift(delay_distribution_vector)
 }
 \arguments{
-\item{delay_distribution_vector}{}
+\item{delay_distribution_vector}{discretized probability distribution vector}
 }
 \value{
 

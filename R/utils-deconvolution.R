@@ -105,7 +105,7 @@
 #TODO add options to take median, mode, mean...
 #' Get initial shift for deconvolution step
 #'
-#' @param delay_distribution_vector
+#' @inheritParams distribution
 #'
 #' @return
 .get_initial_deconvolution_shift <- function(delay_distribution_vector){
@@ -118,31 +118,47 @@
 
 
 #TODO test
-#TODO improve function documentation
-#TODO possibly allow for other ways to specifiy initial sift than median of all reports.
-#TODO format of empirical_delays must be specified somewhere:
-# use "event_date" and "report_delay" as column names
+#TODO possibly allow for other ways to specifiy initial shift than median of all reports.
 #TODO allow for other distributions than gamma for fit, and also allow no fit.
 
 #' Build matrix of delay distributions through time from empirical delay data.
 #'
-#' This matrix is required for the application of the Richardson-Lucy algorithm.
+#' This function takes a record of delays between events and their observations
+#' and builds a discretized delay distribution matrix from this record.
+#' The discretized delay distribution matrix
+#' is required for the application of the Richardson-Lucy algorithm.
+#' The main benefit of providing empirical delay data to an \code{estimateR} analysis,
+#' as opposed to specifiying a delay as a single distribution
+#' (whether a fitted or empirical distribution) is that the variability of
+#' the delays through time is used to inform the analysis and provide more accurate estimates.
+#' If the average of delays has shifted from 5 days to 3 days between the beginning and end
+#' of epidemic of interest, this will be reflected in the recorded empirical delays
+#' and will be accounted for by \code{estimateR} when estimating the reproductive number.
 #'
-#' @param empirical_delays tibble. format to be specified
-#' @param start_date Date. First date of incidence data
+#' \code{empirical_delays} must contain (at least) two columns.
+#' An 'event_date' column of type \code{Date}
+#' and a 'report_delay' column of type \code{numeric}.
+#' Each row represents the recording of a single delay between event and observation.
+#' Typically, the 'event' here is the onset of symptoms of the disease of interest.
+#' And the observation can be, for instance, case confirmation, hospital admission,
+#' admission to an ICU, or death, depending on what the incidence data represents.
+#' For a particular row, 'event_date' would then represent, for a single individual,
+#' the date at which symptoms appeared. And 'report_delay' would represent the number
+#' of time steps (as specified by \code{time_step}) until the observation was made
+#' for this same individual.
+#'
+#'
+#' @param empirical_delays dataframe containing the empirical data. See Details section.
 #' @param n_report_time_steps integer. Length of incidence time series
-#' @param time_step string. "day", "X days", "week", "month"... (see \code{\link[base]{seq.Date}} for details)
 #' @param min_number_cases integer. Minimal number of cases to build empirical distribution from
 #' @param upper_quantile_threshold numeric. Between 0 and 1. TODO add details
+#' @inheritParams dating
 #'
-#' @return
+#' @return a discretized delay distribution matrix.
 #' @export
-#'
-#' @examples
-#' #TODO add example
 get_matrix_from_empirical_delay_distr <- function(empirical_delays,
                                                   n_report_time_steps,
-                                                  start_date = NULL,
+                                                  ref_date = NULL,
                                                   time_step = "day",
                                                   min_number_cases = NULL,
                                                   upper_quantile_threshold = 0.99,
@@ -152,11 +168,11 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   ##TODO need to account for offset if onset data (or not onset data?)
   ##TODO reconsider if we make gamma fit (allow to turn it off, or to use different distribution)
 
-  if(is.null(start_date)) {
-    start_date <- min(dplyr::pull(empirical_delays, .data$event_date), na.rm = TRUE)
+  if(is.null(ref_date)) {
+    ref_date <- min(dplyr::pull(empirical_delays, .data$event_date), na.rm = TRUE)
   }
 
-  all_report_dates <- seq.Date(from = start_date, by = time_step, length.out = n_report_time_steps)
+  all_report_dates <- seq.Date(from = ref_date, by = time_step, length.out = n_report_time_steps)
 
   # Ignore the delay data that is posterior to the last incidence report date.
   empirical_delays <- empirical_delays %>%
@@ -187,8 +203,8 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   initial_shift <- round(stats::median(empirical_delays$report_delay, na.rm = T))
 
   # Left-pad the dates we are looking at to account for shift between event dates and observation dates.
-  all_dates <- c(rev(seq.Date(from = start_date, by = paste0("-1 ", time_step), length.out = initial_shift + 1)),
-                 seq.Date(from = start_date, by = time_step, length.out = n_report_time_steps)[-1])
+  all_dates <- c(rev(seq.Date(from = ref_date, by = paste0("-1 ", time_step), length.out = initial_shift + 1)),
+                 seq.Date(from = ref_date, by = time_step, length.out = n_report_time_steps)[-1])
 
   n_time_steps <- n_report_time_steps + initial_shift
 

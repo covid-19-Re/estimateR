@@ -11,12 +11,12 @@
 )
 }
 \arguments{
-\item{vector_a}{discretized delay distribution vector}
+\item{vector_a}{discretized probability distribution vector}
 
 \item{matrix_b}{discretized delay distribution matrix}
 
-\item{vector_first}{Is the delay described by \code{vector_a} happen before
-the one from \code{matrix_b} or is it the opposite?}
+\item{vector_first}{Does the delay described by \code{vector_a} happen before
+the one from \code{matrix_b}?}
 }
 \value{
 discretized delay distribution matrix

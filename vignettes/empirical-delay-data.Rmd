@@ -27,7 +27,7 @@ This data is derived from the linelist published by the Hong Kong [Centre for He
 head(HK_incidence_data)
 
 incidence <- HK_incidence_data$incidence
-start_date <- min(HK_incidence_data$report_date)
+ref_date <- min(HK_incidence_data$report_date)
 ```
 
 Dataset compiling the delay between onset of symptoms and case report for many cases reported in Hong Kong.
@@ -70,7 +70,7 @@ HK_estimates <- get_block_bootstrapped_estimate(
   estimation_window = estimation_window,
   mean_serial_interval = mean_serial_interval,
   std_serial_interval = std_serial_interval,
-  ref_date = start_date,
+  ref_date = ref_date,
   time_step = "day"
 )
 

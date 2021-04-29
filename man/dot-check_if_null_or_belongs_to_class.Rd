@@ -4,7 +4,12 @@
 \alias{.check_if_null_or_belongs_to_class}
 \title{Utility functions for input validity.}
 \usage{
-.check_if_null_or_belongs_to_class(object, proper_class, parameter_name)
+.check_if_null_or_belongs_to_class(
+  object,
+  proper_class,
+  parameter_name,
+  mode = "any"
+)
 }
 \arguments{
 \item{object}{An object whose class needs checking,}
@@ -12,6 +17,10 @@
 \item{proper_class}{A string describing the desired class of \code{object}.}
 
 \item{parameter_name}{A string containing the name the tested parameter had in the initial function in which it was passed.}
+
+\item{mode}{Optional. A string describing the desired mode of \code{object}.
+Use only if \code{proper_class} is \code{vector}. Mode cannot be \code{Date}.
+Use \code{proper_class = "Date"} for checking class of \code{Date vector}.}
 }
 \value{
 TRUE if all tests were passed. Throws an error otherwise.

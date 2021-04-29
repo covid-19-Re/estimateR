@@ -22,5 +22,6 @@ Utility function that checks whether a user input is a valid delay object. This 
 \item a probability distribution vector: a numeric vector with no \code{NA} or negative values, whose entries sum up to 1
 \item an empirical delay data: a data frame with two columns: \code{event_date} and \code{report_delay}. The columns cannot contain \code{NA} values. \code{report_delay} only contains non-negative values
 \item a delay distribution matrix (as described in \code{\link{.check_is_delay_distribution_matrix}})
+\item a distribution object (e.g. list(name = 'gamma', scale = X, shape = Y))
 }
 }

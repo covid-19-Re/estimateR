@@ -9,6 +9,10 @@ e.g. list(name = "gamma", shape = 2, scale = 4).
 The \code{distribution} list must contain a 'name' element, this element must be  a string and
 correspond to one of the types of \code{\link[stats:Distributions]{distributions}} supported in the \link[stats]{Distributions} package.
 \code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.}
+
+\item{vector_a, vector_b, delay_distribution_vector}{discretized probability distribution vector}
+
+\item{matrix_a, matrix_b}{discretized delay distribution matrix}
 }
 \description{
 Distribution

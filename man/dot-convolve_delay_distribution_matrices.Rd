@@ -7,14 +7,15 @@
 .convolve_delay_distribution_matrices(matrix_a, matrix_b)
 }
 \arguments{
-\item{matrix_a}{first delay distribution matrix}
+\item{matrix_a}{discretized delay distribution matrix}
 
-\item{matrix_b}{second delay distribution matrix}
+\item{matrix_b}{discretized delay distribution matrix}
 }
 \value{
 convolved discretized delay distribution matrix
 }
 \description{
 Note that this convolution operation is not commutative!
-The order matters: here the delay implied by matrix_a happens first.
+The order matters: here the delay implied by \code{matrix_a} happens first,
+then the one implied by \code{matrix_b}.
 }

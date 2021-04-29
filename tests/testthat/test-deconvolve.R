@@ -31,7 +31,7 @@ test_that("deconvolve_incidence yields consistent results on a toy moving-throug
                           332,324,312,297,276,256,236,214,192,170,
                           145,118,91,66)
 
-  start_date <- as.Date("2020-04-01")
+  ref_date <- as.Date("2020-04-01")
   n_days <- 50
   delay_increase <- 1.5
   shape_initial_delay <- 6
@@ -39,7 +39,7 @@ test_that("deconvolve_incidence yields consistent results on a toy moving-throug
   distribution_initial_delay <- list(name = "gamma", shape = shape_initial_delay, scale = scale_initial_delay)
   seed <- 734
 
-  generated_empirical_delays <- generate_delay_data(origin_date = start_date,
+  generated_empirical_delays <- generate_delay_data(origin_date = ref_date,
                                                     n_time_steps = n_days,
                                                     delay_ratio_start_to_end = 1.5,
                                                     distribution_initial_delay = distribution_initial_delay,
@@ -53,7 +53,7 @@ test_that("deconvolve_incidence yields consistent results on a toy moving-throug
                                                 deconvolution_method = "Richardson-Lucy delay distribution",
                                                 delay_incubation = distribution_incubation,
                                                 delay_onset_to_report = generated_empirical_delays,
-                                                start_date = start_date,
+                                                ref_date = ref_date,
                                                 min_number_cases = 20,
                                                 threshold_chi_squared = 1,
                                                 max_iterations = 100)
