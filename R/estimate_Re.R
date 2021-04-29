@@ -70,7 +70,7 @@ estimate_Re <- function( incidence_data,
                                   list(minimul_cumul_incidence, "number"),
                                   list(estimation_window, "number"),
                                   list(mean_serial_interval, "number"),
-                                  list(std_serial_interval, "number"),
+                                  list(std_serial_interval, "non_negative_number"),
                                   list(mean_Re_prior, "number")))
   
   incidence_vector <- .get_values(incidence_input)
