@@ -79,7 +79,7 @@ deconvolve_incidence <- function( incidence_data,
   
   .are_valid_argument_values(list(list(incidence_input, "module_input"),
                                   list(delay_distribution, "delay_object", .get_input_length(incidence_input)),
-                                  list(threshold_chi_squared, "number"),
+                                  list(threshold_chi_squared, "non_negative_number"),
                                   list(max_iterations, "number"),
                                   list(verbose, "boolean")))
 
