@@ -368,7 +368,6 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #'     \item is a lower triangular matrix
 #'     \item no column sums up to more than 1
 #'     \item no NA values
-#'     \item is a square matrix
 #'     \item the size of the matrix is greater than the length of the incidence data
 #' }
 #' 
