@@ -67,7 +67,7 @@ estimate_Re <- function( incidence_data,
                         mean_Re_prior = 1) {
 
   .are_valid_argument_values(list(list(incidence_input, "module_input"),
-                                  list(minimul_cumul_incidence, "number"),
+                                  list(minimul_cumul_incidence, "non_negative_number"),
                                   list(estimation_window, "number"),
                                   list(mean_serial_interval, "number"),
                                   list(std_serial_interval, "non_negative_number"),
