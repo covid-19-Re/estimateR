@@ -29,36 +29,87 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #'
 #'
 #' @param output_list named list of module outputs
-#' @param ref_date Date. Reference date.
-#' @param time_step string. "day", "2 days", "week", "year"... (see seq.Date help page for details)
+#' @param index_col TODO inherit
+#' @inherit dating
 #'
 #' @return tibble
 #' @export
-#'
-#' @examples
-#' #TODO add examples
-merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
+merge_outputs <- function(output_list,
+                          ref_date = NULL,
+                          time_step = "day",
+                          include_index = is.null(ref_date),
+                          index_col = "idx"){
 
   tibble_list <- lapply(1:length(output_list),
                         function(i) {
                           .make_tibble_from_output(output = output_list[[i]],
-                                                  output_name = names(output_list)[i])
+                                                  output_name = names(output_list)[i],
+                                                  index_col = index_col)
                         })
 
-  merged_outputs <- plyr::join_all(tibble_list, by='index', type='full') %>%
-                      dplyr::arrange(.data$index)
+  merged_outputs <- plyr::join_all(tibble_list, by= index_col, type='full') %>%
+                      dplyr::arrange(.data[[index_col]])
 
   if( !is.null(ref_date) ) {
-    dates <- seq.Date(from = ref_date + min(merged_outputs$index), by = time_step, along.with = merged_outputs$index)
+    dates <- seq.Date(from = ref_date + min(merged_outputs[[index_col]]),
+                      by = time_step,
+                      along.with = merged_outputs[[index_col]])
     merged_outputs$date <- dates
     merged_outputs <- dplyr::select(merged_outputs, date, tidyselect::everything())
   }
 
-  merged_outputs <- dplyr::select(merged_outputs, -.data$index)
+  if(!include_index) {
+    merged_outputs <- dplyr::select(merged_outputs, -.data[[index_col]])
+  }
 
   return(merged_outputs)
 }
 
+#' Convert module output object into tibble
+#'
+#' @param output module output object
+#' @param output_name string. Name to be given to the values column
+#' @param index_col index
+#'
+#' @return tibble
+.make_tibble_from_output <- function(output,
+                                     output_name,
+                                     index_col = "idx"){
+
+  tmp_output <- .get_module_input(output)
+  indices <- seq(from = .get_offset(tmp_output), by = 1, length.out = length(.get_values(tmp_output)))
+
+  return(dplyr::tibble(!!index_col := indices, !!output_name := .get_values(tmp_output)))
+}
+
+
+#' Add dates column to dataframe.
+#'
+#' @param estimates dataframe. Estimates.
+#' @param keep_index_col boolean. Keep index column in result?
+#' @inherit dating
+#' @inherit uncertainty
+#'
+#' @return estimates dataframe with dates column.
+.add_date_column <- function(estimates,
+                             ref_date,
+                             time_step,
+                             index_col = "idx",
+                             keep_index_col = FALSE) {
+
+  dates <- seq.Date(from = ref_date + min(estimates[[index_col]]),
+                    by = time_step,
+                    along.with = estimates[[index_col]])
+  estimates$date <- dates
+  estimates <- dplyr::select(estimates, date, tidyselect::everything())
+
+  if(!keep_index_col) {
+    estimates <-  estimates %>%
+      dplyr::select(-.data[[index_col]])
+  }
+
+  return(estimates)
+}
 
 #' Transform input data into a module input object
 #'
@@ -164,7 +215,6 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
   }
 }
 
-
 #' Get length of values vector in a module input object.
 #'
 #' @param input module input object.
@@ -174,44 +224,35 @@ merge_outputs <- function(output_list, ref_date = NULL, time_step = "day"){
   return(length(.get_values(input)))
 }
 
-
-#' Convert module output object into tibble
-#'
-#' @param output module output object
-#' @param output_name string. Name to be given to the values column
-#'
-#' @return tibble
-.make_tibble_from_output <- function(output, output_name){
-
-  tmp_output <- .get_module_input(output)
-  indices <- seq(from = .get_offset(tmp_output), by = 1, length.out = length(.get_values(tmp_output)))
-
-  return(dplyr::tibble(index = indices, !!output_name := .get_values(tmp_output)))
-}
-
-#TODO fill in documentation
-#TODO allow for other types of time steps than days
-#TODO stop exporting after removed from vignette
 #' Generate delay data.
 #'
 #' This utility can be used to build toy examples to test functions dealing with empirical delay data.
+#' It is very basic in what it simulates.
+#' A random walk is simulated over \code{n_time_steps}, representing the incidence through time.
+#' The result of this simulation is offset so that all values are positive.
+#' Then, for each time step, \code{n} samples from a delay distribution are taken,
+#' with \code{n} being the incidence value at this time step.
+#' The random draws are then multiplied by a factor (>1 or <1) to simulate
+#' a gradual shift in the delay distribution through time.
+#' This multiplication factor is calculated
+#' by linearly interpolating between 1 (at the first time step),
+#' and \code{delay_ratio_start_to_end} linearly,
+#' from 1 at the first time step to \code{ratio_delay_end_to_start}
+#' at the last time step.
 #'
-#' @param origin_date
-#' @param n_time_steps
-#' @param delay_ratio_start_to_end
-#' @param time_step
-#' @param distribution_initial_delay
-#' @param seed
+#' @param origin_date Date of first infection.
+#' @param n_time_steps Number of time steps to generate delays over
+#' @param ratio_delay_end_to_start numeric value.
+#' Shift in delay distribution from start to end.
+#' @param distribution_initial_delay Distribution in list format.
+#' @param seed RNG seed
+#' @inherit dating
 #'
-#' @return data.frame. Simulated delay data.
-#' @export
-#'
-#' @examples
-#' #TODO add examples
-generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
+#' @return dataframe. Simulated delay data.
+.generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
                                  n_time_steps = 100,
                                  time_step = "day",
-                                 delay_ratio_start_to_end = 2,
+                                 ratio_delay_end_to_start = 2,
                                  distribution_initial_delay = list(name = "gamma", shape = 6, scale = 5),
                                  seed = NULL){
 
@@ -229,7 +270,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
     raw_sampled_delays <- .sample_from_distribution(distribution = distribution_initial_delay,
                                                     n = pop_size[i])
     # Multiply these samples by a factor that accounts for the linear inflation or deflation of delays.
-    sampled_delays <- round(raw_sampled_delays * (1 + i/n_time_steps * (delay_ratio_start_to_end - 1)))
+    sampled_delays <- round(raw_sampled_delays * (1 + i/n_time_steps * (ratio_delay_end_to_start - 1)))
 
     return(tibble::tibble(event_date = event_dates[i], report_delay = sampled_delays))
   })
@@ -276,7 +317,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #' @description Utility function that checks if a specific user given parameter value is among the accepted ones, in which case it returns TRUE
 #' Throws an error otherwise.
 #' @inherit validation_utility_params
-#' 
+#'
 #'
 .is_value_in_accepted_values_vector <- function(string_user_input, parameter_name){
   if(!is.character(string_user_input)){
@@ -292,7 +333,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #' @description Utility function that checks if a specific user given parameter value an accepted time_step, in which case it returns TRUE
 #' An accepted time_step is considered to be: <<A character string, containing one of "day", "week", "month", "quarter" or "year". This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>> (from \link{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
 #' @inherit validation_utility_params
-#' 
+#'
 .is_value_valid_time_step <- function(string_user_input, parameter_name){
   if(!is.character(string_user_input)){
     stop(paste("Expected parameter", parameter_name, "to be a string."))
@@ -306,7 +347,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 
 
 #' @description Utility function to determine whether an object is a numeric vector with all positive (or zero) values.
-#' 
+#'
 #' @inherit validation_utility_params
 #' @param vector vector to be tested
 #'
@@ -326,7 +367,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #' @description Utility function that checks if a user input is one of:
 #' \itemize{
 #'     \item a numeric vector with values > 0
-#'     \item a list with two elements: \code{values} (a numeric vector with values > 0) and \code{index_offset} (an integer)   
+#'     \item a list with two elements: \code{values} (a numeric vector with values > 0) and \code{index_offset} (an integer)
 #' }
 #' @inherit validation_utility_params
 #' @param module_input_object the vector/list the user passed as a parameter, to be tested
@@ -336,24 +377,24 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
     if("values" %!in% names(module_input_object)){
       stop(paste("When passed as a list,", parameter_name, "has to contain a $values element."))
     }
-    
+
     if("index_offset" %!in% names(module_input_object)){
       stop(paste("When passed as a list,", parameter_name, "has to contain a $index_offset element."))
-    } 
-    
+    }
+
     if(!.is_positive_numeric_vector(module_input_object$values)){
       stop(paste("The $values element of", parameter_name, "has to be a numeric vector with values greater or equal to 0."))
     }
-    
+
     if(module_input_object$index_offset != as.integer(module_input_object$index_offset)){ #if index_offset is not an integer
       stop(paste("The $index_offset element of", parameter_name, "has to be an integer."))
-    } 
-    
+    }
+
   } else if(is.numeric(module_input_object)){
     if(!.is_positive_numeric_vector(module_input_object)){
       stop(paste(parameter_name, "has to be a numeric vector with values greater or equal to 0."))
     }
-    
+
   } else {
     stop(paste(parameter_name, "has to be either a numeric vector or a list."))
   }
@@ -362,7 +403,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 
 #' @description Utility function that checks if a given matrix is a valid delay distribution matrix.
 #' For this, the matrix needs to fulfill the following conditions:
-#' \itemize{ 
+#' \itemize{
 #'     \item is a numeric matrix
 #'     \item has no values < 0
 #'     \item is a lower triangular matrix
@@ -370,44 +411,44 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #'     \item no NA values
 #'     \item the size of the matrix is greater than the length of the incidence data
 #' }
-#' 
+#'
 #' @inherit validation_utility_params
 #' @param delay_matrix A matrix to be tested
-#' 
+#'
 .check_is_delay_distribution_matrix <- function(delay_matrix, incidence_data_length){
   if(!is.matrix(delay_matrix) || !is.numeric(delay_matrix)){
     stop("The delay distribution object needs to be a numeric matrix.")
   }
-  
+
   if(any(is.na(delay_matrix))){
     stop("The delay distribution matrix cannot contain any NA values.")
   }
-  
+
   if(!all(delay_matrix >= 0)){
     stop("The delay distribution matrix needs to contain non-negative values.")
   }
-  
+
   if(ncol(delay_matrix) != nrow(delay_matrix)){
     stop("The delay distribution matrix needs to be square.")
   }
-    
+
   if(!all(delay_matrix == delay_matrix*lower.tri(delay_matrix, diag = TRUE))){ #check if matrix is lower triangular
     stop("The delay distribution matrix needs to be lower triangular.")
   }
-  
+
   if(!all(colSums(delay_matrix) < 1)){
     stop("The delay distribution matrix is not valid. At least one column sums up to a value greater than 1.")
   }
-  
+
   if(ncol(delay_matrix) < incidence_data_length){
     stop("The delay distribution matrix needs to have a greater size than the length of the incidence data.")
   }
-  
+
   return(TRUE)
-  
+
 }
 
-#' @description Utility function that checks whether a user input is a valid delay object. This means it can be one of the following: 
+#' @description Utility function that checks whether a user input is a valid delay object. This means it can be one of the following:
 #'      \itemize{
 #'         \item a probability distribution vector: a numeric vector with no \code{NA} or negative values, whose entries sum up to 1
 #'         \item an empirical delay data: a data frame with two columns: \code{event_date} and \code{report_delay}. The columns cannot contain \code{NA} values. \code{report_delay} only contains non-negative values
@@ -418,23 +459,23 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #' @param delay_object user inputted object to be tested
 #'
 .is_valid_delay_object <- function(delay_object, parameter_name, incidence_data_length){
-  
+
   if(.is_numeric_vector(delay_object)){
-    
+
     .check_is_probability_distr_vector(delay_object)
-  
+
   } else if(is.data.frame(delay_object)){
-    
+
     .check_is_empirical_delay_data(delay_object)
-    
+
   } else if(is.matrix(delay_object)){
-    
+
     .check_is_delay_distribution_matrix(delay_object, incidence_data_length)
-    
+
   } else if(is.list(delay_object)){
-    
+
     .is_valid_distribution(delay_object)
-    
+
   } else {
     stop(paste("Invalid", parameter_name, "input.", parameter_name, "must be either:
          a numeric vector representing a discretized probability distribution,
@@ -445,10 +486,10 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   return(TRUE)
 }
 
-#' @description  Utility function to check whether an object belongs to a particular class. 
+#' @description  Utility function to check whether an object belongs to a particular class.
 #' Wrapper function over \code{\link{.check_class}} needed because, being called from \code{\link{.are_valid_argument_values}},
 #' the parameter name will not be the same as the one from the original function.
-#' 
+#'
 #' @inherit validation_utility_params
 #' @inherit .check_class
 #'
@@ -456,14 +497,14 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
   tryCatch(
     {
       if(is.na(object)){
-        stop("Object was NA") # This error message is never shown. Overwritten below. 
+        stop("Object was NA") # This error message is never shown. Overwritten below.
       }
       .check_class(object, proper_class, mode)
     },
     error=function(error) {
       stop(paste("Expected parameter", parameter_name, "to be of type", proper_class, "and not NA."))
     }
-  )    
+  )
   return(TRUE)
 }
 
@@ -471,7 +512,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #'
 #' @inherit validation_utility_params
 #' @inherit .check_class
-#' 
+#'
 .check_if_null_or_belongs_to_class <- function(object, proper_class, parameter_name, mode="any"){
   if(!is.null(object)){
     .check_class_parameter_name(object, proper_class, parameter_name, mode)
@@ -484,7 +525,7 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #'
 #' @inherit validation_utility_params
 #' @param number The value to be tested
-#' 
+#'
 .check_if_number <- function(number, parameter_name){
   if(!is.numeric(number)){
     stop(paste(parameter_name, "is expected to be a number."))
@@ -500,31 +541,31 @@ generate_delay_data <- function(origin_date = as.Date("2020-02-01"),
 #'
 #' @inherit validation_utility_params
 #' @inherit  .check_if_number
-#' 
+#'
 .check_if_non_negative_number <- function(number, parameter_name){
   .check_if_number(number, parameter_name)
-  
+
   if(number < 0){
     stop(paste(parameter_name, "is expected to be positive."))
   }
-  
+
   return(TRUE)
 }
 
 #' @description Utility function that checks that the values the user passed when calling a function are valid.
-#' 
+#'
 #' @inherit validation_utility_params
 #' @param user_inputs A list of lists with two elements: the first is the value of the parameter to be tested. The second is the expected type of that parameter.
-#' 
+#'
 .are_valid_argument_values <- function(user_inputs){
   for(i in 1:length(user_inputs)){
-    user_input <- user_inputs[[i]][[1]] 
+    user_input <- user_inputs[[i]][[1]]
     input_type <- user_inputs[[i]][[2]]
     parameter_name <- deparse(substitute(user_inputs)[[i+1]][[2]])
     if(length(user_inputs[[i]]) > 2){
-      additional_function_parameter <- user_inputs[[i]][[3]] 
+      additional_function_parameter <- user_inputs[[i]][[3]]
     }
-    
+
     switch (input_type,
         "smoothing_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
         "deconvolution_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),

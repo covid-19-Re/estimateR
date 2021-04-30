@@ -34,6 +34,45 @@ test_that("smooth_deconvolve_estimate yields consistent results on a toy example
   expect_equal(estimates$date, reference_dates)
 })
 
+test_that("smooth_deconvolve_estimate passes '...' arguments consistently", {
+
+  toy_incidence_data <- c(6,8,10,13,17,22,31,41,52,65,80,97,116,
+                          138,162,189,218,245,268,292,311,322,330,
+                          332,324,312,297,276,256,236,214,192,170,
+                          145,118,91,66)
+
+  delay_distribution <- c(0,0.015,0.09,0.168,
+                          0.195,0.176,0.135,0.091,0.057,0.034,
+                          0.019,0.01,0.005,0.003,
+                          0.001,0.001)
+
+  estimates <- smooth_deconvolve_estimate(incidence_data = toy_incidence_data,
+                                          smoothing_method = "LOESS",
+                                          deconvolution_method = "Richardson-Lucy delay distribution",
+                                          estimation_method = "EpiEstim sliding window",
+                                          delay_incubation = delay_distribution,
+                                          estimation_window = 5,
+                                          mean_serial_interval = 8,
+                                          std_serial_interval  = 3,
+                                          block_size = 3,
+                                          degree = 1,
+                                          mean_Re_prior = 2.5,
+                                          output_Re_only = FALSE,
+                                          index_col = "date_index")
+
+  reference_R_values <- c(NA,NA,NA,NA,NA,NA,NA,9.493,7.178,
+                          5.892,5.114,4.591,4.201,3.887,3.609,
+                          3.345,3.099,2.868,2.645,2.436,2.244,
+                          2.063,1.895,1.74,1.593,1.454,1.324,
+                          1.203,1.092,0.994,0.909,0.836,0.775,
+                          0.722,0.674,0.629,0.586,NA,NA,NA,NA,NA)
+
+  reference_indices <- -5:36
+
+  expect_equal(estimates$R_mean, reference_R_values, tolerance = 1E-2)
+  expect_equal(estimates$date_index, reference_indices)
+})
+
 
 #TODO skip on CRAN as it can fail by chance
 test_that("get_block_bootstrapped_estimate yields consistent results on a toy example", {
@@ -66,6 +105,10 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
                                               ref_date = as.Date("2020-02-04"),
                                               time_step = "day")
 
+  reference_dates <- seq.Date(from = as.Date("2020-02-02"),
+                              to = as.Date("2020-03-05"),
+                              by="day")
+
   reference_R_mean_values <- c(4.981,3.595,3.027,2.766,2.619,2.508,2.408,
                           2.306,2.198,2.09,1.986,1.884,1.785,1.693,
                           1.604,1.518,1.437,1.362,1.29,1.22,1.153,
@@ -85,6 +128,7 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
                               0.799,0.779,0.758,0.733,0.708)
 
 
+  expect_equal(estimates$date, reference_dates)
   expect_equal(estimates$Re_estimate, reference_R_mean_values, tolerance = 1E-1)
   expect_equal(estimates$CI_down, reference_CI_down_values, tolerance = 1E-1)
   expect_equal(estimates$CI_up, reference_CI_up_values, tolerance = 1E-1)
@@ -100,9 +144,9 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
                                                estimation_window = 3,
                                                mean_serial_interval = 4.8,
                                                std_serial_interval  = 2.3,
-                                               mean_Re_prior = 1,
-                                               ref_date = as.Date("2020-02-04"),
-                                               time_step = "day")
+                                               mean_Re_prior = 1)
+
+  reference_indices <- -2:30
 
   reference_R_original_values <- c(4.856,3.482,2.918,2.66,2.52,2.423,2.34,2.254,
                                      2.161,2.066,1.971,1.875,1.78,1.69,1.602,1.517,
@@ -120,6 +164,7 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
                               1.338,1.26,1.181,1.103,1.028,0.959,0.898,0.849,0.811,
                               0.782,0.757,0.734,0.71,0.682,0.651)
 
+  expect_equal(estimates$idx, reference_indices)
   expect_equal(estimates$Re_estimate, reference_R_original_values, tolerance = 1E-1)
   expect_equal(estimates$CI_down, reference_CI_down_values, tolerance = 1E-1)
   expect_equal(estimates$CI_up, reference_CI_up_values, tolerance = 1E-1)

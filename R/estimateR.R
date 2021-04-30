@@ -82,12 +82,12 @@ NULL
 #' \item{'EpiEstim sliding window',
 #' implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
 #' }
-#' @param uncertainty_summary_method string. TODO continue here
+#' @param uncertainty_summary_method string. One of the following options:
 #' \itemize{
+#' \item{'NONE' if no summary of bootstrap estimates is required}
 #' \item{'original estimate - CI from bootstrap estimates'}
 #' \item{'bagged mean - CI from bootstrap estimates'}
-#' } 'NONE' if no summary of bootstrap estimates is made
-#' or one of the possible strings in \code{\link{summarise_uncertainty}}
+#' }
 #'
 #' @name module_methods
 NULL
@@ -105,6 +105,19 @@ NULL
 #' @name distribution
 NULL
 
+#' Uncertainty summary
+#'
+#' @param original_estimates Optional. TODO add details
+#' @param bootstrapped_estimates TODO add details
+#' @param Re_estimate_col string. Name of the column containing Re estimates
+#' @param bootstrap_id_col string. Name of the column containing bootstrap samples numbering.
+#' Id 0 must correspond to the estimate on the original data.
+#' @param index_col string. Index column to keep track of which data point
+#'  in bootstrapped estimates corresponds to which data point in the original estimates.
+#' @param alpha value between 0 and 1. Confidence level.
+#'
+#' @name uncertainty
+NULL
 
 
 

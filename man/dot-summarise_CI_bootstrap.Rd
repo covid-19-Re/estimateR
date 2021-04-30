@@ -2,23 +2,39 @@
 % Please edit documentation in R/utils-uncertainty.R
 \name{.summarise_CI_bootstrap}
 \alias{.summarise_CI_bootstrap}
-\title{Title}
+\title{Build a confidence interval from bootstrapped estimates}
 \usage{
 .summarise_CI_bootstrap(
   central_estimates,
   bootstrapped_estimates,
-  alpha = 0.95,
   Re_estimate_col = Re_estimate_col,
   bootstrap_id_col = bootstrap_id_col,
-  time_step = "day"
+  index_col = index_col,
+  alpha = 0.95
 )
 }
 \arguments{
-\item{time_step}{}
+\item{bootstrapped_estimates}{TODO add details}
+
+\item{Re_estimate_col}{string. Name of the column containing Re estimates}
+
+\item{bootstrap_id_col}{string. Name of the column containing bootstrap samples numbering.
+Id 0 must correspond to the estimate on the original data.}
+
+\item{index_col}{string. Index column to keep track of which data point
+in bootstrapped estimates corresponds to which data point in the original estimates.}
+
+\item{alpha}{value between 0 and 1. Confidence level.}
 }
 \value{
-
+dataframe with 4 columns:
+\itemize{
+\item{\code{index_col}, the index column}
+\item{\code{Re_estimate_col}, the estimate input in \code{central_estimates}}
+\item{CI_up, the upper limit of the confidence interval}
+\item{CI_down, the lower limit of the confidence interval}
+}
 }
 \description{
-Title
+Build a confidence interval from bootstrapped estimates
 }

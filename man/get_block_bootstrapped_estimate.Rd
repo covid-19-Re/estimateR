@@ -45,12 +45,12 @@ Available options are:
 implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
 }}
 
-\item{uncertainty_summary_method}{string. TODO continue here
+\item{uncertainty_summary_method}{string. One of the following options:
 \itemize{
+\item{'NONE' if no summary of bootstrap estimates is required}
 \item{'original estimate - CI from bootstrap estimates'}
 \item{'bagged mean - CI from bootstrap estimates'}
-} 'NONE' if no summary of bootstrap estimates is made
-or one of the possible strings in \code{\link{summarise_uncertainty}}}
+}}
 
 \item{delay_incubation}{TODO add details}
 

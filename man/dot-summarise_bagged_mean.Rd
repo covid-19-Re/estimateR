@@ -2,22 +2,33 @@
 % Please edit documentation in R/utils-uncertainty.R
 \name{.summarise_bagged_mean}
 \alias{.summarise_bagged_mean}
-\title{Title}
+\title{Compute bagged mean from bootstrapped replicates}
 \usage{
 .summarise_bagged_mean(
-  original_estimates,
   bootstrapped_estimates,
+  original_estimates = NULL,
   Re_estimate_col = Re_estimate_col,
   bootstrap_id_col = bootstrap_id_col,
-  time_step = "day"
+  index_col = index_col
 )
 }
 \arguments{
-\item{bootstrap_id_col}{}
+\item{bootstrapped_estimates}{TODO add details}
+
+\item{original_estimates}{Optional. TODO add details}
+
+\item{Re_estimate_col}{string. Name of the column containing Re estimates}
+
+\item{bootstrap_id_col}{string. Name of the column containing bootstrap samples numbering.
+Id 0 must correspond to the estimate on the original data.}
+
+\item{index_col}{string. Index column to keep track of which data point
+in bootstrapped estimates corresponds to which data point in the original estimates.}
 }
 \value{
-
+TODO specify
 }
 \description{
-Title
+If \code{original_estimates} are included,
+they will be included in the mean computation.
 }

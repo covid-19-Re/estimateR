@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-uncertainty.R
 \name{summarise_uncertainty}
 \alias{summarise_uncertainty}
-\title{Title}
+\title{Summarise the uncertainty obtained from bootstrapping}
 \usage{
 summarise_uncertainty(
   bootstrapped_estimates,
@@ -10,11 +10,17 @@ summarise_uncertainty(
   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
   Re_estimate_col = "R_mean",
   bootstrap_id_col = "bootstrap_id",
-  time_step = "day"
+  index_col = "idx",
+  ...
 )
 }
 \arguments{
-\item{uncertainty_summary_method}{One of these strings: \itemize{
+\item{bootstrapped_estimates}{TODO add details}
+
+\item{original_estimates}{Optional. TODO add details}
+
+\item{uncertainty_summary_method}{One of these options:
+\itemize{
 \item{'original estimate - CI from bootstrap estimates'}
 \item{'bagged mean - CI from bootstrap estimates'}
 }}
@@ -24,11 +30,19 @@ summarise_uncertainty(
 \item{bootstrap_id_col}{string. Name of the column containing bootstrap samples numbering.
 Id 0 must correspond to the estimate on the original data.}
 
-\item{time_step}{string}
+\item{index_col}{string. Index column to keep track of which data point
+in bootstrapped estimates corresponds to which data point in the original estimates.}
+
+\item{...}{
+  Arguments passed on to \code{\link[=.summarise_CI_bootstrap]{.summarise_CI_bootstrap}}
+  \describe{
+    \item{\code{alpha}}{value between 0 and 1. Confidence level.}
+  }}
 }
 \value{
-dataframe containing Re estimates and confidence interval boundaries.
+dataframe containing Re estimates (column 'Re_estimate')
+and confidence interval boundaries.
 }
 \description{
-Title
+Summarise the uncertainty obtained from bootstrapping
 }

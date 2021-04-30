@@ -4,14 +4,23 @@
 \alias{merge_outputs}
 \title{Merge multiple module outputs into tibble}
 \usage{
-merge_outputs(output_list, ref_date = NULL, time_step = "day")
+merge_outputs(
+  output_list,
+  ref_date = NULL,
+  time_step = "day",
+  include_index = !is.null(ref_date),
+  index_col = "idx"
+)
 }
 \arguments{
 \item{output_list}{named list of module outputs}
 
-\item{ref_date}{Date. Reference date.}
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
-\item{time_step}{string. "day", "2 days", "week", "year"... (see seq.Date help page for details)}
+\item{time_step}{string. Time between two consecutive incidence datapoints.
+"day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+
+\item{index_col}{TODO inherit}
 }
 \value{
 tibble
@@ -22,7 +31,4 @@ The optional reference date is the starting date of an input with offset 0.
 In general, this will be the date corresponding to the first entry in the original incidence data.
 If a reference date is provided, a date column is appended to the tibble,
 with sequential dates generated with the time step specified by the optional time_step parameter.
-}
-\examples{
-#TODO add examples
 }
