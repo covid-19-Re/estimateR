@@ -154,6 +154,15 @@ It performs a non-parametric block bootstrapping.</p>
       <td><p>numeric vector. Incidence data (TODO improve definition)</p></td>
     </tr>
     <tr>
+      <th>bootstrapping_method</th>
+      <td><p>string. Method to perform bootstrapping
+of the original incidence data.
+Available options are:</p><ul>
+<li><p>'non-parametric block boostrap',
+implemented in <code><a href='.block_bootstrap.html'>.block_bootstrap</a></code></p></li>
+</ul></td>
+    </tr>
+    <tr>
       <th>simplify_output</th>
       <td><p>boolean. Return a numeric vector instead of module
 output object if output offset is zero? TODO to be described better.</p></td>
@@ -187,7 +196,7 @@ Available options are:
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Jinzhou Li.</p>
+  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Ana Grosu.</p>
 </div>
 
 <div class="pkgdown">

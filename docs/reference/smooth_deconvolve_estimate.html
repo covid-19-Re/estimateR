@@ -185,6 +185,15 @@ implemented in <code><a href='.estimate_Re_EpiEstim_sliding_window.html'>.estima
       <td><p>TODO add details</p></td>
     </tr>
     <tr>
+      <th>ref_date</th>
+      <td><p>Date. Optional. Date of the first data entry in <code>incidence_data</code></p></td>
+    </tr>
+    <tr>
+      <th>time_step</th>
+      <td><p>string. Time between two consecutive incidence datapoints.
+"day", "2 days", "week", "year"... (see <code><a href='https://rdrr.io/r/base/seq.Date.html'>seq.Date</a></code> for details)</p></td>
+    </tr>
+    <tr>
       <th>output_Re_only</th>
       <td><p>boolean. Should the output only contain Re estimates?
 (as opposed to containing results for each intermediate step)</p></td>
@@ -228,7 +237,7 @@ The <code><a href='estimate_Re.html'>Re estimation</a></code> uses the Cori meth
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Jinzhou Li.</p>
+  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Ana Grosu.</p>
 </div>
 
 <div class="pkgdown">

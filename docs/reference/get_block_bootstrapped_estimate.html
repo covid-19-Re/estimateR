@@ -187,11 +187,15 @@ implemented in <code><a href='.estimate_Re_EpiEstim_sliding_window.html'>.estima
     </tr>
     <tr>
       <th>uncertainty_summary_method</th>
-      <td><p>string. TODO continue here</p><ul>
-<li><p>'original estimate - CI from bootstrap estimates'</p></li>
-<li><p>'bagged mean - CI from bootstrap estimates'</p></li>
-</ul><p>'NONE' if no summary of bootstrap estimates is made
-or one of the possible strings in <code><a href='summarise_uncertainty.html'>summarise_uncertainty</a></code></p></td>
+      <td><p>string. One of the following options:</p><ul>
+<li><p>'NONE' if no summary of bootstrap estimates is required</p></li>
+<li><p>'original estimate - CI from bootstrap estimates'.
+The confidence interval is built using bootstrapped estimates
+and centered around the original estimates.</p></li>
+<li><p>'bagged mean - CI from bootstrap estimates'.
+The confidence interval is built using bootstrapped estimates
+and centered around the mean of bootstrapped estimates and original estimates.</p></li>
+</ul></td>
     </tr>
     <tr>
       <th>delay_incubation</th>
@@ -253,7 +257,7 @@ but it must in any case correspond to the delay between infection and case obser
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Jinzhou Li.</p>
+  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Ana Grosu.</p>
 </div>
 
 <div class="pkgdown">

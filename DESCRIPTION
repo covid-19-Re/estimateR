@@ -12,9 +12,12 @@ Authors@R: c(
     person(given = "Daniel",
            family = "Angst",
            role = "aut"),
+    person(given = "Ana",
+           family = "Grosu",
+           role = "aut"),
     person(given = "Jinzhou",
            family = "Li",
-           role = "aut"))
+           role = "ctb"))
 Description: Draft description. 
     The estimateR package implements a modular pipeline to estimate the effective reproductive number from incidence data.
     The incidence data does not need to directly represent infections.
