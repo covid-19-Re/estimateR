@@ -65,6 +65,10 @@ get_bootstrap_replicate <- function( incidence_data,
 #' @return a module output object. bootstrapped incidence.
 .block_bootstrap <- function(incidence_input, round_incidence = TRUE, smoothing_method = "LOESS", ...) {
   
+  .are_valid_argument_values(list(list(incidence_input, "module_input"),
+                                  list(smoothing_method, "smoothing_method"),
+                                  list(round_incidence, "boolean")))
+  
   dots_args <- .get_dots_as_list(...)
 
   incidence_vector <- .get_values(incidence_input)
@@ -108,6 +112,10 @@ get_bootstrap_replicate <- function( incidence_data,
 #' @return numeric vector. Bootstrapped differences.
 .block_bootstrap_overlap_func <- function(incidence_vector, block_size = 10, keep_weekdays_aligned = TRUE){
 
+  .are_valid_argument_values(list(#list(incidence_vector, "module_input"),
+                                  list(block_size, "positive_integer"),
+                                  list(keep_weekdays_aligned, "boolean")))
+  
   bootstrapped_incidence <-c()
 
   if(keep_weekdays_aligned) {

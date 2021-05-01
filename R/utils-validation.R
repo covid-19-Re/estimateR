@@ -1,3 +1,11 @@
+#List containing predefined accepted string inputs for exported functions, for parameters for which validity is tested using the.is_value_in_accepted_values_vector() function
+accepted_parameter_value <- list(smoothing_method = c("LOESS"),
+                                 deconvolution_method = c("Richardson-Lucy delay distribution"),
+                                 estimation_method = c("EpiEstim sliding window"),
+                                 bootstrapping_method = c("non-parametric block boostrap"),
+                                 uncertainty_summary_method = c("original estimate - CI from bootstrap estimates", "bagged mean - CI from bootstrap estimates"))
+
+
 #' Check that an object represents a probability distribution.
 #'
 #' To pass the check:
@@ -11,10 +19,9 @@
 #' @param tolerance_on_sum Numeric tolerance in checking that vector elements sum to 1.
 #'
 #' @return TRUE if no error was raised.
-.check_is_probability_distr_vector <- function(distribution, tolerate_NAs = FALSE, tolerance_on_sum = 1E-3) {
-
-  .check_class(distribution, "vector", mode = "numeric")
-
+.check_is_probability_distr_vector <- function(distribution, tolerate_NAs = FALSE, tolerance_on_sum = 1E-3, parameter_name = deparse(substitute(distribution))) {
+  
+  .check_class_parameter_name(distribution, "vector", parameter_name, mode = "numeric")
   if( !tolerate_NAs && any(is.na(distribution)) ) {
     stop("Not a proper delay distribution vector. Contains one or more NAs.")
   }
@@ -30,46 +37,6 @@
   return(TRUE)
 }
 
-#' Check whether the class of an object is as expected
-#'
-#' @param object An object whose class needs checking,
-#' @param proper_class A string describing the desired class of \code{object}.
-#' @param mode Optional. A string describing the desired mode of \code{object}.
-#' Use only if \code{proper_class} is \code{vector}. Mode cannot be \code{Date}.
-#' Use \code{proper_class = "Date"} for checking class of \code{Date vector}.
-#'
-#' @return TRUE if no error is thrown.
-.check_class <- function(object, proper_class, mode = "any"){
-  if ("character" %!in% class(proper_class) || length(proper_class) > 1 ) {
-    stop("'proper_class' must be a single string.")
-  }
-
-  if ("character" %!in% class(mode) || length(mode) > 1 ) {
-    stop("'mode' must be a single string.")
-  }
-
-  if(proper_class == "vector") {
-    if(mode == "Date") {
-      stop("Mode cannot be 'Date'.")
-    }
-
-    if(!is.vector(object, mode = mode)) {
-      stop(paste0(deparse(substitute(object)), " must be a ", mode, " vector."))
-    }
-
-    return(TRUE)
-  }
-
-  # validation function
-  is_proper_class <- get(paste0("is.", proper_class), envir = loadNamespace("lubridate")) # need lubridate in case proper_class is Date
-
-  if (!is_proper_class(object)) {
-    # deparse(substitute(...)) lets you do basically the reverse of get(..)
-    stop(paste0(deparse(substitute(object)), " must be a ", proper_class, "."))
-  }
-
-  return(TRUE)
-}
 
 #TODO add checks for other distributions (lognormal, uniform, weibull, truncated_normal,...)
 #TODO fill in doc
@@ -78,9 +45,9 @@
 #' @param distribution
 #'
 #' @return a boolean value.
-.is_valid_distribution <- function(distribution){
+.is_valid_distribution <- function(distribution, parameter_name = deparse(substitute(distribution))){
 
-  .check_class(distribution, "list")
+  .check_class_parameter_name(distribution, "list", parameter_name)
 
   if (!"name" %in% names(distribution)) {
     stop("Missing distribution name. Include a 'name' element in distribution.")
@@ -124,18 +91,18 @@
 #' @param delay
 #'
 #' @return
-.check_is_empirical_delay_data <- function(delay){
+.check_is_empirical_delay_data <- function(delay, parameter_name = deparse(substitute(distribution))){
   if(is.data.frame(delay)) {
 
     if("event_date" %!in% colnames(delay)) {
       stop("Missing 'event_date' column in dataframe.")
     }
-    .check_class(delay$event_date, "Date")
+    .check_class_parameter_name(delay$event_date, "Date", parameter_name)
 
     if ("report_delay" %!in% colnames(delay)) {
       stop("Missing 'report_delay' column in dataframe.")
     }
-    .check_class(delay$report_delay, "vector", mode = "numeric")
+    .check_class_parameter_name(delay$report_delay, "vector", parameter_name, mode = "numeric")
 
     if( any(is.na(delay$event_date)) || any(is.na(delay$report_delay)) ){
       stop("Empirical delay data contains NA values.")
@@ -161,3 +128,339 @@
 .is_numeric_vector <- function(object){
   return(is.vector(object, mode = "numeric"))
 }
+
+
+#' @description Utility function that checks if a specific user given parameter value is among the accepted ones, in which case it returns TRUE
+#' Throws an error otherwise.
+#' @inherit validation_utility_params
+#' 
+#'
+.is_value_in_accepted_values_vector <- function(string_user_input, parameter_name){
+  if(!is.character(string_user_input)){
+    stop(paste("Expected parameter", parameter_name, "to be a string."))
+  }
+  if(!(string_user_input %in% accepted_parameter_value[[parameter_name]])){
+    stop(paste("Expected parameter", parameter_name, "to have one of the following values:", toString(accepted_parameter_value[[parameter_name]]),". Given input was:", string_user_input))
+  }
+  return(TRUE)
+}
+
+
+#' @description Utility function that checks if a specific user given parameter value an accepted time_step, in which case it returns TRUE
+#' An accepted time_step is considered to be: <<A character string, containing one of "day", "week", "month", "quarter" or "year". This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>> (from \link{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
+#' @inherit validation_utility_params
+#' 
+.is_value_valid_time_step <- function(string_user_input, parameter_name){
+  if(!is.character(string_user_input)){
+    stop(paste("Expected parameter", parameter_name, "to be a string."))
+  }
+  is_valid_time_step <- grepl("^([-+]?\\d+ )?(day|week|month|quarter|year)s?$", string_user_input)
+  if(!is_valid_time_step){
+    stop(paste("Expected parameter", parameter_name, "to be a character string, containing one of \"day\", \"week\", \"month\", \"quarter\" or \"year\". This can optionally be preceded by a (positive or negative) integer and a space, or followed by \"s\"."))
+  }
+  return(TRUE)
+}
+
+
+#' @description Utility function to determine whether an object is a numeric vector with all positive (or zero) values.
+#' 
+#' @inherit validation_utility_params
+#' @param vector vector to be tested
+#'
+#' @return boolean. TRUE if vector is a positive numeric vector. FALSE otherwise
+
+.is_positive_numeric_vector <- function(vector){
+  if(!is.vector(vector, mode="numeric")){
+    return(FALSE)
+  }
+  if(!all(vector >= 0)){
+    return(FALSE)
+  }
+  return(TRUE)
+}
+
+
+#' @description Utility function that checks if a user input is one of:
+#' \itemize{
+#'     \item a numeric vector with values > 0
+#'     \item a list with two elements: \code{values} (a numeric vector with values > 0) and \code{index_offset} (an integer)   
+#' }
+#' @inherit validation_utility_params
+#' @param module_input_object the vector/list the user passed as a parameter, to be tested
+#'
+.is_valid_module_input <- function(module_input_object, parameter_name){
+  if(is.list(module_input_object)){
+    if("values" %!in% names(module_input_object)){
+      stop(paste("When passed as a list,", parameter_name, "has to contain a $values element."))
+    }
+    
+    if("index_offset" %!in% names(module_input_object)){
+      stop(paste("When passed as a list,", parameter_name, "has to contain a $index_offset element."))
+    } 
+    
+    if(!.is_positive_numeric_vector(module_input_object$values)){
+      stop(paste("The $values element of", parameter_name, "has to be a numeric vector with values greater or equal to 0."))
+    }
+    
+    if(module_input_object$index_offset != as.integer(module_input_object$index_offset)){ #if index_offset is not an integer
+      stop(paste("The $index_offset element of", parameter_name, "has to be an integer."))
+    } 
+    
+  } else if(is.numeric(module_input_object)){
+    if(!.is_positive_numeric_vector(module_input_object)){
+      stop(paste(parameter_name, "has to be a numeric vector with values greater or equal to 0."))
+    }
+    
+  } else {
+    stop(paste(parameter_name, "has to be either a numeric vector or a list."))
+  }
+  return(TRUE)
+}
+
+#' @description Utility function that checks if a given matrix is a valid delay distribution matrix.
+#' For this, the matrix needs to fulfill the following conditions:
+#' \itemize{ 
+#'     \item is a numeric matrix
+#'     \item has no values < 0
+#'     \item is a lower triangular matrix
+#'     \item no column sums up to more than 1
+#'     \item no NA values
+#'     \item the size of the matrix is greater than the length of the incidence data
+#' }
+#' 
+#' @inherit validation_utility_params
+#' @param delay_matrix A matrix to be tested
+#' 
+.check_is_delay_distribution_matrix <- function(delay_matrix, incidence_data_length, parameter_name){
+  if(!is.matrix(delay_matrix) || !is.numeric(delay_matrix)){
+    stop(paste(parameter_name, "needs to be a numeric matrix."))
+  }
+  
+  if(any(is.na(delay_matrix))){
+    stop(paste(parameter_name, "cannot contain any NA values."))
+  }
+  
+  if(!all(delay_matrix >= 0)){
+    stop(paste(parameter_name, "needs to contain non-negative values."))
+  }
+  
+  if(ncol(delay_matrix) != nrow(delay_matrix)){
+    stop(paste(parameter_name, "needs to be a square matrix."))
+  }
+  
+  if(!all(delay_matrix == delay_matrix*lower.tri(delay_matrix, diag = TRUE))){ #check if matrix is lower triangular
+    stop(paste(parameter_name, "needs to be a lower triangular matrix."))
+  }
+  
+  if(!all(colSums(delay_matrix) < 1)){
+    stop(paste(parameter_name, "is not a valid delay distribution matrix. At least one column sums up to a value greater than 1."))
+  }
+  
+  if(ncol(delay_matrix) < incidence_data_length){
+    stop(paste(parameter_name,"needs to have a greater size than the length of the incidence data."))
+  }
+  
+  return(TRUE)
+  
+}
+
+#' @description Utility function that checks whether a user input is a valid delay object. This means it can be one of the following: 
+#'      \itemize{
+#'         \item a probability distribution vector: a numeric vector with no \code{NA} or negative values, whose entries sum up to 1
+#'         \item an empirical delay data: a data frame with two columns: \code{event_date} and \code{report_delay}. The columns cannot contain \code{NA} values. \code{report_delay} only contains non-negative values
+#'         \item a delay distribution matrix (as described in \code{\link{.check_is_delay_distribution_matrix}})
+#'         \item a distribution object (e.g. list(name = 'gamma', scale = X, shape = Y))
+#'      }
+#' @inherit validation_utility_params
+#' @param delay_object user inputted object to be tested
+#'
+.is_valid_delay_object <- function(delay_object, parameter_name, incidence_data_length){
+  
+  if(.is_numeric_vector(delay_object)){
+    
+    .check_is_probability_distr_vector(delay_object, parameter_name = parameter_name)
+    
+  } else if(is.data.frame(delay_object)){
+    
+    .check_is_empirical_delay_data(delay_object, parameter_name)
+    
+  } else if(is.matrix(delay_object)){
+    
+    .check_is_delay_distribution_matrix(delay_object, incidence_data_length, parameter_name)
+    
+  } else if(is.list(delay_object)){
+    
+    .is_valid_distribution(delay_object, parameter_name)
+    
+  } else {
+    stop(paste("Invalid", parameter_name, "input.", parameter_name, "must be either:
+         a numeric vector representing a discretized probability distribution,
+         or a matrix representing discretized probability distributions,
+         or a distribution object (e.g. list(name = 'gamma', scale = X, shape = Y)),
+         or empirical delay data."))
+  }
+  return(TRUE)
+}
+
+#' @description  Utility function to check whether an object belongs to a particular class. 
+#' 
+#' @param object An object whose class needs checking,
+#' @param proper_class A string describing the desired class of \code{object}.
+#' @param mode Optional. A string describing the desired mode of \code{object}.
+#' Use only if \code{proper_class} is \code{vector}. Mode cannot be \code{Date}.
+#' Use \code{proper_class = "Date"} for checking class of \code{Date vector}.
+#'
+#' 
+#' @inherit validation_utility_params
+#'
+#'
+.check_class_parameter_name <- function(object, proper_class, parameter_name, mode = "any"){
+  
+  if ("character" %!in% class(proper_class) || length(proper_class) > 1 ) {
+    stop("'proper_class' must be a single string.")
+  }
+  
+  if ("character" %!in% class(mode) || length(mode) > 1 ) {
+    stop("'mode' must be a single string.")
+  }
+  
+  
+  if(all(is.na(object))){
+    stop(paste(parameter_name, "cannot be NA."))
+  }
+  
+  
+  if(proper_class == "vector") {
+    if(mode == "Date") {
+      stop("Mode cannot be 'Date'.")
+    }
+    
+    if(!is.vector(object, mode = mode)) {
+      stop(paste0(parameter_name, " must be a ", mode, " vector."))
+    }
+    
+    return(TRUE)
+  }
+  
+  # validation function
+  is_proper_class <- get(paste0("is.", proper_class), envir = loadNamespace("lubridate")) # need lubridate in case proper_class is Date
+  
+  if (!is_proper_class(object)) {
+    # deparse(substitute(...)) lets you do basically the reverse of get(..)
+    stop(paste0(parameter_name, " must be a ", proper_class, "."))
+  }
+  
+  return(TRUE)
+  
+  
+}
+
+#' @description Utility function to check whether an object is null or belongs to a particular class.
+#'
+#' @inherit validation_utility_params
+#' @inherit .check_class_parameter_name
+#' 
+.check_if_null_or_belongs_to_class <- function(object, proper_class, parameter_name, mode="any"){
+  if(!is.null(object)){
+    .check_class_parameter_name(object, proper_class, parameter_name, mode)
+  }
+  return(TRUE)
+}
+
+
+#' @description Utility function to check whether an object is a number.
+#'
+#' @inherit validation_utility_params
+#' @param number The value to be tested
+#' 
+.check_if_number <- function(number, parameter_name){
+  if(!is.numeric(number)){
+    stop(paste(parameter_name, "is expected to be a number."))
+  }
+  if(length(number) > 1){
+    stop(paste(parameter_name, "is expected to be a number."))
+  }
+  return(TRUE)
+}
+
+
+#' @description Utility function to check whether an object is a positive number or 0.
+#'
+#' @inherit validation_utility_params
+#' @inherit  .check_if_number
+#' 
+.check_if_non_negative_number <- function(number, parameter_name){
+  .check_if_number(number, parameter_name)
+  
+  if(number < 0){
+    stop(paste(parameter_name, "is expected to be positive."))
+  }
+  
+  return(TRUE)
+}
+
+#' @description Utility function to check whether an object is a strictly positive number
+#'
+#' @inherit validation_utility_params
+#' @inherit  .check_if_number
+#' 
+.check_if_positive_number <- function(number, parameter_name){
+  .check_if_number(number, parameter_name)
+  
+  if(number <= 0){
+    stop(paste(parameter_name, "is expected to be strictly positive."))
+  }
+  
+  return(TRUE)
+  
+}
+
+#' @description Utility function to check whether an object is a strictly positive integer
+#'
+#' @inherit validation_utility_params
+#' @inherit  .check_if_number
+#' 
+.check_if_positive_integer <- function(number, parameter_name){
+  .check_if_positive_number(number, parameter_name)
+  if(as.integer(number) != number){ # did not use .check_class_parameter_name since is.integer(1) returns false
+    stop(paste(parameter_name, "needs to be an integer."))
+  }
+}
+
+
+
+#' @description Utility function that checks that the values the user passed when calling a function are valid.
+#' 
+#' @inherit validation_utility_params
+#' @param user_inputs A list of lists with two elements: the first is the value of the parameter to be tested. The second is the expected type of that parameter.
+#' 
+.are_valid_argument_values <- function(user_inputs){
+  for(i in 1:length(user_inputs)){
+    user_input <- user_inputs[[i]][[1]] 
+    input_type <- user_inputs[[i]][[2]]
+    parameter_name <- deparse(substitute(user_inputs)[[i+1]][[2]])
+    if(length(user_inputs[[i]]) > 2){
+      additional_function_parameter <- user_inputs[[i]][[3]] 
+    }
+    
+    switch (input_type,
+            "smoothing_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+            "deconvolution_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+            "estimation_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+            "uncertainty_summary_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+            "bootstrapping_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+            "time_step" = .is_value_valid_time_step(user_input, parameter_name),
+            "module_input" = .is_valid_module_input(user_input, parameter_name),
+            "boolean" = .check_class_parameter_name(user_input,"logical", parameter_name),
+            "delay_object" = .is_valid_delay_object(user_input, parameter_name, additional_function_parameter),
+            "number" = .check_if_number(user_input, parameter_name),
+            "non_negative_number" = .check_if_non_negative_number(user_input, parameter_name),
+            "null_or_date" = .check_if_null_or_belongs_to_class(user_input, "Date", parameter_name),
+            "positive_integer" = .check_if_positive_integer(user_input, parameter_name),
+            "positive_number" = .check_if_positive_number(user_input, parameter_name),
+            stop(paste("Checking function for type", input_type, "not found."))
+    )
+  }
+  return(TRUE)
+}
+
