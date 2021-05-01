@@ -111,7 +111,7 @@
 #'
 #' @inheritParams distribution
 #' @inheritParams .get_discretized_distribution
-#' @param max_quantile numeric value between 0 and 1.
+#' @param max_quantile numeric value between 0 and 1. TODO add details
 #' Upper quantile reached by the last element in the discretized distribution vector.
 #'
 #' @return vector containing the discretized probability distribution vector of \code{distribution}.

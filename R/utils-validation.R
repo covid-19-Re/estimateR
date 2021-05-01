@@ -126,7 +126,7 @@
 #' If the \code{delay} input is not a dataframe, return \code{FALSE}.
 #' Otherwise, an error is thrown if \code{delay} does not follow the expected format.
 #'
-#' @inherit empirical_delay_data_format
+#' @inherit empirical_delay_data_format details
 #' @param delay object to be tested
 #'
 #' @return boolean. \code{TRUE} if the input is a dataframe in the proper format.

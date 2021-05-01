@@ -48,8 +48,12 @@ implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
 \item{uncertainty_summary_method}{string. One of the following options:
 \itemize{
 \item{'NONE' if no summary of bootstrap estimates is required}
-\item{'original estimate - CI from bootstrap estimates'}
-\item{'bagged mean - CI from bootstrap estimates'}
+\item{'original estimate - CI from bootstrap estimates'.
+The confidence interval is built using bootstrapped estimates
+and centered around the original estimates.}
+\item{'bagged mean - CI from bootstrap estimates'.
+The confidence interval is built using bootstrapped estimates
+and centered around the mean of bootstrapped estimates and original estimates.}
 }}
 
 \item{delay_incubation}{TODO add details}

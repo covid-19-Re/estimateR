@@ -2,16 +2,31 @@
 % Please edit documentation in R/utils-deconvolution.R
 \name{.left_augment_delay_distribution}
 \alias{.left_augment_delay_distribution}
-\title{Title}
+\title{Augment a delay distribution by left padding with new columns.}
 \usage{
 .left_augment_delay_distribution(delay_distribution_matrix, n_col_augment)
 }
 \arguments{
-\item{n_col_augment}{an integer.}
+\item{delay_distribution_matrix}{discretized delay distribution matrix}
+
+\item{n_col_augment}{an integer. Number of columns to left-pad
+\code{delay_distribution_matrix} with.}
 }
 \value{
-
+If \code{delay_distribution_matrix} is of dimension N,
+then the result is of dimension N + \code{n_col_augment}.
 }
 \description{
-Title
+This function reshapes a discretized delay distribution matrix
+by left-padding it with \code{n_col_augment} columns.
+Because the output matrix must also be lower-triangular,
+additional rows are also padded to the top rows.
+This function allows one to extend further in the past
+the range of the initial delay distribution matrix.
+This is useful when convolving that delay distribution matrix
+with another delay distribution.
+}
+\details{
+The columns that are added replicate the left-most column of
+\code{delay_distribution_matrix}.
 }

@@ -2,18 +2,19 @@
 % Please edit documentation in R/utils-deconvolution.R
 \name{.get_matrix_from_single_delay_distr}
 \alias{.get_matrix_from_single_delay_distr}
-\title{Make square delay distribution matrix from vector of delay distributions.}
+\title{Make delay distribution matrix from vector of delay distribution.}
 \usage{
-.get_matrix_from_single_delay_distr(delay_distribution, N)
+.get_matrix_from_single_delay_distr(delay_distribution_vector, N)
 }
 \arguments{
-\item{delay_distribution}{numeric vector}
+\item{delay_distribution_vector}{discretized probability distribution vector}
 
-\item{N}{integer. Dimension of output matrix}
+\item{N}{integer. Dimension of output matrix.}
 }
 \value{
-square numeric matrix
+discretized delay distribution matrix, representing a constant-through-time
+delay distribution.
 }
 \description{
-Make square delay distribution matrix from vector of delay distributions.
+Make delay distribution matrix from vector of delay distribution.
 }

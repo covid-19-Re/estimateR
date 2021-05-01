@@ -4,16 +4,21 @@
 \alias{.get_delay_matrix_from_delay_distribution_parms}
 \title{Build delay distribution matrix from list of delay distributions}
 \usage{
-.get_delay_matrix_from_delay_distribution_parms(
-  distributions,
-  max_quantile = 0.999,
-  offset_by_one = FALSE
-)
+.get_delay_matrix_from_delay_distribution_parms(distributions, ...)
 }
 \arguments{
-\item{distributions}{list of distributions}
+\item{distributions}{list of distributions,
+each element is either a distribution list or discretized probability distribution vector.}
 
-\item{offset_by_one}{A boolean}
+\item{...}{
+  Arguments passed on to \code{\link[=build_delay_distribution]{build_delay_distribution}}
+  \describe{
+    \item{\code{max_quantile}}{numeric value between 0 and 1. TODO add details
+Upper quantile reached by the last element in the discretized distribution vector.}
+    \item{\code{offset_by_one}}{boolean.
+Set to TRUE if \code{distribution} represent the fit of data that was offset by one
+(\code{fitted_data = original_data + 1}) to accommodate zeroes in \code{original_data}.}
+  }}
 }
 \value{
 delay distribution matrix

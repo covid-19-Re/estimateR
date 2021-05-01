@@ -19,5 +19,5 @@ Utility function that checks if a specific user given parameter value an accepte
 An accepted time_step is considered to be:
 <<A character string, containing one of "day", "week", "month", "quarter" or "year".
 This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>>
-(from \link{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
+(from \url{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
 }

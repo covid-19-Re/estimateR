@@ -1,16 +1,25 @@
-#TODO improve doc
 #' Summarise the uncertainty obtained from bootstrapping
 #'
 #' @param uncertainty_summary_method One of these options:
 #' \itemize{
-#' \item{'original estimate - CI from bootstrap estimates'}
-#' \item{'bagged mean - CI from bootstrap estimates'}
+#' \item{'original estimate - CI from bootstrap estimates'.
+#' The confidence interval is built using bootstrapped estimates
+#' and centered around the original estimates.}
+#' \item{'bagged mean - CI from bootstrap estimates'.
+#' The confidence interval is built using bootstrapped estimates
+#' and centered around the mean of bootstrapped estimates and original estimates.}
 #' }
 #' @inherit uncertainty
 #' @inheritDotParams .summarise_CI_bootstrap
 #'
 #' @return dataframe containing Re estimates (column 'Re_estimate')
-#' and confidence interval boundaries.
+#' and confidence interval boundaries, with 4 columns like so:
+#' \itemize{
+#' \item{\code{index_col}, the timestep index column}
+#' \item{\code{Re_estimate_col}, Re estimates}
+#' \item{CI_up, the upper limit of the confidence interval}
+#' \item{CI_down, the lower limit of the confidence interval}
+#' }
 #' @export
 summarise_uncertainty <- function(bootstrapped_estimates,
                                   original_estimates = NULL,
@@ -93,13 +102,11 @@ summarise_uncertainty <- function(bootstrapped_estimates,
 
 #' Build a confidence interval from bootstrapped estimates
 #'
-#' @param bootstrapped_estimates
-#' @param central_estimates
 #' @inherit uncertainty
 #'
 #' @return dataframe with 4 columns:
 #' \itemize{
-#' \item{\code{index_col}, the index column}
+#' \item{\code{index_col}, the timestep index column}
 #' \item{\code{Re_estimate_col}, the estimate input in \code{central_estimates}}
 #' \item{CI_up, the upper limit of the confidence interval}
 #' \item{CI_down, the lower limit of the confidence interval}
@@ -147,11 +154,13 @@ summarise_uncertainty <- function(bootstrapped_estimates,
 #' Compute bagged mean from bootstrapped replicates
 #'
 #' If \code{original_estimates} are included,
-#' they will be included in the mean computation.
+#' these estimates are included in the mean computation
+#' along with the \code{bootstrapped_estimates}.
 #'
 #' @inherit uncertainty
 #'
-#' @return TODO specify
+#' @return a dataframe containing an timestep index column named \code{index_col}
+#' and a column containing bagged mean estimates called \code{Re_estimate_col}
 .summarise_bagged_mean <- function(bootstrapped_estimates,
                                    original_estimates = NULL,
                                    Re_estimate_col = Re_estimate_col,

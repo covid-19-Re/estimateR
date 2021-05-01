@@ -16,18 +16,29 @@ get_matrix_from_empirical_delay_distr(
 )
 }
 \arguments{
-\item{empirical_delays}{dataframe containing the empirical data. See Details section.}
+\item{empirical_delays}{dataframe containing the empirical data. See Details.}
 
-\item{n_report_time_steps}{integer. Length of incidence time series}
+\item{n_report_time_steps}{integer. Length of the incidence time series in the accompanying analysis.
+This argument is needed to determine the dimensions of the output matrix.}
 
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
 \item{time_step}{string. Time between two consecutive incidence datapoints.
 "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
 
-\item{min_number_cases}{integer. Minimal number of cases to build empirical distribution from}
+\item{min_number_cases}{integer. Minimal number of cases to build
+the empirical distribution from. TODO add details}
 
 \item{upper_quantile_threshold}{numeric. Between 0 and 1. TODO add details}
+
+\item{min_number_cases_fraction}{numeric. Between 0 and 1.
+If \code{min_number_cases} is not provided (kept to \code{NULL}),
+the number of most-recent cases used to build
+the instant delay distribution is \code{min_number_cases_fraction}
+times the total number of reported delays.}
+
+\item{min_min_number_cases}{numeric. Lower bound
+for number of cases used to build an instant delay distribution.}
 }
 \value{
 a discretized delay distribution matrix.

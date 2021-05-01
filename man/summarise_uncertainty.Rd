@@ -15,14 +15,27 @@ summarise_uncertainty(
 )
 }
 \arguments{
-\item{bootstrapped_estimates}{TODO add details}
+\item{bootstrapped_estimates}{Estimates obtained on a number of bootstrap
+replicates of the original data.
+Must be a dataframe in the long format
+with a timestep index column named \code{index_col},
+a bootstrap replicate index column named \code{bootstrap_id_col},
+and an estimate column named \code{Re_estimate_col}.
+The index column must not contain any \code{NA} value.}
 
-\item{original_estimates}{Optional. TODO add details}
+\item{original_estimates}{Optional. Estimates obtained on the original data.
+Must be a dataframe with a timestep index column named \code{index_col}
+and an estimate column named \code{Re_estimate_col}.
+The index column must not contain any \code{NA} value.}
 
 \item{uncertainty_summary_method}{One of these options:
 \itemize{
-\item{'original estimate - CI from bootstrap estimates'}
-\item{'bagged mean - CI from bootstrap estimates'}
+\item{'original estimate - CI from bootstrap estimates'.
+The confidence interval is built using bootstrapped estimates
+and centered around the original estimates.}
+\item{'bagged mean - CI from bootstrap estimates'.
+The confidence interval is built using bootstrapped estimates
+and centered around the mean of bootstrapped estimates and original estimates.}
 }}
 
 \item{Re_estimate_col}{string. Name of the column containing Re estimates}
@@ -36,12 +49,22 @@ in bootstrapped estimates corresponds to which data point in the original estima
 \item{...}{
   Arguments passed on to \code{\link[=.summarise_CI_bootstrap]{.summarise_CI_bootstrap}}
   \describe{
-    \item{\code{alpha}}{value between 0 and 1. Confidence level.}
+    \item{\code{central_estimates}}{Estimates around which the confidence interval is going to be centered.
+Must be a dataframe with a timestep index column named \code{index_col}
+and an estimate column named \code{Re_estimate_col}.
+The index column must not contain any \code{NA} value.}
+    \item{\code{alpha}}{value between 0 and 1. Confidence level of the confidence interval.}
   }}
 }
 \value{
 dataframe containing Re estimates (column 'Re_estimate')
-and confidence interval boundaries.
+and confidence interval boundaries, with 4 columns like so:
+\itemize{
+\item{\code{index_col}, the timestep index column}
+\item{\code{Re_estimate_col}, Re estimates}
+\item{CI_up, the upper limit of the confidence interval}
+\item{CI_down, the lower limit of the confidence interval}
+}
 }
 \description{
 Summarise the uncertainty obtained from bootstrapping

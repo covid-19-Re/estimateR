@@ -172,6 +172,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
 #' @inheritParams universal_params
 #' @inheritParams pipe_params
 #' @inheritParams delay_high
+#' @inheritParams dating
 #' @inheritDotParams .smooth_LOESS -incidence_input
 #' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input

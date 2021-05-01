@@ -4,9 +4,23 @@
 \alias{uncertainty}
 \title{Uncertainty summary}
 \arguments{
-\item{original_estimates}{Optional. TODO add details}
+\item{original_estimates}{Optional. Estimates obtained on the original data.
+Must be a dataframe with a timestep index column named \code{index_col}
+and an estimate column named \code{Re_estimate_col}.
+The index column must not contain any \code{NA} value.}
 
-\item{bootstrapped_estimates}{TODO add details}
+\item{bootstrapped_estimates}{Estimates obtained on a number of bootstrap
+replicates of the original data.
+Must be a dataframe in the long format
+with a timestep index column named \code{index_col},
+a bootstrap replicate index column named \code{bootstrap_id_col},
+and an estimate column named \code{Re_estimate_col}.
+The index column must not contain any \code{NA} value.}
+
+\item{central_estimates}{Estimates around which the confidence interval is going to be centered.
+Must be a dataframe with a timestep index column named \code{index_col}
+and an estimate column named \code{Re_estimate_col}.
+The index column must not contain any \code{NA} value.}
 
 \item{Re_estimate_col}{string. Name of the column containing Re estimates}
 
@@ -16,7 +30,7 @@ Id 0 must correspond to the estimate on the original data.}
 \item{index_col}{string. Index column to keep track of which data point
 in bootstrapped estimates corresponds to which data point in the original estimates.}
 
-\item{alpha}{value between 0 and 1. Confidence level.}
+\item{alpha}{value between 0 and 1. Confidence level of the confidence interval.}
 }
 \description{
 Uncertainty summary

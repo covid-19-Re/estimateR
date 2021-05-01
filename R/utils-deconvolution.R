@@ -1,53 +1,50 @@
 #TODO reorganize files between utils-deconvolution, utils-convolution, utils-distribution
-
 #TODO write deconvolution step that takes into account that data is onset data (when it is). That should apply to Swiss onset data
-
 #TODO add a way to deal with Spanish data specificity
-
 #TODO add way to pass list of distributions in pipe
 
-#' Make square delay distribution matrix from vector of delay distributions.
+#' Make delay distribution matrix from vector of delay distribution.
 #'
-#' @param delay_distribution numeric vector
-#' @param N integer. Dimension of output matrix
+#' @inheritParams distribution
+#' @param N integer. Dimension of output matrix.
 #'
-#' @return square numeric matrix
-.get_matrix_from_single_delay_distr <- function(delay_distribution, N) {
+#' @return discretized delay distribution matrix, representing a constant-through-time
+#' delay distribution.
+.get_matrix_from_single_delay_distr <- function(delay_distribution_vector, N) {
 
-  if(N >= length(delay_distribution)) {
-    delay_distribution <- c(delay_distribution, rep(0, times = N - length(delay_distribution)))
+  if(N >= length(delay_distribution_vector)) {
+    delay_distribution_vector <- c(delay_distribution_vector, rep(0, times = N - length(delay_distribution_vector)))
   }
 
   delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
   for(i in 1:N) {
-    delay_distribution_matrix[, i ] <-  c(rep(0, times = i - 1 ), delay_distribution[1:(N - i + 1)])
+    delay_distribution_matrix[, i ] <-  c(rep(0, times = i - 1 ), delay_distribution_vector[1:(N - i + 1)])
   }
 
   return(delay_distribution_matrix)
 }
 
-#TODO fill documentation
 #TODO maybe export
 #TODO maybe merge with .get_matrix_from_single_delay_distr by adding N parm and checking if list or unique vector
-#TODO finish replacing build_delay_distribution input.
 #' Build delay distribution matrix from list of delay distributions
 #'
-#' @param distributions list of distributions
-#' @param max_quantile
-#' @param offset_by_one A boolean
+#' @param distributions list of distributions,
+#' each element is either a distribution list or discretized probability distribution vector.
+#' @inheritDotParams build_delay_distribution -distribution
 #'
 #' @return delay distribution matrix
-.get_delay_matrix_from_delay_distribution_parms <- function(distributions,
-                                                            max_quantile = 0.999,
-                                                            offset_by_one = FALSE) {
+.get_delay_matrix_from_delay_distribution_parms <- function(distributions, ...) {
   #TODO add checks on validity of input
 
+  dots_args <- .get_dots_as_list(...)
 
   # Generate list of delay distribution vectors
   delay_distribution_list <- lapply(distributions, function(distr){
-    build_delay_distribution(distr,
-                            max_quantile = max_quantile,
-                            offset_by_one = offset_by_one)
+    do.call(
+      'build_delay_distribution',
+      c(list(distribution = distr),
+        .get_shared_args(build_delay_distribution, dots_args))
+    )
   })
 
   N <- length(distributions)
@@ -70,13 +67,26 @@
 
 }
 
-#TODO document
-#' Title
+#' Augment a delay distribution by left padding with new columns.
 #'
-#' @param delay_distribution_matrix
-#' @param n_col_augment an integer.
+#' This function reshapes a discretized delay distribution matrix
+#' by left-padding it with \code{n_col_augment} columns.
+#' Because the output matrix must also be lower-triangular,
+#' additional rows are also padded to the top rows.
+#' This function allows one to extend further in the past
+#' the range of the initial delay distribution matrix.
+#' This is useful when convolving that delay distribution matrix
+#' with another delay distribution.
 #'
-#' @return
+#' The columns that are added replicate the left-most column of
+#' \code{delay_distribution_matrix}.
+#'
+#' @inheritParams distribution
+#' @param n_col_augment an integer. Number of columns to left-pad
+#' \code{delay_distribution_matrix} with.
+#'
+#' @return If \code{delay_distribution_matrix} is of dimension N,
+#' then the result is of dimension N + \code{n_col_augment}.
 .left_augment_delay_distribution <- function(delay_distribution_matrix,
                                              n_col_augment){
 
@@ -101,13 +111,17 @@
   return(augmented_matrix)
 }
 
-#TODO document
 #TODO add options to take median, mode, mean...
 #' Get initial shift for deconvolution step
 #'
+#' This utility function returns the number of timesteps
+#' by which the incidence data should be shifted back in the past
+#' for the initial step of the Richardson-Lucy deconvolution algorithm.
+#'
 #' @inheritParams distribution
 #'
-#' @return
+#' @return an integer value corresponding to the rounded median of
+#' the input delay distribution.
 .get_initial_deconvolution_shift <- function(delay_distribution_vector){
     initial_shift <- ceiling(min(which(cumsum(delay_distribution_vector) > 0.5))) - 1
     initial_shift <- max(initial_shift, 0, na.rm = TRUE)
@@ -120,7 +134,6 @@
 #TODO test
 #TODO possibly allow for other ways to specifiy initial shift than median of all reports.
 #TODO allow for other distributions than gamma for fit, and also allow no fit.
-
 #' Build matrix of delay distributions through time from empirical delay data.
 #'
 #' This function takes a record of delays between events and their observations
@@ -137,9 +150,18 @@
 #'
 #' @inherit empirical_delay_data_format
 #'
-#' @param empirical_delays dataframe containing the empirical data. See Details section.
-#' @param n_report_time_steps integer. Length of incidence time series
-#' @param min_number_cases integer. Minimal number of cases to build empirical distribution from
+#' @param empirical_delays dataframe containing the empirical data. See Details.
+#' @param n_report_time_steps integer. Length of the incidence time series in the accompanying analysis.
+#' This argument is needed to determine the dimensions of the output matrix.
+#' @param min_number_cases integer. Minimal number of cases to build
+#' the empirical distribution from. TODO add details
+#' @param min_number_cases_fraction numeric. Between 0 and 1.
+#' If \code{min_number_cases} is not provided (kept to \code{NULL}),
+#' the number of most-recent cases used to build
+#' the instant delay distribution is \code{min_number_cases_fraction}
+#' times the total number of reported delays.
+#' @param min_min_number_cases numeric. Lower bound
+#' for number of cases used to build an instant delay distribution.
 #' @param upper_quantile_threshold numeric. Between 0 and 1. TODO add details
 #' @inheritParams dating
 #'

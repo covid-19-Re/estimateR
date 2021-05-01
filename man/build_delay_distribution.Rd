@@ -17,7 +17,7 @@ The \code{distribution} list must contain a 'name' element, this element must be
 correspond to one of the types of \code{\link[stats:Distributions]{distributions}} supported in the \link[stats]{Distributions} package.
 \code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.}
 
-\item{max_quantile}{numeric value between 0 and 1.
+\item{max_quantile}{numeric value between 0 and 1. TODO add details
 Upper quantile reached by the last element in the discretized distribution vector.}
 
 \item{offset_by_one}{boolean.

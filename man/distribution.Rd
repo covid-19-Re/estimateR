@@ -12,7 +12,7 @@ correspond to one of the types of \code{\link[stats:Distributions]{distributions
 
 \item{vector_a, vector_b, delay_distribution_vector}{discretized probability distribution vector}
 
-\item{matrix_a, matrix_b}{discretized delay distribution matrix}
+\item{matrix_a, matrix_b, delay_distribution_matrix}{discretized delay distribution matrix}
 }
 \description{
 Distribution

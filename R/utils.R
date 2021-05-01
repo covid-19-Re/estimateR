@@ -355,7 +355,7 @@ merge_outputs <- function(output_list,
 #' An accepted time_step is considered to be:
 #' <<A character string, containing one of "day", "week", "month", "quarter" or "year".
 #' This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>>
-#' (from \link{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
+#' (from \url{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
 #' @inherit validation_utility_params
 #'
 .is_value_valid_time_step <- function(string_user_input, parameter_name){
