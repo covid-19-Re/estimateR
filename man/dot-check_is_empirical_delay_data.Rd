@@ -2,16 +2,30 @@
 % Please edit documentation in R/utils-validation.R
 \name{.check_is_empirical_delay_data}
 \alias{.check_is_empirical_delay_data}
-\title{Title}
+\title{Check if input is in the proper empirical delay data format}
 \usage{
 .check_is_empirical_delay_data(delay)
 }
 \arguments{
-\item{delay}{}
+\item{delay}{dataframe}
 }
 \value{
-
+a boolean value. \code{TRUE} if the input is a dataframe in the proper format.
 }
 \description{
-Title
+If the \code{delay} input is not a dataframe, return \code{FALSE}.
+Otherwise, an error is thrown if \code{delay} does not follow the expected format.
+}
+\details{
+An \code{empirical_delays} dataframe must contain (at least) two columns.
+An 'event_date' column of type \code{Date}
+and a 'report_delay' column of type \code{numeric}.
+Each row represents the recording of a single delay between event and observation.
+Typically, the 'event' here is the onset of symptoms of the disease of interest.
+And the observation can be, for instance, case confirmation, hospital admission,
+admission to an ICU, or death, depending on what the incidence data represents.
+For a particular row, 'event_date' would then represent, for a single individual,
+the date at which symptoms appeared. And 'report_delay' would represent the number
+of time steps (as specified by \code{time_step}) until the observation was made
+for this same individual.
 }

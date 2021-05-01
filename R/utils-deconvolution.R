@@ -135,18 +135,7 @@
 #' of epidemic of interest, this will be reflected in the recorded empirical delays
 #' and will be accounted for by \code{estimateR} when estimating the reproductive number.
 #'
-#' \code{empirical_delays} must contain (at least) two columns.
-#' An 'event_date' column of type \code{Date}
-#' and a 'report_delay' column of type \code{numeric}.
-#' Each row represents the recording of a single delay between event and observation.
-#' Typically, the 'event' here is the onset of symptoms of the disease of interest.
-#' And the observation can be, for instance, case confirmation, hospital admission,
-#' admission to an ICU, or death, depending on what the incidence data represents.
-#' For a particular row, 'event_date' would then represent, for a single individual,
-#' the date at which symptoms appeared. And 'report_delay' would represent the number
-#' of time steps (as specified by \code{time_step}) until the observation was made
-#' for this same individual.
-#'
+#' @inherit empirical_delay_data_format
 #'
 #' @param empirical_delays dataframe containing the empirical data. See Details section.
 #' @param n_report_time_steps integer. Length of incidence time series

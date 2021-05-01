@@ -72,10 +72,13 @@
 }
 
 #TODO add checks for other distributions (lognormal, uniform, weibull, truncated_normal,...)
-#TODO fill in doc
-#' Title
+#TODO reconsider if can return FALSE
+#' Check if valid distribution list
 #'
-#' @param distribution
+#' Throws an error if not a list, or not a list with the appropriate elements.
+#' Returns FALSE if parameter values return an improper distribution (if gamma distr)
+#'
+#' @inheritParams distribution
 #'
 #' @return a boolean value.
 .is_valid_distribution <- function(distribution){
@@ -118,12 +121,15 @@
   return(TRUE)
 }
 
-#TODO fill doc
-#' Title
+#' Check if input is in the proper empirical delay data format
 #'
-#' @param delay
+#' If the \code{delay} input is not a dataframe, return \code{FALSE}.
+#' Otherwise, an error is thrown if \code{delay} does not follow the expected format.
 #'
-#' @return
+#' @inherit empirical_delay_data_format
+#' @param delay object to be tested
+#'
+#' @return boolean. \code{TRUE} if the input is a dataframe in the proper format.
 .check_is_empirical_delay_data <- function(delay){
   if(is.data.frame(delay)) {
 

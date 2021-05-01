@@ -105,6 +105,21 @@ NULL
 #' @name distribution
 NULL
 
+#' @details An \code{empirical_delays} dataframe must contain (at least) two columns.
+#' An 'event_date' column of type \code{Date}
+#' and a 'report_delay' column of type \code{numeric}.
+#' Each row represents the recording of a single delay between event and observation.
+#' Typically, the 'event' here is the onset of symptoms of the disease of interest.
+#' And the observation can be, for instance, case confirmation, hospital admission,
+#' admission to an ICU, or death, depending on what the incidence data represents.
+#' For a particular row, 'event_date' would then represent, for a single individual,
+#' the date at which symptoms appeared. And 'report_delay' would represent the number
+#' of time steps (as specified by \code{time_step}) until the observation was made
+#' for this same individual.
+#'
+#' @name empirical_delay_data_format
+NULL
+
 #' Uncertainty summary
 #'
 #' @param original_estimates Optional. TODO add details

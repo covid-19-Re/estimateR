@@ -46,7 +46,7 @@ of epidemic of interest, this will be reflected in the recorded empirical delays
 and will be accounted for by \code{estimateR} when estimating the reproductive number.
 }
 \details{
-\code{empirical_delays} must contain (at least) two columns.
+An \code{empirical_delays} dataframe must contain (at least) two columns.
 An 'event_date' column of type \code{Date}
 and a 'report_delay' column of type \code{numeric}.
 Each row represents the recording of a single delay between event and observation.
