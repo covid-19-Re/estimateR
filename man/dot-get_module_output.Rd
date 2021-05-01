@@ -7,11 +7,11 @@
 .get_module_output(results, input, offset = 0)
 }
 \arguments{
-\item{results}{numeric vector}
+\item{results}{numeric vector containing output of module operations.}
 
-\item{input}{module input object}
+\item{input}{module input object. Input originally given to module.}
 
-\item{offset}{integer}
+\item{offset}{integer. Shift resulting from operations performed in module.}
 }
 \value{
 module output object
@@ -19,5 +19,5 @@ module output object
 \description{
 Also takes the module input object to calculate the offset of the output object.
 The new offset is simply (module input offset) + (shift applied during module operations)
-The shift applied during module operations is passed as "offset" parameter.
+The shift applied during module operations is the \code{offset} argument.
 }

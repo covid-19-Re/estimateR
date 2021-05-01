@@ -119,6 +119,15 @@ NULL
 #' @name uncertainty
 NULL
 
+#' Module object utilities
+#'
+#' @param index_col string. Index column to keep track of which data point
+#'  in bootstrapped estimates corresponds to which data point in the original estimates.
+#'
+#' @name module_objects
+NULL
+
+
 
 
 

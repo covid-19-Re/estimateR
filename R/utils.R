@@ -1,11 +1,7 @@
 #TODO make class for input objects (list with values and index_offset fields)
-
 #TODO make a utils that does the input checking (for before transformation and for when it's supposed to have been done)
-
 #TODO make a utils function that converts individual module object into a tibble with a date
-
 #TODO clarify the language between module input object and module output object
-
 #TODO reorganize this file (maybe rename)
 
 # Useful operator
@@ -21,15 +17,17 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 
 #' Merge multiple module outputs into tibble
 #'
-#' Output tibble from list of unsynced module outputs, with an optional date reference.
-#' The optional reference date is the starting date of an input with offset 0.
+#' Output tibble from list of unsynced module outputs, with an optional date column.
+#' The optional \code{ref_date} argument is the starting date of an input with offset 0.
 #' In general, this will be the date corresponding to the first entry in the original incidence data.
-#' If a reference date is provided, a date column is appended to the tibble,
-#' with sequential dates generated with the time step specified by the optional time_step parameter.
+#' If a reference date is provided with \code{ref_date}, a date column is appended to the tibble,
+#' with sequential dates generated with the time step specified by the \code{time_step} parameter.
 #'
 #'
-#' @param output_list named list of module outputs
-#' @param index_col TODO inherit
+#' @param output_list named list of module output objects.
+#' @param include_index boolean. Include an index column in output?
+#' @param index_col string. If \code{include_index} is \code{TRUE},
+#' an index column named \code{index_col} is added to the output.
 #' @inherit dating
 #'
 #' @return tibble
@@ -67,9 +65,9 @@ merge_outputs <- function(output_list,
 
 #' Convert module output object into tibble
 #'
-#' @param output module output object
-#' @param output_name string. Name to be given to the values column
-#' @param index_col index
+#' @param output module output object.
+#' @param output_name string. Name to be given to the \code{values} column
+#' @param index_col string. Name of the index column included in the output.
 #'
 #' @return tibble
 .make_tibble_from_output <- function(output,
@@ -86,7 +84,7 @@ merge_outputs <- function(output_list,
 #' Add dates column to dataframe.
 #'
 #' @param estimates dataframe. Estimates.
-#' @param keep_index_col boolean. Keep index column in result?
+#' @param keep_index_col boolean. Keep index column in output?
 #' @inherit dating
 #' @inherit uncertainty
 #'
@@ -113,10 +111,15 @@ merge_outputs <- function(output_list,
 
 #' Transform input data into a module input object
 #'
-#' #TODO specify what format data can take
-#' @param data
+#' The input can be a list containing a \code{values} element
+#' and an \code{index_offset} element, potentially among others.
+#' It can also be a vector containing numeric values.
 #'
-#' @return module input object
+#' @param data TODO specify what format data can take
+#'
+#' @return module input object.
+#' List with a \code{values} and an \code{index_offset} element.
+#'
 .get_module_input <- function(data) {
   #TODO properly check input format
   if (is.list(data)) {
@@ -141,9 +144,9 @@ merge_outputs <- function(output_list,
 #'
 #' This function must be adapted if the module_input_object implementation changes.
 #'
-#' @param module_object
+#' @param module_object module object.
 #'
-#' @return vector containing values
+#' @return vector containing \code{values} only
 .get_values <- function(module_object) {
   if(is.list(module_object)) {
   return(module_object$values)
@@ -157,9 +160,9 @@ merge_outputs <- function(output_list,
 #'
 #' This function must be adapted if the module_input_object implementation changes.
 #'
-#' @param module_object
+#' @param module_object module object.
 #'
-#' @return numeric scalar. Offset
+#' @return numeric scalar. \code{index_offset} of the \code{module_object}
 .get_offset <- function(module_object) {
   if(is.list(module_object)) {
     return(module_object$index_offset)
@@ -173,11 +176,11 @@ merge_outputs <- function(output_list,
 #'
 #' Also takes the module input object to calculate the offset of the output object.
 #' The new offset is simply (module input offset) + (shift applied during module operations)
-#' The shift applied during module operations is passed as "offset" parameter.
+#' The shift applied during module operations is the \code{offset} argument.
 #'
-#' @param results numeric vector
-#' @param input module input object
-#' @param offset integer
+#' @param results numeric vector containing output of module operations.
+#' @param input module input object. Input originally given to module.
+#' @param offset integer. Shift resulting from operations performed in module.
 #'
 #' @return module output object
 .get_module_output <- function(results, input, offset = 0) {
@@ -203,10 +206,11 @@ merge_outputs <- function(output_list,
 #' Simplify output object if possible
 #'
 #' If offset is 0, return only vector containing values.
+#' If offset is not zero then \code{output} is returned as is.
 #'
 #' @param output Module output object
 #'
-#' @return numeric vector or module output object. simplified output
+#' @return numeric vector or module output object.
 .simplify_output <- function(output){
   if(.get_offset(output) == 0) {
     return(.get_values(output))
@@ -241,11 +245,11 @@ merge_outputs <- function(output_list,
 #' at the last time step.
 #'
 #' @param origin_date Date of first infection.
-#' @param n_time_steps Number of time steps to generate delays over
+#' @param n_time_steps interger. Number of time steps to generate delays over
 #' @param ratio_delay_end_to_start numeric value.
 #' Shift in delay distribution from start to end.
 #' @param distribution_initial_delay Distribution in list format.
-#' @param seed RNG seed
+#' @param seed integer. Optional RNG seed.
 #' @inherit dating
 #'
 #' @return dataframe. Simulated delay data.
@@ -288,7 +292,13 @@ merge_outputs <- function(output_list,
   cat(paste0("c(",paste(round(a, digits = digits), collapse=","), ")"))
 }
 
-#TODO doc
+#' Return dots arguments as list.
+#'
+#' If there are no dots arguments, then return an empty list.
+#'
+#' @param ... dots arguments.
+#'
+#' @return list containing dots arguments or empty list
 .get_dots_as_list <- function(...){
   if(...length() > 0) {
     dots_args <- list(...)
@@ -298,12 +308,24 @@ merge_outputs <- function(output_list,
   return(dots_args)
 }
 
-#TODO doc
+#' Get the names of the arguments of a function
+#'
+#' @param func function
+#'
+#' @return names of the arguments of \code{func}
 .get_arg_names <- function(func){
   return(names(formals(func)))
 }
 
-#TODO doc
+#' Get the arguments which apply to a function among a given list of arguments.
+#'
+#' This function is used to find which arguments should be passed
+#' to a list of functions among the dot arguments passed to a higher-level function.
+#'
+#' @param func_list list of functions
+#' @param dots_args list of arguments
+#'
+#' @return elements of \code{dots_args} which can be passed to \code{func_list}
 .get_shared_args <- function(func_list, dots_args){
   if(is.function(func_list)) {
     func_arg_names <- .get_arg_names(func_list)
@@ -316,9 +338,8 @@ merge_outputs <- function(output_list,
 
 #' @description Utility function that checks if a specific user given parameter value is among the accepted ones, in which case it returns TRUE
 #' Throws an error otherwise.
+#'
 #' @inherit validation_utility_params
-#'
-#'
 .is_value_in_accepted_values_vector <- function(string_user_input, parameter_name){
   if(!is.character(string_user_input)){
     stop(paste("Expected parameter", parameter_name, "to be a string."))
@@ -331,7 +352,10 @@ merge_outputs <- function(output_list,
 
 
 #' @description Utility function that checks if a specific user given parameter value an accepted time_step, in which case it returns TRUE
-#' An accepted time_step is considered to be: <<A character string, containing one of "day", "week", "month", "quarter" or "year". This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>> (from \link{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
+#' An accepted time_step is considered to be:
+#' <<A character string, containing one of "day", "week", "month", "quarter" or "year".
+#' This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>>
+#' (from \link{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
 #' @inherit validation_utility_params
 #'
 .is_value_valid_time_step <- function(string_user_input, parameter_name){
@@ -352,7 +376,6 @@ merge_outputs <- function(output_list,
 #' @param vector vector to be tested
 #'
 #' @return boolean. TRUE if vector is a positive numeric vector. FALSE otherwise
-
 .is_positive_numeric_vector <- function(vector){
   if(!is.vector(vector, mode="numeric")){
     return(FALSE)

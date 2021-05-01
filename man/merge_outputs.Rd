@@ -8,27 +8,30 @@ merge_outputs(
   output_list,
   ref_date = NULL,
   time_step = "day",
-  include_index = !is.null(ref_date),
+  include_index = is.null(ref_date),
   index_col = "idx"
 )
 }
 \arguments{
-\item{output_list}{named list of module outputs}
+\item{output_list}{named list of module output objects.}
 
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
 \item{time_step}{string. Time between two consecutive incidence datapoints.
 "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
 
-\item{index_col}{TODO inherit}
+\item{include_index}{boolean. Include an index column in output?}
+
+\item{index_col}{string. If \code{include_index} is \code{TRUE},
+an index column named \code{index_col} is added to the output.}
 }
 \value{
 tibble
 }
 \description{
-Output tibble from list of unsynced module outputs, with an optional date reference.
-The optional reference date is the starting date of an input with offset 0.
+Output tibble from list of unsynced module outputs, with an optional date column.
+The optional \code{ref_date} argument is the starting date of an input with offset 0.
 In general, this will be the date corresponding to the first entry in the original incidence data.
-If a reference date is provided, a date column is appended to the tibble,
-with sequential dates generated with the time step specified by the optional time_step parameter.
+If a reference date is provided with \code{ref_date}, a date column is appended to the tibble,
+with sequential dates generated with the time step specified by the \code{time_step} parameter.
 }

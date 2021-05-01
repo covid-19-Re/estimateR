@@ -7,11 +7,11 @@
 .make_tibble_from_output(output, output_name, index_col = "idx")
 }
 \arguments{
-\item{output}{module output object}
+\item{output}{module output object.}
 
-\item{output_name}{string. Name to be given to the values column}
+\item{output_name}{string. Name to be given to the \code{values} column}
 
-\item{index_col}{index}
+\item{index_col}{string. Name of the index column included in the output.}
 }
 \value{
 tibble

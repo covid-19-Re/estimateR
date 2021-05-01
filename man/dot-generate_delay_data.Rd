@@ -16,7 +16,7 @@
 \arguments{
 \item{origin_date}{Date of first infection.}
 
-\item{n_time_steps}{Number of time steps to generate delays over}
+\item{n_time_steps}{interger. Number of time steps to generate delays over}
 
 \item{time_step}{string. Time between two consecutive incidence datapoints.
 "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
@@ -26,7 +26,7 @@ Shift in delay distribution from start to end.}
 
 \item{distribution_initial_delay}{Distribution in list format.}
 
-\item{seed}{RNG seed}
+\item{seed}{integer. Optional RNG seed.}
 }
 \value{
 dataframe. Simulated delay data.

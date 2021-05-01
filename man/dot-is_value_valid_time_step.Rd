@@ -16,5 +16,8 @@ TRUE if all tests were passed. Throws an error otherwise.
 }
 \description{
 Utility function that checks if a specific user given parameter value an accepted time_step, in which case it returns TRUE
-An accepted time_step is considered to be: <<A character string, containing one of "day", "week", "month", "quarter" or "year". This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>> (from \link{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
+An accepted time_step is considered to be:
+<<A character string, containing one of "day", "week", "month", "quarter" or "year".
+This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>>
+(from \link{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
 }
