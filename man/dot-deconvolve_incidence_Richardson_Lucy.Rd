@@ -7,6 +7,8 @@
 .deconvolve_incidence_Richardson_Lucy(
   incidence_input,
   delay_distribution,
+  is_partially_reported_data = FALSE,
+  delay_distribution_final_report = NULL,
   threshold_chi_squared = 1,
   max_iterations = 100,
   verbose = FALSE
@@ -16,6 +18,24 @@
 \item{incidence_input}{module input object.}
 
 \item{delay_distribution}{numeric square matrix or vector. TODO refactor to estimateR}
+
+\item{is_partially_reported_data}{boolean value.
+Set to \code{TRUE} if incidence was collected following a subsequent observation event.
+For instance, if the incidence represents people starting to show symptoms of a disease
+(dates of onset of symptoms), the data would typically have been collected among
+individuals whose case was confirmed via a test.
+If so, among all events of onset of symptoms, only those who had time to be
+confirmed by a test were reported. Thus, close to the present, there
+is an underreporting of onset of symptoms events.
+In order to account for this effect, set this argument to \code{TRUE} and
+input a \code{delay_distribution_final_report} argument.}
+
+\item{delay_distribution_final_report}{TODO refactor to estimateR
+Distribution of the delay between the events collected in the incidence data
+and the a posteriori observations of these events.
+See \code{is_partially_reported_data} for more details.
+In the example given there, \code{delay_distribution_final_report}
+is the delay distribution between onset of symptoms and case confirmation.}
 
 \item{threshold_chi_squared}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
 
