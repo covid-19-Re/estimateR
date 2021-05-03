@@ -18,69 +18,116 @@ TODO there's a lot of work to do on this vignette.
 
 ```{r setup}
 library(estimateR)
+library(dplyr)
+library(tidyr)
 ```
 
 Aggregated case data for the Hong Kong COVID-19 epidemic.
 This data is derived from the linelist published by the Hong Kong [Centre for Health Protection](https://www.chp.gov.hk).
 ```{r}
 # Hong Kong incidence data
-head(HK_incidence_data)
+head(HK_incidence_data, n = 10)
+```
+The original format of this data is a line list: it shows each recorded COVID-19 case in a separate row, with columns specifying different types of information that could (or could not) be recorded for each case. These columns include the age and gender of the diseased individual, the name o the hospital they were admitted to (if applicable), the date of onset of symptoms and the reporting date. In general, the case report comes after the onset of symptoms.
 
-incidence <- HK_incidence_data$incidence
-ref_date <- min(HK_incidence_data$report_date)
+We aggregated this data into 4 columns. Now, each row corresponds to a single date, and we count three types of incidence. The 'case_incidence' entry for a particular day is the number of cases reported on that date. This is what we typically think of when we talk about incidence.
+In addition, we can use to our advantage the fact that we have access to the date of onset of symptoms for many diseased individuals.
+We build the 'onset_incidence' column by summing, for each date, the number of individuals who started showing symptoms on this date.
+For some individuals, this date was not recorded, thus we build a third incidence column called 'report_incidence'. In 'report_incidence', we sum
+all cases reported on a particular date, which do not have a recorded symptom onset date.
+We note that, for any particular date, 'onset_incidence' + 'report_incidence' is generally not equal to 'case_incidence'. This is normal since 
+a case counted on day X in the 'case_incidence' column could appear on day X - 3 in the 'onset_incidence' column.
+However, it must be true that, for any particular date, 'report_incidence' ≤ 'case_incidence'.
+Also, it must be true that the sum across all rows of 'onset_incidence' plus that of 'report_incidence' is equal to that of 'case_incidence'. This sum amount to the total number of reported cases of COVID-19 in Honk-Kong over the time period of interest.
+Note that, in the original data some cases are reported as being asymptomatic. For simplicity, we treat these cases as if their date of onset of symptoms was unknown.
+
+```{r}
+# Total number of cases reported in Hong-Kong
+(sum(HK_incidence_data$case_incidence))
+
+# Total number of cases when segreggating between cases for which we know the date of onset of symptoms and those for which we do not
+(sum(HK_incidence_data$onset_incidence) + sum(HK_incidence_data$report_incidence))
 ```
 
-Dataset compiling the delay between onset of symptoms and case report for many cases reported in Hong Kong.
-This data is also derived from the linelist published by the Hong Kong [Centre for Health Protection](https://www.chp.gov.hk).
+## First analysis
+As a first rough analysis, we start by estimating the reproductive number through time only using the 'case_incidence' column.
+We pretend that we only know about incidence through case confirmations.
+To do this analysis, we need an estimation of the delay  distribution between infection and case report. We assume this delay can be separated into two independent components: an incubation period, from infection to onset of symptoms, and a delay from onset of symptoms until case report.
+For the incubation period, we use here an estimate from the literature on COVID-19. TODO add ref
 ```{r}
-# Delay between onset of symptom and case report
-head(HK_delay_data)
-```
-
-Other parameters required for Re estimation:
-```{r}
-# Delay between infection and onset of symptoms (incubation period)
+## Delay between infection and onset of symptoms (incubation period) in days
+# Gamma distribution parameter
 shape_incubation <- 3.2
 scale_incubation <- 1.3
+# Incubation period delay distribution
 distribution_incubation <- list(name = "gamma", 
                                 shape = shape_incubation, 
                                 scale = scale_incubation)
-
-# Serial interval (for Re estimation)
-mean_serial_interval <- 4.8
-std_serial_interval <- 2.3
-
-# Sliding estimation window (for Re estimation)
-estimation_window <- 3
 ```
 
-Estimation of the effective reproductive number through time
-```{r message=FALSE, warning=FALSE}
-N_bootstrap_replicates <- 10 # only 10 replicates to keep execution fast
+For the period between the onset of symptoms and the case report, we could use an estimate from the academic literature as well.
+Here, we choose instead to build an estimation of this distribution directly from the data at hand.
+TODO add note below on why it can still be useful to this case even though then we could directly use the symptom onset data.
+From the same [Hong-Kong linelist](https://www.chp.gov.hk) that let us build the incidence dataframe shown above, we compiled
+a dataset of individual delays reported between onset of symptoms and case confirmation. The column 'event_date' shows the date
+of onset of symptoms for a particular diseased individual, and 'report_delay' shows the number of days that elapsed until their case confirmation.
 
-HK_estimates <- get_block_bootstrapped_estimate(
-  incidence,
-  N_bootstrap_replicates = N_bootstrap_replicates,
-  smoothing_method = "LOESS",
-  deconvolution_method = "Richardson-Lucy delay distribution",
-  estimation_method = "EpiEstim sliding window",
-  uncertainty_summary_method = "bagged mean - CI from bootstrap estimates",
-  delay_incubation = distribution_incubation,
-  delay_onset_to_report = HK_delay_data,
-  estimation_window = estimation_window,
+```{r}
+# Delay between onset of symptom and case report
+head(HK_delay_data, n =10)
+```
+We could feed this dataset directly to *estimateR*, as we will see below.
+Instead, we choose here to build an estimate of the delay distribution by ourselves.
+It is this estimate that we will feed to *estimateR* in this first analysis.
+TODO add note on why we would go through the trouble of doing that (maybe data from eslewhere, or only few datapoints for which we have delay data)
+
+```{r}
+empirical_frequencies <- HK_delay_data %>% 
+  count(report_delay) %>% # Count the occurences of each delay
+  mutate(freq = n / sum(n)) # Transform into frequencies
+
+empirical_frequencies
+```
+```{r}
+# Convert to a vector, keeping only the frequencies  
+  onset_to_confirmation_delay <- empirical_frequencies %>% 
+  arrange(report_delay) %>% # Sort by increasing delay
+  pull(freq) # Pull frequencies as a vector
+```
+
+We could go further one step further and fit a particular distribution (e.g. gamma or lognormal) to this empirical frequency vector.
+We may have especialy wanted to that if we had had few datapoints to inform the delay distribution. 
+Fitting with a particular distribution can help smooth out the empirical frequencies in this case.
+When doing so, one needs to be mindful of zero values, as not all distribution types allow for zeroes.TODO add code (when extracting to other vignette).
+
+In order to perform the Re estimation, we also need an estimate of the serial interval, the time between two successive cases in a transmission chain. We draw this estimate from the academic litterature TODO add ref
+```{r}
+# Serial interval (for Re estimation) in days
+mean_serial_interval <- 4.8
+std_serial_interval <- 2.3
+```
+
+#Estimation of the effective reproductive number through time
+```{r message=FALSE, warning=FALSE}
+HK_first_estimates <- get_block_bootstrapped_estimate(
+  incidence_data = HK_incidence_data$case_incidence, 
+  N_bootstrap_replicates = 20, # only 20 replicates to keep execution fast
+  delay_incubation = distribution_incubation, 
+  delay_onset_to_report = onset_to_confirmation_delay,
+  estimation_window = 3, # 3-day sliding window for the Re estimation
   mean_serial_interval = mean_serial_interval,
   std_serial_interval = std_serial_interval,
-  ref_date = ref_date,
+  ref_date = min(HK_incidence_data$date),
   time_step = "day"
 )
 
-head(HK_estimates)
+head(HK_first_estimates)
 ```
-
+Let us plot these estimates with their confidence interval.
 
 ```{r, fig.width=7, fig.height=4}
 library(ggplot2)
-ggplot(HK_estimates, aes(x = date, y = Re_estimate)) +
+ggplot(HK_first_estimates, aes(x = date, y = Re_estimate)) +
   geom_line(lwd=  1.1) +
   geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.15, colour = NA) +
   scale_x_date(date_breaks = "1 month", 
@@ -90,4 +137,38 @@ ggplot(HK_estimates, aes(x = date, y = Re_estimate)) +
   xlab("") +
   theme_bw()
 ```
-TODO add bit about noise in the observations and thus we need to bootstrap: add bootstrapping and plot results with uncertainty.
+##Analysis including incidence of symptom onset events
+We redo the analysis above but this time we feed additional information to *estimateR*.
+```{r}
+# Hong Kong incidence data
+tail(HK_incidence_data, n = 10)
+```
+```{r}
+HK_onset_estimates <- get_block_bootstrapped_estimate(
+  incidence_data = HK_incidence_data$onset_incidence, 
+  N_bootstrap_replicates = 20, # only 20 replicates to keep execution fast
+  delay_incubation = distribution_incubation, 
+  estimation_window = 3, # 3-day sliding window for the Re estimation
+  mean_serial_interval = mean_serial_interval,
+  std_serial_interval = std_serial_interval,
+  ref_date = min(HK_incidence_data$date),
+  time_step = "day",
+  is_partially_reported_data = TRUE,
+  delay_distribution_final_report = onset_to_confirmation_delay
+)
+
+tail(HK_onset_estimates)
+```
+```{r, fig.width=7, fig.height=4}
+library(ggplot2)
+ggplot(HK_onset_estimates, aes(x = date, y = Re_estimate)) +
+  geom_line(lwd=  1.1) +
+  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.15, colour = NA) +
+  scale_x_date(date_breaks = "1 month", 
+               date_labels = '%b\n%Y') +
+  ylab("Reproductive number") +
+  coord_cartesian(ylim = c(0, 6)) +
+  xlab("") +
+  theme_bw()
+```
+TODO figure out whether this jump is normal by taking things step by step.

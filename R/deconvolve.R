@@ -59,6 +59,7 @@ deconvolve_incidence <- function( incidence_data,
   return(deconvolved_incidence)
 }
 
+#TODO test estimates with onset dates.
 #TODO rework on verbosity
 #' Deconvolve the incidence input with the Richardson-Lucy (R-L) algorithm
 #'
