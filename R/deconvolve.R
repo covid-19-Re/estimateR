@@ -122,7 +122,7 @@ deconvolve_incidence <- function( incidence_data,
     if(any(is.na(Q_vector_observation_to_final_report)) || isTRUE(any(Q_vector_observation_to_final_report == 0, na.rm = FALSE))) {
       warning("Invalid delay_distribution_final_report argument in R-L deconvolution algorithm.")
     }
-
+    #TODO need to make sure that the matrix is the same size (as opposed to having extra columns leading)
     incidence_vector <- incidence_vector / Q_vector_observation_to_final_report
 
     if( any(is.na(incidence_vector)) || any(is.infinite(incidence_vector)) ) {
