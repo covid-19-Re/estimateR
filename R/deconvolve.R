@@ -20,6 +20,9 @@ deconvolve_incidence <- function( incidence_data,
                                   simplify_output = TRUE,
                                   ... ) {
 
+  #TODO be careful if we relax the constraints on incidence_data:
+  #.get_input_length(incidence_data) make not make sense anymore
+  #TODO need to make sure whether delays can be matrices with nrows > length(incidence_data)
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
                                   list(deconvolution_method, "deconvolution_method"),
                                   list(delay_incubation, "delay_object", .get_input_length(incidence_data)),
@@ -66,22 +69,6 @@ deconvolve_incidence <- function( incidence_data,
 #' @inheritParams inner_module
 #' @inheritParams universal_params
 #' @param delay_distribution numeric square matrix or vector. TODO refactor to estimateR
-#' @param is_partially_reported_data boolean value.
-#' Set to \code{TRUE} if incidence was collected following a subsequent observation event.
-#' For instance, if the incidence represents people starting to show symptoms of a disease
-#' (dates of onset of symptoms), the data would typically have been collected among
-#' individuals whose case was confirmed via a test.
-#' If so, among all events of onset of symptoms, only those who had time to be
-#' confirmed by a test were reported. Thus, close to the present, there
-#' is an underreporting of onset of symptoms events.
-#' In order to account for this effect, set this argument to \code{TRUE} and
-#' input a \code{delay_distribution_final_report} argument.
-#' @param delay_distribution_final_report TODO refactor to estimateR
-#' Distribution of the delay between the events collected in the incidence data
-#' and the a posteriori observations of these events.
-#' See \code{is_partially_reported_data} for more details.
-#' In the example given there, \code{delay_distribution_final_report}
-#' is the delay distribution between onset of symptoms and case confirmation.
 #' @param threshold_chi_squared numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.
 #' @param max_iterations integer. Maximum threshold for the number of iterations in the R-L algorithm.
 #'
@@ -89,8 +76,6 @@ deconvolve_incidence <- function( incidence_data,
 .deconvolve_incidence_Richardson_Lucy <- function(
   incidence_input,
   delay_distribution,
-  is_partially_reported_data = FALSE,
-  delay_distribution_final_report = NULL,
   threshold_chi_squared = 1,
   max_iterations = 100,
   verbose = FALSE
@@ -99,38 +84,11 @@ deconvolve_incidence <- function( incidence_data,
   #TODO delay_distribution must be vector or matrix (not delay data or distribution list)
   .are_valid_argument_values(list(list(incidence_input, "module_input"),
                                   list(delay_distribution, "delay_object", .get_input_length(incidence_input)),
-                                  list(is_partially_reported_data, "boolean"),
                                   list(threshold_chi_squared, "non_negative_number"),
                                   list(max_iterations, "non_negative_number"),
                                   list(verbose, "boolean")))
 
   incidence_vector <- .get_values(incidence_input)
-
-  if(is_partially_reported_data){
-    .are_valid_argument_values(list(list(delay_distribution_final_report, "delay_object", .get_input_length(incidence_input))))
-    #TODO build matrix beforehand (is not necessarily vector or matrix)
-    if(NCOL(delay_distribution) == 1) {
-      delay_distribution_matrix_final_report <- .get_matrix_from_single_delay_distr(delay_distribution_final_report,
-                                                                       N=length(incidence_vector))
-    } else {
-      delay_distribution_matrix_final_report <- delay_distribution_final_report
-    }
-
-    Q_vector_observation_to_final_report <- apply(delay_distribution_matrix_final_report, MARGIN = 2, sum)
-
-    #TODO improve this error
-    if(any(is.na(Q_vector_observation_to_final_report)) || isTRUE(any(Q_vector_observation_to_final_report == 0, na.rm = FALSE))) {
-      warning("Invalid delay_distribution_final_report argument in R-L deconvolution algorithm.")
-    }
-    #TODO need to make sure that the matrix is the same size (as opposed to having extra columns leading)
-    incidence_vector <- incidence_vector / Q_vector_observation_to_final_report
-
-    if( any(is.na(incidence_vector)) || any(is.infinite(incidence_vector)) ) {
-      stop("Invalid corrected incidence value.")
-    }
-  }
-
-
 
   # Test delay_distribution input
   #TODO apply proper validation step

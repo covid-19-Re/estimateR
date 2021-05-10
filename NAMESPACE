@@ -2,6 +2,7 @@
 
 export(build_delay_distribution)
 export(convolve_delay_inputs)
+export(correct_for_partially_observed_data)
 export(deconvolve_incidence)
 export(estimate_Re)
 export(get_block_bootstrapped_estimate)

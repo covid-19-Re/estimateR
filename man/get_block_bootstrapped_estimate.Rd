@@ -81,12 +81,6 @@ confirmed by a test were reported. Thus, close to the present, there
 is an underreporting of onset of symptoms events.
 In order to account for this effect, set this argument to \code{TRUE} and
 input a \code{delay_distribution_final_report} argument.}
-    \item{\code{delay_distribution_final_report}}{TODO refactor to estimateR
-Distribution of the delay between the events collected in the incidence data
-and the a posteriori observations of these events.
-See \code{is_partially_reported_data} for more details.
-In the example given there, \code{delay_distribution_final_report}
-is the delay distribution between onset of symptoms and case confirmation.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
     \item{\code{verbose}}{Boolean. Print verbose output?}

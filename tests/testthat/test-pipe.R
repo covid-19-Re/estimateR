@@ -11,17 +11,17 @@ test_that("smooth_deconvolve_estimate yields consistent results on a toy example
                           0.001,0.001)
 
   estimates <- smooth_deconvolve_estimate(incidence_data = toy_incidence_data,
-                                         smoothing_method = "LOESS",
-                                         deconvolution_method = "Richardson-Lucy delay distribution",
-                                         estimation_method = "EpiEstim sliding window",
-                                         delay_incubation = delay_distribution,
-                                         estimation_window = 3,
-                                         mean_serial_interval = 4.8,
-                                         std_serial_interval  = 2.3,
-                                         mean_Re_prior = 1,
-                                         output_Re_only = FALSE,
-                                         ref_date = as.Date("2020-02-04"),
-                                         time_step = "day")
+                                          smoothing_method = "LOESS",
+                                          deconvolution_method = "Richardson-Lucy delay distribution",
+                                          estimation_method = "EpiEstim sliding window",
+                                          delay_incubation = delay_distribution,
+                                          estimation_window = 3,
+                                          mean_serial_interval = 4.8,
+                                          std_serial_interval  = 2.3,
+                                          mean_Re_prior = 1,
+                                          output_Re_only = FALSE,
+                                          ref_date = as.Date("2020-02-04"),
+                                          time_step = "day")
 
   reference_R_values <- c(NA,NA,NA,NA,4.785,3.426,2.882,2.644,2.518,2.426,2.343,
                           2.255,2.16,2.064,1.969,1.873,1.78,1.691,1.605,1.522,1.444,
@@ -92,28 +92,28 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
 
   estimates <- get_block_bootstrapped_estimate(incidence_data = toy_incidence_data,
                                                N_bootstrap_replicates = 100,
-                                              smoothing_method = "LOESS",
-                                              deconvolution_method = "Richardson-Lucy delay distribution",
-                                              estimation_method = "EpiEstim sliding window",
-                                              uncertainty_summary_method = "bagged mean - CI from bootstrap estimates",
-                                              delay_incubation = delay_incubation,
-                                              delay_onset_to_report = delay_onset_to_report,
-                                              estimation_window = 3,
-                                              mean_serial_interval = 4.8,
-                                              std_serial_interval  = 2.3,
-                                              mean_Re_prior = 1,
-                                              ref_date = as.Date("2020-02-04"),
-                                              time_step = "day")
+                                               smoothing_method = "LOESS",
+                                               deconvolution_method = "Richardson-Lucy delay distribution",
+                                               estimation_method = "EpiEstim sliding window",
+                                               uncertainty_summary_method = "bagged mean - CI from bootstrap estimates",
+                                               delay_incubation = delay_incubation,
+                                               delay_onset_to_report = delay_onset_to_report,
+                                               estimation_window = 3,
+                                               mean_serial_interval = 4.8,
+                                               std_serial_interval  = 2.3,
+                                               mean_Re_prior = 1,
+                                               ref_date = as.Date("2020-02-04"),
+                                               time_step = "day")
 
   reference_dates <- seq.Date(from = as.Date("2020-02-02"),
                               to = as.Date("2020-03-05"),
                               by="day")
 
   reference_R_mean_values <- c(4.981,3.595,3.027,2.766,2.619,2.508,2.408,
-                          2.306,2.198,2.09,1.986,1.884,1.785,1.693,
-                          1.604,1.518,1.437,1.362,1.29,1.22,1.153,
-                          1.088,1.028,0.973,0.926,0.888,0.859,0.837,
-                          0.819,0.804,0.787,0.769,0.75)
+                               2.306,2.198,2.09,1.986,1.884,1.785,1.693,
+                               1.604,1.518,1.437,1.362,1.29,1.22,1.153,
+                               1.088,1.028,0.973,0.926,0.888,0.859,0.837,
+                               0.819,0.804,0.787,0.769,0.75)
 
   reference_CI_down_values <- c(4.66,3.297,2.74,2.488,2.365,2.294,2.231,
                                 2.149,2.051,1.95,1.854,1.767,1.687,1.61,
@@ -149,10 +149,10 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
   reference_indices <- -2:30
 
   reference_R_original_values <- c(4.856,3.482,2.918,2.66,2.52,2.423,2.34,2.254,
-                                     2.161,2.066,1.971,1.875,1.78,1.69,1.602,1.517,
-                                     1.437,1.362,1.29,1.218,1.147,1.076,1.009,0.945,
-                                     0.889,0.841,0.804,0.774,0.748,0.723,0.696,
-                                     0.665,0.632)
+                                   2.161,2.066,1.971,1.875,1.78,1.69,1.602,1.517,
+                                   1.437,1.362,1.29,1.218,1.147,1.076,1.009,0.945,
+                                   0.889,0.841,0.804,0.774,0.748,0.723,0.696,
+                                   0.665,0.632)
 
   reference_CI_down_values <- c(4.682,3.321,2.769,2.523,2.401,2.327,2.264,2.19,
                                 2.103,2.011,1.919,1.824,1.73,1.639,1.55,1.464,
@@ -224,6 +224,37 @@ test_that("get_block_bootstrapped_estimate passes '...' arguments to inner funct
   expect_equal(estimates$Re_estimate, reference_R_mean_values, tolerance = 1E-1)
   expect_equal(estimates$CI_down, reference_CI_down_values, tolerance = 1E-1)
   expect_equal(estimates$CI_up, reference_CI_up_values, tolerance = 1E-1)
+})
+
+
+test_that("get_infections_from_incidence handles partially-delayed data correctly",{
+  toy_onset_data <- c(6,8,10,13,17,22,31,41,52,65,80,97,116,
+                      138,162,189,218,245,268,292,311,322,330,
+                      332,324,312,297,276,256,236,214,192,170,
+                      145,118,91,66,45,32,11,5,4,0,1,2,0)
+
+  shape_incubation <-  2
+  scale_incubation <- 1.2
+  delay_incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
+
+  .get_delay_distribution(delay_onset_to_report)
+
+  shape_onset_to_report <- 3
+  scale_onset_to_report <- 1.3
+  delay_onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
+
+  corrected_toy_incidence_data <- correct_for_partially_observed_data(toy_onset_data, delay_onset_to_report)
+  smoothed_corrected_toy_incidence_data <- smooth_incidence(corrected_toy_incidence_data, data_points_incl = 10)
+  smooth_incidence(corrected_toy_incidence_data, data_points_incl = 5)
+
+  get_infections_from_incidence(incidence_data = toy_onset_data,
+                                smoothing_method = "LOESS",
+                                deconvolution_method = "Richardson-Lucy delay distribution",
+                                delay_incubation = delay_incubation,
+                                is_partially_reported_data = TRUE,
+                                delay_distribution_final_report = delay_onset_to_report,
+                                output_infection_incidence_only = FALSE)
+  #TODO continue here
 })
 
 

@@ -157,6 +157,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
 
 
 #TODO rename function to remove deconvolution word
+#TODO replace internals with call to get_infections_from_incidence
 #' Estimate Re from incidence data
 #'
 #' This pipe function combines a smoothing step using (to remove noise from the original observations),
@@ -247,3 +248,198 @@ smooth_deconvolve_estimate <- function(incidence_data,
     return(merged_results)
   }
 }
+
+#TODO doc
+#TODO test
+#TODO test output when output_infection_incidence_only = FALSE
+#TODO rework on way delays are input (delay_incubation and delay_onset_to_report args)
+#' Get timeseries of infection events from incidence data of delayed observations
+#'
+#' @param incidence_data
+#' @param smoothing_method
+#' @param deconvolution_method
+#' @param delay_incubation
+#' @param delay_onset_to_report
+#' @param is_partially_reported_data
+#' @param delay_distribution_final_report
+#' @param output_infection_incidence_only
+#' @inheritDotParams merge_outputs -output_list -include_index -index_col
+#' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_distribution_final_report
+#'
+#' @return
+#' @export
+get_infections_from_incidence <- function(incidence_data,
+                                          smoothing_method = "LOESS",
+                                          deconvolution_method = "Richardson-Lucy delay distribution",
+                                          delay_incubation,
+                                          delay_onset_to_report = c(1.0),
+                                          is_partially_reported_data = FALSE,
+                                          delay_distribution_final_report = NULL,
+                                          output_infection_incidence_only = TRUE,
+                                          ...){
+
+  .are_valid_argument_values(list(list(incidence_data, "module_input"),
+                                  list(smoothing_method, "smoothing_method"),
+                                  list(deconvolution_method, "deconvolution_method"),
+                                  list(delay_incubation, "delay_object", .get_input_length(incidence_data)), # need to pass length of incidence data as well in order
+                                  list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)), # to validate when the delay is passed as a matrix
+                                  list(is_partially_reported_data, "boolean"),
+                                  list(output_infection_incidence_only, "boolean")))
+
+  dots_args <- .get_dots_as_list(...)
+
+  original_incidence_data <- incidence_data
+
+  if(is_partially_reported_data) {
+    .are_valid_argument_values(list(list(delay_distribution_final_report, "delay_object", .get_input_length(incidence_data))))
+
+    incidence_data <- do.call(
+      'correct_for_partially_observed_data',
+      c(list(incidence_data = incidence_data,
+             delay_distribution_final_report = delay_distribution_final_report),
+        .get_shared_args(correct_for_partially_observed_data, dots_args))
+    )
+  }
+
+  smoothed_incidence <- do.call(
+    'smooth_incidence',
+    c(list(incidence_data = incidence_data,
+           smoothing_method = smoothing_method),
+      .get_shared_args(.smooth_LOESS, dots_args))
+  )
+
+  #TODO when generalizing to list of delays,
+  # possibly take the convolution out of the deconvolution step.
+  # to improve readability
+  deconvolved_incidence <- do.call(
+    'deconvolve_incidence',
+    c(list(incidence_data = smoothed_incidence,
+           deconvolution_method = deconvolution_method,
+           delay_incubation = delay_incubation,
+           delay_onset_to_report = delay_onset_to_report),
+      .get_shared_args(list(.deconvolve_incidence_Richardson_Lucy,
+                            convolve_delay_inputs),
+                       dots_args))
+  )
+
+  if(output_infection_incidence_only) {
+    return(deconvolved_incidence)
+  } else {
+    if(is_partially_reported_data) {
+      output_list <- list("observed_incidence" = original_incidence_data,
+                          "corrected_incidence" = incidence_data,
+                          "smoothed_incidence" = smoothed_incidence,
+                          "deconvolved_incidence" = deconvolved_incidence)
+    } else {
+      output_list <- list("observed_incidence" = incidence_data,
+                          "smoothed_incidence" = smoothed_incidence,
+                          "deconvolved_incidence" = deconvolved_incidence)
+    }
+
+    merged_results <- do.call(
+      'merge_outputs',
+      c(list(output_list = output_list),
+        .get_shared_args(merge_outputs, dots_args))
+    )
+
+    return(merged_results)
+  }
+}
+
+
+
+#TODO doc
+#' Title
+#'
+#' @param partially_delayed_incidence
+#' @param fully_delayed_incidence
+#' @param smoothing_method
+#' @param deconvolution_method
+#' @param estimation_method
+#' @param delay_until_partial
+#' @param delay_from_partial_to_full
+#' @param partial_observation_requires_full_observation
+#' @param ref_date
+#' @param time_step
+#' @param output_Re_only
+#' @param ...
+#'
+#' @return
+#' @export
+estimate_from_combined_observations <- function(partially_delayed_incidence,
+                                                fully_delayed_incidence,
+                                                smoothing_method = "LOESS",
+                                                deconvolution_method = "Richardson-Lucy delay distribution",
+                                                estimation_method = "EpiEstim sliding window",
+                                                delay_until_partial,
+                                                delay_from_partial_to_full,
+                                                partial_observation_requires_full_observation = TRUE,
+                                                ref_date = NULL,
+                                                time_step = "day",
+                                                output_Re_only = TRUE,
+                                                ...) {
+
+  .are_valid_argument_values(list(list(partially_delayed_incidence, "module_input"),
+                                  list(fully_delayed_incidence, "module_input"),
+                                  list(smoothing_method, "smoothing_method"),
+                                  list(deconvolution_method, "deconvolution_method"),
+                                  list(estimation_method, "estimation_method"),
+                                  #TODO figure out what we do for making sure the two traces are the same size in input.
+                                  list(delay_until_partial, "delay_object", .get_input_length(delay_until_partial)), # need to pass length of incidence data as well in order
+                                  list(delay_from_partial_to_full, "delay_object", .get_input_length(delay_from_partial_to_full)), # to validate when the delay is passed as a matrix
+                                  list(partial_observation_requires_full_observation, "boolean"),
+                                  list(ref_date, "null_or_date"),
+                                  list(time_step, "time_step"),
+                                  list(output_Re_only, "boolean")))
+
+  #TODO add '...' args
+  infections_from_partially_delayed_observations <- get_infections_from_incidence(partially_delayed_incidence,
+                                                                                  smoothing_method = smoothing_method,
+                                                                                  deconvolution_method = deconvolution_method,
+                                                                                  delay_incubation = delay_until_partial,
+                                                                                  is_partially_reported_data = partial_observation_requires_full_observation,
+                                                                                  delay_distribution_final_report = delay_from_partial_to_full,
+                                                                                  output_infection_incidence_only = TRUE)
+  #TODO add '...' args
+  infections_from_fully_delayed_observations <- get_infections_from_incidence(fully_delayed_incidence,
+                                                                              smoothing_method = smoothing_method,
+                                                                              deconvolution_method = deconvolution_method,
+                                                                              delay_incubation = delay_until_partial,
+                                                                              delay_onset_to_report = delay_from_partial_to_full,
+                                                                              is_partially_reported_data = FALSE,
+                                                                              output_infection_incidence_only = TRUE)
+
+  #TODO code inner_addition
+  all_infection_events <- inner_addition(infections_from_partially_delayed_observations, infections_from_fully_delayed_observations)
+
+  estimated_Re <- do.call(
+    'estimate_Re',
+    c(list(incidence_data = all_infection_events,
+           estimation_method = estimation_method),
+      .get_shared_args(.estimate_Re_EpiEstim_sliding_window, dots_args))
+  )
+
+  if(output_Re_only) {
+    return(estimated_Re)
+  } else {
+    merged_results <- do.call(
+      'merge_outputs',
+      c(list(output_list = list("partially_delayed_observations" = partially_delayed_incidence,
+                                "fully_delayed_observations" = fully_delayed_incidence,
+                                "deconvolved_incidence" = all_infection_events,
+                                "R_mean" = estimated_Re),
+             ref_date = ref_date,
+             time_step = time_step),
+        .get_shared_args(merge_outputs, dots_args))
+    )
+
+    return(merged_results)
+  }
+}
+
+#TODO write build_bootstrap_estimates pipe.
+#TODO write pipe for combining bootstrapping estimation from combined observations.
+
+
+
+
