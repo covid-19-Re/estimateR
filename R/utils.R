@@ -204,6 +204,30 @@ merge_outputs <- function(output_list,
   return(list("values" = results, "index_offset" = new_offset))
 }
 
+#TODO doc
+#' Title
+#'
+#' @param input_a
+#' @param input_b
+#'
+#' @return
+#' @export
+inner_addition <- function(input_a, input_b){
+  length_a <- .get_input_length(input_a)
+  length_b <- .get_input_length(input_b)
+
+  offset_a <- .get_offset(input_a)
+  offset_b <- .get_offset(input_b)
+
+  inner_offset <- max(offset_a, offset_b)
+  length_addition <- min(length_a - (inner_offset - offset_a), length_b - (inner_offset - offset_b))
+
+  inner_a <- .get_values(input_a)[seq(from = inner_offset - offset_a + 1, by = 1, length.out =  length_addition)]
+  inner_b <- .get_values(input_b)[seq(from = inner_offset - offset_b + 1, by = 1, length.out =  length_addition)]
+
+  return(.get_module_input(list(values = inner_a + inner_b, index_offset = inner_offset)))
+}
+
 #TODO polish doc
 #' Correct incidence data for yet-to-be-observed fraction of events
 #'

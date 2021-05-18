@@ -237,24 +237,80 @@ test_that("get_infections_from_incidence handles partially-delayed data correctl
   scale_incubation <- 1.2
   delay_incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
 
-  .get_delay_distribution(delay_onset_to_report)
-
   shape_onset_to_report <- 3
   scale_onset_to_report <- 1.3
   delay_onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
 
-  corrected_toy_incidence_data <- correct_for_partially_observed_data(toy_onset_data, delay_onset_to_report)
-  smoothed_corrected_toy_incidence_data <- smooth_incidence(corrected_toy_incidence_data, data_points_incl = 10)
-  smooth_incidence(corrected_toy_incidence_data, data_points_incl = 5)
-
-  get_infections_from_incidence(incidence_data = toy_onset_data,
+  result_deconvolution <- get_infections_from_incidence(incidence_data = toy_onset_data,
                                 smoothing_method = "LOESS",
                                 deconvolution_method = "Richardson-Lucy delay distribution",
                                 delay_incubation = delay_incubation,
                                 is_partially_reported_data = TRUE,
                                 delay_distribution_final_report = delay_onset_to_report,
-                                output_infection_incidence_only = FALSE)
-  #TODO continue here
+                                output_infection_incidence_only = FALSE,
+                                data_points_incl = 21,
+                                degree = 1)
+
+  reference_deconvolved_incidence <- c(16.417,19.763,22.179,26.041,32.397,40.832,
+                               50.92,62.293,75.173,89.947,106.529,124.207,
+                               142.552,161.947,182.9,203.07,221.026,239.061,
+                               255.931,268.766,278.113,285.134,289.532,289.975,
+                               286.109,278.965,269.38,256.736,240.254,221.707,
+                               202.645,181.802,160.793,141.705,123.465,104.689,
+                               85.982,68.065,49.84,31.857,15.892,3.778,
+                               0,0,0,NA,NA,NA)
+
+  expect_equal(result_deconvolution$deconvolved_incidence, reference_deconvolved_incidence, tolerance = 1E-1)
+})
+
+test_that("estimate_from_combined_observations returns consistent results",{
+  toy_onset_data <- c(6,8,10,13,17,22,31,41,52,65,80,97,116,
+                      138,162,189,218,245,268,292,311,322,330,
+                      332,324,312,297,276,256,236,214,192,170,
+                      145,118,91,66,45,32,11,5,4,0,1,2,0)
+
+  toy_case_confirmation_data <- c(11,12,21,23,2,14,49,61,65,45,66,45,
+                                  40,8,61,38,1,3,45,66,12,52,27,3,54,
+                                  10,18,54,12,48,67,62,54,3,29,10,52,
+                                  61,33,39,55,8,64,51,65,34)
+
+  shape_incubation <-  1
+  scale_incubation <- 1.2
+  delay_incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
+
+  shape_onset_to_report <- 4
+  scale_onset_to_report <- 2.3
+  delay_onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
+
+  results_estimation <- estimate_from_combined_observations(partially_delayed_incidence = toy_onset_data,
+                                      fully_delayed_incidence = toy_case_confirmation_data,
+                                      smoothing_method = "LOESS",
+                                      deconvolution_method = "Richardson-Lucy delay distribution",
+                                      estimation_method = "EpiEstim sliding window",
+                                      delay_until_partial = delay_incubation,
+                                      delay_from_partial_to_full = delay_onset_to_report,
+                                      partial_observation_requires_full_observation = TRUE,
+                                      ref_date = as.Date("2021-03-24"),
+                                      time_step = "day",
+                                      output_Re_only = FALSE,
+                                      data_points_incl = 21,
+                                      degree = 1)
+
+
+
+  reference_deconvolved_incidence <- c(59.2,61.7,64.2,69.8,76.9,84.4,92.1,101.5,112.9,126.2,
+                                       140.8,156.9,175.5,195.1,214.5,235.3,255.6,272.3,287,
+                                       301.6,314.4,323.1,328.8,332.7,333.8,330.9,324.9,317.1,
+                                       305.9,290.8,273.5,255.4,237.4,219.6,201.4,183.3,165.1,
+                                       NA,NA,NA,NA,NA,NA,NA,NA,NA,NA)
+
+  reference_R_values <- c(NA,NA,NA,NA,3.5,2.4,2,1.7,1.6,1.6,1.6,1.6,1.6,1.6,
+                          1.6,1.6,1.6,1.5,1.5,1.4,1.4,1.3,1.3,1.2,1.2,1.1,
+                          1.1,1,1,0.9,0.9,0.9,0.8,0.8,0.7,0.7,0.7,
+                          NA,NA,NA,NA,NA,NA,NA,NA,NA,NA)
+
+  expect_equal(results_estimation$combined_deconvolved_incidence, reference_deconvolved_incidence, tolerance = 1E-1)
+  expect_equal(results_estimation$R_mean, reference_R_values, tolerance = 1E-1)
 })
 
 

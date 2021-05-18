@@ -347,7 +347,7 @@ get_infections_from_incidence <- function(incidence_data,
 }
 
 
-
+#TODO refactor arguments: we are using delay_from_partial_to_full and delay_distribution_final_report
 #TODO doc
 #' Title
 #'
@@ -392,24 +392,38 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
                                   list(time_step, "time_step"),
                                   list(output_Re_only, "boolean")))
 
-  #TODO add '...' args
-  infections_from_partially_delayed_observations <- get_infections_from_incidence(partially_delayed_incidence,
-                                                                                  smoothing_method = smoothing_method,
-                                                                                  deconvolution_method = deconvolution_method,
-                                                                                  delay_incubation = delay_until_partial,
-                                                                                  is_partially_reported_data = partial_observation_requires_full_observation,
-                                                                                  delay_distribution_final_report = delay_from_partial_to_full,
-                                                                                  output_infection_incidence_only = TRUE)
-  #TODO add '...' args
-  infections_from_fully_delayed_observations <- get_infections_from_incidence(fully_delayed_incidence,
-                                                                              smoothing_method = smoothing_method,
-                                                                              deconvolution_method = deconvolution_method,
-                                                                              delay_incubation = delay_until_partial,
-                                                                              delay_onset_to_report = delay_from_partial_to_full,
-                                                                              is_partially_reported_data = FALSE,
-                                                                              output_infection_incidence_only = TRUE)
+  dots_args <- .get_dots_as_list(...)
 
-  #TODO code inner_addition
+  infections_from_partially_delayed_observations <- do.call(
+    'get_infections_from_incidence',
+    c(list(partially_delayed_incidence,
+           smoothing_method = smoothing_method,
+           deconvolution_method = deconvolution_method,
+           delay_incubation = delay_until_partial,
+           is_partially_reported_data = partial_observation_requires_full_observation,
+           delay_distribution_final_report = delay_from_partial_to_full,
+           output_infection_incidence_only = TRUE),
+
+      .get_shared_args(list(.deconvolve_incidence_Richardson_Lucy,
+                            convolve_delay_inputs),
+                       dots_args))
+  )
+
+  infections_from_fully_delayed_observations <- do.call(
+    'get_infections_from_incidence',
+    c(list(fully_delayed_incidence,
+           smoothing_method = smoothing_method,
+           deconvolution_method = deconvolution_method,
+           delay_incubation = delay_until_partial,
+           delay_onset_to_report = delay_from_partial_to_full,
+           is_partially_reported_data = FALSE,
+           output_infection_incidence_only = TRUE),
+
+      .get_shared_args(list(.deconvolve_incidence_Richardson_Lucy,
+                            convolve_delay_inputs),
+                       dots_args))
+  )
+
   all_infection_events <- inner_addition(infections_from_partially_delayed_observations, infections_from_fully_delayed_observations)
 
   estimated_Re <- do.call(
@@ -426,7 +440,7 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
       'merge_outputs',
       c(list(output_list = list("partially_delayed_observations" = partially_delayed_incidence,
                                 "fully_delayed_observations" = fully_delayed_incidence,
-                                "deconvolved_incidence" = all_infection_events,
+                                "combined_deconvolved_incidence" = all_infection_events,
                                 "R_mean" = estimated_Re),
              ref_date = ref_date,
              time_step = time_step),
@@ -437,9 +451,168 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
   }
 }
 
-#TODO write build_bootstrap_estimates pipe.
-#TODO write pipe for combining bootstrapping estimation from combined observations.
+# TODO test
+# TODO doc
+#' Title
+#'
+#' @param partially_delayed_incidence
+#' @param fully_delayed_incidence
+#' @param smoothing_method
+#' @param deconvolution_method
+#' @param estimation_method
+#' @param bootstrapping_method
+#' @param uncertainty_summary_method
+#' @param N_bootstrap_replicates
+#' @param delay_until_partial
+#' @param delay_from_partial_to_full
+#' @param partial_observation_requires_full_observation
+#' @param ref_date
+#' @param time_step
+#' @param ...
+#'
+#' @return
+#' @export
+get_bootstrapped_estimate_from_combined_observations <- function(partially_delayed_incidence,
+                                                                 fully_delayed_incidence,
+                                                                 smoothing_method = "LOESS",
+                                                                 deconvolution_method = "Richardson-Lucy delay distribution",
+                                                                 estimation_method = "EpiEstim sliding window",
+                                                                 bootstrapping_method = "non-parametric block boostrap",
+                                                                 uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
+                                                                 N_bootstrap_replicates = 100,
+                                                                 delay_until_partial,
+                                                                 delay_from_partial_to_full,
+                                                                 partial_observation_requires_full_observation = TRUE,
+                                                                 ref_date = NULL,
+                                                                 time_step = "day",
+                                                                 ...){
+
+  #TODO validate arguments
+
+  #TODO allow for 'partially_delayed_incidence' to be NULL,
+  # (need to ensure all subsequent fucntions allow NULL or make if-else)
+
+  # TODO turn get_block_bootstrapped_estimate into a wrapper around this function with partially_delayed_incidence=NULL
+
+  dots_args <- .get_dots_as_list(...)
+
+  index_col <- "idx"
+
+  #TODO first put the delays into vector/matrix format (TODO need to make util for that)
+
+  if(partial_observation_requires_full_observation){
+    .are_valid_argument_values(list(list(delay_from_partial_to_full, "delay_object", .get_input_length(partially_delayed_incidence))))
+
+    partially_delayed_incidence <- do.call(
+      'correct_for_partially_observed_data',
+      c(list(incidence_data = partially_delayed_incidence,
+             delay_distribution_final_report = delay_from_partial_to_full),
+        .get_shared_args(correct_for_partially_observed_data, dots_args))
+    )
+  }
 
 
+
+
+
+
+  #TODO recheck that this is all the required dot args
+  estimate_from_combined_observations_dots_args <- .get_shared_args(list(.smooth_LOESS,
+                                                                .deconvolve_incidence_Richardson_Lucy,
+                                                                .estimate_Re_EpiEstim_sliding_window),
+                                                           dots_args)
+
+
+
+  original_result <- do.call(
+    'estimate_from_combined_observations',
+    c(list(partially_delayed_incidence = partially_delayed_incidence,
+           fully_delayed_incidence = fully_delayed_incidence,
+           smoothing_method = smoothing_method,
+           deconvolution_method = deconvolution_method,
+           estimation_method = estimation_method,
+           delay_until_partial = delay_until_partial,
+           delay_from_partial_to_full = delay_from_partial_to_full,
+           partial_observation_requires_full_observation = FALSE,
+           ref_date = NULL,
+           output_Re_only = FALSE,
+           include_index = TRUE,
+           index_col = index_col),
+      estimate_from_combined_observations_dots_args)
+  )
+
+  original_result$bootstrap_id <- 0
+
+  bootstrapping_results <- list(original_result)
+
+  for(i in 1:N_bootstrap_replicates) {
+
+    bootstrapped_partially_delayed_incidence <- do.call(
+      'get_bootstrap_replicate',
+      c(list(incidence_data = partially_delayed_incidence,
+             bootstrapping_method = bootstrapping_method),
+        .get_shared_args(list(.block_bootstrap,
+                              .block_bootstrap_overlap_func,
+                              .smooth_LOESS),
+                         dots_args))
+    )
+
+    bootstrapped_fully_delayed_incidence <- do.call(
+      'get_bootstrap_replicate',
+      c(list(incidence_data = fully_delayed_incidence,
+             bootstrapping_method = bootstrapping_method),
+        .get_shared_args(list(.block_bootstrap,
+                              .block_bootstrap_overlap_func,
+                              .smooth_LOESS),
+                         dots_args))
+    )
+
+    bootstrapped_estimate <- do.call(
+      'estimate_from_combined_observations',
+      c(list(partially_delayed_incidence = bootstrapped_partially_delayed_incidence,
+             fully_delayed_incidence = bootstrapped_fully_delayed_incidence,
+             smoothing_method = smoothing_method,
+             deconvolution_method = deconvolution_method,
+             estimation_method = estimation_method,
+             delay_until_partial = delay_until_partial,
+             delay_from_partial_to_full = delay_from_partial_to_full,
+             partial_observation_requires_full_observation = FALSE,
+             ref_date = NULL,
+             output_Re_only = FALSE,
+             include_index = TRUE,
+             index_col = index_col),
+        estimate_from_combined_observations_dots_args)
+    )
+
+    bootstrapping_result$bootstrap_id <- i
+
+    bootstrapping_results <- c(bootstrapping_results, list(bootstrapping_result))
+  }
+
+  bootstrapped_estimates <- dplyr::bind_rows(bootstrapping_results)
+
+  original_estimates <- bootstrapped_estimates %>%
+    dplyr::filter(.data$bootstrap_id == 0)
+
+  bootstrapped_estimates <- bootstrapped_estimates %>%
+    dplyr::filter(.data$bootstrap_id > 0)
+
+  #TODO pass '...' args to 'summarise_uncertainty'
+  estimates_with_uncertainty <- summarise_uncertainty(original_estimates = original_estimates,
+                                                      bootstrapped_estimates = bootstrapped_estimates,
+                                                      uncertainty_summary_method = uncertainty_summary_method,
+                                                      Re_estimate_col = "R_mean",
+                                                      bootstrap_id_col = "bootstrap_id",
+                                                      index_col = index_col)
+  if(!is.null(ref_date)) {
+    estimates_with_uncertainty <- .add_date_column(estimates_with_uncertainty,
+                                                   ref_date = ref_date,
+                                                   time_step = time_step,
+                                                   index_col= index_col,
+                                                   keep_index_col = FALSE)
+  }
+
+  return(estimates_with_uncertainty)
+}
 
 
