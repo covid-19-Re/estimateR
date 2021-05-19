@@ -347,7 +347,7 @@ get_infections_from_incidence <- function(incidence_data,
 }
 
 
-#TODO refactor arguments: we are using delay_from_partial_to_full and delay_distribution_final_report
+#TODO refactor arguments: we are using delay_from_partial_to_full and delay_distribution_final_report to refer to the same thing
 #TODO doc
 #' Title
 #'
@@ -451,7 +451,6 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
   }
 }
 
-# TODO test
 # TODO doc
 #' Title
 #'
@@ -490,7 +489,7 @@ get_bootstrapped_estimate_from_combined_observations <- function(partially_delay
   #TODO validate arguments
 
   #TODO allow for 'partially_delayed_incidence' to be NULL,
-  # (need to ensure all subsequent fucntions allow NULL or make if-else)
+  # (need to ensure all subsequent functions allow NULL or make if-else)
 
   # TODO turn get_block_bootstrapped_estimate into a wrapper around this function with partially_delayed_incidence=NULL
 
@@ -498,7 +497,7 @@ get_bootstrapped_estimate_from_combined_observations <- function(partially_delay
 
   index_col <- "idx"
 
-  #TODO first put the delays into vector/matrix format (TODO need to make util for that)
+  #TODO first put the delays into vector/matrix format (TODO need to make util for that) (to speed things up in case empirical data)
 
   if(partial_observation_requires_full_observation){
     .are_valid_argument_values(list(list(delay_from_partial_to_full, "delay_object", .get_input_length(partially_delayed_incidence))))
@@ -510,11 +509,6 @@ get_bootstrapped_estimate_from_combined_observations <- function(partially_delay
         .get_shared_args(correct_for_partially_observed_data, dots_args))
     )
   }
-
-
-
-
-
 
   #TODO recheck that this is all the required dot args
   estimate_from_combined_observations_dots_args <- .get_shared_args(list(.smooth_LOESS,
@@ -584,9 +578,9 @@ get_bootstrapped_estimate_from_combined_observations <- function(partially_delay
         estimate_from_combined_observations_dots_args)
     )
 
-    bootstrapping_result$bootstrap_id <- i
+    bootstrapped_estimate$bootstrap_id <- i
 
-    bootstrapping_results <- c(bootstrapping_results, list(bootstrapping_result))
+    bootstrapping_results <- c(bootstrapping_results, list(bootstrapped_estimate))
   }
 
   bootstrapped_estimates <- dplyr::bind_rows(bootstrapping_results)

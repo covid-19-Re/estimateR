@@ -36,6 +36,8 @@ test_that("smooth_deconvolve_estimate yields consistent results on a toy example
 
 test_that("smooth_deconvolve_estimate passes '...' arguments consistently", {
 
+
+
   toy_incidence_data <- c(6,8,10,13,17,22,31,41,52,65,80,97,116,
                           138,162,189,218,245,268,292,311,322,330,
                           332,324,312,297,276,256,236,214,192,170,
@@ -311,6 +313,120 @@ test_that("estimate_from_combined_observations returns consistent results",{
 
   expect_equal(results_estimation$combined_deconvolved_incidence, reference_deconvolved_incidence, tolerance = 1E-1)
   expect_equal(results_estimation$R_mean, reference_R_values, tolerance = 1E-1)
+})
+
+#TODO switch off on CRAN as can fail by chance
+test_that("get_bootstrapped_estimate_from_combined_observations returns consistent results",{
+
+  toy_onset_data <- c(6,8,10,13,17,22,31,41,52,65,80,97,116,
+                      138,162,189,218,245,268,292,311,322,330,
+                      332,324,312,297,276,256,236,214,192,170,
+                      145,118,91,66,45,32,11,5,4,0,1,2,0)
+
+  toy_case_confirmation_data <- c(11,12,21,23,2,14,49,61,65,45,66,45,
+                                  40,8,61,38,1,3,45,66,12,52,27,3,54,
+                                  10,18,54,12,48,67,62,54,3,29,10,52,
+                                  61,33,39,55,8,64,51,65,34)
+
+  shape_incubation <-  1
+  scale_incubation <- 1.2
+  delay_incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
+
+  shape_onset_to_report <- 4
+  scale_onset_to_report <- 2.3
+  delay_onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
+
+  results_estimation <- get_bootstrapped_estimate_from_combined_observations(partially_delayed_incidence = toy_onset_data,
+                                                            fully_delayed_incidence = toy_case_confirmation_data,
+                                                            smoothing_method = "LOESS",
+                                                            deconvolution_method = "Richardson-Lucy delay distribution",
+                                                            estimation_method = "EpiEstim sliding window",
+                                                            bootstrapping_method = "non-parametric block boostrap",
+                                                            uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
+                                                            N_bootstrap_replicates = 100,
+                                                            delay_until_partial = delay_incubation,
+                                                            delay_from_partial_to_full = delay_onset_to_report,
+                                                            partial_observation_requires_full_observation = TRUE,
+                                                            ref_date = as.Date("2021-03-24"),
+                                                            time_step = "day",
+                                                            output_Re_only = FALSE,
+                                                            data_points_incl = 21,
+                                                            degree = 1)
+
+
+  reference_R_values <- c(3.5,2.4,2,1.7,1.6,1.6,1.6,1.6,1.6,1.6,
+                          1.6,1.6,1.6,1.5,1.5,1.4,1.4,1.3,1.3,1.2,1.2,1.1,
+                          1.1,1,1,0.9,0.9,0.9,0.8,0.8,0.7,0.7,0.7)
+
+  reference_CI_up <- c(3.71,2.61,2.17,1.95,1.85,1.81,1.79,1.79,1.79,
+                       1.78,1.76,1.73,1.68,1.62,1.56,1.49,1.43,1.38,
+                       1.32,1.26,1.21,1.15,1.11,1.06,1.02,0.98,0.94,
+                       0.9,0.86,0.83,0.81,0.79,0.77)
+
+  reference_CI_down <- c(3.26,2.2,1.75,1.54,1.45,1.42,1.43,1.44,1.46,
+                         1.48,1.49,1.49,1.48,1.46,1.41,1.36,1.31,1.25,
+                         1.21,1.16,1.12,1.07,1.03,0.99,0.94,0.89,0.85,
+                         0.8,0.76,0.72,0.69,0.65,0.61)
+
+  expect_equal(results_estimation$Re_estimate, reference_R_values, tolerance = 1E-1)
+  expect_equal(results_estimation$CI_up, reference_CI_up, tolerance = 1E-1)
+  expect_equal(results_estimation$CI_down, reference_CI_down, tolerance = 1E-1)
+})
+
+test_that("get_bootstrapped_estimate_from_combined_observations can deal with empirical delay data",{
+
+  ref_date <- as.Date("2021-03-24")
+  n_days <- 50
+  shape_initial_delay <- 6
+  scale_initial_delay <- 1.5
+  distribution_initial_delay <- list(name = "gamma", shape = shape_initial_delay, scale = scale_initial_delay)
+  seed <- 7543265
+
+  generated_empirical_delays <- .generate_delay_data(origin_date = ref_date,
+                                                     n_time_steps = n_days,
+                                                     ratio_delay_end_to_start = 1.5,
+                                                     distribution_initial_delay = distribution_initial_delay,
+                                                     seed = seed)
+
+  toy_onset_data <- c(6,8,10,13,17,22,31,41,52,65,80,97,116,
+                      138,162,189,218,245,268,292,311,322,330,
+                      332,324,312,297,276,256,236,214,192,170,
+                      145,118,91,66,45,32,11,5,4,0,1,2,0)
+
+  toy_case_confirmation_data <- c(11,12,21,23,2,14,49,61,65,45,66,45,
+                                  40,8,61,38,1,3,45,66,12,52,27,3,54,
+                                  10,18,54,12,48,67,62,54,3,29,10,52,
+                                  61,33,39,55,8,64,51,65,34)
+
+  shape_incubation <-  2
+  scale_incubation <- 1.2
+  delay_incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
+
+  results_estimation <- get_bootstrapped_estimate_from_combined_observations(partially_delayed_incidence = toy_onset_data,
+                                                                             fully_delayed_incidence = toy_case_confirmation_data,
+                                                                             smoothing_method = "LOESS",
+                                                                             deconvolution_method = "Richardson-Lucy delay distribution",
+                                                                             estimation_method = "EpiEstim sliding window",
+                                                                             bootstrapping_method = "non-parametric block boostrap",
+                                                                             uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
+                                                                             N_bootstrap_replicates = 20, # to speed things up
+                                                                             delay_until_partial = delay_incubation,
+                                                                             delay_from_partial_to_full = generated_empirical_delays,
+                                                                             partial_observation_requires_full_observation = TRUE,
+                                                                             ref_date = ref_date,
+                                                                             time_step = "day",
+                                                                             output_Re_only = FALSE,
+                                                                             data_points_incl = 21,
+                                                                             degree = 1)
+
+
+  reference_R_values <- c(3.54,2.43,2.01,1.86,1.81,1.79,1.78,
+                          1.77,1.76,1.75,1.71,1.65,1.58,1.52,
+                          1.45,1.39,1.33,1.28,1.23,1.17,1.12,
+                          1.07,1.02,0.97,0.93,0.88,0.84,0.8,
+                          0.76,0.72,0.69)
+
+  expect_equal(results_estimation$Re_estimate, reference_R_values, tolerance = 1E-1)
 })
 
 

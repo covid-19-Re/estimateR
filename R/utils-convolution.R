@@ -187,6 +187,7 @@ convolve_delay_inputs <- function(delay_incubation,
   dots_args <- .get_dots_as_list(...)
 
   #TODO put these tests below in a utility function
+  #TODO WIP
   if( .check_is_empirical_delay_data(delay_incubation) ){
     if(n_report_time_steps == 0) {
       stop("Empirical delay data input but 'n_time_steps' parameter was not set or set to zero.")

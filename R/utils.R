@@ -257,7 +257,9 @@ inner_addition <- function(input_a, input_b){
 #' @export
 correct_for_partially_observed_data <- function( incidence_data,
                                                  delay_distribution_final_report,
-                                                 cutoff_observation_probability = 0.1 ) {
+                                                 cutoff_observation_probability = 0.1,
+                                                 ...) {
+
 
   #TODO validate cutoff_observation_probability argument
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
@@ -266,8 +268,24 @@ correct_for_partially_observed_data <- function( incidence_data,
   input <- .get_module_input(incidence_data)
   incidence_vector <- .get_values(input)
 
+  dots_args <- .get_dots_as_list(...)
+
   #TODO clear up the mess: decide what kind of input delay_distribution_final_report can be and handle every case allowed
-  delay_distribution_final_report_vector <- .get_delay_distribution(delay_distribution_final_report)
+  #TODO must allow for empirical delay data
+  #TODO WIP - replace by utility function
+  if( .check_is_empirical_delay_data(delay_distribution_final_report) ){
+    delay_distribution_final_report <- do.call(
+      'get_matrix_from_empirical_delay_distr',
+      c(list(empirical_delays = delay_distribution_final_report,
+             n_report_time_steps = .get_input_length(incidence_data)),
+        .get_shared_args(list(get_matrix_from_empirical_delay_distr), dots_args))
+    )
+
+  } else {
+    #TODO this if-else is not correct. the 'else' case does not correct every possibility (matrix)
+    delay_distribution_final_report_vector <- .get_delay_distribution(delay_distribution_final_report)
+  }
+
 
   #TODO build matrix beforehand (is not necessarily vector or matrix)
   if(NCOL(delay_distribution_final_report) == 1) {

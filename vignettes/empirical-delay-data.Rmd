@@ -14,6 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
+TODO rename vignette (both file name and vignette title)
 TODO there's a lot of work to do on this vignette.
 
 ```{r setup}
@@ -79,7 +80,8 @@ head(HK_delay_data, n =10)
 We could feed this dataset directly to *estimateR*, as we will see below.
 Instead, we choose here to build an estimate of the delay distribution by ourselves.
 It is this estimate that we will feed to *estimateR* in this first analysis.
-TODO add note on why we would go through the trouble of doing that (maybe data from eslewhere, or only few datapoints for which we have delay data)
+TODO add note on why we would go through the trouble of doing that (maybe data from elsewhere, or only few datapoints for which we have delay data,
+or no record of the correspondence between delay data and incidence data)
 
 ```{r}
 empirical_frequencies <- HK_delay_data %>% 
@@ -90,17 +92,18 @@ empirical_frequencies
 ```
 ```{r}
 # Convert to a vector, keeping only the frequencies  
-  onset_to_confirmation_delay <- empirical_frequencies %>% 
+  delay_onset_to_report <- empirical_frequencies %>% 
   arrange(report_delay) %>% # Sort by increasing delay
   pull(freq) # Pull frequencies as a vector
 ```
 
 We could go further one step further and fit a particular distribution (e.g. gamma or lognormal) to this empirical frequency vector.
-We may have especialy wanted to that if we had had few datapoints to inform the delay distribution. 
+We may have especially wanted to do that if we had had few datapoints to inform the delay distribution.
 Fitting with a particular distribution can help smooth out the empirical frequencies in this case.
-When doing so, one needs to be mindful of zero values, as not all distribution types allow for zeroes.TODO add code (when extracting to other vignette).
+When doing so, one needs to be mindful of zero values, as not all distribution types allow for zeroes. TODO add code on how to do that(when extracting to other vignette).
 
-In order to perform the Re estimation, we also need an estimate of the serial interval, the time between two successive cases in a transmission chain. We draw this estimate from the academic litterature TODO add ref
+In order to perform the Re estimation, we also need an estimate of the serial interval, the time between two successive cases in a transmission chain.
+We draw this estimate from the academic litterature TODO add ref
 ```{r}
 # Serial interval (for Re estimation) in days
 mean_serial_interval <- 4.8
@@ -113,7 +116,7 @@ HK_first_estimates <- get_block_bootstrapped_estimate(
   incidence_data = HK_incidence_data$case_incidence, 
   N_bootstrap_replicates = 20, # only 20 replicates to keep execution fast
   delay_incubation = distribution_incubation, 
-  delay_onset_to_report = onset_to_confirmation_delay,
+  delay_onset_to_report = delay_onset_to_report,
   estimation_window = 3, # 3-day sliding window for the Re estimation
   mean_serial_interval = mean_serial_interval,
   std_serial_interval = std_serial_interval,
@@ -129,46 +132,122 @@ Let us plot these estimates with their confidence interval.
 library(ggplot2)
 ggplot(HK_first_estimates, aes(x = date, y = Re_estimate)) +
   geom_line(lwd=  1.1) +
-  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.15, colour = NA) +
+  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.45, colour = NA) +
   scale_x_date(date_breaks = "1 month", 
                date_labels = '%b\n%Y') +
   ylab("Reproductive number") +
-  coord_cartesian(ylim = c(0, 3.7)) +
+  coord_cartesian(ylim = c(0, 5)) +
   xlab("") +
   theme_bw()
 ```
+TODO add note to explain that early estimates are unreliable and that EpiEstim would give "Estimating too early warning" if we printed out warnings. Thus early estimates need to be interpreted with caution.
+
 ##Analysis including incidence of symptom onset events
 We redo the analysis above but this time we feed additional information to *estimateR*.
-```{r}
-# Hong Kong incidence data
-tail(HK_incidence_data, n = 10)
-```
-```{r}
-HK_onset_estimates <- get_block_bootstrapped_estimate(
-  incidence_data = HK_incidence_data$onset_incidence, 
+TODO add text to explain what we're doing
+
+```{r message=FALSE, warning=FALSE}
+HK_combined_estimates <- get_bootstrapped_estimate_from_combined_observations(
+  partially_delayed_incidence = HK_incidence_data$onset_incidence,
+  fully_delayed_incidence = HK_incidence_data$report_incidence,
   N_bootstrap_replicates = 20, # only 20 replicates to keep execution fast
-  delay_incubation = distribution_incubation, 
+  delay_until_partial = distribution_incubation,
+  delay_from_partial_to_full = delay_onset_to_report,
+  partial_observation_requires_full_observation = TRUE,
   estimation_window = 3, # 3-day sliding window for the Re estimation
   mean_serial_interval = mean_serial_interval,
   std_serial_interval = std_serial_interval,
   ref_date = min(HK_incidence_data$date),
-  time_step = "day",
-  is_partially_reported_data = TRUE,
-  delay_distribution_final_report = onset_to_confirmation_delay
+  time_step = "day"
 )
 
-tail(HK_onset_estimates)
+tail(HK_combined_estimates)
 ```
+
 ```{r, fig.width=7, fig.height=4}
 library(ggplot2)
-ggplot(HK_onset_estimates, aes(x = date, y = Re_estimate)) +
+ggplot(HK_combined_estimates, aes(x = date, y = Re_estimate)) +
   geom_line(lwd=  1.1) +
-  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.15, colour = NA) +
+  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.45, colour = NA) +
   scale_x_date(date_breaks = "1 month", 
                date_labels = '%b\n%Y') +
   ylab("Reproductive number") +
-  coord_cartesian(ylim = c(0, 6)) +
+  coord_cartesian(ylim = c(0, 5)) +
   xlab("") +
   theme_bw()
 ```
-TODO figure out whether this jump is normal by taking things step by step.
+##Further analysis including variability-through-time of reporting delays
+TODO add explanation on what we are doing here.
+The calculations below take a couple of minutes to complete.
+```{r message=FALSE, warning=FALSE}
+HK_variable_delays_estimates <- get_bootstrapped_estimate_from_combined_observations(
+  partially_delayed_incidence = HK_incidence_data$onset_incidence,
+  fully_delayed_incidence = HK_incidence_data$report_incidence,
+  N_bootstrap_replicates = 1, # only 1 replicates to keep execution fast TODO change later when faster
+  delay_until_partial = distribution_incubation,
+  delay_from_partial_to_full = HK_delay_data,
+  partial_observation_requires_full_observation = TRUE,
+  estimation_window = 3, # 3-day sliding window for the Re estimation
+  mean_serial_interval = mean_serial_interval,
+  std_serial_interval = std_serial_interval,
+  ref_date = min(HK_incidence_data$date),
+  time_step = "day"
+)
+
+tail(HK_variable_delays_estimates)
+```
+
+```{r, fig.width=7, fig.height=4}
+library(ggplot2)
+ggplot(HK_variable_delays_estimates, aes(x = date, y = Re_estimate)) +
+  geom_line(lwd=  1.1) +
+  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.45, colour = NA) +
+  scale_x_date(date_breaks = "1 month", 
+               date_labels = '%b\n%Y') +
+  ylab("Reproductive number") +
+  coord_cartesian(ylim = c(0, 5)) +
+  xlab("") +
+  theme_bw()
+```
+##Summary
+TODO add text
+TODO explain why no difference when including delay data that varies through time (only few cases with no onset data (actually check that)
+```{r, fig.width=14, fig.height=4}
+HK_variable_delays_estimates <- HK_variable_delays_estimates %>% 
+  mutate(`Estimate type` = "All available data")
+
+HK_combined_estimates <- HK_combined_estimates %>% 
+  mutate(`Estimate type` = "Including symptom onset data")
+
+HK_first_estimates <- HK_first_estimates %>% 
+  mutate(`Estimate type` = "Case incidence only")
+
+HK_estimates <- bind_rows(list(HK_variable_delays_estimates,
+                               HK_combined_estimates,
+                               HK_first_estimates))
+
+delay_matrix <- get_matrix_from_empirical_delay_distr(HK_delay_data,
+                                                      n_report_time_steps = length(HK_incidence_data$report_incidence))
+
+library(ggplot2)
+library(viridis)
+
+color_scale <- viridis(6)
+
+# ggplot(HK_estimates, aes(x = date, y = Re_estimate)) +
+ggplot(filter(HK_estimates, `Estimate type` != "Case incidence only") , aes(x = date, y = Re_estimate)) +
+  geom_line(aes(colour = `Estimate type`), lwd=  1.1) +
+  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down, fill = `Estimate type`), alpha = 0.15, colour = NA) +
+  scale_x_date(date_breaks = "1 month", 
+               date_labels = '%b\n%Y') +
+  ylab("Reproductive number") +
+  # coord_cartesian(ylim = c(0, 5)) +
+  coord_cartesian(ylim = c(0, 2.5)) +
+  xlab("") +
+  theme_bw() +
+  theme(
+    legend.position="top"
+  ) + 
+  scale_colour_manual(values=color_scale[c(1,4,6)],
+                      aesthetics = c("fill", "color"))
+```
