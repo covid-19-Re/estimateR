@@ -385,8 +385,8 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
                                   list(deconvolution_method, "deconvolution_method"),
                                   list(estimation_method, "estimation_method"),
                                   #TODO figure out what we do for making sure the two traces are the same size in input.
-                                  list(delay_until_partial, "delay_object", .get_input_length(delay_until_partial)), # need to pass length of incidence data as well in order
-                                  list(delay_from_partial_to_full, "delay_object", .get_input_length(delay_from_partial_to_full)), # to validate when the delay is passed as a matrix
+                                  list(delay_until_partial, "delay_object", .get_input_length(partially_delayed_incidence)), # need to pass length of incidence data as well in order
+                                  list(delay_from_partial_to_full, "delay_object", .get_input_length(fully_delayed_incidence)), # to validate when the delay is passed as a matrix
                                   list(partial_observation_requires_full_observation, "boolean"),
                                   list(ref_date, "null_or_date"),
                                   list(time_step, "time_step"),
@@ -471,7 +471,7 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
 #'
 #' @return
 #' @export
-get_bootstrapped_estimate_from_combined_observations <- function(partially_delayed_incidence,
+get_bootstrapped_estimates_from_combined_observations <- function(partially_delayed_incidence,
                                                                  fully_delayed_incidence,
                                                                  smoothing_method = "LOESS",
                                                                  deconvolution_method = "Richardson-Lucy delay distribution",
@@ -490,22 +490,23 @@ get_bootstrapped_estimate_from_combined_observations <- function(partially_delay
 
   #TODO allow for 'partially_delayed_incidence' to be NULL,
   # (need to ensure all subsequent functions allow NULL or make if-else)
-
   # TODO turn get_block_bootstrapped_estimate into a wrapper around this function with partially_delayed_incidence=NULL
 
   dots_args <- .get_dots_as_list(...)
 
   index_col <- "idx"
 
-  #TODO first put the delays into vector/matrix format (TODO need to make util for that) (to speed things up in case empirical data)
+  # Precompute delay distribution vector or matrix to avoid repeating costly computations needlessly for each bootstrap sample
+  delay_distribution_until_partial <- .get_delay_distribution(delay_until_partial,
+                                                              n_report_time_steps = .get_input_length(partially_delayed_incidence))
+  delay_distribution_partial_to_full <- .get_delay_distribution(delay_from_partial_to_full,
+                                                                n_report_time_steps = .get_input_length(fully_delayed_incidence))
 
   if(partial_observation_requires_full_observation){
-    .are_valid_argument_values(list(list(delay_from_partial_to_full, "delay_object", .get_input_length(partially_delayed_incidence))))
-
     partially_delayed_incidence <- do.call(
       'correct_for_partially_observed_data',
       c(list(incidence_data = partially_delayed_incidence,
-             delay_distribution_final_report = delay_from_partial_to_full),
+             delay_distribution_final_report = delay_distribution_partial_to_full),
         .get_shared_args(correct_for_partially_observed_data, dots_args))
     )
   }
@@ -525,8 +526,8 @@ get_bootstrapped_estimate_from_combined_observations <- function(partially_delay
            smoothing_method = smoothing_method,
            deconvolution_method = deconvolution_method,
            estimation_method = estimation_method,
-           delay_until_partial = delay_until_partial,
-           delay_from_partial_to_full = delay_from_partial_to_full,
+           delay_until_partial = delay_distribution_until_partial,
+           delay_from_partial_to_full = delay_distribution_partial_to_full,
            partial_observation_requires_full_observation = FALSE,
            ref_date = NULL,
            output_Re_only = FALSE,
@@ -568,8 +569,8 @@ get_bootstrapped_estimate_from_combined_observations <- function(partially_delay
              smoothing_method = smoothing_method,
              deconvolution_method = deconvolution_method,
              estimation_method = estimation_method,
-             delay_until_partial = delay_until_partial,
-             delay_from_partial_to_full = delay_from_partial_to_full,
+             delay_until_partial = delay_distribution_until_partial,
+             delay_from_partial_to_full = delay_distribution_partial_to_full,
              partial_observation_requires_full_observation = FALSE,
              ref_date = NULL,
              output_Re_only = FALSE,

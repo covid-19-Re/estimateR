@@ -228,7 +228,48 @@ inner_addition <- function(input_a, input_b){
   return(.get_module_input(list(values = inner_a + inner_b, index_offset = inner_offset)))
 }
 
+#TODO doc
+#' Title
+#'
+#' @param input_a
+#' @param input_b
+#'
+#' @return
+#' @export
+left_addition <- function(input_a, input_b){
+  #TODO validate input
+  offset_a <- .get_offset(input_a)
+  offset_b <- .get_offset(input_b)
+
+  min_offset <- min(offset_a, offset_b)
+  padded_input_a <- leftpad_input(input_a, min_offset, padding_value = 0)
+  padded_input_b <- leftpad_input(input_b, min_offset, padding_value = 0)
+
+  length_a <- .get_input_length(padded_input_a)
+  length_b <- .get_input_length(padded_input_b)
+
+  length_addition <- min(length_a, length_b)
+
+  values_a <- .get_values(padded_input_a)[1:length_addition]
+  values_b <- .get_values(padded_input_b)[1:length_addition]
+
+  return(.get_module_input(list(values = values_a + values_b, index_offset = min_offset)))
+}
+
+#TODO doc
+leftpad_input <- function(input, new_offset, padding_value = 0){
+  #TODO validate input
+  if(new_offset >= .get_offset(input)) {
+    return(input)
+  } else {
+    padded_values <- c(rep(padding_value, length.out = .get_offset(input) - new_offset), .get_values(input))
+    return(list(values = padded_values, index_offset = new_offset))
+  }
+}
+
+#TODO test with matrix delay
 #TODO polish doc
+#TODO redoc
 #' Correct incidence data for yet-to-be-observed fraction of events
 #'
 #' Use this function to correct the tail of an incidence timeseries
@@ -258,6 +299,8 @@ inner_addition <- function(input_a, input_b){
 correct_for_partially_observed_data <- function( incidence_data,
                                                  delay_distribution_final_report,
                                                  cutoff_observation_probability = 0.1,
+                                                 ref_date = NULL,
+                                                 time_step = "day",
                                                  ...) {
 
 
@@ -270,29 +313,27 @@ correct_for_partially_observed_data <- function( incidence_data,
 
   dots_args <- .get_dots_as_list(...)
 
-  #TODO clear up the mess: decide what kind of input delay_distribution_final_report can be and handle every case allowed
-  #TODO must allow for empirical delay data
-  #TODO WIP - replace by utility function
-  if( .check_is_empirical_delay_data(delay_distribution_final_report) ){
-    delay_distribution_final_report <- do.call(
-      'get_matrix_from_empirical_delay_distr',
-      c(list(empirical_delays = delay_distribution_final_report,
-             n_report_time_steps = .get_input_length(incidence_data)),
-        .get_shared_args(list(get_matrix_from_empirical_delay_distr), dots_args))
-    )
+  delay_distribution_final_report <- do.call(
+    '.get_delay_distribution',
+    c(list(delay = delay_distribution_final_report,
+           n_report_time_steps = length(incidence_vector),
+           ref_date = ref_date,
+           time_step = time_step),
+      .get_shared_args(list(.get_delay_distribution,
+                            get_matrix_from_empirical_delay_distr,
+                            build_delay_distribution),
+                       dots_args))
+  )
 
-  } else {
-    #TODO this if-else is not correct. the 'else' case does not correct every possibility (matrix)
-    delay_distribution_final_report_vector <- .get_delay_distribution(delay_distribution_final_report)
-  }
-
-
-  #TODO build matrix beforehand (is not necessarily vector or matrix)
   if(NCOL(delay_distribution_final_report) == 1) {
-    delay_distribution_matrix_final_report <- .get_matrix_from_single_delay_distr(delay_distribution_final_report_vector,
+    # delay_distribution_final_report is a vector, we build a delay distr matrix from it
+    delay_distribution_matrix_final_report <- .get_matrix_from_single_delay_distr(delay_distribution_final_report,
                                                                                   N=length(incidence_vector))
   } else {
-    delay_distribution_matrix_final_report <- delay_distribution_final_report
+    # delay_distribution_final_report is a matrix, we truncate off the extra initial columns (required for R-L algo only)
+    initial_offset <- ncol(delay_distribution_final_report) - length(incidence_vector) + 1
+    delay_distribution_matrix_final_report <- delay_distribution_final_report[initial_offset:nrow(delay_distribution_final_report),
+                                                                              initial_offset:ncol(delay_distribution_final_report)]
   }
 
   Q_vector_observation_to_final_report <- apply(delay_distribution_matrix_final_report, MARGIN = 2, sum)
@@ -541,6 +582,9 @@ correct_for_partially_observed_data <- function( incidence_data,
   return(TRUE)
 }
 
+#TODO reconsider whether we need the incidence_data_length here.
+# Is it acceptable if dim(matrix) > incidence data length?
+# And is it needed to check whether ncol(delay_matrix) < incidence_data_length
 #' @description Utility function that checks if a given matrix is a valid delay distribution matrix.
 #' For this, the matrix needs to fulfill the following conditions:
 #' \itemize{

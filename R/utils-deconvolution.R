@@ -134,6 +134,8 @@
 #TODO test
 #TODO possibly allow for other ways to specifiy initial shift than median of all reports.
 #TODO allow for other distributions than gamma for fit, and also allow no fit.
+#TODO doc fact that if ref_date is not given then ref_date is earliest reported date.
+#TODO also doc emphasize fact that ref_date parameter is important here.
 #' Build matrix of delay distributions through time from empirical delay data.
 #'
 #' This function takes a record of delays between events and their observations

@@ -74,7 +74,7 @@ and centered around the mean of bootstrapped estimates and original estimates.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
     \item{\code{verbose}}{Boolean. Print verbose output?}
-    \item{\code{minimul_cumul_incidence}}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
+    \item{\code{minimum_cumul_incidence}}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
     \item{\code{estimation_window}}{Integer scalar. Number of data points over which to assume Re to be constant.}
     \item{\code{mean_serial_interval}}{Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
     \item{\code{std_serial_interval}}{Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}

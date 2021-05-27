@@ -5,7 +5,7 @@ test_that("estimate_Re yields consistent results on a toy example", {
 
   estimated_Re <- estimate_Re(incidence_data = incidence_data,
               estimation_method = "EpiEstim sliding window",
-              minimul_cumul_incidence = 0,
+              minimum_cumul_incidence = 0,
               estimation_window = 3,
               mean_serial_interval = 4.8,
               std_serial_interval  = 2.3,

@@ -18,6 +18,7 @@ test_that("smooth_deconvolve_estimate yields consistent results on a toy example
                                           estimation_window = 3,
                                           mean_serial_interval = 4.8,
                                           std_serial_interval  = 2.3,
+                                          minimum_cumul_incidence = 10,
                                           mean_Re_prior = 1,
                                           output_Re_only = FALSE,
                                           ref_date = as.Date("2020-02-04"),
@@ -56,6 +57,7 @@ test_that("smooth_deconvolve_estimate passes '...' arguments consistently", {
                                           estimation_window = 5,
                                           mean_serial_interval = 8,
                                           std_serial_interval  = 3,
+                                          minimum_cumul_incidence = 0,
                                           block_size = 3,
                                           degree = 1,
                                           mean_Re_prior = 2.5,
@@ -103,6 +105,7 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
                                                estimation_window = 3,
                                                mean_serial_interval = 4.8,
                                                std_serial_interval  = 2.3,
+                                               minimum_cumul_incidence = 10,
                                                mean_Re_prior = 1,
                                                ref_date = as.Date("2020-02-04"),
                                                time_step = "day")
@@ -144,6 +147,7 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
                                                delay_incubation = delay_incubation,
                                                delay_onset_to_report = delay_onset_to_report,
                                                estimation_window = 3,
+                                               minimum_cumul_incidence = 0,
                                                mean_serial_interval = 4.8,
                                                std_serial_interval  = 2.3,
                                                mean_Re_prior = 1)
@@ -199,6 +203,7 @@ test_that("get_block_bootstrapped_estimate passes '...' arguments to inner funct
                                                estimation_window = 5,
                                                mean_serial_interval = 4.8,
                                                std_serial_interval  = 2.3,
+                                               minimum_cumul_incidence = 0,
                                                block_size = 8,
                                                degree = 2,
                                                ref_date = as.Date("2020-02-04"),
@@ -294,6 +299,7 @@ test_that("estimate_from_combined_observations returns consistent results",{
                                       partial_observation_requires_full_observation = TRUE,
                                       ref_date = as.Date("2021-03-24"),
                                       time_step = "day",
+                                      minimum_cumul_incidence = 0,
                                       output_Re_only = FALSE,
                                       data_points_incl = 21,
                                       degree = 1)
@@ -336,7 +342,7 @@ test_that("get_bootstrapped_estimate_from_combined_observations returns consiste
   scale_onset_to_report <- 2.3
   delay_onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
 
-  results_estimation <- get_bootstrapped_estimate_from_combined_observations(partially_delayed_incidence = toy_onset_data,
+  results_estimation <- get_bootstrapped_estimates_from_combined_observations(partially_delayed_incidence = toy_onset_data,
                                                             fully_delayed_incidence = toy_case_confirmation_data,
                                                             smoothing_method = "LOESS",
                                                             deconvolution_method = "Richardson-Lucy delay distribution",
@@ -350,6 +356,7 @@ test_that("get_bootstrapped_estimate_from_combined_observations returns consiste
                                                             ref_date = as.Date("2021-03-24"),
                                                             time_step = "day",
                                                             output_Re_only = FALSE,
+                                                            minimum_cumul_incidence = 0,
                                                             data_points_incl = 21,
                                                             degree = 1)
 
@@ -402,7 +409,7 @@ test_that("get_bootstrapped_estimate_from_combined_observations can deal with em
   scale_incubation <- 1.2
   delay_incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
 
-  results_estimation <- get_bootstrapped_estimate_from_combined_observations(partially_delayed_incidence = toy_onset_data,
+  results_estimation <- get_bootstrapped_estimates_from_combined_observations(partially_delayed_incidence = toy_onset_data,
                                                                              fully_delayed_incidence = toy_case_confirmation_data,
                                                                              smoothing_method = "LOESS",
                                                                              deconvolution_method = "Richardson-Lucy delay distribution",
@@ -416,6 +423,7 @@ test_that("get_bootstrapped_estimate_from_combined_observations can deal with em
                                                                              ref_date = ref_date,
                                                                              time_step = "day",
                                                                              output_Re_only = FALSE,
+                                                                             minimum_cumul_incidence = 0,
                                                                              data_points_incl = 21,
                                                                              degree = 1)
 

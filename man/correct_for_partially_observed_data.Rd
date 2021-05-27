@@ -8,6 +8,8 @@ correct_for_partially_observed_data(
   incidence_data,
   delay_distribution_final_report,
   cutoff_observation_probability = 0.1,
+  ref_date = NULL,
+  time_step = "day",
   ...
 )
 }

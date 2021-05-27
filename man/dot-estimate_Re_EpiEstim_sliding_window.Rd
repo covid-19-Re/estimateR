@@ -6,7 +6,7 @@
 \usage{
 .estimate_Re_EpiEstim_sliding_window(
   incidence_input,
-  minimul_cumul_incidence = 0,
+  minimum_cumul_incidence = 10,
   estimation_window = 3,
   mean_serial_interval = 4.8,
   std_serial_interval = 2.3,
@@ -16,7 +16,7 @@
 \arguments{
 \item{incidence_input}{module input object.}
 
-\item{minimul_cumul_incidence}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
+\item{minimum_cumul_incidence}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
 
 \item{estimation_window}{Integer scalar. Number of data points over which to assume Re to be constant.}
 

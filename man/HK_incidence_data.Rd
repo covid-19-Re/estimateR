@@ -5,7 +5,7 @@
 \alias{HK_incidence_data}
 \title{Incidence data for COVID-19 in Hong Kong}
 \format{
-A data frame with 452 rows and 2 variables:
+A data frame with 196 rows and 2 variables:
 \describe{
 \item{report_date}{date of case reporting in YYYY-mm-dd format}
 \item{incidence}{number of cases reported on this date}
@@ -18,7 +18,7 @@ A data frame with 452 rows and 2 variables:
 HK_incidence_data
 }
 \description{
-A dataset containing aggregated incidence data for Hong Kong from January 2020 to April 2021.
+A dataset containing aggregated incidence data for Hong Kong from January 2020 to July 2021.
 This data was  put together by aggregating the publicly-available linelist data for SARS-CoV-2 in Hong Kong.
 The linelist data is published by the Centre for Health Protection in Hong Kong.
 }

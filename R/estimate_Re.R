@@ -21,8 +21,8 @@ estimate_Re <- function( incidence_data,
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
                                   list(estimation_method, "estimation_method"),
                                   list(simplify_output, "boolean")))
-  
-  
+
+
   dots_args <- .get_dots_as_list(...)
   input <- .get_module_input(incidence_data)
 
@@ -51,7 +51,7 @@ estimate_Re <- function( incidence_data,
 #' when assuming that is Re is constant over e.g. (T-3, T-2, T-1, T),
 #' for a sliding window of 4 time steps.
 #'
-#' @param minimul_cumul_incidence Numeric scalar. Minimum number of cumulated infections before starting the Re estimation
+#' @param minimum_cumul_incidence Numeric scalar. Minimum number of cumulated infections before starting the Re estimation
 #' @param estimation_window Integer scalar. Number of data points over which to assume Re to be constant.
 #' @param mean_serial_interval Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}
 #' @param std_serial_interval Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}
@@ -60,26 +60,26 @@ estimate_Re <- function( incidence_data,
 #'
 #' @return module output object. mean of Re estimates
 .estimate_Re_EpiEstim_sliding_window <- function(incidence_input,
-                        minimul_cumul_incidence = 0,
+                        minimum_cumul_incidence = 10,
                         estimation_window = 3,
                         mean_serial_interval = 4.8,
                         std_serial_interval  = 2.3,
                         mean_Re_prior = 1) {
 
   .are_valid_argument_values(list(list(incidence_input, "module_input"),
-                                  list(minimul_cumul_incidence, "non_negative_number"),
+                                  list(minimum_cumul_incidence, "non_negative_number"),
                                   list(estimation_window, "number"),
                                   list(mean_serial_interval, "number"),
                                   list(std_serial_interval, "non_negative_number"),
                                   list(mean_Re_prior, "number")))
-  
+
   incidence_vector <- .get_values(incidence_input)
 
-  # Ensure that incidence_vector has no NA or negative values
-  #TODO make these checks in the get_module_input function
-  incidence_vector <- dplyr::if_else(is.na(incidence_vector) | incidence_vector < 0, 0, incidence_vector)
+  if(sum(incidence_vector) < minimum_cumul_incidence) {
+    stop("minimum_cumul_incidence parameter is set higher than total cumulative incidence.")
+  }
 
-  offset <- which(cumsum(incidence_vector) >= minimul_cumul_incidence)[1]
+  offset <- which(cumsum(incidence_vector) >= minimum_cumul_incidence)[1]
   # offset needs to be at least two for EpiEstim
   offset <- max(2, offset)
 

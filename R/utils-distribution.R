@@ -107,7 +107,7 @@
 }
 
 #TODO add details on the discretization
-#' Build a discretized probability distribution vector from a delay distribution
+#' Build a discretized probability distribution vector from a delay distribution list
 #'
 #' @inheritParams distribution
 #' @inheritParams .get_discretized_distribution
@@ -136,28 +136,66 @@ build_delay_distribution <- function(distribution,
   return(distribution_vector)
 }
 
-#' Return probability distribution vector
+#TODO consider exporting (useful for piping)
+#TODO show in vignette why and how to pre-compute the delay distribution
+#TODO redoc
+#TODO test (with incorrect input and correct input)
+#' Return probability distribution vector or matrix
 #'
-#' Can take a \code{distribution} list or a probability distribution vector.
-#' In the first case, this function builds and return the vector of discretized probability distribution.
-#' In the second case, it checks that \code{delay} is a valid discretized probability distribution and returns it.
+#' Can take a \code{distribution} list, a probability distribution vector,
+#' a probability distribution matrix or empirical delay data as input.
+#'
+#' If \code{delay} is a \code{distribution} list,
+#' this function builds and return the vector of discretized probability distribution.
+#' If it is a vector, it checks that \code{delay}
+#' is a valid discretized probability distribution and returns it.
 #' See \code{\link{build_delay_distribution}} for details on the \code{distribution} list format.
+#' TODO add details on matrix and empirical data cases and the acceptable formats.
 #'
-#' @param delay list or vector. Delay distribution to transform or validate
+#' @param delay list, vector, matrix or dataframe.
+#' Delay distribution to transform or validate
 #' into a vector of discretized probability distribution.
 #' @inheritDotParams build_delay_distribution -distribution
 #'
-#' @return vector of discretized probability distribution.
+#' @return vector or matrix of discretized probability distribution.
 .get_delay_distribution <- function(delay,
+                                    n_report_time_steps = NULL,
+                                    ref_date = NULL,
+                                    time_step = "day",
                                     ...){
-  if( .is_numeric_vector(delay) ) {
-    .check_is_probability_distr_vector(delay)
-    return(delay)
+
+  #TODO validate other arguments
+  # We put '1' here, because we do not care here about checking the dimension of the matrix.
+  .are_valid_argument_values(list(list(delay, "delay_object", 1)))
+
+  dots_args <- .get_dots_as_list(...)
+
+  if( is.data.frame(delay) ){
+    if(is.null(n_report_time_steps) || n_report_time_steps == 0) {
+      stop("Empirical delay data input but 'n_report_time_steps' parameter was not set or set to zero.")
+    }
+
+    delay_distribution <- do.call(
+      'get_matrix_from_empirical_delay_distr',
+      c(list(empirical_delays = delay,
+             n_report_time_steps = n_report_time_steps,
+             ref_date = ref_date,
+             time_step = time_step),
+        .get_shared_args(list(get_matrix_from_empirical_delay_distr), dots_args))
+    )
   } else if( is.list(delay) ) {
-    return(build_delay_distribution(delay, ...))
+    delay_distribution <- do.call(
+      'build_delay_distribution',
+      c(list(distribution = delay),
+        .get_shared_args(list(build_delay_distribution), dots_args))
+    )
+  } else if(is.matrix(delay) || .is_numeric_vector(delay)) {
+    delay_distribution <- delay
   } else {
-    stop("Input must either be a vector representing the discretized delay distribution or a distribution object.")
+    stop("Unknown delay type.")
   }
+
+  return(delay_distribution)
 }
 
 
