@@ -348,6 +348,7 @@ get_infections_from_incidence <- function(incidence_data,
 
 
 #TODO refactor arguments: we are using delay_from_partial_to_full and delay_distribution_final_report to refer to the same thing
+#TODO allow to pass a thrid argument for delays: the convolution of all delays (to speed up bootstrapping)
 #TODO doc
 #' Title
 #'
