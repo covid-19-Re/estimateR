@@ -29,6 +29,9 @@ summarise_uncertainty <- function(bootstrapped_estimates,
                                   index_col = "idx",
                                   ...){
 
+  #TODO validate input
+  #TODO validate the bootstrapped_estimates format
+
   if(Re_estimate_col %!in% names(bootstrapped_estimates)) {
     stop(paste0("Missing ", Re_estimate_col, " column in 'bootstrapped estimates' argument,
                 or 'Re_estimate_col' was not set to the corresponding column name."))

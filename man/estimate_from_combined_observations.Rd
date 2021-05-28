@@ -2,7 +2,7 @@
 % Please edit documentation in R/pipe.R
 \name{estimate_from_combined_observations}
 \alias{estimate_from_combined_observations}
-\title{Title}
+\title{Estimate Re from delayed observations of infection events.}
 \usage{
 estimate_from_combined_observations(
   partially_delayed_incidence,
@@ -20,11 +20,77 @@ estimate_from_combined_observations(
 )
 }
 \arguments{
-\item{...}{}
+\item{partially_delayed_incidence}{TODO add details}
+
+\item{fully_delayed_incidence}{TODO add details}
+
+\item{smoothing_method}{string. Method used to smooth the original incidence data.
+Available options are:
+\itemize{
+\item{'LOESS', implemented in \code{\link{.smooth_LOESS}}}
+}}
+
+\item{deconvolution_method}{string. Method used to infer timings of infection
+events from the original incidence data (aka deconvolution step).
+Available options are:
+\itemize{
+\item{'Richardson-Lucy delay distribution',
+implemented in \code{\link{.deconvolve_incidence_Richardson_Lucy}}}
+}}
+
+\item{estimation_method}{string. Method used to estimate reproductive number
+values through time from the reconstructed infection timings.
+Available options are:
+\itemize{
+\item{'EpiEstim sliding window',
+implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
+}}
+
+\item{delay_until_partial}{TODO add details}
+
+\item{delay_from_partial_to_full}{TODO add details}
+
+\item{partial_observation_requires_full_observation}{boolean TODO add details}
+
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
+
+\item{time_step}{string. Time between two consecutive incidence datapoints.
+"day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+
+\item{output_Re_only}{boolean. Should the output only contain Re estimates?
+(as opposed to containing results for each intermediate step)}
+
+\item{...}{
+  Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}, \code{\link[=merge_outputs]{merge_outputs}}, \code{\link[=correct_for_partially_observed_data]{correct_for_partially_observed_data}}
+  \describe{
+    \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.}
+    \item{\code{degree}}{integer. LOESS degree.}
+    \item{\code{delay_distribution}}{numeric square matrix or vector. TODO refactor to estimateR}
+    \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
+    \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
+    \item{\code{verbose}}{Boolean. Print verbose output?}
+    \item{\code{minimum_cumul_incidence}}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
+    \item{\code{estimation_window}}{Integer scalar. Number of data points over which to assume Re to be constant.}
+    \item{\code{mean_serial_interval}}{Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{std_serial_interval}}{Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{mean_Re_prior}}{Numeric positive scalar. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{cutoff_observation_probability}}{value between 0 and 1.
+Only datapoints for timesteps that have a probability to be observed higher
+than \code{cutoff_observation_probability} are kept.
+The few datapoints with a lower probability to be observed are trimmed off
+the tail of the timeseries.}
+  }}
 }
 \value{
 
 }
 \description{
-Title
+This function allows for combining two different incidence timeseries.
+The two timeseries can represent events that are differently delayed from the original infection events.
+The two data sources must not have any overlap in the events recorded.
+The function can account for the one of the two types of events to require
+the future observation of the other type of event.
+For instance, one type can be events of symptom onset, and the other be case confirmation.
+Typically, the recording of a symptom onset event will require a future case confirmation.
+If so, the \code{partial_observation_requires_full_observation} flag should be set to \code{TRUE}.
 }

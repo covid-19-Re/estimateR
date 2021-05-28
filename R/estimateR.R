@@ -17,6 +17,8 @@ NULL
 #' Module structure characteristics
 #'
 #' @param incidence_data numeric vector. Incidence data (TODO improve definition)
+#' @param partially_delayed_incidence TODO add details
+#' @param fully_delayed_incidence TODO add details
 #' @param simplify_output boolean. Return a numeric vector instead of module
 #'  output object if output offset is zero? TODO to be described better.
 #'
@@ -40,14 +42,27 @@ NULL
 #'
 #' @param output_Re_only boolean. Should the output only contain Re estimates?
 #' (as opposed to containing results for each intermediate step)
+#' @param output_infection_incidence_only boolean. TODO add details
 #'
 #' @name pipe_params
+NULL
+
+#' Bootstrapping parameters
+#'
+#' @param N_bootstrap_replicates integer. Number of bootstrap samples.
+#'
+#' @name bootstrap_params
 NULL
 
 #' High-level delay parameters
 #'
 #' @param delay_incubation TODO add details
 #' @param delay_onset_to_report TODO add details
+#' @param delay_distribution_final_report TODO add details
+#' @param is_partially_reported_data boolean TODO add details
+#' @param delay_until_partial TODO add details
+#' @param delay_from_partial_to_full TODO add details
+#' @param partial_observation_requires_full_observation boolean TODO add details
 #'
 #' @name delay_high
 NULL

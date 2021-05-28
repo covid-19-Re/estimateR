@@ -2,7 +2,7 @@
 % Please edit documentation in R/pipe.R
 \name{get_infections_from_incidence}
 \alias{get_infections_from_incidence}
-\title{Get timeseries of infection events from incidence data of delayed observations}
+\title{Infer timeseries of infection events from incidence data of delayed observations}
 \usage{
 get_infections_from_incidence(
   incidence_data,
@@ -13,16 +13,52 @@ get_infections_from_incidence(
   is_partially_reported_data = FALSE,
   delay_distribution_final_report = NULL,
   output_infection_incidence_only = TRUE,
+  ref_date = NULL,
+  time_step = "day",
   ...
 )
 }
 \arguments{
-\item{...}{
-  Arguments passed on to \code{\link[=merge_outputs]{merge_outputs}}, \code{\link[=correct_for_partially_observed_data]{correct_for_partially_observed_data}}
-  \describe{
-    \item{\code{ref_date}}{Date. Optional. Date of the first data entry in \code{incidence_data}}
-    \item{\code{time_step}}{string. Time between two consecutive incidence datapoints.
+\item{incidence_data}{numeric vector. Incidence data (TODO improve definition)}
+
+\item{smoothing_method}{string. Method used to smooth the original incidence data.
+Available options are:
+\itemize{
+\item{'LOESS', implemented in \code{\link{.smooth_LOESS}}}
+}}
+
+\item{deconvolution_method}{string. Method used to infer timings of infection
+events from the original incidence data (aka deconvolution step).
+Available options are:
+\itemize{
+\item{'Richardson-Lucy delay distribution',
+implemented in \code{\link{.deconvolve_incidence_Richardson_Lucy}}}
+}}
+
+\item{delay_incubation}{TODO add details}
+
+\item{delay_onset_to_report}{TODO add details}
+
+\item{is_partially_reported_data}{boolean TODO add details}
+
+\item{delay_distribution_final_report}{TODO add details}
+
+\item{output_infection_incidence_only}{boolean. TODO add details}
+
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
+
+\item{time_step}{string. Time between two consecutive incidence datapoints.
 "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+
+\item{...}{
+  Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=merge_outputs]{merge_outputs}}, \code{\link[=correct_for_partially_observed_data]{correct_for_partially_observed_data}}
+  \describe{
+    \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.}
+    \item{\code{degree}}{integer. LOESS degree.}
+    \item{\code{delay_distribution}}{numeric square matrix or vector. TODO refactor to estimateR}
+    \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
+    \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
+    \item{\code{verbose}}{Boolean. Print verbose output?}
     \item{\code{cutoff_observation_probability}}{value between 0 and 1.
 Only datapoints for timesteps that have a probability to be observed higher
 than \code{cutoff_observation_probability} are kept.
@@ -34,5 +70,11 @@ the tail of the timeseries.}
 
 }
 \description{
-Get timeseries of infection events from incidence data of delayed observations
+This function takes as input incidence data of delayed observations of infections events,
+as well as the probability distribution(s) of the delay(s).
+It returns an inferred incidence of infection events.
+This function can account for the observations being dependent on future delayed observations.
+For instance, if the incidence data represents symptom onset events, usually these events
+are dependent on a secondary delayed observation: a case confirmation typically, or
+a hospital admission or any other type of event,
 }

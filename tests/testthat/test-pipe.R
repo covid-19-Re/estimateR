@@ -1,4 +1,4 @@
-test_that("smooth_deconvolve_estimate yields consistent results on a toy example", {
+test_that("estimate_Re_from_noisy_delayed_incidence yields consistent results on a toy example", {
 
   toy_incidence_data <- c(6,8,10,13,17,22,31,41,52,65,80,97,116,
                           138,162,189,218,245,268,292,311,322,330,
@@ -10,7 +10,7 @@ test_that("smooth_deconvolve_estimate yields consistent results on a toy example
                           0.019,0.01,0.005,0.003,
                           0.001,0.001)
 
-  estimates <- smooth_deconvolve_estimate(incidence_data = toy_incidence_data,
+  estimates <- estimate_Re_from_noisy_delayed_incidence(incidence_data = toy_incidence_data,
                                           smoothing_method = "LOESS",
                                           deconvolution_method = "Richardson-Lucy delay distribution",
                                           estimation_method = "EpiEstim sliding window",
@@ -35,7 +35,7 @@ test_that("smooth_deconvolve_estimate yields consistent results on a toy example
   expect_equal(estimates$date, reference_dates)
 })
 
-test_that("smooth_deconvolve_estimate passes '...' arguments consistently", {
+test_that("estimate_Re_from_noisy_delayed_incidence passes '...' arguments consistently", {
 
 
 
@@ -49,7 +49,7 @@ test_that("smooth_deconvolve_estimate passes '...' arguments consistently", {
                           0.019,0.01,0.005,0.003,
                           0.001,0.001)
 
-  estimates <- smooth_deconvolve_estimate(incidence_data = toy_incidence_data,
+  estimates <- estimate_Re_from_noisy_delayed_incidence(incidence_data = toy_incidence_data,
                                           smoothing_method = "LOESS",
                                           deconvolution_method = "Richardson-Lucy delay distribution",
                                           estimation_method = "EpiEstim sliding window",

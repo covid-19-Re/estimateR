@@ -85,7 +85,7 @@ and centered around the mean of bootstrapped estimates and original estimates.}
 tibble. Re estimations along with results from each pipeline step. TODO add details
 }
 \description{
-An estimation of the effective reproductive number through time is made with \code{smooth_deconvolve_estimate}
+An estimation of the effective reproductive number through time is made
 on the original incidence data.
 Then, the same estimation is performed on a number of bootstrap samples built from the original incidence data.
 The estimate on the original data is output along with confidence interval boundaries

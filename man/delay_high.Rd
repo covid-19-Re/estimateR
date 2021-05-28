@@ -7,6 +7,16 @@
 \item{delay_incubation}{TODO add details}
 
 \item{delay_onset_to_report}{TODO add details}
+
+\item{delay_distribution_final_report}{TODO add details}
+
+\item{is_partially_reported_data}{boolean TODO add details}
+
+\item{delay_until_partial}{TODO add details}
+
+\item{delay_from_partial_to_full}{TODO add details}
+
+\item{partial_observation_requires_full_observation}{boolean TODO add details}
 }
 \description{
 High-level delay parameters

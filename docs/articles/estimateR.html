@@ -87,9 +87,9 @@
     
 <div id="draft-vignette-demonstrating-a-simple-use-case-of-estimater" class="section level1">
 <h1 class="hasAnchor">
-<a href="#draft-vignette-demonstrating-a-simple-use-case-of-estimater" class="anchor"></a>Draft vignette demonstrating a simple use case of <em>estimateR</em>
+<a href="#draft-vignette-demonstrating-a-simple-use-case-of-estimater" class="anchor"></a>Draft vignette demonstrating a simple use case of <strong>estimateR</strong>
 </h1>
-<p>This vignette’s purpose is to demonstrate how to use the <em>estimateR</em> package in a basic use case. The <em>estimateR</em> package provides tools to estimate the effective reproductive number through time from delayed and indirect observations of infection events.</p>
+<p>This vignette’s purpose is to demonstrate how to use the <strong>estimateR</strong> package in a basic use case. The <strong>estimateR</strong> package provides tools to estimate the effective reproductive number through time from delayed and indirect observations of infection events.</p>
 <p>Let us start with a toy dataset. The incidence data represents daily counts of case confirmations. This incidence data counts the number of people getting tested positive for a particular infectious disease X on day <em>T</em>.</p>
 <p>TODO replace with example data in the package</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -114,7 +114,7 @@
 <p>We are interested in the effective reproductive number through time <em>Re</em>. To estimate this number, we need the time series (in the conceptual sense, not the data type sense) of infection events over the period of interest. But all we have at the moment is a smoothed version of the time series of confirmed case reports. There are two major differences between this time series and the time series of infection events. First, in almost all real-life cases, only a fraction of infected individuals will get tested, and even among individuals tested some false-negative results will arise. For simplicity, we ignore false-positive numbers here. This difference does not cause direct issues for estimating <em>Re</em>. Indeed, as long as the fraction of tested individuals among the pool of newly-infected individuals remains constant then <em>Re</em> estimates are not biased.</p>
 <p>Second, a case-confirmation report is not a direct observation of an infection event. This report will always come with a delay. For simplicity, we assume here that individuals are only tested after they start showing symptoms for the pathogen of interest. The delay between infection and observation can thus be divided into two distinct time periods: the incubation period and the delay from symptom onset to case confirmation. The exact number of days this delay represents will vary from individual to individual, we capture this variability by assuming the delay observed in any particular individual is the result of a random draw from a probability distribution representing the population variability in the reporting delays.</p>
 <p>In mathematical terms, the observed time series is the result of the convolution of the time series of infections and the distribution of delays. To infer the time series of infection events, we perform the inverse transformation: we deconvolve the delay distribution from the time series of observations. We use the Richardson-Lucy algorithm to perform this deconvolution step.</p>
-<p>In <em>estimateR</em>, we approximate both delay distributions -incubation period and delay from onset of symptoms to case observation- by gamma distributions.</p>
+<p>In <strong>estimateR</strong>, we approximate both delay distributions -incubation period and delay from onset of symptoms to case observation- by gamma distributions.</p>
 </div>
 <div id="inference-of-infection-events" class="section level2">
 <h2 class="hasAnchor">
@@ -202,7 +202,7 @@
 <div id="simplification-using-a-wrapper-function" class="section level2">
 <h2 class="hasAnchor">
 <a href="#simplification-using-a-wrapper-function" class="anchor"></a>Simplification using a wrapper function</h2>
-<p>The process presented above can be performed in a single function <code>smooth_deconvolve_estimate</code>. We rewrite all the code blocks above using <code>smooth_deconvolve_estimate</code> this time.</p>
+<p>The process presented above can be performed in a single function <code>estimate_Re_from_noisy_delayed_incidence</code>. We rewrite all the code blocks above using <code>estimate_Re_from_noisy_delayed_incidence</code> this time.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">date_first_data_point</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"2020-02-24"</span><span class="op">)</span>
 <span class="va">toy_incidence_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>
@@ -227,7 +227,7 @@
 
 <span class="va">estimation_window</span> <span class="op">&lt;-</span> <span class="fl">3</span>
 
-<span class="va">toy_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/smooth_deconvolve_estimate.html">smooth_deconvolve_estimate</a></span><span class="op">(</span>
+<span class="va">toy_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_Re_from_noisy_delayed_incidence.html">estimate_Re_from_noisy_delayed_incidence</a></span><span class="op">(</span>
   <span class="va">toy_incidence_data</span>,
   smoothing_method <span class="op">=</span> <span class="st">"LOESS"</span>,
   deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
@@ -285,12 +285,12 @@
 <span class="co">#&gt; # A tibble: 6 x 4</span>
 <span class="co">#&gt;   date       Re_estimate CI_down CI_up</span>
 <span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 2020-02-20        4.45    4.32  4.59</span>
-<span class="co">#&gt; 2 2020-02-21        3.17    3.06  3.29</span>
-<span class="co">#&gt; 3 2020-02-22        2.66    2.55  2.77</span>
-<span class="co">#&gt; 4 2020-02-23        2.44    2.31  2.57</span>
-<span class="co">#&gt; 5 2020-02-24        2.34    2.17  2.51</span>
-<span class="co">#&gt; 6 2020-02-25        2.27    2.07  2.48</span></code></pre></div>
+<span class="co">#&gt; 1 2020-02-20        4.45    4.28  4.63</span>
+<span class="co">#&gt; 2 2020-02-21        3.17    3.02  3.33</span>
+<span class="co">#&gt; 3 2020-02-22        2.66    2.53  2.80</span>
+<span class="co">#&gt; 4 2020-02-23        2.44    2.31  2.58</span>
+<span class="co">#&gt; 5 2020-02-24        2.34    2.19  2.48</span>
+<span class="co">#&gt; 6 2020-02-25        2.27    2.12  2.43</span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">estimates</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">Re_estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>

@@ -10,16 +10,16 @@ knitr::opts_chunk$set(
 )
 ```
 
-# *estimateR* package
+# **estimateR** package
 
-The *estimateR* package provides tools to estimate the effective reproductive number through time from delayed and indirect observations of infection events.
+The **estimateR** package provides tools to estimate the effective reproductive number through time from delayed and indirect observations of infection events.
 This package is under development. 
 The README file is still at a super rough stage.
 
 
 ## Quick toy example
 
-We demonstrate below a basic use of the *estimateR* package. Check out the estimateR vignette for more details.
+We demonstrate below a basic use of the **estimateR** package. Check out the *estimateR* vignette for more details.
 
 We start with arbitrary incidence data representing daily counts of case confirmations for a disease of interest.
 This incidence data counts the number of people getting tested positive for a particular infectious disease X on day *T*.
@@ -59,7 +59,7 @@ estimation_window = 3
 
 ## End of user input
 
-toy_estimates <- smooth_deconvolve_estimate(toy_incidence_data,
+toy_estimates <- estimate_Re_from_noisy_delayed_incidence(toy_incidence_data,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",

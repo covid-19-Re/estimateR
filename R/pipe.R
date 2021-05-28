@@ -1,6 +1,7 @@
+#TODO polish doc (e.g. '...' args)
 #' Estimate Re from incidence and estimate uncertainty with block-bootstrapping
 #'
-#' An estimation of the effective reproductive number through time is made with \code{smooth_deconvolve_estimate}
+#' An estimation of the effective reproductive number through time is made
 #' on the original incidence data.
 #' Then, the same estimation is performed on a number of bootstrap samples built from the original incidence data.
 #' The estimate on the original data is output along with confidence interval boundaries
@@ -15,8 +16,8 @@
 #' but it must in any case correspond to the delay between infection and case observation.
 #'
 #'
-#' @param N_bootstrap_replicates integer. Number of bootstrap samples.
 #' @inheritParams pipe_params
+#' @inheritParams bootstrap_params
 #' @inheritParams module_methods
 #' @inheritParams module_structure
 #' @inheritParams universal_params
@@ -76,7 +77,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
                                                            dots_args)
 
   original_result <- do.call(
-    'smooth_deconvolve_estimate',
+    'estimate_Re_from_noisy_delayed_incidence',
     c(list(incidence_data = incidence_data,
            smoothing_method = smoothing_method,
            deconvolution_method = deconvolution_method,
@@ -108,7 +109,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
     )
 
     bootstrapping_result <- do.call(
-      'smooth_deconvolve_estimate',
+      'estimate_Re_from_noisy_delayed_incidence',
       c(list(incidence_data = bootstrapped_incidence,
              smoothing_method = smoothing_method,
              deconvolution_method = deconvolution_method,
@@ -156,8 +157,6 @@ get_block_bootstrapped_estimate <- function(incidence_data,
 }
 
 
-#TODO rename function to remove deconvolution word
-#TODO replace internals with call to get_infections_from_incidence
 #' Estimate Re from incidence data
 #'
 #' This pipe function combines a smoothing step using (to remove noise from the original observations),
@@ -180,7 +179,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
 #'
 #' @return effective reproductive number estimates through time TODO add details
 #' @export
-smooth_deconvolve_estimate <- function(incidence_data,
+estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
                                        smoothing_method = "LOESS",
                                        deconvolution_method = "Richardson-Lucy delay distribution",
                                        estimation_method = "EpiEstim sliding window",
@@ -202,6 +201,8 @@ smooth_deconvolve_estimate <- function(incidence_data,
                                   list(output_Re_only, "boolean")))
 
   dots_args <- .get_dots_as_list(...)
+
+  get_infections_from_incidence
 
   smoothed_incidence <- do.call(
     'smooth_incidence',
@@ -249,20 +250,27 @@ smooth_deconvolve_estimate <- function(incidence_data,
   }
 }
 
-#TODO doc
+#TODO polish doc
 #TODO test
 #TODO test output when output_infection_incidence_only = FALSE
 #TODO rework on way delays are input (delay_incubation and delay_onset_to_report args)
-#' Get timeseries of infection events from incidence data of delayed observations
+#' Infer timeseries of infection events from incidence data of delayed observations
 #'
-#' @param incidence_data
-#' @param smoothing_method
-#' @param deconvolution_method
-#' @param delay_incubation
-#' @param delay_onset_to_report
-#' @param is_partially_reported_data
-#' @param delay_distribution_final_report
-#' @param output_infection_incidence_only
+#' This function takes as input incidence data of delayed observations of infections events,
+#' as well as the probability distribution(s) of the delay(s).
+#' It returns an inferred incidence of infection events.
+#' This function can account for the observations being dependent on future delayed observations.
+#' For instance, if the incidence data represents symptom onset events, usually these events
+#' are dependent on a secondary delayed observation: a case confirmation typically, or
+#' a hospital admission or any other type of event,
+#'
+#' @inheritParams module_structure
+#' @inheritParams module_methods
+#' @inheritParams pipe_params
+#' @inheritParams delay_high
+#' @inheritParams dating
+#' @inheritDotParams .smooth_LOESS -incidence_input
+#' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #' @inheritDotParams merge_outputs -output_list -include_index -index_col
 #' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_distribution_final_report
 #'
@@ -276,6 +284,8 @@ get_infections_from_incidence <- function(incidence_data,
                                           is_partially_reported_data = FALSE,
                                           delay_distribution_final_report = NULL,
                                           output_infection_incidence_only = TRUE,
+                                          ref_date = NULL,
+                                          time_step = "day",
                                           ...){
 
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
@@ -296,7 +306,9 @@ get_infections_from_incidence <- function(incidence_data,
     incidence_data <- do.call(
       'correct_for_partially_observed_data',
       c(list(incidence_data = incidence_data,
-             delay_distribution_final_report = delay_distribution_final_report),
+             delay_distribution_final_report = delay_distribution_final_report,
+             ref_date = NULL,
+             time_step = "day"),
         .get_shared_args(correct_for_partially_observed_data, dots_args))
     )
   }
@@ -338,7 +350,9 @@ get_infections_from_incidence <- function(incidence_data,
 
     merged_results <- do.call(
       'merge_outputs',
-      c(list(output_list = output_list),
+      c(list(output_list = output_list,
+             ref_date = ref_date,
+             time_step = time_step),
         .get_shared_args(merge_outputs, dots_args))
     )
 
@@ -348,22 +362,31 @@ get_infections_from_incidence <- function(incidence_data,
 
 
 #TODO refactor arguments: we are using delay_from_partial_to_full and delay_distribution_final_report to refer to the same thing
-#TODO allow to pass a thrid argument for delays: the convolution of all delays (to speed up bootstrapping)
-#TODO doc
-#' Title
+#TODO allow to pass a third argument for delays: the convolution of all delays (to speed up bootstrapping)
+#TODO polish doc
+#TODO test
+#' Estimate Re from delayed observations of infection events.
 #'
-#' @param partially_delayed_incidence
-#' @param fully_delayed_incidence
-#' @param smoothing_method
-#' @param deconvolution_method
-#' @param estimation_method
-#' @param delay_until_partial
-#' @param delay_from_partial_to_full
-#' @param partial_observation_requires_full_observation
-#' @param ref_date
-#' @param time_step
-#' @param output_Re_only
-#' @param ...
+#' This function allows for combining two different incidence timeseries.
+#' The two timeseries can represent events that are differently delayed from the original infection events.
+#' The two data sources must not have any overlap in the events recorded.
+#' The function can account for the one of the two types of events to require
+#' the future observation of the other type of event.
+#' For instance, one type can be events of symptom onset, and the other be case confirmation.
+#' Typically, the recording of a symptom onset event will require a future case confirmation.
+#' If so, the \code{partial_observation_requires_full_observation} flag should be set to \code{TRUE}.
+#'
+#'
+#' @inheritParams module_structure
+#' @inheritParams module_methods
+#' @inheritParams pipe_params
+#' @inheritParams delay_high
+#' @inheritParams dating
+#' @inheritDotParams .smooth_LOESS -incidence_input
+#' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
+#' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
+#' @inheritDotParams merge_outputs -output_list -include_index -index_col
+#' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_distribution_final_report
 #'
 #' @return
 #' @export
@@ -452,23 +475,22 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
   }
 }
 
+#TODO polish doc (e.g. '...' args)
 # TODO doc
-#' Title
+# TODO continue here
+#' Estimate Re from incidence and estimate uncertainty by bootstrapping
 #'
-#' @param partially_delayed_incidence
-#' @param fully_delayed_incidence
-#' @param smoothing_method
-#' @param deconvolution_method
-#' @param estimation_method
-#' @param bootstrapping_method
-#' @param uncertainty_summary_method
-#' @param N_bootstrap_replicates
-#' @param delay_until_partial
-#' @param delay_from_partial_to_full
-#' @param partial_observation_requires_full_observation
-#' @param ref_date
-#' @param time_step
-#' @param ...
+#' @inheritParams module_structure
+#' @inheritParams module_methods
+#' @inheritParams pipe_params
+#' @inheritParams bootstrap_params
+#' @inheritParams delay_high
+#' @inheritParams dating
+#' @inheritDotParams .smooth_LOESS -incidence_input
+#' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
+#' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
+#' @inheritDotParams merge_outputs -output_list -include_index -index_col
+#' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_distribution_final_report
 #'
 #' @return
 #' @export
@@ -489,7 +511,7 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
 
   #TODO validate arguments
 
-  #TODO allow for 'partially_delayed_incidence' to be NULL,
+  #TODO allow for 'partially_delayed_incidence' or 'fully_delayed_incidence' to be NULL,
   # (need to ensure all subsequent functions allow NULL or make if-else)
   # TODO turn get_block_bootstrapped_estimate into a wrapper around this function with partially_delayed_incidence=NULL
 
