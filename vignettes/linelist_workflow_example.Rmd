@@ -1,0 +1,151 @@
+---
+title: "From raw linelist data to Re estimates"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{From raw linelist data to Re estimates}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+In this vignette, we demonstrate a workflow for estimating Re from a linelist.
+The example is simplified version of the linelists gathered by the Federal Office of Public Health in Switzerland.
+We prepared the data by removing all columns non-relevant to our analysis to ensure the anonimization of the data.
+To keep the data handling fast and easy, we restricted the data from February to July 2020.
+
+```{r setup}
+library(estimateR)
+
+# Data handling packages
+library(dplyr)
+library(tidyr)
+
+# Packages for plotting
+library(ggplot2)
+library(viridis)
+```
+
+```{r}
+# Swiss linelist
+head(CH_linelist, n = 10)
+```
+We transform the linelist into a dataframe that contains the daily incidence for case confirmations.
+
+First, we construct the incidence of events of onset of symptoms for cases for which it is known.
+```{r}
+onset_incidence <- CH_linelist %>%
+  transmute(date = symptom_onset_date) %>%
+  filter(!is.na(date)) %>%
+  group_by(date) %>%
+  tally(name = "onset_incidence")
+
+head(onset_incidence)
+```
+Then, we construct the incidence of events of case confirmation with no known symptom onset date.
+```{r}
+confirmation_incidence <- CH_linelist %>%
+  # only keep report_date when we do not have the onset_date
+  mutate(confirmation_date = if_else(is.na(symptom_onset_date), confirmation_date, as.Date(NA))) %>%
+  transmute(date = confirmation_date) %>%
+  filter(!is.na(date)) %>%
+  group_by(date) %>%
+  tally(name = "confirmation_incidence")
+
+head(confirmation_incidence)
+```
+Now let us merge the two into a single dataframe. We need to make sure we align the two incidence vectors, and fill the missing dates with zero values.
+
+```{r}
+CH_incidence_data <- full_join(onset_incidence, confirmation_incidence, by = 'date') %>%
+  replace_na(list(onset_incidence = 0, confirmation_incidence = 0)) %>%
+  complete(date = seq.Date(min(date), # add zeroes for dates with no reported case
+                  max(date),
+                  by = "days"),
+                  fill = list(onset_incidence = 0,
+                              confirmation_incidence = 0)) %>%
+  select(date, onset_incidence, confirmation_incidence) %>%
+  arrange(date)
+
+head(CH_incidence_data)
+```
+As a second step, we make use of the linelist to inform the analysis on the distribution of the delay between onset of symptom and case confirmation.
+
+```{r}
+CH_delay_data <- CH_linelist %>%
+  filter(!is.na(symptom_onset_date), !is.na(confirmation_date)) %>%
+  transmute(event_date = symptom_onset_date,
+            report_date = confirmation_date) %>% 
+  mutate(report_delay = as.integer(report_date - event_date)) %>% 
+  mutate(report_delay = if_else(report_delay < 0, as.integer(NA), report_delay)) %>%  # curate negative delays
+  filter(!is.na(report_delay)) %>% # remove NA values
+  select(-report_date) %>% # rearrange dataset
+  arrange(event_date)
+
+head(CH_delay_data)
+```
+
+Additionally, we need to specify the incubation period for COVID-19 (TODO add ref) and the serial interval (TODO add ref).
+```{r}
+## Delay between infection and onset of symptoms (incubation period) in days
+# Gamma distribution parameter
+shape_incubation <- 3.2
+scale_incubation <- 1.3
+
+# Incubation period delay distribution
+distribution_incubation <- list(name = "gamma", 
+                                shape = shape_incubation, 
+                                scale = scale_incubation)
+
+# Serial interval (for Re estimation) in days
+mean_serial_interval <- 4.8
+std_serial_interval <- 2.3
+```
+
+Now, we set some parameter of the analysis:
+```{r}
+estimation_window = 3 # 3-day sliding window for the Re estimation
+minimum_cumul_incidence = 100 # we start estimating Re after at least 100 cases have been recorded
+N_bootstrap_replicates = 100 # we take 100 replicates in the bootstrapping procedure
+
+# We specifiy the reference date (first date of data) and the time step of data.
+ref_date = min(CH_incidence_data$date)
+time_step = "day"
+```
+
+We can then perform the Re estimation. The computation should take a few seconds to complete.
+```{r}
+CH_estimates <- get_bootstrapped_estimates_from_combined_observations(
+  partially_delayed_incidence = CH_incidence_data$onset_incidence,
+  fully_delayed_incidence = CH_incidence_data$confirmation_incidence,
+  N_bootstrap_replicates = N_bootstrap_replicates,
+  delay_until_partial = distribution_incubation,
+  delay_from_partial_to_full = CH_delay_data,
+  partial_observation_requires_full_observation = TRUE,
+  estimation_window = estimation_window,
+  minimum_cumul_incidence = minimum_cumul_incidence,
+  mean_serial_interval = mean_serial_interval,
+  std_serial_interval = std_serial_interval,
+  ref_date = ref_date,
+  time_step = time_step
+)
+
+head(CH_estimates)
+```
+
+```{r, fig.width=8, fig.height=4}
+ggplot(CH_estimates, aes(x = date, y = Re_estimate)) +
+  # geom_line(lwd=  1.1)
+  geom_line(lwd=  1.1) +
+  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.45, colour = NA) +
+  scale_x_date(date_breaks = "2 weeks",
+               date_labels = '%b-%d\n%Y') +
+  ylab("Reproductive number") +
+  coord_cartesian(ylim = c(0, 3.5)) +
+  xlab("") +
+  theme_bw()
+```
