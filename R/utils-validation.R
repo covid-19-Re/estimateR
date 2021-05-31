@@ -11,7 +11,7 @@
 #' @param tolerance_on_sum Numeric tolerance in checking that vector elements sum to 1.
 #'
 #' @return TRUE if no error was raised.
-.check_is_probability_distr_vector <- function(distribution, tolerate_NAs = FALSE, tolerance_on_sum = 1E-3) {
+.check_is_probability_distr_vector <- function(distribution, tolerate_NAs = FALSE, tolerance_on_sum = 1E-2) {
 
   .check_class(distribution, "vector", mode = "numeric")
 

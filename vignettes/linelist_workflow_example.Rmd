@@ -13,10 +13,8 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+
 In this vignette, we demonstrate a workflow for estimating Re from a linelist.
-The example is simplified version of the linelists gathered by the Federal Office of Public Health in Switzerland.
-We prepared the data by removing all columns non-relevant to our analysis to ensure the anonimization of the data.
-To keep the data handling fast and easy, we restricted the data from February to July 2020.
 
 ```{r setup}
 library(estimateR)
@@ -25,11 +23,14 @@ library(estimateR)
 library(dplyr)
 library(tidyr)
 
-# Packages for plotting
+# Package for plotting
 library(ggplot2)
-library(viridis)
 ```
 
+The example is a simplified version of the linelist gathered by the Federal Office of Public Health in Switzerland.
+We prepared the data by removing all columns non-relevant to our analysis to ensure the anonymization of the data.
+To keep the data handling fast and easy, we restricted the data from February to July 2020.
+The data is stored in the `CH_linelist` variable.
 ```{r}
 # Swiss linelist
 head(CH_linelist, n = 10)
@@ -139,7 +140,6 @@ head(CH_estimates)
 
 ```{r, fig.width=8, fig.height=4}
 ggplot(CH_estimates, aes(x = date, y = Re_estimate)) +
-  # geom_line(lwd=  1.1)
   geom_line(lwd=  1.1) +
   geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.45, colour = NA) +
   scale_x_date(date_breaks = "2 weeks",

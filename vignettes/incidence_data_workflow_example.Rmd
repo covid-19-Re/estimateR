@@ -1,0 +1,151 @@
+---
+title: "From aggregated incidence data to Re estimates"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{From aggregated incidence data to Re estimates}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this vignette, we demonstrate a workflow for estimating Re from aggregated incidence data.
+```{r setup}
+library(estimateR)
+
+# Data handling packages
+library(dplyr)
+library(tidyr)
+
+# Package for plotting
+library(ggplot2)
+```
+
+In this example, we fetch and analyze COVID-19 incidence data from Estonia. 
+The Estonian public health authorities publish detailed COVID-19 related data [here](https://www.terviseamet.ee/et/koroonaviirus/avaandmed).
+We start by fetching the dataset containing the number of reported cases for each day since the beginning of the pandemic. 
+```{r}
+url <- "https://opendata.digilugu.ee/opendata_covid19_tests_total.csv"
+EST_data <- try(readr::read_csv(url))
+
+if ("try-error" %in% class(EST_data)) {
+  warning(stringr::str_c("Couldn't read EST case data at ", url))
+} else {
+  
+# Keep columns of interest only  
+EST_incidence <- EST_data %>%
+  dplyr::transmute(date = lubridate::as_date(StatisticsDate),
+            case_incidence = DailyCases)
+}
+```
+
+In case the data is innacessible, an earlier version is stored in the `EST_incidence_data` variable with **estimateR**.
+```{r}
+ EST_incidence <- EST_incidence_data
+head(EST_incidence)
+```
+
+As a curation step, we make sure that there is no missing date and no negative or NA values in the original data.
+```{r}
+EST_incidence <- EST_incidence %>% 
+  # replace potential negative values by 0
+  dplyr::mutate(case_incidence = if_else(case_incidence < 0, 0, case_incidence)) %>% 
+  #replace potential NA values by 0
+   tidyr::replace_na(list(case_incidence = 0)) %>%
+  # add zeroes for dates with no reported case
+    tidyr::complete(date = seq.Date(min(date),  max(date),
+                                      by = "days"),
+                  fill = list(case_incidence = 0))
+```
+
+Now that our incidence data is ready and curated, we need to gather all COVID-19 parameters required for the Re estimation.
+TODO add references
+```{r}
+## Delay between infection and onset of symptoms (incubation period) in days
+# Gamma distribution parameter
+shape_incubation <- 3.2
+scale_incubation <- 1.3
+
+# Incubation period delay distribution
+distribution_incubation <- list(name = "gamma", 
+                                shape = shape_incubation, 
+                                scale = scale_incubation)
+
+
+## Delay between onset of symptoms and case confirmation in days
+# Gamma distribution parameter
+shape_onset_to_confirmation <- 2.1
+scale_onset_to_confirmation <- 2.6
+
+# Incubation period delay distribution
+distribution_onset_to_confirmation <- list(name = "gamma", 
+                                shape = shape_onset_to_confirmation, 
+                                scale = scale_onset_to_confirmation)
+
+## Serial interval (for Re estimation) in days
+mean_serial_interval <- 4.8
+std_serial_interval <- 2.3
+```
+ We also need some specifications for the analysis:
+ 
+```{r}
+estimation_window = 3 # 3-day sliding window for the Re estimation
+minimum_cumul_incidence = 100 # we start estimating Re after at least 100 cases have been recorded
+N_bootstrap_replicates = 100 # we take 100 replicates in the bootstrapping procedure
+
+# We specifiy the reference date (first date of data) and the time step of data.
+ref_date = min(EST_incidence$date)
+time_step = "day"
+```
+
+We can then perform the Re estimation. The computations will take a few seconds to complete.
+```{r}
+EST_estimates <- get_block_bootstrapped_estimate(
+  incidence_data = EST_incidence$case_incidence,
+  N_bootstrap_replicates = N_bootstrap_replicates,
+  delay_incubation = distribution_incubation, 
+  delay_onset_to_report = distribution_onset_to_confirmation,
+  estimation_window = estimation_window,
+  minimum_cumul_incidence = minimum_cumul_incidence,
+  mean_serial_interval = mean_serial_interval,
+  std_serial_interval = std_serial_interval,
+  ref_date = ref_date,
+  time_step = time_step
+)
+
+head(EST_estimates)
+```
+Now let us plot these estimates through time, along with their confidence intervals.
+```{r, fig.width=8, fig.height=4}
+ggplot(EST_estimates, aes(x = date, y = Re_estimate)) +
+  geom_line(lwd=  1.1) +
+  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.45, colour = NA) +
+  scale_x_date(date_breaks = "1 month",
+               date_labels = '%b\n%Y') +
+  ylab("Reproductive number") +
+  coord_cartesian(ylim = c(0, 3.5)) +
+  xlab("") +
+  theme_bw()
+```
+
+The results seem reasonable overall, especially from November 2020 on.
+However, the two wide swings in June and July 2020 are suspicious.
+Let us zoom in on the raw incidence data to check if the data seems to carry real signal for these swings or if they are byproducts of isolated bumps in the reported numbers.
+
+```{r, fig.width=8, fig.height=4}
+ggplot(filter(EST_incidence, date < as.Date("2020-09-01"), date >= as.Date("2020-05-01")), aes(x = date, y = case_incidence)) +
+  geom_bar(stat="identity") +
+    scale_x_date(date_breaks = "1 month",
+               date_labels = '%b\n%Y')
+```
+
+For both early June and early July we see that the overall numbers are very low, and that the Re peaks correspond to particularly high outliers in the reported numbers.
+
+This should make us wary of drawing any conclusions for the Re estimates over this period before investigating whether the peaks in the observed numbers were not explainable by something else than a rise in Re. The external reason could be an adjustment in the reported numbers, or a one-time large testing event.
+
+It is always extremely valuable to plot the incidence data when doing an Re estimation, even when nothing looks suspicious in the estimates. 
