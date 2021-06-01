@@ -29,7 +29,7 @@ library(ggplot2)
 
 The example is a simplified version of the linelist gathered by the Federal Office of Public Health in Switzerland.
 We prepared the data by removing all columns non-relevant to our analysis to ensure the anonymization of the data.
-To keep the data handling fast and easy, we restricted the data from February to July 2020.
+To keep the data handling fast and easy, we restricted the data from February to June 2020.
 The data is stored in the `CH_linelist` variable.
 ```{r}
 # Swiss linelist

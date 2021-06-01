@@ -21,6 +21,9 @@ library(estimateR)
 # Data handling packages
 library(dplyr)
 library(tidyr)
+library(readr)
+library(stringr)
+library(lubridate)
 
 # Package for plotting
 library(ggplot2)
@@ -31,16 +34,16 @@ The Estonian public health authorities publish detailed COVID-19 related data [h
 We start by fetching the dataset containing the number of reported cases for each day since the beginning of the pandemic. 
 ```{r}
 url <- "https://opendata.digilugu.ee/opendata_covid19_tests_total.csv"
-EST_data <- try(readr::read_csv(url))
+EST_data <- try(read_csv(url))
 
 if ("try-error" %in% class(EST_data)) {
-  warning(stringr::str_c("Couldn't read EST case data at ", url))
+  warning(str_c("Couldn't read EST case data at ", url))
 } else {
   
 # Keep columns of interest only  
 EST_incidence <- EST_data %>%
-  dplyr::transmute(date = lubridate::as_date(StatisticsDate),
-            case_incidence = DailyCases)
+  transmute(report_date = as_date(StatisticsDate),
+            incidence = DailyCases)
 }
 ```
 
@@ -54,13 +57,13 @@ As a curation step, we make sure that there is no missing date and no negative o
 ```{r}
 EST_incidence <- EST_incidence %>% 
   # replace potential negative values by 0
-  dplyr::mutate(case_incidence = if_else(case_incidence < 0, 0, case_incidence)) %>% 
+  mutate(incidence = if_else(incidence < 0, 0, incidence)) %>% 
   #replace potential NA values by 0
-   tidyr::replace_na(list(case_incidence = 0)) %>%
+   replace_na(list(incidence = 0)) %>%
   # add zeroes for dates with no reported case
-    tidyr::complete(date = seq.Date(min(date),  max(date),
+    complete(report_date = seq.Date(min(report_date),  max(report_date),
                                       by = "days"),
-                  fill = list(case_incidence = 0))
+                  fill = list(incidence = 0))
 ```
 
 Now that our incidence data is ready and curated, we need to gather all COVID-19 parameters required for the Re estimation.
@@ -99,14 +102,14 @@ minimum_cumul_incidence = 100 # we start estimating Re after at least 100 cases 
 N_bootstrap_replicates = 100 # we take 100 replicates in the bootstrapping procedure
 
 # We specifiy the reference date (first date of data) and the time step of data.
-ref_date = min(EST_incidence$date)
+ref_date = min(EST_incidence$report_date)
 time_step = "day"
 ```
 
 We can then perform the Re estimation. The computations will take a few seconds to complete.
 ```{r}
 EST_estimates <- get_block_bootstrapped_estimate(
-  incidence_data = EST_incidence$case_incidence,
+  incidence_data = EST_incidence$incidence,
   N_bootstrap_replicates = N_bootstrap_replicates,
   delay_incubation = distribution_incubation, 
   delay_onset_to_report = distribution_onset_to_confirmation,
@@ -138,7 +141,7 @@ However, the two wide swings in June and July 2020 are suspicious.
 Let us zoom in on the raw incidence data to check if the data seems to carry real signal for these swings or if they are byproducts of isolated bumps in the reported numbers.
 
 ```{r, fig.width=8, fig.height=4}
-ggplot(filter(EST_incidence, date < as.Date("2020-09-01"), date >= as.Date("2020-05-01")), aes(x = date, y = case_incidence)) +
+ggplot(filter(EST_incidence, report_date < as.Date("2020-09-01"), report_date >= as.Date("2020-05-01")), aes(x = report_date, y = incidence)) +
   geom_bar(stat="identity") +
     scale_x_date(date_breaks = "1 month",
                date_labels = '%b\n%Y')
