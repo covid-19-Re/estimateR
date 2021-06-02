@@ -27,19 +27,19 @@ library(tidyr)
 library(ggplot2)
 ```
 
-The example is a simplified version of the linelist gathered by the Federal Office of Public Health in Switzerland.
-We prepared the data by removing all columns non-relevant to our analysis to ensure the anonymization of the data.
-To keep the data handling fast and easy, we restricted the data from February to June 2020.
-The data is stored in the `CH_linelist` variable.
+The example is a synthetic version of a linelist of COVID-19 cases.
+The aggregated incidence of this linelist corresponds to or closely matches the incidence of Swiss cases as reported by the Federal Office of Public Health.
+To keep the data handling fast and easy, we restricted the simulated data from February to June 2020.
+The data is stored in the `CH_simulated_linelist` variable.
 ```{r}
-# Swiss linelist
-head(CH_linelist, n = 10)
+# Simulated Swiss linelist
+head(CH_simulated_linelist, n = 10)
 ```
 We transform the linelist into a dataframe that contains the daily incidence for case confirmations.
 
 First, we construct the incidence of events of onset of symptoms for cases for which it is known.
 ```{r}
-onset_incidence <- CH_linelist %>%
+onset_incidence <- CH_simulated_linelist %>%
   transmute(date = symptom_onset_date) %>%
   filter(!is.na(date)) %>%
   group_by(date) %>%
@@ -49,7 +49,7 @@ head(onset_incidence)
 ```
 Then, we construct the incidence of events of case confirmation with no known symptom onset date.
 ```{r}
-confirmation_incidence <- CH_linelist %>%
+confirmation_incidence <- CH_simulated_linelist %>%
   # only keep report_date when we do not have the onset_date
   mutate(confirmation_date = if_else(is.na(symptom_onset_date), confirmation_date, as.Date(NA))) %>%
   transmute(date = confirmation_date) %>%
@@ -77,7 +77,7 @@ head(CH_incidence_data)
 As a second step, we make use of the linelist to inform the analysis on the distribution of the delay between onset of symptom and case confirmation.
 
 ```{r}
-CH_delay_data <- CH_linelist %>%
+CH_delay_data <- CH_simulated_linelist %>%
   filter(!is.na(symptom_onset_date), !is.na(confirmation_date)) %>%
   transmute(event_date = symptom_onset_date,
             report_date = confirmation_date) %>% 
@@ -149,3 +149,4 @@ ggplot(CH_estimates, aes(x = date, y = Re_estimate)) +
   xlab("") +
   theme_bw()
 ```
+TODO Summary

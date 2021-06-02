@@ -23,8 +23,8 @@
 #'
 #' @format A data frame with 196 rows and 2 variables:
 #' \describe{
-#'   \item{report_date}{date of case reporting in YYYY-mm-dd format}
-#'   \item{incidence}{number of cases reported on this date}
+#'   \item{date}{date of case reporting in YYYY-mm-dd format}
+#'   \item{case_incidence}{number of cases reported on this date}
 #' }
 #' @source \url{https://www.chp.gov.hk}
 "HK_incidence_data"
@@ -36,31 +36,29 @@
 #'
 #' @format A data frame with 460 rows and 2 variables:
 #' \describe{
-#'   \item{report_date}{date of case reporting in YYYY-mm-dd format}
-#'   \item{incidence}{number of cases reported on this date}
+#'   \item{date}{date of case reporting in YYYY-mm-dd format}
+#'   \item{case_incidence}{number of cases reported on this date}
 #' }
 #' @source \url{https://opendata.digilugu.ee/opendata_covid19_tests_total.csv}
 "EST_incidence_data"
 
-#' Linelist of COVID-19 patients in Switzerland
+#' Synthetic linelist of COVID-19 patients
 #'
-#' A dataset containing a linelist of Swiss COVID-19 patients from February to June 2020.
+#' A synthetic dataset containing a simulated linelist of Swiss COVID-19 patients from February to June 2020.
+#' The incidence that can be derived from aggregating this synthetic linelist
+#' corresponds to or closely matches the
+#' incidence numbers reported for Switzerland by the Federal Office of Public Health.
 #'
-#' Each row refers to a particular patient.
+#' In this simulated dataset, each row refers to a particular patient.
 #' The 'confirmation_date' column refers to the date at which a positive COVID-19 test is reported.
-#' If applicable, a date of hospital admission is included.
-#' If applicable, a date of death is included.
-#' If applicable and known, a date of onset of symptoms is included.
+#' For each patient, with a probability < 1, a date of onset of symptoms was drawn from a probability distribution.
+#' Otherwise, the date of onset of symptoms was left as NA.
 #'
-#' This linelist is provided by the Federal Office of Public Health in Switzerland.
-#'
-#' @format A data frame with 31'950 rows and 4 columns:
+#' @format A data frame with 31'950 rows and 2 columns:
 #' \describe{
 #'   \item{confirmation_date}{date of case confirmation in YYYY-mm-dd format}
-#'   \item{symptom_onset_date}{If applicable and reported, date of onset of symptoms in YYYY-mm-dd format}
-#'   \item{hospital_admission_date}{If applicable, date of admission to a hospital in YYYY-mm-dd format}
-#'   \item{death_date}{If applicable, date of death of the patient in YYYY-mm-dd format}
+#'   \item{symptom_onset_date}{If simulated, date of onset of symptoms in YYYY-mm-dd format}
 #' }
-#' @source Federal Office of Public Health
-"CH_linelist"
+#' @source
+"CH_simulated_linelist"
 

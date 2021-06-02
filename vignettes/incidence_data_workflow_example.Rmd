@@ -42,12 +42,12 @@ if ("try-error" %in% class(EST_data)) {
   
 # Keep columns of interest only  
 EST_incidence <- EST_data %>%
-  transmute(report_date = as_date(StatisticsDate),
-            incidence = DailyCases)
+  transmute(date = as_date(StatisticsDate),
+            case_incidence = DailyCases)
 }
 ```
 
-In case the data is innacessible, an earlier version is stored in the `EST_incidence_data` variable with **estimateR**.
+In case the data is inaccessible, an earlier version is stored in the `EST_incidence_data` variable with **estimateR**.
 ```{r}
  EST_incidence <- EST_incidence_data
 head(EST_incidence)
@@ -57,13 +57,13 @@ As a curation step, we make sure that there is no missing date and no negative o
 ```{r}
 EST_incidence <- EST_incidence %>% 
   # replace potential negative values by 0
-  mutate(incidence = if_else(incidence < 0, 0, incidence)) %>% 
+  mutate(case_incidence = if_else(case_incidence < 0, 0, case_incidence)) %>% 
   #replace potential NA values by 0
-   replace_na(list(incidence = 0)) %>%
+   replace_na(list(case_incidence = 0)) %>%
   # add zeroes for dates with no reported case
-    complete(report_date = seq.Date(min(report_date),  max(report_date),
+    complete(date = seq.Date(min(date),  max(date),
                                       by = "days"),
-                  fill = list(incidence = 0))
+                  fill = list(case_incidence = 0))
 ```
 
 Now that our incidence data is ready and curated, we need to gather all COVID-19 parameters required for the Re estimation.
@@ -102,14 +102,14 @@ minimum_cumul_incidence = 100 # we start estimating Re after at least 100 cases 
 N_bootstrap_replicates = 100 # we take 100 replicates in the bootstrapping procedure
 
 # We specifiy the reference date (first date of data) and the time step of data.
-ref_date = min(EST_incidence$report_date)
+ref_date = min(EST_incidence$date)
 time_step = "day"
 ```
 
 We can then perform the Re estimation. The computations will take a few seconds to complete.
 ```{r}
 EST_estimates <- get_block_bootstrapped_estimate(
-  incidence_data = EST_incidence$incidence,
+  incidence_data = EST_incidence$case_incidence,
   N_bootstrap_replicates = N_bootstrap_replicates,
   delay_incubation = distribution_incubation, 
   delay_onset_to_report = distribution_onset_to_confirmation,
@@ -141,7 +141,7 @@ However, the two wide swings in June and July 2020 are suspicious.
 Let us zoom in on the raw incidence data to check if the data seems to carry real signal for these swings or if they are byproducts of isolated bumps in the reported numbers.
 
 ```{r, fig.width=8, fig.height=4}
-ggplot(filter(EST_incidence, report_date < as.Date("2020-09-01"), report_date >= as.Date("2020-05-01")), aes(x = report_date, y = incidence)) +
+ggplot(filter(EST_incidence, date < as.Date("2020-09-01"), date >= as.Date("2020-05-01")), aes(x = date, y = case_incidence)) +
   geom_bar(stat="identity") +
     scale_x_date(date_breaks = "1 month",
                date_labels = '%b\n%Y')

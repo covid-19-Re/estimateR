@@ -55,7 +55,9 @@ Suggests:
     knitr,
     rmarkdown,
     ggplot2,
-    viridis
+    viridis,
+    readr,
+    stringr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Depends: 
