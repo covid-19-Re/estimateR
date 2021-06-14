@@ -37,6 +37,7 @@ estimate_Re <- function( incidence_data,
   }
 
   if(simplify_output) {
+    #TODO simplify output if output_HPD = TRUE
     Re_estimate <- .simplify_output(Re_estimate)
   }
 
@@ -64,7 +65,8 @@ estimate_Re <- function( incidence_data,
                         estimation_window = 3,
                         mean_serial_interval = 4.8,
                         std_serial_interval  = 2.3,
-                        mean_Re_prior = 1) {
+                        mean_Re_prior = 1,
+                        output_HPD = FALSE) {
 
   .are_valid_argument_values(list(list(incidence_input, "module_input"),
                                   list(minimum_cumul_incidence, "non_negative_number"),
@@ -111,6 +113,19 @@ estimate_Re <- function( incidence_data,
   R_mean <- .get_module_output(R_instantaneous$R$`Mean(R)`,
                                incidence_input,
                               additional_offset)
+  if(output_HPD){
+    R_highHPD <- .get_module_output(R_instantaneous$R$`Quantile.0.975(R)`,
+                                 incidence_input,
+                                 additional_offset)
 
-  return(R_mean)
+    R_lowHPD <- .get_module_output(R_instantaneous$R$`Quantile.0.025(R)`,
+                                 incidence_input,
+                                 additional_offset)
+
+    return(list(R_mean=R_mean,
+                R_highHPD=R_highHPD,
+                R_lowHPD=R_lowHPD))
+  } else {
+    return(R_mean)
+  }
 }
