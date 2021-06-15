@@ -2,16 +2,21 @@
 % Please edit documentation in R/utils-validation.R
 \name{.is_valid_distribution}
 \alias{.is_valid_distribution}
-\title{Title}
+\title{Check if valid distribution list}
 \usage{
 .is_valid_distribution(distribution)
 }
 \arguments{
-\item{distribution}{}
+\item{distribution}{list. probability distribution specified in list format
+e.g. list(name = "gamma", shape = 2, scale = 4).
+The \code{distribution} list must contain a 'name' element, this element must be  a string and
+correspond to one of the types of \code{\link[stats:Distributions]{distributions}} supported in the \link[stats]{Distributions} package.
+\code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.}
 }
 \value{
 a boolean value.
 }
 \description{
-Title
+Throws an error if not a list, or not a list with the appropriate elements.
+Returns FALSE if parameter values return an improper distribution (if gamma distr)
 }

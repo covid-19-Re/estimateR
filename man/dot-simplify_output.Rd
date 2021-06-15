@@ -10,8 +10,9 @@
 \item{output}{Module output object}
 }
 \value{
-numeric vector or module output object. simplified output
+numeric vector or module output object.
 }
 \description{
 If offset is 0, return only vector containing values.
+If offset is not zero then \code{output} is returned as is.
 }

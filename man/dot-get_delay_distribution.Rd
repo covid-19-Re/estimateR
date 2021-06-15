@@ -13,7 +13,7 @@ into a vector of discretized probability distribution.}
 \item{...}{
   Arguments passed on to \code{\link[=build_delay_distribution]{build_delay_distribution}}
   \describe{
-    \item{\code{max_quantile}}{numeric value between 0 and 1.
+    \item{\code{max_quantile}}{numeric value between 0 and 1. TODO add details
 Upper quantile reached by the last element in the discretized distribution vector.}
     \item{\code{offset_by_one}}{boolean.
 Set to TRUE if \code{distribution} represent the fit of data that was offset by one

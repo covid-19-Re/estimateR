@@ -39,9 +39,9 @@ test_that("deconvolve_incidence yields consistent results on a toy moving-throug
   distribution_initial_delay <- list(name = "gamma", shape = shape_initial_delay, scale = scale_initial_delay)
   seed <- 734
 
-  generated_empirical_delays <- generate_delay_data(origin_date = ref_date,
+  generated_empirical_delays <- .generate_delay_data(origin_date = ref_date,
                                                     n_time_steps = n_days,
-                                                    delay_ratio_start_to_end = 1.5,
+                                                    ratio_delay_end_to_start = 1.5,
                                                     distribution_initial_delay = distribution_initial_delay,
                                                     seed = seed)
 

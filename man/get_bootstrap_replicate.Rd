@@ -14,6 +14,14 @@ get_bootstrap_replicate(
 \arguments{
 \item{incidence_data}{numeric vector. Incidence data (TODO improve definition)}
 
+\item{bootstrapping_method}{string. Method to perform bootstrapping
+of the original incidence data.
+Available options are:
+\itemize{
+\item{'non-parametric block boostrap',
+implemented in \code{\link{.block_bootstrap}}}
+}}
+
 \item{simplify_output}{boolean. Return a numeric vector instead of module
 output object if output offset is zero? TODO to be described better.}
 

@@ -2,22 +2,44 @@
 % Please edit documentation in R/utils-uncertainty.R
 \name{.summarise_bagged_mean}
 \alias{.summarise_bagged_mean}
-\title{Title}
+\title{Compute bagged mean from bootstrapped replicates}
 \usage{
 .summarise_bagged_mean(
-  original_estimates,
   bootstrapped_estimates,
+  original_estimates = NULL,
   Re_estimate_col = Re_estimate_col,
   bootstrap_id_col = bootstrap_id_col,
-  time_step = "day"
+  index_col = index_col
 )
 }
 \arguments{
-\item{bootstrap_id_col}{}
+\item{bootstrapped_estimates}{Estimates obtained on a number of bootstrap
+replicates of the original data.
+Must be a dataframe in the long format
+with a timestep index column named \code{index_col},
+a bootstrap replicate index column named \code{bootstrap_id_col},
+and an estimate column named \code{Re_estimate_col}.
+The index column must not contain any \code{NA} value.}
+
+\item{original_estimates}{Optional. Estimates obtained on the original data.
+Must be a dataframe with a timestep index column named \code{index_col}
+and an estimate column named \code{Re_estimate_col}.
+The index column must not contain any \code{NA} value.}
+
+\item{Re_estimate_col}{string. Name of the column containing Re estimates}
+
+\item{bootstrap_id_col}{string. Name of the column containing bootstrap samples numbering.
+Id 0 must correspond to the estimate on the original data.}
+
+\item{index_col}{string. Index column to keep track of which data point
+in bootstrapped estimates corresponds to which data point in the original estimates.}
 }
 \value{
-
+a dataframe containing an timestep index column named \code{index_col}
+and a column containing bagged mean estimates called \code{Re_estimate_col}
 }
 \description{
-Title
+If \code{original_estimates} are included,
+these estimates are included in the mean computation
+along with the \code{bootstrapped_estimates}.
 }

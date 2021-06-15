@@ -3,6 +3,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
                                  deconvolution_method = c("Richardson-Lucy delay distribution"),
                                  estimation_method = c("EpiEstim sliding window"),
                                  bootstrapping_method = c("non-parametric block boostrap"),
+                                 function_prefix = c("d", "q", "p", "r"),
                                  uncertainty_summary_method = c("original estimate - CI from bootstrap estimates", "bagged mean - CI from bootstrap estimates"))
 
 
@@ -39,10 +40,13 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 
 
 #TODO add checks for other distributions (lognormal, uniform, weibull, truncated_normal,...)
-#TODO fill in doc
-#' Title
+#TODO reconsider if can return FALSE
+#' Check if valid distribution list
 #'
-#' @param distribution
+#' Throws an error if not a list, or not a list with the appropriate elements.
+#' Returns FALSE if parameter values return an improper distribution (if gamma distr)
+#'
+#' @inheritParams distribution
 #'
 #' @return a boolean value.
 .is_valid_distribution <- function(distribution, parameter_name = deparse(substitute(distribution))){
@@ -85,12 +89,15 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
   return(TRUE)
 }
 
-#TODO fill doc
-#' Title
+#' Check if input is in the proper empirical delay data format
 #'
-#' @param delay
+#' If the \code{delay} input is not a dataframe, return \code{FALSE}.
+#' Otherwise, an error is thrown if \code{delay} does not follow the expected format.
 #'
-#' @return
+#' @inherit empirical_delay_data_format details
+#' @param delay object to be tested
+#'
+#' @return boolean. \code{TRUE} if the input is a dataframe in the proper format.
 .check_is_empirical_delay_data <- function(delay, parameter_name = deparse(substitute(distribution))){
   if(is.data.frame(delay)) {
 
@@ -132,9 +139,8 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 
 #' @description Utility function that checks if a specific user given parameter value is among the accepted ones, in which case it returns TRUE
 #' Throws an error otherwise.
-#' @inherit validation_utility_params
-#' 
 #'
+#' @inherit validation_utility_params
 .is_value_in_accepted_values_vector <- function(string_user_input, parameter_name){
   if(!is.character(string_user_input)){
     stop(paste("Expected parameter", parameter_name, "to be a string."))
@@ -145,11 +151,13 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
   return(TRUE)
 }
 
-
 #' @description Utility function that checks if a specific user given parameter value an accepted time_step, in which case it returns TRUE
-#' An accepted time_step is considered to be: <<A character string, containing one of "day", "week", "month", "quarter" or "year". This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>> (from \link{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
+#' An accepted time_step is considered to be:
+#' <<A character string, containing one of "day", "week", "month", "quarter" or "year".
+#' This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>>
+#' (from \url{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
 #' @inherit validation_utility_params
-#' 
+#'
 .is_value_valid_time_step <- function(string_user_input, parameter_name){
   if(!is.character(string_user_input)){
     stop(paste("Expected parameter", parameter_name, "to be a string."))
@@ -163,12 +171,11 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 
 
 #' @description Utility function to determine whether an object is a numeric vector with all positive (or zero) values.
-#' 
+#'
 #' @inherit validation_utility_params
 #' @param vector vector to be tested
 #'
 #' @return boolean. TRUE if vector is a positive numeric vector. FALSE otherwise
-
 .is_positive_numeric_vector <- function(vector){
   if(!is.vector(vector, mode="numeric")){
     return(FALSE)
@@ -252,7 +259,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
     stop(paste(parameter_name, "needs to be a lower triangular matrix."))
   }
   
-  if(!all(colSums(delay_matrix) < 1)){
+  if(!all(colSums(delay_matrix) <= 1)){
     stop(paste(parameter_name, "is not a valid delay distribution matrix. At least one column sums up to a value greater than 1."))
   }
   
@@ -415,6 +422,29 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
   
 }
 
+#' @description Utility function to check whether an object is an integer
+#'
+#' @inherit validation_utility_params
+#' 
+.check_if_integer <- function(number, parameter_name){
+  if(as.integer(number) != number){ # did not use .check_class_parameter_name since is.integer(1) returns false
+    stop(paste(parameter_name, "needs to be an integer."))
+  }
+  return(TRUE)
+}
+
+#' @description Utility function to check whether an object is an integer or null
+#'
+#' @inherit validation_utility_params
+#' 
+.check_if_null_or_integer <- function(number, parameter_name){
+  if(!is.null(number)){
+    .check_if_integer(number, parameter_name)
+  }
+  return(TRUE)
+}
+
+
 #' @description Utility function to check whether an object is a strictly positive integer
 #'
 #' @inherit validation_utility_params
@@ -422,11 +452,21 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #' 
 .check_if_positive_integer <- function(number, parameter_name){
   .check_if_positive_number(number, parameter_name)
-  if(as.integer(number) != number){ # did not use .check_class_parameter_name since is.integer(1) returns false
-    stop(paste(parameter_name, "needs to be an integer."))
-  }
+  .check_if_integer(number, parameter_name)
 }
 
+#' @description Utility function to check whether an object is a number that belongs to a given interval
+#'
+#' @inherit validation_utility_params
+#' @inherit  .check_if_number
+#' 
+.check_is_numeric_in_interval  <- function(user_input, parameter_name, interval_start, interval_end){
+  .check_if_number(user_input, parameter_name)
+  if(user_input < interval_start || user_input > interval_end){
+    stop(paste0("Expected ", parameter_name, " to be in interval [", interval_start,", ", interval_end, "]."))
+  }
+  return(TRUE)
+}
 
 
 #' @description Utility function that checks that the values the user passed when calling a function are valid.
@@ -456,11 +496,22 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
             "number" = .check_if_number(user_input, parameter_name),
             "non_negative_number" = .check_if_non_negative_number(user_input, parameter_name),
             "null_or_date" = .check_if_null_or_belongs_to_class(user_input, "Date", parameter_name),
+            "null_or_int" = .check_if_null_or_integer(user_input, parameter_name),
             "positive_integer" = .check_if_positive_integer(user_input, parameter_name),
             "positive_number" = .check_if_positive_number(user_input, parameter_name),
+            "string" = .check_if_null_or_belongs_to_class(user_input, "character", parameter_name),
+            "date" = .check_class_parameter_name(user_input, "Date", parameter_name),
+            "integer" = .check_if_integer(user_input, parameter_name),
+            "distribution" = .is_valid_distribution(user_input, parameter_name),
+            "numeric_between_zero_one" = .check_is_numeric_in_interval(user_input, parameter_name, 0, 1),
+            "function_prefix" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+            "numeric_vector" = .check_class_parameter_name(user_input, "vector", parameter_name, "numeric"),
+            "probability_distr_vector" = .check_is_probability_distr_vector(user_input, parameter_name = parameter_name),
+            "probability_distr_vector_high_tolerance" = .check_is_probability_distr_vector(user_input, parameter_name = parameter_name, tolerance_on_sum = 1E-2),
+            "probability_distr_matrix" = .check_is_delay_distribution_matrix(user_input, additional_function_parameter, parameter_name),
+            "empirical_delay_data" = .check_is_empirical_delay_data(user_input, parameter_name),
             stop(paste("Checking function for type", input_type, "not found."))
     )
-  }
+    }
   return(TRUE)
 }
-

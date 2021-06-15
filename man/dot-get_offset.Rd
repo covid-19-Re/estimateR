@@ -7,10 +7,10 @@
 .get_offset(module_object)
 }
 \arguments{
-\item{module_object}{}
+\item{module_object}{module object.}
 }
 \value{
-numeric scalar. Offset
+numeric scalar. \code{index_offset} of the \code{module_object}
 }
 \description{
 This function must be adapted if the module_input_object implementation changes.

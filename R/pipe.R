@@ -41,17 +41,19 @@ get_block_bootstrapped_estimate <- function(incidence_data,
                                             ...){
 
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
-                              list(N_bootstrap_replicates, "non_negative_number"),
-                              list(smoothing_method, "smoothing_method"),
-                              list(deconvolution_method, "deconvolution_method"),
-                              list(estimation_method, "estimation_method"),
-                              list(uncertainty_summary_method, "uncertainty_summary_method"),
-                              list(delay_incubation, "delay_object", .get_input_length(incidence_data)),
-                              list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)),
-                              list(ref_date, "null_or_date"),
-                              list(time_step, "time_step")))
+                                  list(N_bootstrap_replicates, "non_negative_number"),
+                                  list(smoothing_method, "smoothing_method"),
+                                  list(deconvolution_method, "deconvolution_method"),
+                                  list(estimation_method, "estimation_method"),
+                                  list(uncertainty_summary_method, "uncertainty_summary_method"),
+                                  list(delay_incubation, "delay_object", .get_input_length(incidence_data)),
+                                  list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)),
+                                  list(ref_date, "null_or_date"),
+                                  list(time_step, "time_step")))
 
   dots_args <- .get_dots_as_list(...)
+
+  index_col <- "idx"
 
   # Display progress bar
   # progress_bar <- utils::txtProgressBar(min = 0, max = N_bootstrap_replicates + 1, style = 3)
@@ -80,9 +82,10 @@ get_block_bootstrapped_estimate <- function(incidence_data,
            deconvolution_method = deconvolution_method,
            estimation_method = estimation_method,
            delay_incubation = total_delay_distribution,
-           ref_date = ref_date,
-           time_step = time_step,
-           output_Re_only = FALSE),
+           ref_date = NULL,
+           output_Re_only = FALSE,
+           include_index = TRUE,
+           index_col = index_col),
       smooth_deconvolve_estimate_dots_args)
   )
 
@@ -111,9 +114,10 @@ get_block_bootstrapped_estimate <- function(incidence_data,
              deconvolution_method = deconvolution_method,
              estimation_method = estimation_method,
              delay_incubation = total_delay_distribution,
-             ref_date = ref_date,
-             time_step = time_step,
-             output_Re_only = FALSE),
+             ref_date = NULL,
+             output_Re_only = FALSE,
+             include_index = TRUE,
+             index_col = index_col),
         smooth_deconvolve_estimate_dots_args)
     )
 
@@ -135,7 +139,14 @@ get_block_bootstrapped_estimate <- function(incidence_data,
                                                       uncertainty_summary_method = uncertainty_summary_method,
                                                       Re_estimate_col = "R_mean",
                                                       bootstrap_id_col = "bootstrap_id",
-                                                      time_step = time_step)
+                                                      index_col = index_col)
+  if(!is.null(ref_date)) {
+    estimates_with_uncertainty <- .add_date_column(estimates_with_uncertainty,
+                                                   ref_date = ref_date,
+                                                   time_step = time_step,
+                                                   index_col= index_col,
+                                                   keep_index_col = FALSE)
+  }
 
   # Close progress bar
   # utils::setTxtProgressBar(progress_bar, N_bootstrap_replicates + 1)
@@ -161,6 +172,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
 #' @inheritParams universal_params
 #' @inheritParams pipe_params
 #' @inheritParams delay_high
+#' @inheritParams dating
 #' @inheritDotParams .smooth_LOESS -incidence_input
 #' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
@@ -221,15 +233,16 @@ smooth_deconvolve_estimate <- function(incidence_data,
   if(output_Re_only) {
     return(estimated_Re)
   } else {
-    merging_args <- names(formals(merge_outputs))
-
-    merged_results <- merge_outputs(
-      output_list = list("observed_incidence" = incidence_data,
-                         "smoothed_incidence" = smoothed_incidence,
-                         "deconvolved_incidence" = deconvolved_incidence,
-                         "R_mean" = estimated_Re),
-      ref_date = ref_date,
-      time_step = time_step)
+    merged_results <- do.call(
+      'merge_outputs',
+      c(list(output_list = list("observed_incidence" = incidence_data,
+                                "smoothed_incidence" = smoothed_incidence,
+                                "deconvolved_incidence" = deconvolved_incidence,
+                                "R_mean" = estimated_Re),
+             ref_date = ref_date,
+             time_step = time_step),
+        .get_shared_args(merge_outputs, dots_args))
+    )
 
     return(merged_results)
   }

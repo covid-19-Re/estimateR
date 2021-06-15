@@ -46,6 +46,11 @@ implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
 
 \item{delay_onset_to_report}{TODO add details}
 
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
+
+\item{time_step}{string. Time between two consecutive incidence datapoints.
+"day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+
 \item{output_Re_only}{boolean. Should the output only contain Re estimates?
 (as opposed to containing results for each intermediate step)}
 

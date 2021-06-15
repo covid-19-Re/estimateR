@@ -174,14 +174,8 @@ output object if output offset is zero? TODO to be described better.</p></td>
     <tr>
       <th>...</th>
       <td><p>Arguments passed on to <code><a href='convolve_delay_inputs.html'>convolve_delay_inputs</a></code>, <code><a href='.deconvolve_incidence_Richardson_Lucy.html'>.deconvolve_incidence_Richardson_Lucy</a></code></p><dl>
-    <dt><code>n_report_time_steps</code></dt><dd><p>Integer value required if</p></dd>
-    <dt><code>start_date</code></dt><dd><p>Optional. Date of the first incidence data point.</p></dd>
-    <dt><code>time_step</code></dt><dd><p>Size of time step used in delays. String in the format:
-"day", "2 days", "week", "year"... (see <code><a href='https://rdrr.io/r/base/seq.Date.html'>seq.Date</a></code> for
-details)</p></dd>
-    <dt><code>min_number_cases</code></dt><dd><p>Use only if an input is empirical delay data. Number
-of cases over which to build empirical delay distribution</p></dd>
-    <dt><code>upper_quantile_threshold</code></dt><dd><p>Value between 0 and 1. Quantile</p></dd>
+    <dt><code>n_report_time_steps</code></dt><dd><p>integer. Length of incidence time series.
+Use only when providing empirical delay data.</p></dd>
     <dt><code>delay_distribution</code></dt><dd><p>numeric square matrix or vector. TODO refactor to estimateR</p></dd>
     <dt><code>threshold_chi_squared</code></dt><dd><p>numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.</p></dd>
     <dt><code>max_iterations</code></dt><dd><p>integer. Maximum threshold for the number of iterations in the R-L algorithm.</p></dd>
@@ -206,7 +200,7 @@ of cases over which to build empirical delay distribution</p></dd>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Jinzhou Li.</p>
+  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Ana Grosu.</p>
 </div>
 
 <div class="pkgdown">

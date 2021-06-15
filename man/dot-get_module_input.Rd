@@ -7,11 +7,14 @@
 .get_module_input(data)
 }
 \arguments{
-\item{data}{}
+\item{data}{TODO specify what format data can take}
 }
 \value{
-module input object
+module input object.
+List with a \code{values} and an \code{index_offset} element.
 }
 \description{
-#TODO specify what format data can take
+The input can be a list containing a \code{values} element
+and an \code{index_offset} element, potentially among others.
+It can also be a vector containing numeric values.
 }

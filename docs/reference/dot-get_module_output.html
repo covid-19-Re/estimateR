@@ -42,7 +42,7 @@
 <meta property="og:title" content="Transform a result output of a module into a module output — .get_module_output" />
 <meta property="og:description" content="Also takes the module input object to calculate the offset of the output object.
 The new offset is simply (module input offset) + (shift applied during module operations)
-The shift applied during module operations is passed as &quot;offset&quot; parameter." />
+The shift applied during module operations is the offset argument." />
 
 
 
@@ -128,7 +128,7 @@ The shift applied during module operations is passed as &quot;offset&quot; param
     <div class="ref-description">
     <p>Also takes the module input object to calculate the offset of the output object.
 The new offset is simply (module input offset) + (shift applied during module operations)
-The shift applied during module operations is passed as "offset" parameter.</p>
+The shift applied during module operations is the <code>offset</code> argument.</p>
     </div>
 
     <pre class="usage"><span class='fu'>.get_module_output</span><span class='op'>(</span><span class='va'>results</span>, <span class='va'>input</span>, offset <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span></pre>
@@ -138,15 +138,15 @@ The shift applied during module operations is passed as "offset" parameter.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>results</th>
-      <td><p>numeric vector</p></td>
+      <td><p>numeric vector containing output of module operations.</p></td>
     </tr>
     <tr>
       <th>input</th>
-      <td><p>module input object</p></td>
+      <td><p>module input object. Input originally given to module.</p></td>
     </tr>
     <tr>
       <th>offset</th>
-      <td><p>integer</p></td>
+      <td><p>integer. Shift resulting from operations performed in module.</p></td>
     </tr>
     </table>
 
@@ -165,7 +165,7 @@ The shift applied during module operations is passed as "offset" parameter.</p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Jinzhou Li.</p>
+  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Ana Grosu.</p>
 </div>
 
 <div class="pkgdown">

@@ -127,18 +127,22 @@
     <p>Convert module output object into tibble</p>
     </div>
 
-    <pre class="usage"><span class='fu'>.make_tibble_from_output</span><span class='op'>(</span><span class='va'>output</span>, <span class='va'>output_name</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>.make_tibble_from_output</span><span class='op'>(</span><span class='va'>output</span>, <span class='va'>output_name</span>, index_col <span class='op'>=</span> <span class='st'>"idx"</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>output</th>
-      <td><p>module output object</p></td>
+      <td><p>module output object.</p></td>
     </tr>
     <tr>
       <th>output_name</th>
-      <td><p>string. Name to be given to the values column</p></td>
+      <td><p>string. Name to be given to the <code>values</code> column</p></td>
+    </tr>
+    <tr>
+      <th>index_col</th>
+      <td><p>string. Name of the index column included in the output.</p></td>
     </tr>
     </table>
 
@@ -157,7 +161,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Jinzhou Li.</p>
+  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Ana Grosu.</p>
 </div>
 
 <div class="pkgdown">

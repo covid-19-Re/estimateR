@@ -22,7 +22,15 @@ Use only when providing empirical delay data.}
 \item{...}{
   Arguments passed on to \code{\link[=get_matrix_from_empirical_delay_distr]{get_matrix_from_empirical_delay_distr}}
   \describe{
-    \item{\code{min_number_cases}}{integer. Minimal number of cases to build empirical distribution from}
+    \item{\code{min_number_cases}}{integer. Minimal number of cases to build
+the empirical distribution from. TODO add details}
+    \item{\code{min_number_cases_fraction}}{numeric. Between 0 and 1.
+If \code{min_number_cases} is not provided (kept to \code{NULL}),
+the number of most-recent cases used to build
+the instant delay distribution is \code{min_number_cases_fraction}
+times the total number of reported delays.}
+    \item{\code{min_min_number_cases}}{numeric. Lower bound
+for number of cases used to build an instant delay distribution.}
     \item{\code{upper_quantile_threshold}}{numeric. Between 0 and 1. TODO add details}
     \item{\code{ref_date}}{Date. Optional. Date of the first data entry in \code{incidence_data}}
     \item{\code{time_step}}{string. Time between two consecutive incidence datapoints.

@@ -7,10 +7,10 @@
 .get_values(module_object)
 }
 \arguments{
-\item{module_object}{}
+\item{module_object}{module object.}
 }
 \value{
-vector containing values
+vector containing \code{values} only
 }
 \description{
 This function must be adapted if the module_input_object implementation changes.

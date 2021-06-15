@@ -26,12 +26,24 @@ Available options are:
 implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
 }}
 
-\item{uncertainty_summary_method}{string. TODO continue here
+\item{uncertainty_summary_method}{string. One of the following options:
 \itemize{
-\item{'original estimate - CI from bootstrap estimates'}
-\item{'bagged mean - CI from bootstrap estimates'}
-} 'NONE' if no summary of bootstrap estimates is made
-or one of the possible strings in \code{\link{summarise_uncertainty}}}
+\item{'NONE' if no summary of bootstrap estimates is required}
+\item{'original estimate - CI from bootstrap estimates'.
+The confidence interval is built using bootstrapped estimates
+and centered around the original estimates.}
+\item{'bagged mean - CI from bootstrap estimates'.
+The confidence interval is built using bootstrapped estimates
+and centered around the mean of bootstrapped estimates and original estimates.}
+}}
+
+\item{bootstrapping_method}{string. Method to perform bootstrapping
+of the original incidence data.
+Available options are:
+\itemize{
+\item{'non-parametric block boostrap',
+implemented in \code{\link{.block_bootstrap}}}
+}}
 }
 \description{
 Methods available for each module

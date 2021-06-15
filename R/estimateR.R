@@ -82,12 +82,23 @@ NULL
 #' \item{'EpiEstim sliding window',
 #' implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
 #' }
-#' @param uncertainty_summary_method string. TODO continue here
+#' @param uncertainty_summary_method string. One of the following options:
 #' \itemize{
-#' \item{'original estimate - CI from bootstrap estimates'}
-#' \item{'bagged mean - CI from bootstrap estimates'}
-#' } 'NONE' if no summary of bootstrap estimates is made
-#' or one of the possible strings in \code{\link{summarise_uncertainty}}
+#' \item{'NONE' if no summary of bootstrap estimates is required}
+#' \item{'original estimate - CI from bootstrap estimates'.
+#' The confidence interval is built using bootstrapped estimates
+#' and centered around the original estimates.}
+#' \item{'bagged mean - CI from bootstrap estimates'.
+#' The confidence interval is built using bootstrapped estimates
+#' and centered around the mean of bootstrapped estimates and original estimates.}
+#' }
+#' @param bootstrapping_method string. Method to perform bootstrapping
+#' of the original incidence data.
+#' Available options are:
+#' \itemize{
+#' \item{'non-parametric block boostrap',
+#' implemented in \code{\link{.block_bootstrap}}}
+#' }
 #'
 #' @name module_methods
 NULL
@@ -100,9 +111,61 @@ NULL
 #' correspond to one of the types of \code{\link[stats:Distributions]{distributions}} supported in the \link[stats]{Distributions} package.
 #' \code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.
 #' @param vector_a,vector_b,delay_distribution_vector discretized probability distribution vector
-#' @param matrix_a,matrix_b discretized delay distribution matrix
+#' @param matrix_a,matrix_b,delay_distribution_matrix discretized delay distribution matrix
 #'
 #' @name distribution
+NULL
+
+#' Empirical delay data format
+#'
+#' @details An \code{empirical_delays} dataframe must contain (at least) two columns.
+#' An 'event_date' column of type \code{Date}
+#' and a 'report_delay' column of type \code{numeric}.
+#' Each row represents the recording of a single delay between event and observation.
+#' Typically, the 'event' here is the onset of symptoms of the disease of interest.
+#' And the observation can be, for instance, case confirmation, hospital admission,
+#' admission to an ICU, or death, depending on what the incidence data represents.
+#' For a particular row, 'event_date' would then represent, for a single individual,
+#' the date at which symptoms appeared. And 'report_delay' would represent the number
+#' of time steps (as specified by \code{time_step}) until the observation was made
+#' for this same individual.
+#'
+#' @name empirical_delay_data_format
+NULL
+
+#' Uncertainty summary
+#'
+#' @param original_estimates Optional. Estimates obtained on the original data.
+#' Must be a dataframe with a timestep index column named \code{index_col}
+#' and an estimate column named \code{Re_estimate_col}.
+#' The index column must not contain any \code{NA} value.
+#' @param bootstrapped_estimates Estimates obtained on a number of bootstrap
+#' replicates of the original data.
+#' Must be a dataframe in the long format
+#' with a timestep index column named \code{index_col},
+#' a bootstrap replicate index column named \code{bootstrap_id_col},
+#' and an estimate column named \code{Re_estimate_col}.
+#' The index column must not contain any \code{NA} value.
+#' @param central_estimates Estimates around which the confidence interval is going to be centered.
+#' Must be a dataframe with a timestep index column named \code{index_col}
+#' and an estimate column named \code{Re_estimate_col}.
+#' The index column must not contain any \code{NA} value.
+#' @param Re_estimate_col string. Name of the column containing Re estimates
+#' @param bootstrap_id_col string. Name of the column containing bootstrap samples numbering.
+#' Id 0 must correspond to the estimate on the original data.
+#' @param index_col string. Index column to keep track of which data point
+#'  in bootstrapped estimates corresponds to which data point in the original estimates.
+#' @param alpha value between 0 and 1. Confidence level of the confidence interval.
+#'
+#' @name uncertainty
+NULL
+
+#' Module object utilities
+#'
+#' @param index_col string. Index column to keep track of which data point
+#'  in bootstrapped estimates corresponds to which data point in the original estimates.
+#'
+#' @name module_objects
 NULL
 
 

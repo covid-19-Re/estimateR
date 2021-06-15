@@ -7,6 +7,8 @@
 .smooth_LOESS(incidence_input, data_points_incl = 21, degree = 1)
 }
 \arguments{
+\item{incidence_input}{module input object.}
+
 \item{data_points_incl}{integer. Size of the window used in the LOESS algorithm.}
 
 \item{degree}{integer. LOESS degree.}

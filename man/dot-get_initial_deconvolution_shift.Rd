@@ -10,8 +10,11 @@
 \item{delay_distribution_vector}{discretized probability distribution vector}
 }
 \value{
-
+an integer value corresponding to the rounded median of
+the input delay distribution.
 }
 \description{
-Get initial shift for deconvolution step
+This utility function returns the number of timesteps
+by which the incidence data should be shifted back in the past
+for the initial step of the Richardson-Lucy deconvolution algorithm.
 }
