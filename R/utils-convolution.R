@@ -128,8 +128,8 @@
 .convolve_delay_distributions <- function(first_delay,
                                           second_delay) {
 
-  .are_valid_argument_values(list(list(first_delay, "delay_object", 0), # TODO EXPLAIN WHY
-                                  list(second_delay, "delay_object", 0))) #
+  .are_valid_argument_values(list(list(first_delay, "delay_object", 1), # TODO EXPLAIN WHY
+                                  list(second_delay, "delay_object", 1))) #
 
   if( .is_numeric_vector(first_delay) ){
     if ( .is_numeric_vector(second_delay) ){
@@ -160,6 +160,7 @@
 
 #TODO generalize this to a list of inputs
 #TODO add details on what is returned (vector or matrix)
+#TODO rename to 'convolve_delays'
 #' Convolve delay inputs.
 #'
 #' This function is flexible in the type of delay inputs it can handle.
@@ -187,67 +188,32 @@
 #' @export
 convolve_delay_inputs <- function(delay_incubation,
                                   delay_onset_to_report,
-                                  n_report_time_steps,
+                                  n_report_time_steps = NULL,
                                   ...){
+  
+  # We put '1' here, because we do not care here about checking the dimension of the matrix.
+  .are_valid_argument_values(list(list(delay_incubation, "delay_object", 1),
+                                  list(delay_onset_to_report, "delay_object", 1)))
 
-   .are_valid_argument_values(list(list(delay_incubation, "delay_object", 0),
-                                   list(delay_onset_to_report, "delay_object", 0))) #todo: n_report_time_steps?
-                     
   dots_args <- .get_dots_as_list(...)
- 
-  #TODO put these tests below in a utility function
-  if( .check_is_empirical_delay_data(delay_incubation) ){
-    if(n_report_time_steps == 0) {
-      stop("Empirical delay data input but 'n_time_steps' parameter was not set or set to zero.")
-    }
-    delay_distribution_incubation <- do.call(
-      'get_matrix_from_empirical_delay_distr',
-      c(list(empirical_delays = delay_incubation,
-             n_report_time_steps = n_report_time_steps),
-        .get_shared_args(list(get_matrix_from_empirical_delay_distr), dots_args))
-    )
 
-  } else if(is.matrix(delay_incubation)) {
-    #TODO check that delay_incubation is actually a delay distribution matrix
-    delay_distribution_incubation <- delay_incubation
-  } else if(.is_numeric_vector(delay_incubation) || is.list(delay_incubation)){
-    delay_distribution_incubation <- .get_delay_distribution(delay_incubation)
-  } else {
-    stop("Invalid 'delay_incubation' input. 'delay_incubation' must be either:
-         a numeric vector representing a discretized probability distribution,
-         or a matrix representing discretized probability distributions,
-         or a distribution object (e.g. list(name = 'gamma', scale = X, shape = Y)),
-         or empirical delay data.")
-  }
+  delay_distribution_incubation <- do.call(
+    '.get_delay_distribution',
+    c(list(delay = delay_incubation,
+           n_report_time_steps = n_report_time_steps),
+      .get_shared_args(list(get_matrix_from_empirical_delay_distr,
+                            build_delay_distribution), dots_args))
+  )
 
-  if( .check_is_empirical_delay_data(delay_onset_to_report) ){
-    if(n_report_time_steps == 0) {
-      stop("Empirical delay data input but 'n_report_time_steps' parameter was not set or set to zero.")
-    }
-
-    delay_distribution_onset_to_report <- do.call(
-      'get_matrix_from_empirical_delay_distr',
-      c(list(empirical_delays = delay_onset_to_report,
-             n_report_time_steps = n_report_time_steps),
-        .get_shared_args(list(get_matrix_from_empirical_delay_distr), dots_args))
-    )
-
-
-  } else if(is.matrix(delay_onset_to_report)) {
-    #TODO check that delay_incubation is actually a delay distribution matrix
-    delay_distribution_onset_to_report <- delay_onset_to_report
-  } else if (.is_numeric_vector(delay_onset_to_report) || is.list(delay_onset_to_report)) {
-    delay_distribution_onset_to_report <- .get_delay_distribution(delay_onset_to_report)
-  } else {
-    stop("Invalid 'delay_onset_to_report' input. 'delay_onset_to_report' must be either:
-         a numeric vector representing a discretized probability distribution,
-         or a matrix representing discretized probability distributions,
-         or a distribution object (e.g. list(name = 'gamma', scale = X, shape = Y)),
-         or empirical delay data.")
-  }
+  delay_distribution_onset_to_report <- do.call(
+    '.get_delay_distribution',
+    c(list(delay = delay_onset_to_report,
+           n_report_time_steps = n_report_time_steps),
+      .get_shared_args(list(get_matrix_from_empirical_delay_distr,
+                            build_delay_distribution), dots_args))
+  )
 
   total_delay_distribution <- .convolve_delay_distributions(delay_distribution_incubation,
                                                             delay_distribution_onset_to_report)
-
   return(total_delay_distribution)
 }

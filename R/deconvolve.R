@@ -19,14 +19,17 @@ deconvolve_incidence <- function( incidence_data,
                                   delay_onset_to_report = c(1.0),
                                   simplify_output = TRUE,
                                   ... ) {
-  
+
+  #TODO be careful if we relax the constraints on incidence_data:
+  #.get_input_length(incidence_data) make not make sense anymore
+  #TODO need to make sure whether delays can be matrices with nrows > length(incidence_data)
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
                                   list(deconvolution_method, "deconvolution_method"),
                                   list(delay_incubation, "delay_object", .get_input_length(incidence_data)),
                                   list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)),
                                   list(simplify_output, "boolean")))
-  
-  
+
+
 
   dots_args <- .get_dots_as_list(...)
   input <- .get_module_input(incidence_data)
@@ -59,6 +62,7 @@ deconvolve_incidence <- function( incidence_data,
   return(deconvolved_incidence)
 }
 
+#TODO test estimates with onset dates.
 #TODO rework on verbosity
 #' Deconvolve the incidence input with the Richardson-Lucy (R-L) algorithm
 #'
@@ -76,7 +80,8 @@ deconvolve_incidence <- function( incidence_data,
   max_iterations = 100,
   verbose = FALSE
 ) {
-  
+
+  #TODO delay_distribution must be vector or matrix (not delay data or distribution list)
   .are_valid_argument_values(list(list(incidence_input, "module_input"),
                                   list(delay_distribution, "delay_object", .get_input_length(incidence_input)),
                                   list(threshold_chi_squared, "non_negative_number"),
@@ -95,6 +100,7 @@ deconvolve_incidence <- function( incidence_data,
   first_recorded_incidence <-  incidence_vector[1]
   last_recorded_incidence <- incidence_vector[length_original_vector]
 
+  #TODO reorganize this: build matrix beforehand and get shift uniquely from matrix size
   if(NCOL(delay_distribution) == 1) {
     first_guess_delay <- .get_initial_deconvolution_shift(delay_distribution)
   } else {

@@ -14,10 +14,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Draft vignette demonstrating a simple use case of *estimateR*
+# Draft vignette demonstrating a simple use case of **estimateR**
 
-This vignette's purpose is to demonstrate how to use the *estimateR* package in a basic use case.
-The *estimateR* package provides tools to estimate the effective reproductive number through time from delayed and indirect observations of infection events.
+This vignette's purpose is to demonstrate how to use the **estimateR** package in a basic use case.
+The **estimateR** package provides tools to estimate the effective reproductive number through time from delayed and indirect observations of infection events.
 
 Let us start with a toy dataset. 
 The incidence data represents daily counts of case confirmations.
@@ -59,7 +59,7 @@ The delay between infection and observation can thus be divided into two distinc
 
 In mathematical terms, the observed time series is the result of the convolution of the time series of infections and the distribution of delays. To infer the time series of infection events, we perform the inverse transformation: we deconvolve the delay distribution from the time series of observations. We use the Richardson-Lucy algorithm to perform this deconvolution step. 
 
-In *estimateR*, we approximate both delay distributions -incubation period and delay from onset of symptoms to case observation- by gamma distributions.
+In **estimateR**, we approximate both delay distributions -incubation period and delay from onset of symptoms to case observation- by gamma distributions.
 
 ## Inference of infection events
 
@@ -132,8 +132,8 @@ head(toy_results)
 
 
 ## Simplification using a wrapper function
-The process presented above can be performed in a single function `smooth_deconvolve_estimate`.
-We rewrite all the code blocks above using `smooth_deconvolve_estimate` this time.
+The process presented above can be performed in a single function `estimate_Re_from_noisy_delayed_incidence`.
+We rewrite all the code blocks above using `estimate_Re_from_noisy_delayed_incidence` this time.
 
 ```{r}
 date_first_data_point <- as.Date("2020-02-24")
@@ -159,7 +159,7 @@ std_serial_interval <- 2.3
 
 estimation_window <- 3
 
-toy_estimates <- smooth_deconvolve_estimate(
+toy_estimates <- estimate_Re_from_noisy_delayed_incidence(
   toy_incidence_data,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",

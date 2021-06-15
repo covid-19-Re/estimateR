@@ -12,6 +12,7 @@ smooth_incidence <- function(incidence_data,
                              smoothing_method = "LOESS",
                              simplify_output = TRUE,
                              ...) {
+
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
                                   list(smoothing_method, "smoothing_method"),
                                   list(simplify_output, "boolean")))

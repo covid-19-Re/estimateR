@@ -97,7 +97,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/empirical-delay-data.html">Re estimation using empirical delay data</a>
+      <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
+    </li>
+    <li>
+      <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
+    </li>
+    <li>
+      <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
     </li>
   </ul>
 </li>
@@ -155,15 +161,27 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="bootstrap_params.html">bootstrap_params</a></code> </p>
+        </td>
+        <td><p>Bootstrapping parameters</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="build_delay_distribution.html">build_delay_distribution()</a></code> </p>
         </td>
-        <td><p>Build a discretized probability distribution vector from a delay distribution</p></td>
+        <td><p>Build a discretized probability distribution vector from a delay distribution list</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="convolve_delay_inputs.html">convolve_delay_inputs()</a></code> </p>
         </td>
         <td><p>Convolve delay inputs.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="correct_for_partially_observed_data.html">correct_for_partially_observed_data()</a></code> </p>
+        </td>
+        <td><p>Correct incidence data for yet-to-be-observed fraction of events</p></td>
       </tr><tr>
         
         <td>
@@ -313,7 +331,7 @@
         <td>
           <p><code><a href="dot-get_delay_distribution.html">.get_delay_distribution()</a></code> </p>
         </td>
-        <td><p>Return probability distribution vector</p></td>
+        <td><p>Return probability distribution vector or matrix</p></td>
       </tr><tr>
         
         <td>
@@ -515,6 +533,18 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="estimate_Re_from_noisy_delayed_incidence.html">estimate_Re_from_noisy_delayed_incidence()</a></code> </p>
+        </td>
+        <td><p>Estimate Re from incidence data</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="estimate_from_combined_observations.html">estimate_from_combined_observations()</a></code> </p>
+        </td>
+        <td><p>Estimate Re from delayed observations of infection events.</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="get_block_bootstrapped_estimate.html">get_block_bootstrapped_estimate()</a></code> </p>
         </td>
         <td><p>Estimate Re from incidence and estimate uncertainty with block-bootstrapping</p></td>
@@ -527,15 +557,39 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="get_bootstrapped_estimates_from_combined_observations.html">get_bootstrapped_estimates_from_combined_observations()</a></code> </p>
+        </td>
+        <td><p>Estimate Re from incidence and estimate uncertainty by bootstrapping</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="get_infections_from_incidence.html">get_infections_from_incidence()</a></code> </p>
+        </td>
+        <td><p>Infer timeseries of infection events from incidence data of delayed observations</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="get_matrix_from_empirical_delay_distr.html">get_matrix_from_empirical_delay_distr()</a></code> </p>
         </td>
         <td><p>Build matrix of delay distributions through time from empirical delay data.</p></td>
       </tr><tr>
         
         <td>
+          <p><code><a href="inner_addition.html">inner_addition()</a></code> </p>
+        </td>
+        <td><p>Title</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="inner_module.html">inner_module</a></code> </p>
         </td>
         <td><p>Inner module option characteristics</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="left_addition.html">left_addition()</a></code> </p>
+        </td>
+        <td><p>Title</p></td>
       </tr><tr>
         
         <td>
@@ -566,12 +620,6 @@
           <p><code><a href="pipe_params.html">pipe_params</a></code> </p>
         </td>
         <td><p>Pipe parameters</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="smooth_deconvolve_estimate.html">smooth_deconvolve_estimate()</a></code> </p>
-        </td>
-        <td><p>Estimate Re from incidence data</p></td>
       </tr><tr>
         
         <td>

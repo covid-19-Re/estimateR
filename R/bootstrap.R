@@ -18,12 +18,12 @@ get_bootstrap_replicate <- function( incidence_data,
                                      bootstrapping_method = "non-parametric block boostrap",
                                      simplify_output = TRUE,
                                      ... ) {
-  
+
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
                                   list(bootstrapping_method, "bootstrapping_method"),
                                   list(simplify_output, "boolean")))
-  
-  
+
+
 
   dots_args <- .get_dots_as_list(...)
   input <- .get_module_input(incidence_data)
@@ -69,6 +69,7 @@ get_bootstrap_replicate <- function( incidence_data,
                                   list(smoothing_method, "smoothing_method"),
                                   list(round_incidence, "boolean")))
   
+
   dots_args <- .get_dots_as_list(...)
 
   incidence_vector <- .get_values(incidence_input)

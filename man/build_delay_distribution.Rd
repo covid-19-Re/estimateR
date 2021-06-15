@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-distribution.R
 \name{build_delay_distribution}
 \alias{build_delay_distribution}
-\title{Build a discretized probability distribution vector from a delay distribution}
+\title{Build a discretized probability distribution vector from a delay distribution list}
 \usage{
 build_delay_distribution(
   distribution,
@@ -28,5 +28,5 @@ Set to TRUE if \code{distribution} represent the fit of data that was offset by 
 vector containing the discretized probability distribution vector of \code{distribution}.
 }
 \description{
-Build a discretized probability distribution vector from a delay distribution
+Build a discretized probability distribution vector from a delay distribution list
 }

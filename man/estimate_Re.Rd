@@ -28,7 +28,7 @@ output object if output offset is zero? TODO to be described better.}
 \item{...}{
   Arguments passed on to \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}
   \describe{
-    \item{\code{minimul_cumul_incidence}}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
+    \item{\code{minimum_cumul_incidence}}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
     \item{\code{estimation_window}}{Integer scalar. Number of data points over which to assume Re to be constant.}
     \item{\code{mean_serial_interval}}{Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
     \item{\code{std_serial_interval}}{Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}

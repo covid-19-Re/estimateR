@@ -6,6 +6,8 @@
 \arguments{
 \item{output_Re_only}{boolean. Should the output only contain Re estimates?
 (as opposed to containing results for each intermediate step)}
+
+\item{output_infection_incidence_only}{boolean. TODO add details}
 }
 \description{
 Pipe parameters

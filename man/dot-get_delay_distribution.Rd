@@ -2,12 +2,19 @@
 % Please edit documentation in R/utils-distribution.R
 \name{.get_delay_distribution}
 \alias{.get_delay_distribution}
-\title{Return probability distribution vector}
+\title{Return probability distribution vector or matrix}
 \usage{
-.get_delay_distribution(delay, ...)
+.get_delay_distribution(
+  delay,
+  n_report_time_steps = NULL,
+  ref_date = NULL,
+  time_step = "day",
+  ...
+)
 }
 \arguments{
-\item{delay}{list or vector. Delay distribution to transform or validate
+\item{delay}{list, vector, matrix or dataframe.
+Delay distribution to transform or validate
 into a vector of discretized probability distribution.}
 
 \item{...}{
@@ -21,11 +28,17 @@ Set to TRUE if \code{distribution} represent the fit of data that was offset by 
   }}
 }
 \value{
-vector of discretized probability distribution.
+vector or matrix of discretized probability distribution.
 }
 \description{
-Can take a \code{distribution} list or a probability distribution vector.
-In the first case, this function builds and return the vector of discretized probability distribution.
-In the second case, it checks that \code{delay} is a valid discretized probability distribution and returns it.
+Can take a \code{distribution} list, a probability distribution vector,
+a probability distribution matrix or empirical delay data as input.
+}
+\details{
+If \code{delay} is a \code{distribution} list,
+this function builds and return the vector of discretized probability distribution.
+If it is a vector, it checks that \code{delay}
+is a valid discretized probability distribution and returns it.
 See \code{\link{build_delay_distribution}} for details on the \code{distribution} list format.
+TODO add details on matrix and empirical data cases and the acceptable formats.
 }

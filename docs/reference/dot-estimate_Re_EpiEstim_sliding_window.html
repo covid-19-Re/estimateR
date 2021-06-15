@@ -100,7 +100,13 @@ for a sliding window of 4 time steps." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/empirical-delay-data.html">Re estimation using empirical delay data</a>
+      <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
+    </li>
+    <li>
+      <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
+    </li>
+    <li>
+      <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
     </li>
   </ul>
 </li>
@@ -133,7 +139,7 @@ for a sliding window of 4 time steps.</p>
 
     <pre class="usage"><span class='fu'>.estimate_Re_EpiEstim_sliding_window</span><span class='op'>(</span>
   <span class='va'>incidence_input</span>,
-  minimul_cumul_incidence <span class='op'>=</span> <span class='fl'>0</span>,
+  minimum_cumul_incidence <span class='op'>=</span> <span class='fl'>10</span>,
   estimation_window <span class='op'>=</span> <span class='fl'>3</span>,
   mean_serial_interval <span class='op'>=</span> <span class='fl'>4.8</span>,
   std_serial_interval <span class='op'>=</span> <span class='fl'>2.3</span>,
@@ -148,7 +154,7 @@ for a sliding window of 4 time steps.</p>
       <td><p>module input object.</p></td>
     </tr>
     <tr>
-      <th>minimul_cumul_incidence</th>
+      <th>minimum_cumul_incidence</th>
       <td><p>Numeric scalar. Minimum number of cumulated infections before starting the Re estimation</p></td>
     </tr>
     <tr>

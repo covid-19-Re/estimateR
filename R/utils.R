@@ -3,6 +3,7 @@
 #TODO make a utils function that converts individual module object into a tibble with a date
 #TODO clarify the language between module input object and module output object
 #TODO reorganize this file (maybe rename)
+#TODO write function that does inner addition of two incidence module inputs.
 
 # Useful operator
 `%!in%` <- Negate(`%in%`)
@@ -41,12 +42,12 @@ merge_outputs <- function(output_list,
   tibble_list <- lapply(1:length(output_list),
                         function(i) {
                           .make_tibble_from_output(output = output_list[[i]],
-                                                  output_name = names(output_list)[i],
-                                                  index_col = index_col)
+                                                   output_name = names(output_list)[i],
+                                                   index_col = index_col)
                         })
 
   merged_outputs <- plyr::join_all(tibble_list, by= index_col, type='full') %>%
-                      dplyr::arrange(.data[[index_col]])
+    dplyr::arrange(.data[[index_col]])
 
   if( !is.null(ref_date) ) {
     dates <- seq.Date(from = ref_date + min(merged_outputs[[index_col]]),
@@ -162,7 +163,7 @@ merge_outputs <- function(output_list,
   
   .are_valid_argument_values(list(list(module_object, "module_input")))
   if(is.list(module_object)) {
-  return(module_object$values)
+    return(module_object$values)
   } else {
     return(module_object)
   }
@@ -219,6 +220,163 @@ merge_outputs <- function(output_list,
   }
 
   return(list("values" = results, "index_offset" = new_offset))
+}
+
+#TODO doc
+#' Title
+#'
+#' @param input_a
+#' @param input_b
+#'
+#' @return
+#' @export
+inner_addition <- function(input_a, input_b){
+  length_a <- .get_input_length(input_a)
+  length_b <- .get_input_length(input_b)
+
+  offset_a <- .get_offset(input_a)
+  offset_b <- .get_offset(input_b)
+
+  inner_offset <- max(offset_a, offset_b)
+  length_addition <- min(length_a - (inner_offset - offset_a), length_b - (inner_offset - offset_b))
+
+  inner_a <- .get_values(input_a)[seq(from = inner_offset - offset_a + 1, by = 1, length.out =  length_addition)]
+  inner_b <- .get_values(input_b)[seq(from = inner_offset - offset_b + 1, by = 1, length.out =  length_addition)]
+
+  return(.get_module_input(list(values = inner_a + inner_b, index_offset = inner_offset)))
+}
+
+#TODO doc
+#' Title
+#'
+#' @param input_a
+#' @param input_b
+#'
+#' @return
+#' @export
+left_addition <- function(input_a, input_b){
+  #TODO validate input
+  offset_a <- .get_offset(input_a)
+  offset_b <- .get_offset(input_b)
+
+  min_offset <- min(offset_a, offset_b)
+  padded_input_a <- leftpad_input(input_a, min_offset, padding_value = 0)
+  padded_input_b <- leftpad_input(input_b, min_offset, padding_value = 0)
+
+  length_a <- .get_input_length(padded_input_a)
+  length_b <- .get_input_length(padded_input_b)
+
+  length_addition <- min(length_a, length_b)
+
+  values_a <- .get_values(padded_input_a)[1:length_addition]
+  values_b <- .get_values(padded_input_b)[1:length_addition]
+
+  return(.get_module_input(list(values = values_a + values_b, index_offset = min_offset)))
+}
+
+#TODO doc
+leftpad_input <- function(input, new_offset, padding_value = 0){
+  #TODO validate input
+  if(new_offset >= .get_offset(input)) {
+    return(input)
+  } else {
+    padded_values <- c(rep(padding_value, length.out = .get_offset(input) - new_offset), .get_values(input))
+    return(list(values = padded_values, index_offset = new_offset))
+  }
+}
+
+#TODO test with matrix delay
+#TODO polish doc
+#TODO redoc
+#' Correct incidence data for yet-to-be-observed fraction of events
+#'
+#' Use this function to correct the tail of an incidence timeseries
+#' if incidence was collected following a subsequent observation event.
+#' For instance, if the incidence represents people starting to show symptoms of a disease
+#' (dates of onset of symptoms), the data would typically have been collected among
+#' individuals whose case was confirmed via a test.
+#' If so, among all events of onset of symptoms, only those who had time to be
+#' confirmed by a test were reported.
+#' Thus, close to the present, there is an underreporting of onset of symptoms events.
+#' In order to account for this effect, this function divides each incidence value
+#' by the probability of an event happening at a particular timestep to have been observed.
+#' Typically, this correction only affects the few most recent datapoints.
+#'
+#' @param delay_distribution_final_report TODO refactor to estimateR
+#' Distribution of the delay between the events collected in the incidence data
+#' and the a posteriori observations of these events.
+#' @param cutoff_observation_probability value between 0 and 1.
+#' Only datapoints for timesteps that have a probability to be observed higher
+#' than \code{cutoff_observation_probability} are kept.
+#' The few datapoints with a lower probability to be observed are trimmed off
+#' the tail of the timeseries.
+#' @inheritParams module_structure
+#'
+#' @return module output object
+#' @export
+correct_for_partially_observed_data <- function( incidence_data,
+                                                 delay_distribution_final_report,
+                                                 cutoff_observation_probability = 0.1,
+                                                 ref_date = NULL,
+                                                 time_step = "day",
+                                                 ...) {
+
+
+  #TODO validate cutoff_observation_probability argument
+  .are_valid_argument_values(list(list(incidence_data, "module_input"),
+                                  list(delay_distribution_final_report, "delay_object", .get_input_length(incidence_data))))
+
+  input <- .get_module_input(incidence_data)
+  incidence_vector <- .get_values(input)
+
+  dots_args <- .get_dots_as_list(...)
+
+  delay_distribution_final_report <- do.call(
+    '.get_delay_distribution',
+    c(list(delay = delay_distribution_final_report,
+           n_report_time_steps = length(incidence_vector),
+           ref_date = ref_date,
+           time_step = time_step),
+      .get_shared_args(list(.get_delay_distribution,
+                            get_matrix_from_empirical_delay_distr,
+                            build_delay_distribution),
+                       dots_args))
+  )
+
+  if(NCOL(delay_distribution_final_report) == 1) {
+    # delay_distribution_final_report is a vector, we build a delay distr matrix from it
+    delay_distribution_matrix_final_report <- .get_matrix_from_single_delay_distr(delay_distribution_final_report,
+                                                                                  N=length(incidence_vector))
+  } else {
+    # delay_distribution_final_report is a matrix, we truncate off the extra initial columns (required for R-L algo only)
+    initial_offset <- ncol(delay_distribution_final_report) - length(incidence_vector) + 1
+    delay_distribution_matrix_final_report <- delay_distribution_final_report[initial_offset:nrow(delay_distribution_final_report),
+                                                                              initial_offset:ncol(delay_distribution_final_report)]
+  }
+
+  Q_vector_observation_to_final_report <- apply(delay_distribution_matrix_final_report, MARGIN = 2, sum)
+
+  #TODO improve this error
+  if(any(is.na(Q_vector_observation_to_final_report)) || isTRUE(any(Q_vector_observation_to_final_report == 0, na.rm = FALSE))) {
+    warning("Invalid delay_distribution_final_report argument.")
+  }
+  #TODO need to make sure that the matrix is the same size (as opposed to having extra columns leading)
+  incidence_vector <- incidence_vector / Q_vector_observation_to_final_report
+
+  # Now we cut off values at the end of the time series,
+  # those dates for which the probability of having observed an event that happened on that date is too low
+  # We define 'too low' as being below a 'cutoff_observation_probability'
+  tail_values_below_cutoff <- which(rev(Q_vector_observation_to_final_report) < cutoff_observation_probability )
+
+  if(length(tail_values_below_cutoff) == 0) {
+    cutoff <- 0
+  } else {
+    cutoff <- max(tail_values_below_cutoff)
+  }
+
+  truncated_incidence_vector <- incidence_vector[1:(length(incidence_vector) - cutoff)]
+
+  return(.get_module_output(truncated_incidence_vector, input))
 }
 
 #' Simplify output object if possible

@@ -54,7 +54,10 @@ Suggests:
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,
-    ggplot2
+    ggplot2,
+    viridis,
+    readr,
+    stringr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Depends: 

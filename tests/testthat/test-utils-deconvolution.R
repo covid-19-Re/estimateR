@@ -86,6 +86,7 @@ test_that("convolve_delay_inputs returns same output as empirical method of conv
                                 shape = shape_onset_to_report,
                                 scale = scale_onset_to_report)
 
+  #TODO fix this (need to pass n_report_time_steps)
   convolved_output <- convolve_delay_inputs(delay_incubation = incubation_delay,
                                             delay_onset_to_report = onset_to_report_delay)
 

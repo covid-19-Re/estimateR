@@ -7,7 +7,7 @@
 convolve_delay_inputs(
   delay_incubation,
   delay_onset_to_report,
-  n_report_time_steps,
+  n_report_time_steps = NULL,
   ...
 )
 }

@@ -6,6 +6,10 @@
 \arguments{
 \item{incidence_data}{numeric vector. Incidence data (TODO improve definition)}
 
+\item{partially_delayed_incidence}{TODO add details}
+
+\item{fully_delayed_incidence}{TODO add details}
+
 \item{simplify_output}{boolean. Return a numeric vector instead of module
 output object if output offset is zero? TODO to be described better.}
 }

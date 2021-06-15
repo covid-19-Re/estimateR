@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Estimate Re from incidence and estimate uncertainty with block-bootstrapping — get_block_bootstrapped_estimate" />
-<meta property="og:description" content="An estimation of the effective reproductive number through time is made with smooth_deconvolve_estimate
+<meta property="og:description" content="An estimation of the effective reproductive number through time is made
 on the original incidence data.
 Then, the same estimation is performed on a number of bootstrap samples built from the original incidence data.
 The estimate on the original data is output along with confidence interval boundaries
@@ -102,7 +102,13 @@ built from the distribution of bootstrapped estimates." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/empirical-delay-data.html">Re estimation using empirical delay data</a>
+      <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
+    </li>
+    <li>
+      <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
+    </li>
+    <li>
+      <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
     </li>
   </ul>
 </li>
@@ -128,7 +134,7 @@ built from the distribution of bootstrapped estimates." />
     </div>
 
     <div class="ref-description">
-    <p>An estimation of the effective reproductive number through time is made with <code>smooth_deconvolve_estimate</code>
+    <p>An estimation of the effective reproductive number through time is made
 on the original incidence data.
 Then, the same estimation is performed on a number of bootstrap samples built from the original incidence data.
 The estimate on the original data is output along with confidence interval boundaries
@@ -223,7 +229,7 @@ and centered around the mean of bootstrapped estimates and original estimates.</
     <dt><code>threshold_chi_squared</code></dt><dd><p>numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.</p></dd>
     <dt><code>max_iterations</code></dt><dd><p>integer. Maximum threshold for the number of iterations in the R-L algorithm.</p></dd>
     <dt><code>verbose</code></dt><dd><p>Boolean. Print verbose output?</p></dd>
-    <dt><code>minimul_cumul_incidence</code></dt><dd><p>Numeric scalar. Minimum number of cumulated infections before starting the Re estimation</p></dd>
+    <dt><code>minimum_cumul_incidence</code></dt><dd><p>Numeric scalar. Minimum number of cumulated infections before starting the Re estimation</p></dd>
     <dt><code>estimation_window</code></dt><dd><p>Integer scalar. Number of data points over which to assume Re to be constant.</p></dd>
     <dt><code>mean_serial_interval</code></dt><dd><p>Numeric positive scalar. <code>mean_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
     <dt><code>std_serial_interval</code></dt><dd><p>Numeric positive scalar. <code>std_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>

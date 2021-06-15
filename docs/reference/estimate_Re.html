@@ -102,7 +102,13 @@ TODO add details on inner function, that it wraps around EpiEstim and so on." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/empirical-delay-data.html">Re estimation using empirical delay data</a>
+      <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
+    </li>
+    <li>
+      <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
+    </li>
+    <li>
+      <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
     </li>
   </ul>
 </li>
@@ -166,7 +172,7 @@ output object if output offset is zero? TODO to be described better.</p></td>
     <tr>
       <th>...</th>
       <td><p>Arguments passed on to <code><a href='.estimate_Re_EpiEstim_sliding_window.html'>.estimate_Re_EpiEstim_sliding_window</a></code></p><dl>
-    <dt><code>minimul_cumul_incidence</code></dt><dd><p>Numeric scalar. Minimum number of cumulated infections before starting the Re estimation</p></dd>
+    <dt><code>minimum_cumul_incidence</code></dt><dd><p>Numeric scalar. Minimum number of cumulated infections before starting the Re estimation</p></dd>
     <dt><code>estimation_window</code></dt><dd><p>Integer scalar. Number of data points over which to assume Re to be constant.</p></dd>
     <dt><code>mean_serial_interval</code></dt><dd><p>Numeric positive scalar. <code>mean_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
     <dt><code>std_serial_interval</code></dt><dd><p>Numeric positive scalar. <code>std_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>

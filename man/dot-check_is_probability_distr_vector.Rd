@@ -7,7 +7,7 @@
 .check_is_probability_distr_vector(
   distribution,
   tolerate_NAs = FALSE,
-  tolerance_on_sum = 0.001
+  tolerance_on_sum = 0.01
 )
 }
 \arguments{
