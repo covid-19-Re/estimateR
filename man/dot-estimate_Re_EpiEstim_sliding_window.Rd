@@ -10,7 +10,8 @@
   estimation_window = 3,
   mean_serial_interval = 4.8,
   std_serial_interval = 2.3,
-  mean_Re_prior = 1
+  mean_Re_prior = 1,
+  output_HPD = FALSE
 )
 }
 \arguments{
