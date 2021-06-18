@@ -308,7 +308,9 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
   if(output_Re_only) {
     return(estimated_Re)
   } else {
-    if(!.is_list_of_outputs(estimated_Re)) {
+    #TODO simplify this call (create util function)
+    test_if_single_output <- try(.is_valid_module_input(estimated_Re, "estimated_Re"), silent = TRUE)
+    if(!("try-error" %in% class(test_if_single_output))) {
       estimated_Re <- list("Re_estimate" = estimated_Re)
     }
 

@@ -20,6 +20,8 @@ Available options are:
 \itemize{
 \item{'EpiEstim sliding window',
 implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
+\item{'EpiEstim piecewise constant',
+implemented in \code{\link{.estimate_Re_EpiEstim_piecewise_constant}}}
 }}
 
 \item{simplify_output}{boolean. Return a numeric vector instead of module

@@ -48,6 +48,8 @@ Available options are:
 \itemize{
 \item{'EpiEstim sliding window',
 implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
+\item{'EpiEstim piecewise constant',
+implemented in \code{\link{.estimate_Re_EpiEstim_piecewise_constant}}}
 }}
 
 \item{bootstrapping_method}{string. Method to perform bootstrapping

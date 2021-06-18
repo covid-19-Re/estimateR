@@ -96,6 +96,8 @@ NULL
 #' \itemize{
 #' \item{'EpiEstim sliding window',
 #' implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
+#' \item{'EpiEstim piecewise constant',
+#' implemented in \code{\link{.estimate_Re_EpiEstim_piecewise_constant}}}
 #' }
 #' @param uncertainty_summary_method string. One of the following options:
 #' \itemize{
