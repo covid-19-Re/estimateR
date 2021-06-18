@@ -15,7 +15,7 @@
 #' @export
 estimate_Re <- function( incidence_data,
                          estimation_method = "EpiEstim sliding window",
-                         simplify_output = TRUE,
+                         simplify_output = FALSE,
                          ... ) {
 
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
@@ -37,8 +37,12 @@ estimate_Re <- function( incidence_data,
   }
 
   if(simplify_output) {
-    #TODO simplify output if output_HPD = TRUE
-    Re_estimate <- .simplify_output(Re_estimate)
+    if(.is_list_of_outputs(Re_estimate)) {
+    #TODO test if this works as intended
+      Re_estimate <- merge_outputs(Re_estimate)
+    } else {
+      Re_estimate <- .simplify_output(Re_estimate)
+    }
   }
 
   return(Re_estimate)
@@ -110,22 +114,22 @@ estimate_Re <- function( incidence_data,
   )
 
   additional_offset <- t_end[1] - 1
-  R_mean <- .get_module_output(R_instantaneous$R$`Mean(R)`,
+  Re_estimate <- .get_module_output(R_instantaneous$R$`Mean(R)`,
                                incidence_input,
                               additional_offset)
   if(output_HPD){
-    R_highHPD <- .get_module_output(R_instantaneous$R$`Quantile.0.975(R)`,
+    Re_highHPD <- .get_module_output(R_instantaneous$R$`Quantile.0.975(R)`,
                                  incidence_input,
                                  additional_offset)
 
-    R_lowHPD <- .get_module_output(R_instantaneous$R$`Quantile.0.025(R)`,
+    Re_lowHPD <- .get_module_output(R_instantaneous$R$`Quantile.0.025(R)`,
                                  incidence_input,
                                  additional_offset)
 
-    return(list(R_mean=R_mean,
-                R_highHPD=R_highHPD,
-                R_lowHPD=R_lowHPD))
+    return(list(Re_estimate=Re_estimate,
+                Re_highHPD=Re_highHPD,
+                Re_lowHPD=Re_lowHPD))
   } else {
-    return(R_mean)
+    return(Re_estimate)
   }
 }

@@ -7,7 +7,7 @@
 estimate_Re(
   incidence_data,
   estimation_method = "EpiEstim sliding window",
-  simplify_output = TRUE,
+  simplify_output = FALSE,
   ...
 )
 }

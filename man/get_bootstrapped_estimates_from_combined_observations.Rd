@@ -12,12 +12,14 @@ get_bootstrapped_estimates_from_combined_observations(
   estimation_method = "EpiEstim sliding window",
   bootstrapping_method = "non-parametric block boostrap",
   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
+  combine_bootstrap_and_estimation_uncertainties = FALSE,
   N_bootstrap_replicates = 100,
   delay_until_partial,
   delay_from_partial_to_full,
   partial_observation_requires_full_observation = TRUE,
   ref_date = NULL,
   time_step = "day",
+  output_Re_only = TRUE,
   ...
 )
 }
@@ -79,6 +81,9 @@ and centered around the mean of bootstrapped estimates and original estimates.}
 
 \item{time_step}{string. Time between two consecutive incidence datapoints.
 "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+
+\item{output_Re_only}{boolean. Should the output only contain Re estimates?
+(as opposed to containing results for each intermediate step)}
 
 \item{...}{
   Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}, \code{\link[=merge_outputs]{merge_outputs}}, \code{\link[=correct_for_partially_observed_data]{correct_for_partially_observed_data}}

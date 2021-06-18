@@ -99,7 +99,11 @@ merge_outputs <- function(output_list,
   dates <- seq.Date(from = ref_date + min(estimates[[index_col]]),
                     by = time_step,
                     along.with = estimates[[index_col]])
-  estimates$date <- dates
+
+  estimates <- estimates %>%
+    dplyr::arrange(.data[[index_col]]) %>%
+    dplyr::mutate(date = dates)
+
   estimates <- dplyr::select(estimates, date, tidyselect::everything())
 
   if(!keep_index_col) {
@@ -377,6 +381,15 @@ correct_for_partially_observed_data <- function( incidence_data,
   }
 }
 
+.simplify <- function(output_list,
+                      ref_date,
+                      time_step = "day") {
+
+  merged_outputs <- merge_outputs(output_list = output_list,
+                ref_date = ref_date,
+                time_step = time_step)
+}
+
 #' Get length of values vector in a module input object.
 #'
 #' @param input module input object.
@@ -579,6 +592,30 @@ correct_for_partially_observed_data <- function( incidence_data,
   } else {
     stop(paste(parameter_name, "has to be either a numeric vector or a list."))
   }
+  return(TRUE)
+}
+
+.is_list_of_outputs <- function(output_list){
+  if(!is.list(output_list)) {
+    return(FALSE)
+  }
+
+  check_if_simple_output <- try(.is_valid_module_input(output_list, deparse(substitute(output_list))),
+                                silent = TRUE)
+
+  # Return FALSE if input is an output object itself
+  if(!("try-error" %in% class(check_if_simple_output))) {
+    return(FALSE)
+  }
+
+  for(i in 1:length(output_list)) {
+    test_output_i <- try(.is_valid_module_input(output_list[[i]], names(output_list)[i]),
+                         silent = TRUE)
+    if("try-error" %in% class(test_output_i)) {
+      return(FALSE)
+    }
+  }
+
   return(TRUE)
 }
 

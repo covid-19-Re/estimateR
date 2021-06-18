@@ -1,3 +1,4 @@
+#TODO redo doc
 #' Summarise the uncertainty obtained from bootstrapping
 #'
 #' @param uncertainty_summary_method One of these options:
@@ -21,182 +22,183 @@
 #' \item{CI_down, the lower limit of the confidence interval}
 #' }
 #' @export
-summarise_uncertainty <- function(bootstrapped_estimates,
-                                  original_estimates = NULL,
+summarise_uncertainty <- function(bootstrapped_values,
+                                  original_values = NULL,
                                   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
-                                  Re_estimate_col = "R_mean",
+                                  value_col = "Re_estimate",
+                                  output_value_col = "Re_estimate",
                                   bootstrap_id_col = "bootstrap_id",
                                   index_col = "idx",
                                   ...){
 
   #TODO validate input
-  #TODO validate the bootstrapped_estimates format
+  #TODO validate the bootstrapped_values format
 
-  if(Re_estimate_col %!in% names(bootstrapped_estimates)) {
-    stop(paste0("Missing ", Re_estimate_col, " column in 'bootstrapped estimates' argument,
-                or 'Re_estimate_col' was not set to the corresponding column name."))
+  if(value_col %!in% names(bootstrapped_values)) {
+    stop(paste0("Missing ", value_col, " column in 'bootstrapped values' argument,
+                or 'value_col' was not set to the corresponding column name."))
   }
 
-  if(bootstrap_id_col %!in% names(bootstrapped_estimates)) {
-    stop(paste0("Missing ", bootstrap_id_col, " column in 'bootstrapped estimates' argument,
+  if(bootstrap_id_col %!in% names(bootstrapped_values)) {
+    stop(paste0("Missing ", bootstrap_id_col, " column in 'bootstrapped values' argument,
                 or 'bootstrap_id_col' was not set to the corresponding column name."))
   }
 
-  if(index_col %!in% names(bootstrapped_estimates)) {
-    stop(paste0("Missing ", index_col, " column in 'bootstrapped estimates' argument,
+  if(index_col %!in% names(bootstrapped_values)) {
+    stop(paste0("Missing ", index_col, " column in 'bootstrapped values' argument,
                 or 'index_col' was not set to the corresponding column name."))
   }
 
   dots_args <- .get_dots_as_list(...)
 
-  old_Re_estimate_col <- Re_estimate_col
-  Re_estimate_col <- "Re_estimate"
+  bootstrapped_values <- bootstrapped_values %>%
+    dplyr::rename(!!output_value_col := .data[[value_col]])
 
-  bootstrapped_estimates <- bootstrapped_estimates %>%
-    dplyr::rename(!!Re_estimate_col := .data[[old_Re_estimate_col]])
-
-  if(!is.null(original_estimates)) {
-    original_estimates <- original_estimates %>%
-      dplyr::rename(!!Re_estimate_col := .data[[old_Re_estimate_col]])
+  if(!is.null(original_values)) {
+    original_values <- original_values %>%
+      dplyr::rename(!!output_value_col := .data[[value_col]])
   }
 
   if(uncertainty_summary_method == "original estimate - CI from bootstrap estimates") {
 
-    if( is.null(original_estimates) ) {
-      stop("'original_estimates' must be provided when using uncertainty method
+    if( is.null(original_values) ) {
+      stop("'original_values' must be provided when using uncertainty method
            'original estimate - CI from bootstrap estimates'")
     }
 
-    CI_bootstrap <- do.call(
+    bootstrap_summary <- do.call(
       '.summarise_CI_bootstrap',
-      c(list(central_estimates = original_estimates,
-             bootstrapped_estimates = bootstrapped_estimates,
-             Re_estimate_col = Re_estimate_col,
+      c(list(central_values = original_values,
+             bootstrapped_values = bootstrapped_values,
+             value_col = output_value_col,
              bootstrap_id_col = bootstrap_id_col,
              index_col = index_col),
         .get_shared_args(.summarise_CI_bootstrap, dots_args))
     )
-
-    return(CI_bootstrap)
 
   } else if (uncertainty_summary_method == "bagged mean - CI from bootstrap estimates") {
 
-    central_estimates <- .summarise_bagged_mean(original_estimates = original_estimates,
-                                                bootstrapped_estimates = bootstrapped_estimates,
-                                                Re_estimate_col = Re_estimate_col,
+    central_values <- .summarise_bagged_mean(original_values = original_values,
+                                                bootstrapped_values = bootstrapped_values,
+                                                value_col = output_value_col,
                                                 bootstrap_id_col = bootstrap_id_col,
                                                 index_col = index_col)
 
-    Re_estimate <- do.call(
+    bootstrap_summary <- do.call(
       '.summarise_CI_bootstrap',
-      c(list(central_estimates = central_estimates,
-             bootstrapped_estimates = bootstrapped_estimates,
-             Re_estimate_col = Re_estimate_col,
+      c(list(central_values = central_values,
+             bootstrapped_values = bootstrapped_values,
+             value_col = output_value_col,
              bootstrap_id_col = bootstrap_id_col,
              index_col = index_col),
         .get_shared_args(.summarise_CI_bootstrap, dots_args))
     )
-
-    return(Re_estimate)
   } else {
     stop("Uncertainty summary method is unknown.")
   }
+
+  return(bootstrap_summary)
 }
 
-#' Build a confidence interval from bootstrapped estimates
+#' Build a confidence interval from bootstrapped values
 #'
 #' @inherit uncertainty
 #'
 #' @return dataframe with 4 columns:
 #' \itemize{
 #' \item{\code{index_col}, the timestep index column}
-#' \item{\code{Re_estimate_col}, the estimate input in \code{central_estimates}}
+#' \item{\code{value_col}, the value input in \code{central_values}}
 #' \item{CI_up, the upper limit of the confidence interval}
 #' \item{CI_down, the lower limit of the confidence interval}
 #' }
-.summarise_CI_bootstrap <- function(central_estimates,
-                                    bootstrapped_estimates,
-                                    Re_estimate_col = Re_estimate_col,
-                                    bootstrap_id_col = bootstrap_id_col,
-                                    index_col = index_col,
-                                    alpha = 0.95){
+.summarise_CI_bootstrap <- function(central_values,
+                                    bootstrapped_values,
+                                    value_col,
+                                    bootstrap_id_col,
+                                    index_col,
+                                    alpha = 0.95,
+                                    prefix_up = "CI_up",
+                                    prefix_down = "CI_down"){
 
   #TODO proper validation of input (check that numeric between 0 and 1,
   # strings and dataframes with the right columns and with no NA in index_col)
 
-  if(any(is.na(bootstrapped_estimates[[index_col]]))) {
-    stop(paste("NA value(s) in column", index_col, "in", deparse(substitute(bootstrapped_estimates))))
+  if(any(is.na(bootstrapped_values[[index_col]]))) {
+    stop(paste("NA value(s) in column", index_col, "in", deparse(substitute(bootstrapped_values))))
   }
 
-  if(any(is.na(central_estimates[[index_col]]))) {
-    stop(paste("NA value(s) in column", index_col, "in", deparse(substitute(central_estimates))))
+  if(any(is.na(central_values[[index_col]]))) {
+    stop(paste("NA value(s) in column", index_col, "in", deparse(substitute(central_values))))
   }
+
+  CI_down <- paste(prefix_down, value_col, sep = "_")
+  CI_up <- paste(prefix_up, value_col, sep = "_")
 
   high_quantile <- 1-(1-alpha)/2
 
-  central_estimates <- central_estimates %>%
-    dplyr::select(.data[[index_col]], .data[[Re_estimate_col]]) %>%
-    dplyr::filter(!is.na(.data[[Re_estimate_col]]))
+  central_values <- central_values %>%
+    dplyr::select(.data[[index_col]], .data[[value_col]]) %>%
+    dplyr::filter(!is.na(.data[[value_col]]))
 
-  estimate_with_uncertainty <- bootstrapped_estimates %>%
-    dplyr::select(.data[[index_col]], .data[[Re_estimate_col]]) %>%
-    dplyr::filter(!is.na(.data[[Re_estimate_col]])) %>%
+  value_with_uncertainty <- bootstrapped_values %>%
+    dplyr::select(.data[[index_col]], .data[[value_col]]) %>%
+    dplyr::filter(!is.na(.data[[value_col]])) %>%
     dplyr::group_by(.data[[index_col]]) %>%
-    dplyr::summarize(sd_mean = stats::sd(.data[[Re_estimate_col]]),
+    dplyr::summarize(sd_mean = stats::sd(.data[[value_col]]),
                      .groups = "drop") %>%
-    dplyr::right_join(central_estimates, by = index_col) %>%
-    dplyr::mutate(CI_down = .data[[Re_estimate_col]] - stats::qnorm(high_quantile)*.data$sd_mean,
-                  CI_up = .data[[Re_estimate_col]] + stats::qnorm(high_quantile)*.data$sd_mean) %>%
-    dplyr::mutate(CI_down = dplyr::if_else(.data$CI_down < 0, 0, .data$CI_down)) %>%
+    dplyr::right_join(central_values, by = index_col) %>%
+    dplyr::mutate(!!CI_down := .data[[value_col]] - stats::qnorm(high_quantile)*.data$sd_mean,
+                  !!CI_up := .data[[value_col]] + stats::qnorm(high_quantile)*.data$sd_mean) %>%
+    dplyr::mutate(!!CI_down := dplyr::if_else(.data[[CI_down]] < 0, 0, .data[[CI_down]])) %>%
     dplyr::select(-.data$sd_mean) %>%
     tidyr::complete(!!index_col := seq(min(.data[[index_col]]), max(.data[[index_col]])))
 
-  return(estimate_with_uncertainty)
+  return(value_with_uncertainty)
 }
 
 #' Compute bagged mean from bootstrapped replicates
 #'
-#' If \code{original_estimates} are included,
-#' these estimates are included in the mean computation
-#' along with the \code{bootstrapped_estimates}.
+#' If \code{original_values} are included,
+#' these values are included in the mean computation
+#' along with the \code{bootstrapped_values}.
 #'
 #' @inherit uncertainty
 #'
-#' @return a dataframe containing an timestep index column named \code{index_col}
-#' and a column containing bagged mean estimates called \code{Re_estimate_col}
-.summarise_bagged_mean <- function(bootstrapped_estimates,
-                                   original_estimates = NULL,
-                                   Re_estimate_col = Re_estimate_col,
-                                   bootstrap_id_col = bootstrap_id_col,
-                                   index_col = index_col) {
+#' @return a dataframe containing a time step index column named \code{index_col}
+#' and a column containing bagged mean values called \code{value_col}
+.summarise_bagged_mean <- function(bootstrapped_values,
+                                   original_values = NULL,
+                                   value_col,
+                                   bootstrap_id_col,
+                                   index_col) {
 
   #TODO proper validation of input (check that strings and dataframes with the right columns and with no NA in index_col)
 
-  if(any(is.na(bootstrapped_estimates[[index_col]]))) {
-    stop(paste("NA value(s) in column", index_col, "in", deparse(substitute(bootstrapped_estimates))))
+  if(any(is.na(bootstrapped_values[[index_col]]))) {
+    stop(paste("NA value(s) in column", index_col, "in", deparse(substitute(bootstrapped_values))))
   }
 
-  bootstrapped_estimates <- bootstrapped_estimates %>%
-    dplyr::select(.data[[index_col]], .data[[Re_estimate_col]])
+  bootstrapped_values <- bootstrapped_values %>%
+    dplyr::select(.data[[index_col]], .data[[value_col]])
 
-  if(!is.null(original_estimates)) {
-    if(any(is.na(original_estimates[[index_col]]))) {
-      stop(paste("NA value(s) in column", index_col, "in", deparse(substitute(original_estimates))))
+  if(!is.null(original_values)) {
+    if(any(is.na(original_values[[index_col]]))) {
+      stop(paste("NA value(s) in column", index_col, "in", deparse(substitute(original_values))))
     }
 
-    original_estimates <- original_estimates %>%
-      dplyr::select(.data[[index_col]], .data[[Re_estimate_col]])
+    original_values <- original_values %>%
+      dplyr::select(.data[[index_col]], .data[[value_col]])
 
-    bootstrapped_estimates <- bootstrapped_estimates %>%
-      dplyr::bind_rows(original_estimates)
+    bootstrapped_values <- bootstrapped_values %>%
+      dplyr::bind_rows(original_values)
   }
 
-  bagged_mean_estimate <- bootstrapped_estimates %>%
-    dplyr::filter(!is.na(.data[[Re_estimate_col]])) %>%
+  bagged_mean_value <- bootstrapped_values %>%
+    dplyr::filter(!is.na(.data[[value_col]])) %>%
     dplyr::group_by(.data[[index_col]]) %>%
-    dplyr::summarize(!!Re_estimate_col := mean(.data[[Re_estimate_col]]),
+    dplyr::summarize(!!value_col := mean(.data[[value_col]]),
                      .groups = "drop") %>%
     tidyr::complete(!!index_col := seq(min(.data[[index_col]]), max(.data[[index_col]])))
 
-  return(bagged_mean_estimate)
+  return(bagged_mean_value)
 }

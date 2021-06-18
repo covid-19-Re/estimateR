@@ -24,6 +24,8 @@ The index column must not contain any \code{NA} value.}
 
 \item{Re_estimate_col}{string. Name of the column containing Re estimates}
 
+\item{estimate_col}{string. Name of the column containing estimates}
+
 \item{bootstrap_id_col}{string. Name of the column containing bootstrap samples numbering.
 Id 0 must correspond to the estimate on the original data.}
 
