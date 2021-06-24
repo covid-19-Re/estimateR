@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Build a confidence interval from bootstrapped estimates — .summarise_CI_bootstrap • estimateR</title>
+<title>Build a confidence interval from bootstrapped values — .summarise_CI_bootstrap • estimateR</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Build a confidence interval from bootstrapped estimates — .summarise_CI_bootstrap" />
-<meta property="og:description" content="Build a confidence interval from bootstrapped estimates" />
+<meta property="og:title" content="Build a confidence interval from bootstrapped values — .summarise_CI_bootstrap" />
+<meta property="og:description" content="Build a confidence interval from bootstrapped values" />
 
 
 
@@ -124,48 +124,29 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Build a confidence interval from bootstrapped estimates</h1>
+    <h1>Build a confidence interval from bootstrapped values</h1>
     
     <div class="hidden name"><code>dot-summarise_CI_bootstrap.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Build a confidence interval from bootstrapped estimates</p>
+    <p>Build a confidence interval from bootstrapped values</p>
     </div>
 
     <pre class="usage"><span class='fu'>.summarise_CI_bootstrap</span><span class='op'>(</span>
-  <span class='va'>central_estimates</span>,
-  <span class='va'>bootstrapped_estimates</span>,
-  Re_estimate_col <span class='op'>=</span> <span class='va'>Re_estimate_col</span>,
-  bootstrap_id_col <span class='op'>=</span> <span class='va'>bootstrap_id_col</span>,
-  index_col <span class='op'>=</span> <span class='va'>index_col</span>,
-  alpha <span class='op'>=</span> <span class='fl'>0.95</span>
+  <span class='va'>central_values</span>,
+  <span class='va'>bootstrapped_values</span>,
+  <span class='va'>value_col</span>,
+  <span class='va'>bootstrap_id_col</span>,
+  <span class='va'>index_col</span>,
+  alpha <span class='op'>=</span> <span class='fl'>0.95</span>,
+  prefix_up <span class='op'>=</span> <span class='st'>"CI_up"</span>,
+  prefix_down <span class='op'>=</span> <span class='st'>"CI_down"</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>central_estimates</th>
-      <td><p>Estimates around which the confidence interval is going to be centered.
-Must be a dataframe with a timestep index column named <code>index_col</code>
-and an estimate column named <code>Re_estimate_col</code>.
-The index column must not contain any <code>NA</code> value.</p></td>
-    </tr>
-    <tr>
-      <th>bootstrapped_estimates</th>
-      <td><p>Estimates obtained on a number of bootstrap
-replicates of the original data.
-Must be a dataframe in the long format
-with a timestep index column named <code>index_col</code>,
-a bootstrap replicate index column named <code>bootstrap_id_col</code>,
-and an estimate column named <code>Re_estimate_col</code>.
-The index column must not contain any <code>NA</code> value.</p></td>
-    </tr>
-    <tr>
-      <th>Re_estimate_col</th>
-      <td><p>string. Name of the column containing Re estimates</p></td>
-    </tr>
     <tr>
       <th>bootstrap_id_col</th>
       <td><p>string. Name of the column containing bootstrap samples numbering.
@@ -186,7 +167,7 @@ in bootstrapped estimates corresponds to which data point in the original estima
 
     <p>dataframe with 4 columns:</p><ul>
 <li><p><code>index_col</code>, the timestep index column</p></li>
-<li><p><code>Re_estimate_col</code>, the estimate input in <code>central_estimates</code></p></li>
+<li><p><code>value_col</code>, the value input in <code>central_values</code></p></li>
 <li><p>CI_up, the upper limit of the confidence interval</p></li>
 <li><p>CI_down, the lower limit of the confidence interval</p></li>
 </ul>

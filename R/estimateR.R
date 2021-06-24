@@ -96,6 +96,8 @@ NULL
 #' \itemize{
 #' \item{'EpiEstim sliding window',
 #' implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
+#' \item{'EpiEstim piecewise constant',
+#' implemented in \code{\link{.estimate_Re_EpiEstim_piecewise_constant}}}
 #' }
 #' @param uncertainty_summary_method string. One of the following options:
 #' \itemize{
@@ -148,6 +150,7 @@ NULL
 #' @name empirical_delay_data_format
 NULL
 
+#TODO redo to accomodate change from 'estimates' to 'values'
 #' Uncertainty summary
 #'
 #' @param original_estimates Optional. Estimates obtained on the original data.
@@ -166,6 +169,7 @@ NULL
 #' and an estimate column named \code{Re_estimate_col}.
 #' The index column must not contain any \code{NA} value.
 #' @param Re_estimate_col string. Name of the column containing Re estimates
+#' @param estimate_col string. Name of the column containing estimates
 #' @param bootstrap_id_col string. Name of the column containing bootstrap samples numbering.
 #' Id 0 must correspond to the estimate on the original data.
 #' @param index_col string. Index column to keep track of which data point

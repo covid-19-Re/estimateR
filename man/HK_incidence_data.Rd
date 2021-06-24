@@ -7,8 +7,8 @@
 \format{
 A data frame with 196 rows and 2 variables:
 \describe{
-\item{report_date}{date of case reporting in YYYY-mm-dd format}
-\item{incidence}{number of cases reported on this date}
+\item{date}{date of case reporting in YYYY-mm-dd format}
+\item{case_incidence}{number of cases reported on this date}
 }
 }
 \source{

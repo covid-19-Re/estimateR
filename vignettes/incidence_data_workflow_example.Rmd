@@ -118,7 +118,8 @@ EST_estimates <- get_block_bootstrapped_estimate(
   mean_serial_interval = mean_serial_interval,
   std_serial_interval = std_serial_interval,
   ref_date = ref_date,
-  time_step = time_step
+  time_step = time_step,
+  combine_bootstrap_and_estimation_uncertainties = TRUE
 )
 
 head(EST_estimates)
@@ -127,7 +128,7 @@ Now let us plot these estimates through time, along with their confidence interv
 ```{r, fig.width=8, fig.height=4}
 ggplot(EST_estimates, aes(x = date, y = Re_estimate)) +
   geom_line(lwd=  1.1) +
-  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.45, colour = NA) +
+  geom_ribbon(aes(x = date, ymax = CI_up_Re_estimate, ymin = CI_down_Re_estimate), alpha = 0.45, colour = NA) +
   scale_x_date(date_breaks = "1 month",
                date_labels = '%b\n%Y') +
   ylab("Reproductive number") +
@@ -148,6 +149,7 @@ ggplot(filter(EST_incidence, date < as.Date("2020-09-01"), date >= as.Date("2020
 ```
 
 For both early June and early July we see that the overall numbers are very low, and that the Re peaks correspond to particularly high outliers in the reported numbers.
+Moreover, uncertainty intervals are very wide during this period.
 
 This should make us wary of drawing any conclusions for the Re estimates over this period before investigating whether the peaks in the observed numbers were not explainable by something else than a rise in Re. The external reason could be an adjustment in the reported numbers, or a one-time large testing event.
 

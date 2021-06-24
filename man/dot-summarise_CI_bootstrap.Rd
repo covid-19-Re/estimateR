@@ -2,33 +2,20 @@
 % Please edit documentation in R/utils-uncertainty.R
 \name{.summarise_CI_bootstrap}
 \alias{.summarise_CI_bootstrap}
-\title{Build a confidence interval from bootstrapped estimates}
+\title{Build a confidence interval from bootstrapped values}
 \usage{
 .summarise_CI_bootstrap(
-  central_estimates,
-  bootstrapped_estimates,
-  Re_estimate_col = Re_estimate_col,
-  bootstrap_id_col = bootstrap_id_col,
-  index_col = index_col,
-  alpha = 0.95
+  central_values,
+  bootstrapped_values,
+  value_col,
+  bootstrap_id_col,
+  index_col,
+  alpha = 0.95,
+  prefix_up = "CI_up",
+  prefix_down = "CI_down"
 )
 }
 \arguments{
-\item{central_estimates}{Estimates around which the confidence interval is going to be centered.
-Must be a dataframe with a timestep index column named \code{index_col}
-and an estimate column named \code{Re_estimate_col}.
-The index column must not contain any \code{NA} value.}
-
-\item{bootstrapped_estimates}{Estimates obtained on a number of bootstrap
-replicates of the original data.
-Must be a dataframe in the long format
-with a timestep index column named \code{index_col},
-a bootstrap replicate index column named \code{bootstrap_id_col},
-and an estimate column named \code{Re_estimate_col}.
-The index column must not contain any \code{NA} value.}
-
-\item{Re_estimate_col}{string. Name of the column containing Re estimates}
-
 \item{bootstrap_id_col}{string. Name of the column containing bootstrap samples numbering.
 Id 0 must correspond to the estimate on the original data.}
 
@@ -41,11 +28,11 @@ in bootstrapped estimates corresponds to which data point in the original estima
 dataframe with 4 columns:
 \itemize{
 \item{\code{index_col}, the timestep index column}
-\item{\code{Re_estimate_col}, the estimate input in \code{central_estimates}}
+\item{\code{value_col}, the value input in \code{central_values}}
 \item{CI_up, the upper limit of the confidence interval}
 \item{CI_down, the lower limit of the confidence interval}
 }
 }
 \description{
-Build a confidence interval from bootstrapped estimates
+Build a confidence interval from bootstrapped values
 }

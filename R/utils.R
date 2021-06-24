@@ -110,7 +110,11 @@ merge_outputs <- function(output_list,
   dates <- seq.Date(from = ref_date + min(estimates[[index_col]]),
                     by = time_step,
                     along.with = estimates[[index_col]])
-  estimates$date <- dates
+
+  estimates <- estimates %>%
+    dplyr::arrange(.data[[index_col]]) %>%
+    dplyr::mutate(date = dates)
+
   estimates <- dplyr::select(estimates, date, tidyselect::everything())
 
   if(!keep_index_col) {
@@ -412,6 +416,15 @@ correct_for_partially_observed_data <- function( incidence_data,
   }
 }
 
+.simplify <- function(output_list,
+                      ref_date,
+                      time_step = "day") {
+
+  merged_outputs <- merge_outputs(output_list = output_list,
+                ref_date = ref_date,
+                time_step = time_step)
+}
+
 #' Get length of values vector in a module input object.
 #'
 #' @param input module input object.
@@ -489,7 +502,7 @@ correct_for_partially_observed_data <- function( incidence_data,
 #' @param digits integer. Number of digits to round.
 #'
 #' @return Print vector as string
-.print_vector <- function(a, digits = 3) {
+.print_vector <- function(a, digits = 2) {
   cat(paste0("c(",paste(round(a, digits = digits), collapse=","), ")"))
 }
 
@@ -535,3 +548,4 @@ correct_for_partially_observed_data <- function( incidence_data,
   }
   return(dots_args[names(dots_args) %in% func_arg_names])
 }
+

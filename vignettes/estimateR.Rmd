@@ -120,7 +120,7 @@ toy_results <- merge_outputs(
     "observed_incidence" = toy_incidence_data, # The LHS terms are arbitrary names for the output of each step.
     "smoothed_incidence" = smoothed_toy_incidence,
     "deconvolved_incidence" = toy_infection_events,
-    "R_mean" = toy_Re_estimates
+    "Re_estimate" = toy_Re_estimates
   ),
   ref_date = as.Date("2020-02-24"), # The observation data starts on Feb 24th 2021.
   time_step = "day"
@@ -193,6 +193,7 @@ estimates <- get_block_bootstrapped_estimate(toy_incidence_data,
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
+  combine_bootstrap_and_estimation_uncertainties = TRUE,
   delay_incubation = incubation,
   delay_onset_to_report = onset_to_report,
   estimation_window = estimation_window,
@@ -208,7 +209,7 @@ head(estimates)
 library(ggplot2)
 ggplot(estimates, aes(x = date, y = Re_estimate)) +
   geom_line(lwd=  1.1) +
-  geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down), alpha = 0.15, colour = NA) +
+  geom_ribbon(aes(x = date, ymax = CI_up_Re_estimate, ymin = CI_down_Re_estimate), alpha = 0.15, colour = NA) +
   scale_x_date(date_breaks = "1 day", 
                date_labels = '%b\n%d') +
   ylab("Reproductive number") +

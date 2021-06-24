@@ -106,13 +106,21 @@
 <span class="co">#&gt; </span>
 <span class="co">#&gt;     intersect, setdiff, setequal, union</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org">readr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://stringr.tidyverse.org">stringr</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://lubridate.tidyverse.org">lubridate</a></span><span class="op">)</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Attaching package: 'lubridate'</span>
+<span class="co">#&gt; The following objects are masked from 'package:base':</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     date, intersect, setdiff, union</span>
 
 <span class="co"># Package for plotting</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></code></pre></div>
 <p>In this example, we fetch and analyze COVID-19 incidence data from Estonia. The Estonian public health authorities publish detailed COVID-19 related data <a href="https://www.terviseamet.ee/et/koroonaviirus/avaandmed">here</a>. We start by fetching the dataset containing the number of reported cases for each day since the beginning of the pandemic.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">url</span> <span class="op">&lt;-</span> <span class="st">"https://opendata.digilugu.ee/opendata_covid19_tests_total.csv"</span>
-<span class="va">EST_data</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html">try</a></span><span class="op">(</span><span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span><span class="op">)</span>
+<span class="va">EST_data</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html">try</a></span><span class="op">(</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span><span class="op">)</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; ── Column specification ────────────────────────────────────────────────────────</span>
 <span class="co">#&gt; cols(</span>
@@ -125,15 +133,15 @@
 <span class="co">#&gt; )</span>
 
 <span class="kw">if</span> <span class="op">(</span><span class="st">"try-error"</span> <span class="op">%in%</span> <span class="fu"><a href="https://rdrr.io/r/base/class.html">class</a></span><span class="op">(</span><span class="va">EST_data</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
-  <span class="kw"><a href="https://rdrr.io/r/base/warning.html">warning</a></span><span class="op">(</span><span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_c.html">str_c</a></span><span class="op">(</span><span class="st">"Couldn't read EST case data at "</span>, <span class="va">url</span><span class="op">)</span><span class="op">)</span>
+  <span class="kw"><a href="https://rdrr.io/r/base/warning.html">warning</a></span><span class="op">(</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_c.html">str_c</a></span><span class="op">(</span><span class="st">"Couldn't read EST case data at "</span>, <span class="va">url</span><span class="op">)</span><span class="op">)</span>
 <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
   
 <span class="co"># Keep columns of interest only  </span>
 <span class="va">EST_incidence</span> <span class="op">&lt;-</span> <span class="va">EST_data</span> <span class="op">%&gt;%</span>
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="http://lubridate.tidyverse.org/reference/as_date.html">as_date</a></span><span class="op">(</span><span class="va">StatisticsDate</span><span class="op">)</span>,
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="http://lubridate.tidyverse.org/reference/as_date.html">as_date</a></span><span class="op">(</span><span class="va">StatisticsDate</span><span class="op">)</span>,
             case_incidence <span class="op">=</span> <span class="va">DailyCases</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
-<p>In case the data is innacessible, an earlier version is stored in the <code>EST_incidence_data</code> variable with <strong>estimateR</strong>.</p>
+<p>In case the data is inaccessible, an earlier version is stored in the <code>EST_incidence_data</code> variable with <strong>estimateR</strong>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"> <span class="va">EST_incidence</span> <span class="op">&lt;-</span> <span class="va">EST_incidence_data</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">EST_incidence</span><span class="op">)</span>
@@ -150,11 +158,11 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">EST_incidence</span> <span class="op">&lt;-</span> <span class="va">EST_incidence</span> <span class="op">%&gt;%</span> 
   <span class="co"># replace potential negative values by 0</span>
-  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>case_incidence <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html">if_else</a></span><span class="op">(</span><span class="va">case_incidence</span> <span class="op">&lt;</span> <span class="fl">0</span>, <span class="fl">0</span>, <span class="va">case_incidence</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span><span class="op">(</span>case_incidence <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html">if_else</a></span><span class="op">(</span><span class="va">case_incidence</span> <span class="op">&lt;</span> <span class="fl">0</span>, <span class="fl">0</span>, <span class="va">case_incidence</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
   <span class="co">#replace potential NA values by 0</span>
-   <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/replace_na.html">replace_na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>case_incidence <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
+   <span class="fu"><a href="https://tidyr.tidyverse.org/reference/replace_na.html">replace_na</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>case_incidence <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span>
   <span class="co"># add zeroes for dates with no reported case</span>
-    <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/complete.html">complete</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.Date.html">seq.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,  <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
+    <span class="fu"><a href="https://tidyr.tidyverse.org/reference/complete.html">complete</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.Date.html">seq.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,  <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
                                       by <span class="op">=</span> <span class="st">"days"</span><span class="op">)</span>,
                   fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>case_incidence <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p>Now that our incidence data is ready and curated, we need to gather all COVID-19 parameters required for the Re estimation. TODO add references</p>
@@ -204,30 +212,32 @@
   mean_serial_interval <span class="op">=</span> <span class="va">mean_serial_interval</span>,
   std_serial_interval <span class="op">=</span> <span class="va">std_serial_interval</span>,
   ref_date <span class="op">=</span> <span class="va">ref_date</span>,
-  time_step <span class="op">=</span> <span class="va">time_step</span>
+  time_step <span class="op">=</span> <span class="va">time_step</span>,
+  combine_bootstrap_and_estimation_uncertainties <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">EST_estimates</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 6 x 4</span>
-<span class="co">#&gt;   date       Re_estimate CI_down CI_up</span>
-<span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 2020-03-06        2.13    1.96  2.31</span>
-<span class="co">#&gt; 2 2020-03-07        1.87    1.30  2.44</span>
-<span class="co">#&gt; 3 2020-03-08        1.65    1.26  2.03</span>
-<span class="co">#&gt; 4 2020-03-09        1.48    1.21  1.75</span>
-<span class="co">#&gt; 5 2020-03-10        1.38    1.13  1.62</span>
-<span class="co">#&gt; 6 2020-03-11        1.31    1.05  1.57</span></code></pre></div>
+<span class="co">#&gt;   date       Re_estimate CI_down_Re_estimate CI_up_Re_estimate</span>
+<span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;               &lt;dbl&gt;             &lt;dbl&gt;</span>
+<span class="co">#&gt; 1 2020-02-17          NA                  NA                NA</span>
+<span class="co">#&gt; 2 2020-02-18          NA                  NA                NA</span>
+<span class="co">#&gt; 3 2020-02-19          NA                  NA                NA</span>
+<span class="co">#&gt; 4 2020-02-20          NA                  NA                NA</span>
+<span class="co">#&gt; 5 2020-02-21          NA                  NA                NA</span>
+<span class="co">#&gt; 6 2020-02-22          NA                  NA                NA</span></code></pre></div>
 <p>Now let us plot these estimates through time, along with their confidence intervals.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">EST_estimates</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">Re_estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span>lwd<span class="op">=</span>  <span class="fl">1.1</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, ymax <span class="op">=</span> <span class="va">CI_up</span>, ymin <span class="op">=</span> <span class="va">CI_down</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.45</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, ymax <span class="op">=</span> <span class="va">CI_up_Re_estimate</span>, ymin <span class="op">=</span> <span class="va">CI_down_Re_estimate</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.45</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_date.html">scale_x_date</a></span><span class="op">(</span>date_breaks <span class="op">=</span> <span class="st">"1 month"</span>,
                date_labels <span class="op">=</span> <span class="st">'%b\n%Y'</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"Reproductive number"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html">coord_cartesian</a></span><span class="op">(</span>ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3.5</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">""</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span>
+<span class="co">#&gt; Warning: Removed 27 row(s) containing missing values (geom_path).</span></code></pre></div>
 <p><img src="incidence_data_workflow_example_files/figure-html/unnamed-chunk-8-1.png" width="768"></p>
 <p>The results seem reasonable overall, especially from November 2020 on. However, the two wide swings in June and July 2020 are suspicious. Let us zoom in on the raw incidence data to check if the data seems to carry real signal for these swings or if they are byproducts of isolated bumps in the reported numbers.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -236,7 +246,7 @@
     <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_date.html">scale_x_date</a></span><span class="op">(</span>date_breaks <span class="op">=</span> <span class="st">"1 month"</span>,
                date_labels <span class="op">=</span> <span class="st">'%b\n%Y'</span><span class="op">)</span></code></pre></div>
 <p><img src="incidence_data_workflow_example_files/figure-html/unnamed-chunk-9-1.png" width="768"></p>
-<p>For both early June and early July we see that the overall numbers are very low, and that the Re peaks correspond to particularly high outliers in the reported numbers.</p>
+<p>For both early June and early July we see that the overall numbers are very low, and that the Re peaks correspond to particularly high outliers in the reported numbers. Moreover, uncertainty intervals are very wide during this period.</p>
 <p>This should make us wary of drawing any conclusions for the Re estimates over this period before investigating whether the peaks in the observed numbers were not explainable by something else than a rise in Re. The external reason could be an adjustment in the reported numbers, or a one-time large testing event.</p>
 <p>It is always extremely valuable to plot the incidence data when doing an Re estimation, even when nothing looks suspicious in the estimates.</p>
   </div>

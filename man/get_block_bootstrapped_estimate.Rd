@@ -11,10 +11,12 @@ get_block_bootstrapped_estimate(
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
+  combine_bootstrap_and_estimation_uncertainties = FALSE,
   delay_incubation,
   delay_onset_to_report = c(1),
   ref_date = NULL,
   time_step = "day",
+  output_Re_only = TRUE,
   ...
 )
 }
@@ -43,6 +45,8 @@ Available options are:
 \itemize{
 \item{'EpiEstim sliding window',
 implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
+\item{'EpiEstim piecewise constant',
+implemented in \code{\link{.estimate_Re_EpiEstim_piecewise_constant}}}
 }}
 
 \item{uncertainty_summary_method}{string. One of the following options:
@@ -64,6 +68,9 @@ and centered around the mean of bootstrapped estimates and original estimates.}
 
 \item{time_step}{string. Time between two consecutive incidence datapoints.
 "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+
+\item{output_Re_only}{boolean. Should the output only contain Re estimates?
+(as opposed to containing results for each intermediate step)}
 
 \item{...}{
   Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}

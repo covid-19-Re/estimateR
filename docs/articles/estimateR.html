@@ -182,7 +182,7 @@
     <span class="st">"observed_incidence"</span> <span class="op">=</span> <span class="va">toy_incidence_data</span>, <span class="co"># The LHS terms are arbitrary names for the output of each step.</span>
     <span class="st">"smoothed_incidence"</span> <span class="op">=</span> <span class="va">smoothed_toy_incidence</span>,
     <span class="st">"deconvolved_incidence"</span> <span class="op">=</span> <span class="va">toy_infection_events</span>,
-    <span class="st">"R_mean"</span> <span class="op">=</span> <span class="va">toy_Re_estimates</span>
+    <span class="st">"Re_estimate"</span> <span class="op">=</span> <span class="va">toy_Re_estimates</span>
   <span class="op">)</span>,
   ref_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"2020-02-24"</span><span class="op">)</span>, <span class="co"># The observation data starts on Feb 24th 2021.</span>
   time_step <span class="op">=</span> <span class="st">"day"</span>
@@ -197,13 +197,13 @@
 <span class="co">#&gt; 4 2020-02-19                 NA                 NA              30.33052</span>
 <span class="co">#&gt; 5 2020-02-20                 NA                 NA              36.10101</span>
 <span class="co">#&gt; 6 2020-02-21                 NA                 NA              43.46775</span>
-<span class="co">#&gt;     R_mean</span>
-<span class="co">#&gt; 1       NA</span>
-<span class="co">#&gt; 2       NA</span>
-<span class="co">#&gt; 3       NA</span>
-<span class="co">#&gt; 4       NA</span>
-<span class="co">#&gt; 5 4.454175</span>
-<span class="co">#&gt; 6 3.174828</span></code></pre></div>
+<span class="co">#&gt;   Re_estimate</span>
+<span class="co">#&gt; 1          NA</span>
+<span class="co">#&gt; 2          NA</span>
+<span class="co">#&gt; 3          NA</span>
+<span class="co">#&gt; 4          NA</span>
+<span class="co">#&gt; 5    4.454175</span>
+<span class="co">#&gt; 6    3.174828</span></code></pre></div>
 </div>
 <div id="simplification-using-a-wrapper-function" class="section level2">
 <h2 class="hasAnchor">
@@ -256,13 +256,13 @@
 <span class="co">#&gt; 4 2020-02-19                 NA                 NA              30.33052</span>
 <span class="co">#&gt; 5 2020-02-20                 NA                 NA              36.10101</span>
 <span class="co">#&gt; 6 2020-02-21                 NA                 NA              43.46775</span>
-<span class="co">#&gt;     R_mean</span>
-<span class="co">#&gt; 1       NA</span>
-<span class="co">#&gt; 2       NA</span>
-<span class="co">#&gt; 3       NA</span>
-<span class="co">#&gt; 4       NA</span>
-<span class="co">#&gt; 5 4.454175</span>
-<span class="co">#&gt; 6 3.174828</span></code></pre></div>
+<span class="co">#&gt;   Re_estimate</span>
+<span class="co">#&gt; 1          NA</span>
+<span class="co">#&gt; 2          NA</span>
+<span class="co">#&gt; 3          NA</span>
+<span class="co">#&gt; 4          NA</span>
+<span class="co">#&gt; 5    4.454175</span>
+<span class="co">#&gt; 6    3.174828</span></code></pre></div>
 </div>
 <div id="uncertainty-estimation" class="section level2">
 <h2 class="hasAnchor">
@@ -278,6 +278,7 @@
   deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
   estimation_method <span class="op">=</span> <span class="st">"EpiEstim sliding window"</span>,
   uncertainty_summary_method <span class="op">=</span> <span class="st">"original estimate - CI from bootstrap estimates"</span>,
+  combine_bootstrap_and_estimation_uncertainties <span class="op">=</span> <span class="cn">TRUE</span>,
   delay_incubation <span class="op">=</span> <span class="va">incubation</span>,
   delay_onset_to_report <span class="op">=</span> <span class="va">onset_to_report</span>,
   estimation_window <span class="op">=</span> <span class="va">estimation_window</span>,
@@ -289,25 +290,26 @@
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">estimates</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 6 x 4</span>
-<span class="co">#&gt;   date       Re_estimate CI_down CI_up</span>
-<span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 2020-02-20        4.45    4.30  4.61</span>
-<span class="co">#&gt; 2 2020-02-21        3.17    3.04  3.31</span>
-<span class="co">#&gt; 3 2020-02-22        2.66    2.54  2.79</span>
-<span class="co">#&gt; 4 2020-02-23        2.44    2.31  2.57</span>
-<span class="co">#&gt; 5 2020-02-24        2.34    2.18  2.49</span>
-<span class="co">#&gt; 6 2020-02-25        2.27    2.10  2.45</span></code></pre></div>
+<span class="co">#&gt;   date       Re_estimate CI_down_Re_estimate CI_up_Re_estimate</span>
+<span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;               &lt;dbl&gt;             &lt;dbl&gt;</span>
+<span class="co">#&gt; 1 2020-02-16       NA                  NA                NA   </span>
+<span class="co">#&gt; 2 2020-02-17       NA                  NA                NA   </span>
+<span class="co">#&gt; 3 2020-02-18       NA                  NA                NA   </span>
+<span class="co">#&gt; 4 2020-02-19       NA                  NA                NA   </span>
+<span class="co">#&gt; 5 2020-02-20        4.45                3.59              5.41</span>
+<span class="co">#&gt; 6 2020-02-21        3.17                2.61              3.80</span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
 <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">estimates</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">Re_estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span>lwd<span class="op">=</span>  <span class="fl">1.1</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, ymax <span class="op">=</span> <span class="va">CI_up</span>, ymin <span class="op">=</span> <span class="va">CI_down</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.15</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_ribbon.html">geom_ribbon</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, ymax <span class="op">=</span> <span class="va">CI_up_Re_estimate</span>, ymin <span class="op">=</span> <span class="va">CI_down_Re_estimate</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.15</span>, colour <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_date.html">scale_x_date</a></span><span class="op">(</span>date_breaks <span class="op">=</span> <span class="st">"1 day"</span>, 
                date_labels <span class="op">=</span> <span class="st">'%b\n%d'</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">ylab</a></span><span class="op">(</span><span class="st">"Reproductive number"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html">coord_cartesian</a></span><span class="op">(</span>ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3.7</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html">xlab</a></span><span class="op">(</span><span class="st">""</span><span class="op">)</span> <span class="op">+</span>
-  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span><span class="op">(</span><span class="op">)</span>
+<span class="co">#&gt; Warning: Removed 12 row(s) containing missing values (geom_path).</span></code></pre></div>
 <p><img src="estimateR_files/figure-html/unnamed-chunk-9-1.png" width="672"></p>
 </div>
 </div>
