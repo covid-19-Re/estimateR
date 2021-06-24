@@ -294,7 +294,9 @@ get_infections_from_incidence <- function(incidence_data,
                                   list(delay_incubation, "delay_object", .get_input_length(incidence_data)), # need to pass length of incidence data as well in order
                                   list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)), # to validate when the delay is passed as a matrix
                                   list(is_partially_reported_data, "boolean"),
-                                  list(output_infection_incidence_only, "boolean")))
+                                  list(output_infection_incidence_only, "boolean"),
+                                  list(ref_date, "null_or_date"),
+                                  list(time_step, "time_step")))
 
   dots_args <- .get_dots_as_list(...)
 

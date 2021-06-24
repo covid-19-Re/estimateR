@@ -241,7 +241,7 @@ test_that(".get_matrix_from_empirical_delay_distr returns valid output",{
   
 })
 
-test_that(".get_matrix_from_empirical_delay_distr returns a matrix with the expected distributions",{
+test_that(".get_matrix_from_empirical_delay_distr returns a matrix with the expected distributions when using fit_gamma_distrib = TRUE",{
 
   nr_distribution_samples = 500
   time_steps = 30

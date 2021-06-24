@@ -469,6 +469,47 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 }
 
 
+
+#' TODO docs
+#' 
+.check_is_estimate  <- function(user_input, parameter_name, index_col_name){
+  .check_class_parameter_name(user_input, "data.frame", parameter_name)
+  # if(ncol(user_input) < 4){
+  #   stop(paste0("Expected ", parameter_name, " to have at least 4 columns for: index, Re estimates, upper and lower confidence interval limits."))
+  # }
+  
+  if(index_col_name %!in% names(user_input)){
+    stop(paste("Missing index column. No column named ", index_col_name, "in", parameter_name))
+  }
+  
+  if(any(is.na(user_input[[index_col_name]]))) {
+    stop(paste("NA value(s) in column", index_col_name, "in", parameter_name))
+  }
+  return(TRUE)
+}
+
+
+#'TODO docs
+#'
+#'
+#'
+.check_is_bootstrap_estimate  <- function(user_input, parameter_name, col_names){
+  Re_estimate_col = col_names[1]
+  bootstrap_id_col = col_names[2]
+  index_col = col_names[3]
+  
+  .check_is_estimate(user_input, parameter_name, index_col)
+  
+  for(i in 1:2){#the bootstrap_id column name and Re_estimate column name; index column is already checked by .check_is_estimate
+    if(col_names[i] %!in% names(user_input)) {
+      stop(paste0("Missing ", col_names[i], " column in 'bootstrapped estimates' argument,
+                or '", col_names[i],"' was not set to the corresponding column name."))
+    }
+  }
+  
+  return(TRUE)
+}
+
 #' @description Utility function that checks that the values the user passed when calling a function are valid.
 #' 
 #' @inherit validation_utility_params
@@ -510,6 +551,8 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
             "probability_distr_vector_high_tolerance" = .check_is_probability_distr_vector(user_input, parameter_name = parameter_name, tolerance_on_sum = 1E-2),
             "probability_distr_matrix" = .check_is_delay_distribution_matrix(user_input, additional_function_parameter, parameter_name),
             "empirical_delay_data" = .check_is_empirical_delay_data(user_input, parameter_name),
+            "estimates" = .check_is_estimate(user_input, parameter_name, additional_function_parameter),
+            "bootstrap_estimates" = .check_is_bootstrap_estimate(user_input, parameter_name, additional_function_parameter),
             stop(paste("Checking function for type", input_type, "not found."))
     )
     }

@@ -183,7 +183,10 @@ build_delay_distribution <- function(distribution,
 
   #TODO validate other arguments
   # We put '1' here, because we do not care here about checking the dimension of the matrix.
-  .are_valid_argument_values(list(list(delay, "delay_object", 1)))
+  .are_valid_argument_values(list(list(delay, "delay_object", 1),
+                                  list(n_report_time_steps, "null_or_int"),
+                                  list(ref_date, "null_or_date"),
+                                  list(time_step, "time_step")))
 
   dots_args <- .get_dots_as_list(...)
 

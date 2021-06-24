@@ -193,7 +193,8 @@ convolve_delay_inputs <- function(delay_incubation,
   
   # We put '1' here, because we do not care here about checking the dimension of the matrix.
   .are_valid_argument_values(list(list(delay_incubation, "delay_object", 1),
-                                  list(delay_onset_to_report, "delay_object", 1)))
+                                  list(delay_onset_to_report, "delay_object", 1),
+                                  list(n_report_time_steps, "null_or_int")))
 
   dots_args <- .get_dots_as_list(...)
 

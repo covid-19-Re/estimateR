@@ -101,7 +101,8 @@ merge_outputs <- function(output_list,
                              keep_index_col = FALSE) {
 
   
-  .are_valid_argument_values(list(list(ref_date, "date"),
+  .are_valid_argument_values(list(list(estimates, "estimates", index_col),
+                                  list(ref_date, "date"),
                                   list(time_step, "time_step"),
                                   list(index_col, "string"),
                                   list(keep_index_col, "boolean")))
@@ -134,6 +135,7 @@ merge_outputs <- function(output_list,
 .get_module_input <- function(data) {
   
   .are_valid_argument_values(list(list(data, "module_input")))
+  
   if (is.list(data)) {
     values <- as.double(data$values)
     index_offset <- data$index_offset
@@ -231,6 +233,10 @@ merge_outputs <- function(output_list,
 #' @return
 #' @export
 inner_addition <- function(input_a, input_b){
+  
+  .are_valid_argument_values(list(list(input_a, "module_input"),
+                                  list(input_b, "module_input")))
+  
   length_a <- .get_input_length(input_a)
   length_b <- .get_input_length(input_b)
 
@@ -255,7 +261,10 @@ inner_addition <- function(input_a, input_b){
 #' @return
 #' @export
 left_addition <- function(input_a, input_b){
-  #TODO validate input
+  
+  .are_valid_argument_values(list(list(input_a, "module_input"),
+                                  list(input_b, "module_input")))
+  
   offset_a <- .get_offset(input_a)
   offset_b <- .get_offset(input_b)
 
@@ -276,7 +285,11 @@ left_addition <- function(input_a, input_b){
 
 #TODO doc
 leftpad_input <- function(input, new_offset, padding_value = 0){
-  #TODO validate input
+  
+  .are_valid_argument_values(list(list(input, "module_input"),
+                                  list(new_offset, "number"),
+                                  list(padding_value, "number")))
+  
   if(new_offset >= .get_offset(input)) {
     return(input)
   } else {
@@ -321,10 +334,11 @@ correct_for_partially_observed_data <- function( incidence_data,
                                                  time_step = "day",
                                                  ...) {
 
-
-  #TODO validate cutoff_observation_probability argument
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
-                                  list(delay_distribution_final_report, "delay_object", .get_input_length(incidence_data))))
+                                  list(delay_distribution_final_report, "delay_object", .get_input_length(incidence_data)),
+                                  list(cutoff_observation_probability, "numeric_between_zero_one"),
+                                  list(ref_date, "null_or_date"),
+                                  list(time_step, "time_step")))
 
   input <- .get_module_input(incidence_data)
   incidence_vector <- .get_values(input)

@@ -113,7 +113,7 @@ get_bootstrap_replicate <- function( incidence_data,
 #' @return numeric vector. Bootstrapped differences.
 .block_bootstrap_overlap_func <- function(incidence_vector, block_size = 10, keep_weekdays_aligned = TRUE){
 
-  .are_valid_argument_values(list(#list(incidence_vector, "module_input"),
+  .are_valid_argument_values(list(list(incidence_vector, "numeric_vector"),
                                   list(block_size, "positive_integer"),
                                   list(keep_weekdays_aligned, "boolean")))
   
