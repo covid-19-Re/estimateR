@@ -27,6 +27,12 @@ smooth_incidence <- function(incidence_data,
       c(list(incidence_input = input),
         .get_shared_args(.smooth_LOESS, dots_args))
     )
+  } else if(smoothing_method == "TEST"){
+    smoothed_incidence <- do.call(
+      '.smooth_TEST',
+      c(list(incidence_input = input),
+        .get_shared_args(.smooth_LOESS, dots_args))
+    )
   } else {
     smoothed_incidence <- .make_empty_module_output()
   }
@@ -78,5 +84,31 @@ smooth_incidence <- function(incidence_data,
   normalized_smoothed_counts <-
     raw_smoothed_counts * sum(incidence_vector, na.rm = T) / sum(raw_smoothed_counts, na.rm = T)
 
+  return(.get_module_output(normalized_smoothed_counts, incidence_input))
+}
+
+.smooth_TEST <- function(incidence_input, data_points_incl = 21, degree = 1) {
+
+  .are_valid_argument_values(list(list(incidence_input, "module_input"),
+                                  list(data_points_incl, "non_negative_number"),
+                                  list(degree, "non_negative_number"))) #minimal test; needs to be one of {0,1,2}, but stats::loess already throws if it isn't
+
+  incidence_vector <- .get_values(incidence_input)
+
+  n_points <- length(incidence_vector)
+  sel_span <- data_points_incl / n_points
+
+  n_pad <- round(length(incidence_vector) * sel_span * 0.5)
+
+  c_data <- data.frame(value = c(seq(from=1, to=incidence_vector[1], length.out = n_pad ), incidence_vector),
+                       date_num = 1:(n_pad + n_points))
+
+  c_data.lo <- stats::loess(value ~ date_num, data = c_data, span = sel_span, degree = degree)
+  smoothed <- stats::predict(c_data.lo)
+  smoothed[smoothed < 0] <- 0
+  raw_smoothed_counts <- smoothed[(n_pad + 1):length(smoothed)]
+  normalized_smoothed_counts <-
+    raw_smoothed_counts * sum(incidence_vector, na.rm = T) / sum(raw_smoothed_counts, na.rm = T)
+  
   return(.get_module_output(normalized_smoothed_counts, incidence_input))
 }

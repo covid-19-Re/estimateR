@@ -8,170 +8,80 @@ knitr::opts_chunk$set(echo = TRUE)
 library(estimateR)
 library(tibble)
 library(Metrics)
-
+library(hydroGOF)
+library(ggplot2)
 ```
 
-## Creating the delay matrix without fitting gamma distributions to its columns
 
-This is exactly the same as `get_matrix_from_empirical_delay_distr()`, until the last step where, instead of fitting the gamma distribution to the data and taking the probabilities to form the columns of the delay matrix, the columns will be given by the densities returned by `hist()`.
-
-```{r function}
-get_matrix_from_empirical_delay_distr_no_gamma_fit <- function(empirical_delays,
-                                                  n_report_time_steps,
-                                                  ref_date = NULL,
-                                                  time_step = "day",
-                                                  min_number_cases = NULL,
-                                                  upper_quantile_threshold = 0.99,
-                                                  min_number_cases_fraction = 0.05,
-                                                  min_min_number_cases = 10){
-  
-  if(is.null(ref_date)) {
-    ref_date <- min(dplyr::pull(empirical_delays, .data$event_date), na.rm = TRUE)
-  }
-  
-  all_report_dates <- seq.Date(from = ref_date, by = time_step, length.out = n_report_time_steps)
-  
-  # Ignore the delay data that is posterior to the last incidence report date.
-  empirical_delays <- empirical_delays %>%
-    dplyr::filter(.data$event_date <= max(all_report_dates))
-  
-  # Set the 'min_number_cases' parameter if not set by the user
-  #TODO make this 'min_number_cases' depend on the length of the time_series.
-  if( is.null(min_number_cases) ){
-    min_number_cases <- min_number_cases_fraction * nrow(empirical_delays)
-    min_number_cases <- max(min_number_cases, min_min_number_cases)
-  }
-  
-  # Find the threshold for right-truncation
-  # No time-variation beyond this threshold due to the fraction of unsampled individuals when nearing the last sampling date
-  # TODO put the search for threshold_right_truncation in separate utility function
-  delay_counts <- empirical_delays %>%
-    dplyr::select(.data$report_delay) %>%
-    dplyr::group_by(.data$report_delay) %>%
-    dplyr::summarise(counts = dplyr::n(), .groups = "drop")
-  
-  threshold_right_truncation <- delay_counts %>%
-    dplyr::mutate(cumul_freq = cumsum(.data$counts)/sum(.data$counts)) %>%
-    dplyr::filter(.data$cumul_freq > upper_quantile_threshold) %>%
-    utils::head(n=1) %>%
-    dplyr::pull(.data$report_delay)
-  
-  # Use median of reported delays as initial shift (needed for deconvolution step)
-  initial_shift <- round(stats::median(empirical_delays$report_delay, na.rm = T))
-  
-  # Left-pad the dates we are looking at to account for shift between event dates and observation dates.
-  all_dates <- c(rev(seq.Date(from = ref_date, by = paste0("-1 ", time_step), length.out = initial_shift + 1)),
-                 seq.Date(from = ref_date, by = time_step, length.out = n_report_time_steps)[-1])
-  
-  n_time_steps <- n_report_time_steps + initial_shift
-  
-  delay_distribution_matrix <- matrix(0, nrow = n_time_steps, ncol = n_time_steps)
-  
-  #TODO fix issue with what happens when n_time_steps <= threshold_right_truncation: we shouldn't go until n_time_steps
-  #TODO test what happens when n_time_steps <= threshold_right_truncation
-  last_varying_col <- dplyr::if_else(n_time_steps > threshold_right_truncation, n_time_steps - threshold_right_truncation, n_time_steps)
-  
-  distribution_list <- vector(mode = "list", length = last_varying_col)
-  
-  # Populate the delay_distribution_matrix by column
-  for(i in 1:last_varying_col) {
-    
-    # Shuffle rows so as to get rid of potential biases
-    shuffled_delays <- empirical_delays %>%
-      dplyr::slice( sample(1:dplyr::n()) )
-    
-    recent_counts <- shuffled_delays %>%
-      dplyr::arrange( dplyr::desc(.data$event_date) ) %>%
-      dplyr::filter( .data$event_date <= all_dates[i] )
-    
-    if( nrow(recent_counts) >= min_number_cases ) {
-      # If enough data points before date of interest,
-      # take most recent observations before this date.
-      
-      recent_counts_distribution <- recent_counts %>%
-        dplyr::slice_head( n = min_number_cases )  %>%
-        dplyr::pull(.data$report_delay)
-    } else {
-      # Otherwise, take 'min_number_of_cases' observations,
-      # even after date of interest.
-      recent_counts_distribution <- shuffled_delays %>%
-        dplyr::arrange( .data$event_date ) %>%
-        dplyr::slice_head( n = min_number_cases )  %>%
-        dplyr::pull(.data$report_delay)
-    }
-
-    data_hist <- hist(recent_counts_distribution, breaks=seq(0,n_time_steps,l=n_time_steps+1), plot=FALSE)
-    new_column <- c(rep(0,i-1), data_hist$density)
-    new_column <- head(new_column, n_time_steps)
-    delay_distribution_matrix[,i] <- new_column
-  }
-  
-  if(last_varying_col < n_time_steps) {
-    for( j in 1: threshold_right_truncation) {
-      delay_distribution_matrix[, i+j ] <-  c(rep(0, times =  j), delay_distribution_matrix[1:(nrow(delay_distribution_matrix) - j), i])
-    }
-  }
-
-  
-  return(delay_distribution_matrix)
-}
-```
-
-## Comparison of Re estimates for the two cases
-### Getting the Re estimates for the gamma fit case
+## Comparison of estimates for the two cases
+### Comparing the deconvolved smoothed incidence values
 ```{r fit, warning=FALSE}
-timesteps <- 450
+timesteps <- length(HK_incidence_data$case_incidence)
 shape_incubation = 3.2 
 scale_incubation = 1.3
 incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
-mean_serial_interval = 4.8
-std_serial_interval = 2.3
-estimation_window = 3 
 
 set.seed(2)
-delay_matrix_fit <- get_matrix_from_empirical_delay_distr(HK_delay_data, timesteps)
-
-incidence_smoothed <- smooth_incidence(
-  incidence_data = HK_incidence_data$case_incidence,
-  smoothing_method = "LOESS"
-)
-
+delay_matrix_fit <- get_matrix_from_empirical_delay_distr(HK_delay_data, timesteps, fit_gamma_distrib = TRUE)
+delay_matrix_no_fit <- get_matrix_from_empirical_delay_distr(HK_delay_data, timesteps, fit_gamma_distrib = FALSE)
 
 shape_onset_to_report <- 2.7
 scale_onset_to_report <- 1.6
 onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
 
-deconvolved_incidence <- deconvolve_incidence( 
-  incidence_data = incidence_smoothed,
-  deconvolution_method = "Richardson-Lucy delay distribution",
-  delay_incubation = incubation,
-  delay_onset_to_report = delay_matrix_fit
-)
+deconvolved_incidence_fit <- get_infections_from_incidence(incidence_data = HK_incidence_data$case_incidence,
+                                delay_incubation = incubation,
+                                delay_onset_to_report = delay_matrix_fit,
+                                output_infection_incidence_only = FALSE,
+                                ref_date = min(HK_incidence_data$date)) 
 
-# re_estimation_fit <- estimate_Re_from_noisy_delayed_incidence(HK_incidence_data$report_incidence, #or report?
-#                            smoothing_method = "LOESS",
-#                            deconvolution_method = "Richardson-Lucy delay distribution",
-#                            estimation_method = "EpiEstim sliding window",
-#                            delay_incubation = incubation,
-#                            delay_onset_to_report = delay_matrix_fit,
-#                            estimation_window = estimation_window,
-#                            mean_serial_interval = mean_serial_interval,
-#                            std_serial_interval  = std_serial_interval,
-#                            output_Re_only = FALSE,
-#                            time_step = "day"
-#   )
+deconvolved_incidence_no_fit <- get_infections_from_incidence(incidence_data = HK_incidence_data$case_incidence,
+                                delay_incubation = incubation,
+                                delay_onset_to_report = delay_matrix_no_fit,
+                                output_infection_incidence_only = FALSE,
+                                ref_date = min(HK_incidence_data$date)) 
+
+ggplot(data.frame(deconvolved_incidence_fit, deconvolved_incidence_no_fit)) +
+geom_line(aes(y = deconvolved_incidence, x=date), lwd=  .5, color="red") +
+geom_line(aes(y = deconvolved_incidence.1, x=date.1), lwd=  .5, color="blue") +
+ylab("Deconvolved incidence") +
+geom_line(aes(y = (deconvolved_incidence-deconvolved_incidence.1)/deconvolved_incidence, x=date), lwd=  .5, color="black") +
+geom_line(aes(y = (deconvolved_incidence-deconvolved_incidence.1), x=date), lwd=  .5, color="purple") +
+xlab("") +
+scale_x_date(date_breaks = "1 month", 
+             date_labels = '%b\n%d') +
+theme_bw()
+#print(deconvolved_incidence$deconvolved_incidence)
+
 ```
+This graph shows us the value for the smooth deconvolved incidences in the case of fitting gamma distributions to the columns of the delay matrix (red line) as well as in the case of not fitting the columns (blue line). The purple line shows the difference in between the two estimates (gamma_fit - no_gamma fit). We can see that in periods of increasing incidence, the gamma fit estimates are slightly bigger, whereas in periods of decreasing incidence, the no gamma fit estimates are bigger. If we, however, divide the difference by the absolute value of the smoothed deconvolved incidence numbers (black line), we see that the two cases agree to a very high extent.
 
-### Getting the Re estimates for the no gamma fit case
+
+### Computing the Re estimates for the two cases
 ```{r no fit, warning=FALSE}
 set.seed(2)
-delay_matrix_no_fit <- get_matrix_from_empirical_delay_distr_no_gamma_fit(HK_delay_data, timesteps)
+mean_serial_interval = 4.8
+std_serial_interval = 2.3
+estimation_window = 3
+
+re_estimation_fit <- estimate_Re_from_noisy_delayed_incidence(HK_incidence_data$case_incidence,
+                           smoothing_method = "LOESS",
+                           deconvolution_method = "Richardson-Lucy delay distribution",
+                           estimation_method = "EpiEstim sliding window",
+                           delay_incubation = incubation,
+                           delay_onset_to_report = delay_matrix_fit,
+                           estimation_window = estimation_window,
+                           mean_serial_interval = mean_serial_interval,
+                           std_serial_interval  = std_serial_interval,
+                           output_Re_only = FALSE,
+                           time_step = "day"
+  )
+
 re_estimation_no_fit <- estimate_Re_from_noisy_delayed_incidence(HK_incidence_data$case_incidence,
                                                 smoothing_method = "LOESS",
                                                 deconvolution_method = "Richardson-Lucy delay distribution",
                                                 estimation_method = "EpiEstim sliding window",
                                                 delay_incubation = incubation,
-                                                minimum_cumul_incidence = 0,
                                                 delay_onset_to_report = delay_matrix_no_fit,
                                                 estimation_window = estimation_window,
                                                 mean_serial_interval = mean_serial_interval,
@@ -202,7 +112,6 @@ print(hydroGOF::rmse(re_estimation_fit$R_mean, re_estimation_no_fit$R_mean, na.r
                                                mean_serial_interval = mean_serial_interval,
                                                std_serial_interval = std_serial_interval,
                                                ref_date = as.Date("2020-02-24"),
-                                               minimum_cumul_incidence = 0,
                                                time_step = "day"
   )
   
@@ -224,48 +133,15 @@ print(hydroGOF::rmse(re_estimation_fit$R_mean, re_estimation_no_fit$R_mean, na.r
 
 ### Plotting the results
 
-```{r deconv_incid, echo=FALSE}
-  incidence_no_fit <- deconvolve_incidence(
-    incidence_data = HK_incidence_data$incidence,
-    deconvolution_method = "Richardson-Lucy delay distribution",
-    delay_incubation = incubation,
-    delay_onset_to_report = delay_matrix_no_fit
-  )
-  incidence_fit <- deconvolve_incidence(
-    incidence_data = HK_incidence_data$incidence,
-    deconvolution_method = "Richardson-Lucy delay distribution",
-    delay_incubation = incubation,
-    delay_onset_to_report = delay_matrix_fit
-  )
-  
-  incidences <- merge_outputs(
-    list(
-      "incidence_fit" = incidence_fit,
-      "incidence_no_fit" = incidence_no_fit
-    ),
-    ref_date = as.Date("2020-02-24"), # The observation data starts on Feb 24th 2021.
-    time_step = "day"
-  )
-  
-  incidence_difference <- incidences$incidence_fit-incidences$incidence_no_fit
-
-    ggplot(data.frame(incidence_fit, incidence_no_fit)) +
-    geom_line(aes(y = values, x=1:length(values)), lwd=  .5, color="red") +
-    geom_line(aes(y = values.1, x=1:length(values.1)), lwd=  .5, color="blue") +
-    ylab("Deconvolved incidence") +
-    geom_line(aes(y = incidence_difference/10-5, x=1:length(values.1)), lwd=  .9, color="pink") +
-    xlab("") +
-    theme_bw()
-
-```
-
 The graph below shows a comparison between the Re estimates using the gamma fitted (red) and the unfitted (blue) delay matrices. The confidence intervals obtained by bootstrapping are displayed in light red (gamma fit) and light blue (no gamma fit). 
 The pink line at the bottom of the graph shows the difference between the Re estimates (Re_gamma_fit - Re_no_gamma_fit.). This line will go above 0 when the estimates obtained using the unfitted delay matrix underestimate the Re values (compared to the gamma fit version).
-I was interested to see under which circumstances Re_no_gamma_fit underestimate and under which circumstances they overestimate the Re values (compared to Re_gamma_fit.). By visual inspection it seems like, when Re is on an increasing trend, Re_gamma_fit > Re_no_gamma_fit, and when Re is on a decreasing trend, Re_gamma_fit < Re_no_gamma_fit.
+I was interested to see under which circumstances Re_no_gamma_fit underestimate and under which circumstances they overestimate the Re values (compared to Re_gamma_fit). By visual inspection it seems like, when Re is on an increasing trend, Re_gamma_fit > Re_no_gamma_fit, and when Re is on a decreasing trend, Re_gamma_fit < Re_no_gamma_fit.
 To better see this, I plotted the vertical lines that represent local minima of the absolute value of the difference between estimates (\code{abs(Re_gamma_fit - Re_no_gamma_fit)}).
 We see that, around peaks, Re_no_gamma_fit is more confident in the estimates (which might not be a good thing(?)). In the very beginning of the epidemic, Re_no_gamma_fit severely overestimates. In recent time periods, however, both estimates agree, both in terms of absolute value, and CIs. 
-```{r pressure, echo=FALSE}
- difference <- (estimates_fit$Re_estimate-estimates_no_fit$Re_estimate)
+
+
+```{r plotting, echo=FALSE}
+ difference <- (estimates_fit[-1,]$Re_estimate-estimates_no_fit$Re_estimate)
   abs_difference <- abs(difference)
   indexes <- which(diff(sign(diff(abs_difference)))==2)+1
   
@@ -274,13 +150,11 @@ We see that, around peaks, Re_no_gamma_fit is more confident in the estimates (w
     vertical_lines <- c(vertical_lines, as.numeric(estimates_no_fit$date[indexes[i]]))
   }
 
-  ggplot(data.frame(estimates_fit, estimates_no_fit), aes(x = date)) +
+  ggplot(data.frame(estimates_fit[-1,], estimates_no_fit), aes(x = date)) + #remove first row of estimates_fit because it covers one day earlier than estimates_no_fit
     geom_vline(xintercept = vertical_lines)+
     geom_line(aes(y = Re_estimate), lwd=  .9, color="red") +
     geom_line(aes(y = Re_estimate.1), lwd=  .9, color="blue") +
     geom_line(aes(y = difference), lwd=  .9, color="pink") +
-    geom_line(aes(y = incidence_difference[5:452]/400), lwd=  .9, color="purple") +
-    
     geom_ribbon(aes(x = date, ymax = CI_up, ymin = CI_down, fill="CI Re fit"), alpha = 0.15, colour = NA) +
     geom_ribbon(aes(x = date, ymax = CI_up.1, ymin = CI_down.1, fill="CI Re no fit"), alpha = 0.15, colour = NA) +
     scale_fill_manual(values=c("red", "blue"), name="fill")+
