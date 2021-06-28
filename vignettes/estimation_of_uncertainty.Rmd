@@ -1,0 +1,30 @@
+---
+title: "Available options for estimating uncertainty on Re estimates"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Available options for estimating uncertainty on Re estimates}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(estimateR)
+```
+
+Properly estimating the true uncertainty around a Re estimate is a complex task.
+We distinguish two main sources of uncertainty: the noise inherent to the data gathering process and the uncertainty inherent to the Re calculation.
+TODO add details on both sources of uncertainty (where do they come from?)
+The purpose of this vignette is to showcase the options available in **estimateR** to account for the overall uncertainty.
+
+**estimateR** handles the noise in the reporting process by TODO continue vignette
+```{r}
+#TODO show example
+```
+
