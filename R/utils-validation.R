@@ -38,6 +38,47 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 }
 
 
+#' Check whether the class of an object is as expected
+#'
+#' @param object An object whose class needs checking,
+#' @param proper_class A string describing the desired class of \code{object}.
+#' @param mode Optional. A string describing the desired mode of \code{object}.
+#' Use only if \code{proper_class} is \code{vector}. Mode cannot be \code{Date}.
+#' Use \code{proper_class = "Date"} for checking class of \code{Date vector}.
+#'
+#' @return TRUE if no error is thrown.
+.check_class <- function(object, proper_class, mode = "any"){
+  if ("character" %!in% class(proper_class) || length(proper_class) > 1 ) {
+    stop("'proper_class' must be a single string.")
+  }
+  
+  if ("character" %!in% class(mode) || length(mode) > 1 ) {
+    stop("'mode' must be a single string.")
+  }
+  
+  if(proper_class == "vector") {
+    if(mode == "Date") {
+      stop("Mode cannot be 'Date'.")
+    }
+    
+    if(!is.vector(object, mode = mode)) {
+      stop(paste0(deparse(substitute(object)), " must be a ", mode, " vector."))
+    }
+    
+    return(TRUE)
+  }
+  
+  # validation function
+  is_proper_class <- get(paste0("is.", proper_class), envir = loadNamespace("lubridate")) # need lubridate in case proper_class is Date
+  
+  if (!is_proper_class(object)) {
+    # deparse(substitute(...)) lets you do basically the reverse of get(..)
+    stop(paste0(deparse(substitute(object)), " must be a ", proper_class, "."))
+  }
+  
+  return(TRUE)
+}
+
 #TODO add checks for other distributions (lognormal, uniform, weibull, truncated_normal,...)
 #TODO reconsider if can return FALSE
 #' Check if valid distribution list
@@ -348,7 +389,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 .check_class_parameter_name <- function(object, proper_class, parameter_name, mode = "any"){
   tryCatch(
     {
-      if(is.na(object)){
+      if(length(object) == 1 && is.na(object)){
         stop("Object was NA") # This error message is never shown. Overwritten below.
       }
       .check_class(object, proper_class, mode)
