@@ -228,6 +228,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     utils::head(n=1) %>%
     dplyr::pull(.data$report_delay)
 
+  #TODO allow for different ways of specifying initial shift
   # Use median of reported delays as initial shift (needed for deconvolution step)
   initial_shift <- round(stats::median(empirical_delays$report_delay, na.rm = T))
 

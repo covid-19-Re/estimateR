@@ -1,11 +1,10 @@
 #List containing predefined accepted string inputs for exported functions, for parameters for which validity is tested using the.is_value_in_accepted_values_vector() function
 accepted_parameter_value <- list(smoothing_method = c("LOESS"),
                                  deconvolution_method = c("Richardson-Lucy delay distribution"),
-                                 estimation_method = c("EpiEstim sliding window"),
+                                 estimation_method = c("EpiEstim sliding window", "EpiEstim piecewise constant"),
                                  bootstrapping_method = c("non-parametric block boostrap"),
                                  function_prefix = c("d", "q", "p", "r"),
                                  uncertainty_summary_method = c("original estimate - CI from bootstrap estimates", "bagged mean - CI from bootstrap estimates"))
-
 
 #' Check that an object represents a probability distribution.
 #'
@@ -224,6 +223,36 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
   return(TRUE)
 }
 
+
+.is_list_of_outputs <- function(output_list){
+  if(!is.list(output_list)) {
+    return(FALSE)
+  }
+
+  check_if_simple_output <- try(.is_valid_module_input(output_list, deparse(substitute(output_list))),
+                                silent = TRUE)
+
+  # Return FALSE if input is an output object itself
+  if(!("try-error" %in% class(check_if_simple_output))) {
+    return(FALSE)
+  }
+
+  for(i in 1:length(output_list)) {
+    test_output_i <- try(.is_valid_module_input(output_list[[i]], names(output_list)[i]),
+                         silent = TRUE)
+    if("try-error" %in% class(test_output_i)) {
+      return(FALSE)
+    }
+  }
+
+  return(TRUE)
+}
+
+
+
+#TODO reconsider whether we need the incidence_data_length here.
+# Is it acceptable if dim(matrix) > incidence data length?
+# And is it needed to check whether ncol(delay_matrix) < incidence_data_length
 #' @description Utility function that checks if a given matrix is a valid delay distribution matrix.
 #' For this, the matrix needs to fulfill the following conditions:
 #' \itemize{ 
@@ -309,64 +338,33 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
   return(TRUE)
 }
 
-#' @description  Utility function to check whether an object belongs to a particular class. 
-#' 
-#' @param object An object whose class needs checking,
-#' @param proper_class A string describing the desired class of \code{object}.
-#' @param mode Optional. A string describing the desired mode of \code{object}.
-#' Use only if \code{proper_class} is \code{vector}. Mode cannot be \code{Date}.
-#' Use \code{proper_class = "Date"} for checking class of \code{Date vector}.
+#' @description  Utility function to check whether an object belongs to a particular class.
+#' Wrapper function over \code{\link{.check_class}} needed because, being called from \code{\link{.are_valid_argument_values}},
+#' the parameter name will not be the same as the one from the original function.
 #'
-#' 
 #' @inherit validation_utility_params
-#'
+#' @inherit .check_class
 #'
 .check_class_parameter_name <- function(object, proper_class, parameter_name, mode = "any"){
-  
-  if ("character" %!in% class(proper_class) || length(proper_class) > 1 ) {
-    stop("'proper_class' must be a single string.")
-  }
-  
-  if ("character" %!in% class(mode) || length(mode) > 1 ) {
-    stop("'mode' must be a single string.")
-  }
-  
-  
-  if(all(is.na(object))){
-    stop(paste(parameter_name, "cannot be NA."))
-  }
-  
-  
-  if(proper_class == "vector") {
-    if(mode == "Date") {
-      stop("Mode cannot be 'Date'.")
+  tryCatch(
+    {
+      if(is.na(object)){
+        stop("Object was NA") # This error message is never shown. Overwritten below.
+      }
+      .check_class(object, proper_class, mode)
+    },
+    error=function(error) {
+      stop(paste("Expected parameter", parameter_name, "to be of type", proper_class, "and not NA."))
     }
-    
-    if(!is.vector(object, mode = mode)) {
-      stop(paste0(parameter_name, " must be a ", mode, " vector."))
-    }
-    
-    return(TRUE)
-  }
-  
-  # validation function
-  is_proper_class <- get(paste0("is.", proper_class), envir = loadNamespace("lubridate")) # need lubridate in case proper_class is Date
-  
-  if (!is_proper_class(object)) {
-    # deparse(substitute(...)) lets you do basically the reverse of get(..)
-    stop(paste0(parameter_name, " must be a ", proper_class, "."))
-  }
-  
+  )
   return(TRUE)
-  
-  
 }
 
 #' @description Utility function to check whether an object is null or belongs to a particular class.
 #'
 #' @inherit validation_utility_params
-#' @inherit .check_class_parameter_name
-#' 
+#' @inherit .check_class
+#'
 .check_if_null_or_belongs_to_class <- function(object, proper_class, parameter_name, mode="any"){
   if(!is.null(object)){
     .check_class_parameter_name(object, proper_class, parameter_name, mode)

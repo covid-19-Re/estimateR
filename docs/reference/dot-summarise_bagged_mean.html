@@ -40,9 +40,9 @@
 
 
 <meta property="og:title" content="Compute bagged mean from bootstrapped replicates — .summarise_bagged_mean" />
-<meta property="og:description" content="If original_estimates are included,
-these estimates are included in the mean computation
-along with the bootstrapped_estimates." />
+<meta property="og:description" content="If original_values are included,
+these values are included in the mean computation
+along with the bootstrapped_values." />
 
 
 
@@ -132,43 +132,22 @@ along with the bootstrapped_estimates." />
     </div>
 
     <div class="ref-description">
-    <p>If <code>original_estimates</code> are included,
-these estimates are included in the mean computation
-along with the <code>bootstrapped_estimates</code>.</p>
+    <p>If <code>original_values</code> are included,
+these values are included in the mean computation
+along with the <code>bootstrapped_values</code>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>.summarise_bagged_mean</span><span class='op'>(</span>
-  <span class='va'>bootstrapped_estimates</span>,
-  original_estimates <span class='op'>=</span> <span class='cn'>NULL</span>,
-  Re_estimate_col <span class='op'>=</span> <span class='va'>Re_estimate_col</span>,
-  bootstrap_id_col <span class='op'>=</span> <span class='va'>bootstrap_id_col</span>,
-  index_col <span class='op'>=</span> <span class='va'>index_col</span>
+  <span class='va'>bootstrapped_values</span>,
+  original_values <span class='op'>=</span> <span class='cn'>NULL</span>,
+  <span class='va'>value_col</span>,
+  <span class='va'>bootstrap_id_col</span>,
+  <span class='va'>index_col</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>bootstrapped_estimates</th>
-      <td><p>Estimates obtained on a number of bootstrap
-replicates of the original data.
-Must be a dataframe in the long format
-with a timestep index column named <code>index_col</code>,
-a bootstrap replicate index column named <code>bootstrap_id_col</code>,
-and an estimate column named <code>Re_estimate_col</code>.
-The index column must not contain any <code>NA</code> value.</p></td>
-    </tr>
-    <tr>
-      <th>original_estimates</th>
-      <td><p>Optional. Estimates obtained on the original data.
-Must be a dataframe with a timestep index column named <code>index_col</code>
-and an estimate column named <code>Re_estimate_col</code>.
-The index column must not contain any <code>NA</code> value.</p></td>
-    </tr>
-    <tr>
-      <th>Re_estimate_col</th>
-      <td><p>string. Name of the column containing Re estimates</p></td>
-    </tr>
     <tr>
       <th>bootstrap_id_col</th>
       <td><p>string. Name of the column containing bootstrap samples numbering.
@@ -183,8 +162,8 @@ in bootstrapped estimates corresponds to which data point in the original estima
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a dataframe containing an timestep index column named <code>index_col</code>
-and a column containing bagged mean estimates called <code>Re_estimate_col</code></p>
+    <p>a dataframe containing a time step index column named <code>index_col</code>
+and a column containing bagged mean values called <code>value_col</code></p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

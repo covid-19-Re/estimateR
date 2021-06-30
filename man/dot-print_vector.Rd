@@ -4,7 +4,7 @@
 \alias{.print_vector}
 \title{Utility function to print vectors in a copy-pastable format}
 \usage{
-.print_vector(a, digits = 3)
+.print_vector(a, digits = 2)
 }
 \arguments{
 \item{a}{numeric vector}

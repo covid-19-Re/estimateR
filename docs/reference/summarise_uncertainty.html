@@ -134,10 +134,11 @@
     </div>
 
     <pre class="usage"><span class='fu'>summarise_uncertainty</span><span class='op'>(</span>
-  <span class='va'>bootstrapped_estimates</span>,
-  original_estimates <span class='op'>=</span> <span class='cn'>NULL</span>,
+  <span class='va'>bootstrapped_values</span>,
+  original_values <span class='op'>=</span> <span class='cn'>NULL</span>,
   uncertainty_summary_method <span class='op'>=</span> <span class='st'>"original estimate - CI from bootstrap estimates"</span>,
-  Re_estimate_col <span class='op'>=</span> <span class='st'>"R_mean"</span>,
+  value_col <span class='op'>=</span> <span class='st'>"Re_estimate"</span>,
+  output_value_col <span class='op'>=</span> <span class='st'>"Re_estimate"</span>,
   bootstrap_id_col <span class='op'>=</span> <span class='st'>"bootstrap_id"</span>,
   index_col <span class='op'>=</span> <span class='st'>"idx"</span>,
   <span class='va'>...</span>
@@ -146,23 +147,6 @@
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>bootstrapped_estimates</th>
-      <td><p>Estimates obtained on a number of bootstrap
-replicates of the original data.
-Must be a dataframe in the long format
-with a timestep index column named <code>index_col</code>,
-a bootstrap replicate index column named <code>bootstrap_id_col</code>,
-and an estimate column named <code>Re_estimate_col</code>.
-The index column must not contain any <code>NA</code> value.</p></td>
-    </tr>
-    <tr>
-      <th>original_estimates</th>
-      <td><p>Optional. Estimates obtained on the original data.
-Must be a dataframe with a timestep index column named <code>index_col</code>
-and an estimate column named <code>Re_estimate_col</code>.
-The index column must not contain any <code>NA</code> value.</p></td>
-    </tr>
     <tr>
       <th>uncertainty_summary_method</th>
       <td><p>One of these options:</p><ul>
@@ -173,10 +157,6 @@ and centered around the original estimates.</p></li>
 The confidence interval is built using bootstrapped estimates
 and centered around the mean of bootstrapped estimates and original estimates.</p></li>
 </ul></td>
-    </tr>
-    <tr>
-      <th>Re_estimate_col</th>
-      <td><p>string. Name of the column containing Re estimates</p></td>
     </tr>
     <tr>
       <th>bootstrap_id_col</th>
@@ -191,10 +171,6 @@ in bootstrapped estimates corresponds to which data point in the original estima
     <tr>
       <th>...</th>
       <td><p>Arguments passed on to <code><a href='.summarise_CI_bootstrap.html'>.summarise_CI_bootstrap</a></code></p><dl>
-    <dt><code>central_estimates</code></dt><dd><p>Estimates around which the confidence interval is going to be centered.
-Must be a dataframe with a timestep index column named <code>index_col</code>
-and an estimate column named <code>Re_estimate_col</code>.
-The index column must not contain any <code>NA</code> value.</p></dd>
     <dt><code>alpha</code></dt><dd><p>value between 0 and 1. Confidence level of the confidence interval.</p></dd>
   
 </dl></td>

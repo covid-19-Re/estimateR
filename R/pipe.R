@@ -1,4 +1,7 @@
+#TODO reduce duplication between bottstrapping pipe functions
+
 #TODO polish doc (e.g. '...' args)
+#TODO redoc (combine_bootstrap_and_estimation_uncertainties)
 #' Estimate Re from incidence and estimate uncertainty with block-bootstrapping
 #'
 #' An estimation of the effective reproductive number through time is made
@@ -35,10 +38,12 @@ get_block_bootstrapped_estimate <- function(incidence_data,
                                             deconvolution_method = "Richardson-Lucy delay distribution",
                                             estimation_method = "EpiEstim sliding window",
                                             uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
+                                            combine_bootstrap_and_estimation_uncertainties = FALSE,
                                             delay_incubation,
                                             delay_onset_to_report = c(1.0),
                                             ref_date = NULL,
                                             time_step = "day",
+                                            output_Re_only = TRUE,
                                             ...){
 
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
@@ -47,14 +52,17 @@ get_block_bootstrapped_estimate <- function(incidence_data,
                                   list(deconvolution_method, "deconvolution_method"),
                                   list(estimation_method, "estimation_method"),
                                   list(uncertainty_summary_method, "uncertainty_summary_method"),
+                                  list(combine_bootstrap_and_estimation_uncertainties, "boolean"),
                                   list(delay_incubation, "delay_object", .get_input_length(incidence_data)),
                                   list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)),
                                   list(ref_date, "null_or_date"),
-                                  list(time_step, "time_step")))
+                                  list(time_step, "time_step"),
+                                  list(output_Re_only, "boolean")))
 
   dots_args <- .get_dots_as_list(...)
 
   index_col <- "idx"
+  bootstrap_id_col <- "bootstrap_id"
 
   # Display progress bar
   # progress_bar <- utils::txtProgressBar(min = 0, max = N_bootstrap_replicates + 1, style = 3)
@@ -86,11 +94,22 @@ get_block_bootstrapped_estimate <- function(incidence_data,
            ref_date = NULL,
            output_Re_only = FALSE,
            include_index = TRUE,
-           index_col = index_col),
+           index_col = index_col,
+           output_HPD = combine_bootstrap_and_estimation_uncertainties),
       smooth_deconvolve_estimate_dots_args)
   )
 
-  original_result$bootstrap_id <- 0
+  if(combine_bootstrap_and_estimation_uncertainties) {
+    # Keep the Re estimation HPDs for later
+    Re_HPDs <- original_result %>%
+      dplyr::select(.data[[index_col]], .data$Re_highHPD, .data$Re_lowHPD)
+
+    # Remove them from the original_result variable
+    original_result <- original_result %>%
+      dplyr::select(!c(.data$Re_highHPD, .data$Re_lowHPD))
+  }
+
+  original_result[[bootstrap_id_col]] <- 0
 
   bootstrapping_results <- list(original_result)
 
@@ -118,11 +137,12 @@ get_block_bootstrapped_estimate <- function(incidence_data,
              ref_date = NULL,
              output_Re_only = FALSE,
              include_index = TRUE,
-             index_col = index_col),
+             index_col = index_col,
+             output_HPD = FALSE),
         smooth_deconvolve_estimate_dots_args)
     )
 
-    bootstrapping_result$bootstrap_id <- i
+    bootstrapping_result[[bootstrap_id_col]] <- i
 
     bootstrapping_results <- c(bootstrapping_results, list(bootstrapping_result))
   }
@@ -130,17 +150,69 @@ get_block_bootstrapped_estimate <- function(incidence_data,
   bootstrapped_estimates <- dplyr::bind_rows(bootstrapping_results)
 
   original_estimates <- bootstrapped_estimates %>%
-    dplyr::filter(.data$bootstrap_id == 0)
+    dplyr::filter(.data[[bootstrap_id_col]] == 0)
 
   bootstrapped_estimates <- bootstrapped_estimates %>%
-    dplyr::filter(.data$bootstrap_id > 0)
+    dplyr::filter(.data[[bootstrap_id_col]] > 0)
 
-  estimates_with_uncertainty <- summarise_uncertainty(original_estimates = original_estimates,
-                                                      bootstrapped_estimates = bootstrapped_estimates,
-                                                      uncertainty_summary_method = uncertainty_summary_method,
-                                                      Re_estimate_col = "R_mean",
-                                                      bootstrap_id_col = "bootstrap_id",
-                                                      index_col = index_col)
+  if(output_Re_only) {
+    #TODO pass '...' args to 'summarise_uncertainty'
+    estimates_with_uncertainty <- summarise_uncertainty(original_values = original_estimates,
+                                                        bootstrapped_values = bootstrapped_estimates,
+                                                        uncertainty_summary_method = uncertainty_summary_method,
+                                                        value_col = "Re_estimate",
+                                                        output_value_col = "Re_estimate",
+                                                        bootstrap_id_col = bootstrap_id_col,
+                                                        index_col = index_col)
+
+    if(combine_bootstrap_and_estimation_uncertainties) {
+      estimates_with_uncertainty <- dplyr::full_join(estimates_with_uncertainty,
+                                                     Re_HPDs,
+                                                     by = index_col) %>%
+        dplyr::mutate(CI_down_Re_estimate = dplyr::if_else(.data$CI_down_Re_estimate > .data$Re_lowHPD,
+                                                           .data$Re_lowHPD, .data$CI_down_Re_estimate),
+                      CI_up_Re_estimate = dplyr::if_else(.data$CI_up_Re_estimate < .data$Re_highHPD,
+                                                         .data$Re_highHPD, .data$CI_up_Re_estimate)) %>%
+        dplyr::select(!c(.data$Re_lowHPD, .data$Re_highHPD))
+    }
+  } else {
+    #TODO pass '...' args to 'summarise_uncertainty'
+
+    cols_to_summarise <- names(bootstrapped_estimates)
+    cols_to_summarise <- cols_to_summarise[!cols_to_summarise %in% c(index_col, bootstrap_id_col) ]
+
+    summaries <- lapply(cols_to_summarise, function(col_x){
+      bootstrapped_estimates_of_interest <- bootstrapped_estimates %>%
+        dplyr::select(.data[[col_x]], .data[[index_col]], .data[[bootstrap_id_col]])
+
+      original_estimates_of_interest <- original_estimates %>%
+        dplyr::select(.data[[col_x]], .data[[index_col]], .data[[bootstrap_id_col]])
+
+      summarise_uncertainty(original_values = original_estimates_of_interest,
+                            bootstrapped_values = bootstrapped_estimates_of_interest,
+                            uncertainty_summary_method = uncertainty_summary_method,
+                            value_col = col_x,
+                            output_value_col = col_x,
+                            bootstrap_id_col = bootstrap_id_col,
+                            index_col = index_col)
+    })
+
+    estimates_with_uncertainty <- summaries %>%
+      purrr::reduce(dplyr::full_join, by = index_col)
+
+    if(combine_bootstrap_and_estimation_uncertainties) {
+      estimates_with_uncertainty <- dplyr::full_join(estimates_with_uncertainty,
+                                                     Re_HPDs,
+                                                     by = index_col) %>%
+        dplyr::mutate(bootstrapped_CI_down_Re_estimate = .data$CI_down_Re_estimate,
+                      bootstrapped_CI_up_Re_estimate = .data$CI_up_Re_estimate) %>%
+        dplyr::mutate(CI_down_Re_estimate = dplyr::if_else(.data$CI_down_Re_estimate > .data$Re_lowHPD,
+                                                           .data$Re_lowHPD, .data$CI_down_Re_estimate),
+                      CI_up_Re_estimate = dplyr::if_else(.data$CI_up_Re_estimate < .data$Re_highHPD,
+                                                         .data$Re_highHPD, .data$CI_up_Re_estimate))
+    }
+  }
+
   if(!is.null(ref_date)) {
     estimates_with_uncertainty <- .add_date_column(estimates_with_uncertainty,
                                                    ref_date = ref_date,
@@ -228,19 +300,26 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
   estimated_Re <- do.call(
     'estimate_Re',
     c(list(incidence_data = deconvolved_incidence,
-           estimation_method = estimation_method),
+           estimation_method = estimation_method,
+           simplify_output = FALSE),
       .get_shared_args(.estimate_Re_EpiEstim_sliding_window, dots_args))
   )
 
   if(output_Re_only) {
     return(estimated_Re)
   } else {
+    #TODO simplify this call (create util function)
+    test_if_single_output <- try(.is_valid_module_input(estimated_Re, "estimated_Re"), silent = TRUE)
+    if(!("try-error" %in% class(test_if_single_output))) {
+      estimated_Re <- list("Re_estimate" = estimated_Re)
+    }
+
     merged_results <- do.call(
       'merge_outputs',
-      c(list(output_list = list("observed_incidence" = incidence_data,
+      c(list(output_list = c(list("observed_incidence" = incidence_data,
                                 "smoothed_incidence" = smoothed_incidence,
-                                "deconvolved_incidence" = deconvolved_incidence,
-                                "R_mean" = estimated_Re),
+                                "deconvolved_incidence" = deconvolved_incidence),
+                             estimated_Re),
              ref_date = ref_date,
              time_step = time_step),
         .get_shared_args(merge_outputs, dots_args))
@@ -462,12 +541,17 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
   if(output_Re_only) {
     return(estimated_Re)
   } else {
+    test_if_single_output <- try(.is_valid_module_input(estimated_Re, "estimated_Re"), silent = TRUE)
+    if(!("try-error" %in% class(test_if_single_output))) {
+      estimated_Re <- list("Re_estimate" = estimated_Re)
+    }
+
     merged_results <- do.call(
       'merge_outputs',
-      c(list(output_list = list("partially_delayed_observations" = partially_delayed_incidence,
+      c(list(output_list = c(list("partially_delayed_observations" = partially_delayed_incidence,
                                 "fully_delayed_observations" = fully_delayed_incidence,
-                                "combined_deconvolved_incidence" = all_infection_events,
-                                "R_mean" = estimated_Re),
+                                "combined_deconvolved_incidence" = all_infection_events),
+                                estimated_Re),
              ref_date = ref_date,
              time_step = time_step),
         .get_shared_args(merge_outputs, dots_args))
@@ -503,12 +587,14 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
                                                                  estimation_method = "EpiEstim sliding window",
                                                                  bootstrapping_method = "non-parametric block boostrap",
                                                                  uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
+                                                                 combine_bootstrap_and_estimation_uncertainties = FALSE,
                                                                  N_bootstrap_replicates = 100,
                                                                  delay_until_partial,
                                                                  delay_from_partial_to_full,
                                                                  partial_observation_requires_full_observation = TRUE,
                                                                  ref_date = NULL,
                                                                  time_step = "day",
+                                                                 output_Re_only = TRUE,
                                                                  ...){
 
   #TODO validate arguments
@@ -520,6 +606,7 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
   dots_args <- .get_dots_as_list(...)
 
   index_col <- "idx"
+  bootstrap_id_col <- "bootstrap_id"
 
   # Precompute delay distribution vector or matrix to avoid repeating costly computations needlessly for each bootstrap sample
   delay_distribution_until_partial <- .get_delay_distribution(delay_until_partial,
@@ -557,11 +644,22 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
            ref_date = NULL,
            output_Re_only = FALSE,
            include_index = TRUE,
-           index_col = index_col),
+           index_col = index_col,
+           output_HPD = combine_bootstrap_and_estimation_uncertainties),
       estimate_from_combined_observations_dots_args)
   )
 
-  original_result$bootstrap_id <- 0
+  if(combine_bootstrap_and_estimation_uncertainties) {
+    # Keep the Re estimation HPDs for later
+    Re_HPDs <- original_result %>%
+      dplyr::select(.data[[index_col]], .data$Re_highHPD, .data$Re_lowHPD)
+
+    # Remove them from the original_result variable
+    original_result <- original_result %>%
+      dplyr::select(!c(.data$Re_highHPD, .data$Re_lowHPD))
+  }
+
+  original_result[[bootstrap_id_col]] <- 0
 
   bootstrapping_results <- list(original_result)
 
@@ -600,11 +698,12 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
              ref_date = NULL,
              output_Re_only = FALSE,
              include_index = TRUE,
-             index_col = index_col),
+             index_col = index_col,
+             outputHPD = FALSE),
         estimate_from_combined_observations_dots_args)
     )
 
-    bootstrapped_estimate$bootstrap_id <- i
+    bootstrapped_estimate[[bootstrap_id_col]] <- i
 
     bootstrapping_results <- c(bootstrapping_results, list(bootstrapped_estimate))
   }
@@ -612,18 +711,70 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
   bootstrapped_estimates <- dplyr::bind_rows(bootstrapping_results)
 
   original_estimates <- bootstrapped_estimates %>%
-    dplyr::filter(.data$bootstrap_id == 0)
+    dplyr::filter(.data[[bootstrap_id_col]] == 0)
 
   bootstrapped_estimates <- bootstrapped_estimates %>%
-    dplyr::filter(.data$bootstrap_id > 0)
+    dplyr::filter(.data[[bootstrap_id_col]] > 0)
 
-  #TODO pass '...' args to 'summarise_uncertainty'
-  estimates_with_uncertainty <- summarise_uncertainty(original_estimates = original_estimates,
-                                                      bootstrapped_estimates = bootstrapped_estimates,
-                                                      uncertainty_summary_method = uncertainty_summary_method,
-                                                      Re_estimate_col = "R_mean",
-                                                      bootstrap_id_col = "bootstrap_id",
-                                                      index_col = index_col)
+  #TODO isolate in a function to remove duplication with get_block_bootstrapped_estimate and simplify this function
+  if(output_Re_only) {
+    #TODO pass '...' args to 'summarise_uncertainty'
+    estimates_with_uncertainty <- summarise_uncertainty(original_values = original_estimates,
+                                                        bootstrapped_values = bootstrapped_estimates,
+                                                        uncertainty_summary_method = uncertainty_summary_method,
+                                                        value_col = "Re_estimate",
+                                                        output_value_col = "Re_estimate",
+                                                        bootstrap_id_col = bootstrap_id_col,
+                                                        index_col = index_col)
+
+    if(combine_bootstrap_and_estimation_uncertainties) {
+      estimates_with_uncertainty <- dplyr::full_join(estimates_with_uncertainty,
+                                                     Re_HPDs,
+                                                     by = index_col) %>%
+        dplyr::mutate(CI_down_Re_estimate = dplyr::if_else(.data$CI_down_Re_estimate > .data$Re_lowHPD,
+                                                           .data$Re_lowHPD, .data$CI_down_Re_estimate),
+                      CI_up_Re_estimate = dplyr::if_else(.data$CI_up_Re_estimate < .data$Re_highHPD,
+                                                         .data$Re_highHPD, .data$CI_up_Re_estimate)) %>%
+        dplyr::select(!c(.data$Re_lowHPD, .data$Re_highHPD))
+    }
+
+  } else {
+    #TODO pass '...' args to 'summarise_uncertainty'
+
+    cols_to_summarise <- names(bootstrapped_estimates)
+    cols_to_summarise <- cols_to_summarise[!cols_to_summarise %in% c(index_col, bootstrap_id_col) ]
+    summaries <- lapply(cols_to_summarise, function(col_x){
+      bootstrapped_estimates_of_interest <- bootstrapped_estimates %>%
+        dplyr::select(.data[[col_x]], .data[[index_col]], .data[[bootstrap_id_col]])
+
+      original_estimates_of_interest <- original_estimates %>%
+        dplyr::select(.data[[col_x]], .data[[index_col]], .data[[bootstrap_id_col]])
+
+      summarise_uncertainty(original_values = original_estimates_of_interest,
+                            bootstrapped_values = bootstrapped_estimates_of_interest,
+                            uncertainty_summary_method = uncertainty_summary_method,
+                            value_col = col_x,
+                            output_value_col = col_x,
+                            bootstrap_id_col = bootstrap_id_col,
+                            index_col = index_col)
+    })
+
+    estimates_with_uncertainty <- summaries %>%
+      purrr::reduce(dplyr::full_join, by = index_col)
+
+    if(combine_bootstrap_and_estimation_uncertainties) {
+      estimates_with_uncertainty <- dplyr::full_join(estimates_with_uncertainty, Re_HPDs,
+                                                     by = index_col) %>%
+        dplyr::mutate(bootstrapped_CI_down_Re_estimate = .data$CI_down_Re_estimate,
+                      bootstrapped_CI_up_Re_estimate = .data$CI_up_Re_estimate) %>%
+        dplyr::mutate(CI_down_Re_estimate = dplyr::if_else(.data$CI_down_Re_estimate > .data$Re_lowHPD,
+                                                           .data$Re_lowHPD, .data$CI_down_Re_estimate),
+                      CI_up_Re_estimate = dplyr::if_else(.data$CI_up_Re_estimate < .data$Re_highHPD,
+                                                         .data$Re_highHPD, .data$CI_up_Re_estimate))
+    }
+  }
+
+
   if(!is.null(ref_date)) {
     estimates_with_uncertainty <- .add_date_column(estimates_with_uncertainty,
                                                    ref_date = ref_date,

@@ -148,10 +148,12 @@ built from the distribution of bootstrapped estimates.</p>
   deconvolution_method <span class='op'>=</span> <span class='st'>"Richardson-Lucy delay distribution"</span>,
   estimation_method <span class='op'>=</span> <span class='st'>"EpiEstim sliding window"</span>,
   uncertainty_summary_method <span class='op'>=</span> <span class='st'>"original estimate - CI from bootstrap estimates"</span>,
+  combine_bootstrap_and_estimation_uncertainties <span class='op'>=</span> <span class='cn'>FALSE</span>,
   <span class='va'>delay_incubation</span>,
   delay_onset_to_report <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>,
   ref_date <span class='op'>=</span> <span class='cn'>NULL</span>,
   time_step <span class='op'>=</span> <span class='st'>"day"</span>,
+  output_Re_only <span class='op'>=</span> <span class='cn'>TRUE</span>,
   <span class='va'>...</span>
 <span class='op'>)</span></pre>
 
@@ -189,6 +191,8 @@ values through time from the reconstructed infection timings.
 Available options are:</p><ul>
 <li><p>'EpiEstim sliding window',
 implemented in <code><a href='.estimate_Re_EpiEstim_sliding_window.html'>.estimate_Re_EpiEstim_sliding_window</a></code></p></li>
+<li><p>'EpiEstim piecewise constant',
+implemented in <code><a href='.estimate_Re_EpiEstim_piecewise_constant.html'>.estimate_Re_EpiEstim_piecewise_constant</a></code></p></li>
 </ul></td>
     </tr>
     <tr>
@@ -219,6 +223,11 @@ and centered around the mean of bootstrapped estimates and original estimates.</
       <th>time_step</th>
       <td><p>string. Time between two consecutive incidence datapoints.
 "day", "2 days", "week", "year"... (see <code><a href='https://rdrr.io/r/base/seq.Date.html'>seq.Date</a></code> for details)</p></td>
+    </tr>
+    <tr>
+      <th>output_Re_only</th>
+      <td><p>boolean. Should the output only contain Re estimates?
+(as opposed to containing results for each intermediate step)</p></td>
     </tr>
     <tr>
       <th>...</th>
