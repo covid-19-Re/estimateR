@@ -1,12 +1,13 @@
 #List containing predefined accepted string inputs for exported functions, for parameters for which validity is tested using the.is_value_in_accepted_values_vector() function
-accepted_parameter_value <- list(smoothing_method = c("LOESS", "TEST"),
+accepted_parameter_value <- list(smoothing_method = c("LOESS", "TEST1", "TEST2", "TEST3"),
                                  deconvolution_method = c("Richardson-Lucy delay distribution"),
-                                 estimation_method = c("EpiEstim sliding window"),
+                                 estimation_method = c("EpiEstim sliding window", "EpiEstim piecewise constant"),
                                  bootstrapping_method = c("non-parametric block boostrap"),
                                  function_prefix = c("d", "q", "p", "r"),
                                  uncertainty_summary_method = c("original estimate - CI from bootstrap estimates", "bagged mean - CI from bootstrap estimates"))
 
 
+                            
 #' Check that an object represents a probability distribution.
 #'
 #' To pass the check:
@@ -224,9 +225,36 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS", "TEST"),
   return(TRUE)
 }
 
+.is_list_of_outputs <- function(output_list){
+  if(!is.list(output_list)) {
+    return(FALSE)
+  }
+
+  check_if_simple_output <- try(.is_valid_module_input(output_list, deparse(substitute(output_list))),
+                                silent = TRUE)
+
+  # Return FALSE if input is an output object itself
+  if(!("try-error" %in% class(check_if_simple_output))) {
+    return(FALSE)
+  }
+
+  for(i in 1:length(output_list)) {
+    test_output_i <- try(.is_valid_module_input(output_list[[i]], names(output_list)[i]),
+                         silent = TRUE)
+    if("try-error" %in% class(test_output_i)) {
+      return(FALSE)
+    }
+  }
+
+  return(TRUE)
+}
+
+#TODO reconsider whether we need the incidence_data_length here.
+# Is it acceptable if dim(matrix) > incidence data length?
+# And is it needed to check whether ncol(delay_matrix) < incidence_data_length
 #' @description Utility function that checks if a given matrix is a valid delay distribution matrix.
 #' For this, the matrix needs to fulfill the following conditions:
-#' \itemize{ 
+#' \itemize{
 #'     \item is a numeric matrix
 #'     \item has no values < 0
 #'     \item is a lower triangular matrix
@@ -234,10 +262,10 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS", "TEST"),
 #'     \item no NA values
 #'     \item the size of the matrix is greater than the length of the incidence data
 #' }
-#' 
+#'
 #' @inherit validation_utility_params
 #' @param delay_matrix A matrix to be tested
-#' 
+#'
 .check_is_delay_distribution_matrix <- function(delay_matrix, incidence_data_length, parameter_name){
   if(!is.matrix(delay_matrix) || !is.numeric(delay_matrix)){
     stop(paste(parameter_name, "needs to be a numeric matrix."))

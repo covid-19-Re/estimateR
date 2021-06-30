@@ -345,8 +345,8 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
                                                                                  offset_by_one = TRUE)
   } else {
     # Populate the delay_distribution_matrix by column
+    # if(n_time_steps > threshold_right_truncation){
     for(i in 1:last_varying_col) {
-
       # Shuffle rows so as to get rid of potential biases
       shuffled_delays <- empirical_delays %>%
         dplyr::slice( sample(1:dplyr::n()) )
@@ -371,7 +371,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
           dplyr::pull(.data$report_delay)
       }
 
-      data_hist <- hist(recent_counts_distribution, breaks=seq(0,n_time_steps,l=n_time_steps+1), plot=FALSE)
+      data_hist <- hist(recent_counts_distribution, breaks=seq(0, n_time_steps,l=n_time_steps+1), plot=FALSE)
       new_column <- c(rep(0,i-1), data_hist$density)
       new_column <- head(new_column, n_time_steps)
       delay_distribution_matrix[,i] <- new_column
