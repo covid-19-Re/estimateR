@@ -54,7 +54,7 @@ smooth_incidence <- function(incidence_data,
 #' @param data_points_incl integer. Size of the window used in the LOESS algorithm.
 #' @param degree integer. LOESS degree.
 #'
-#' @return module output. Smoothed incidence TODO add details.
+#' @return module output object. Smoothed incidence.
 .smooth_LOESS <- function(incidence_input, data_points_incl = 21, degree = 1) {
 
   .are_valid_argument_values(list(list(incidence_input, "module_input"),

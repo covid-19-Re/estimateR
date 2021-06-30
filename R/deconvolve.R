@@ -1,7 +1,7 @@
-#' Infer Infection Events Dates from Delayed Observation
+#' Infer infection events dates from delayed observations
 #'
 #' This function reconstructs an incidence of infection events from incidence data representing delayed observations.
-#' The assumption made is that delayed observations represent the convolution of the infections with a delay distribution.
+#' The assumption made is that delayed observations represent the convolution of the time series of infections with a delay distribution.
 #' \code{deconvolve_incidence} implements a deconvolution algorithm (Richardson-Lucy) to reconstruct
 #' a vector of infection events from input data representing delayed observations.
 #'
@@ -11,7 +11,7 @@
 #' @inheritDotParams convolve_delay_inputs
 #' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #'
-#' @return module output object. Inferred incidence of infection events.
+#' @return module output object. Inferred incidence of infection events. TODO specify
 #' @export
 deconvolve_incidence <- function( incidence_data,
                                   deconvolution_method = "Richardson-Lucy delay distribution",

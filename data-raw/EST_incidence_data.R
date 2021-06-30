@@ -10,5 +10,4 @@ EST_incidence_data <- EST_data %>%
   dplyr::transmute(date = lubridate::as_date(StatisticsDate),
             case_incidence = DailyCases)
 
-#TODO document data
 usethis::use_data(EST_incidence_data, overwrite = TRUE, compress = "bzip2", version = 2)
