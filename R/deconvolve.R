@@ -102,31 +102,47 @@ deconvolve_incidence <- function( incidence_data,
 
   #TODO reorganize this: build matrix beforehand and get shift uniquely from matrix size
   if(NCOL(delay_distribution) == 1) {
-    first_guess_delay <- .get_initial_deconvolution_shift(delay_distribution)
+    n_time_units_left_extension <- .get_time_steps_quantile(delay_distribution, quantile = 0.95)
+    initial_shift <- .get_time_steps_quantile(delay_distribution, quantile = 0.5)
+
+    delay_distribution_matrix <- .get_matrix_from_single_delay_distr(
+      delay_distribution,
+      N=length(incidence_vector) + n_time_units_left_extension)
   } else {
-    #TODO add check that NCOL(delay_distribution) > length_original_vector
-    first_guess_delay <- NCOL(delay_distribution) - length_original_vector
+    delay_distribution_matrix <- delay_distribution
+
+    if(NCOL(delay_distribution_matrix) < length_original_vector) {
+      stop("The dimension of 'delay_distribution' cannot be smaller than the length of 'incidence_input'.")
+    }
+    n_time_units_left_extension <- NCOL(delay_distribution_matrix) - length_original_vector
+    initial_shift <- min(n_time_units_left_extension,
+                         .get_time_steps_quantile(delay_distribution_matrix[,1], quantile = 0.5))
   }
 
-  original_incidence <- c(rep(0, times = first_guess_delay), incidence_vector)
+  #TODO here we could decide to either extend with zeroes when we know it's zero, or with an extrapolation of the early values
+  #with zeroes does it have the benefit that whatever value we have in the deconvolved values, there is no effect on optim step?
+  original_incidence <- c(rep(0, times = n_time_units_left_extension), incidence_vector)
 
   ### Richardson-Lucy algorithm
   #TODO document the math notations used in the algo and possibly rename some intermediary variables (E, B...)
 
   ## Initial step
   # Prepare vector with initial guess for first step of deconvolution
-  current_estimate <- c(incidence_vector, rep(last_recorded_incidence, times = first_guess_delay))
+  #TODO here we could also decide to extend with extrapolation of last values
+  current_estimate <- c(incidence_vector, rep(last_recorded_incidence, times = initial_shift))
+
+  extra_left_steps <- n_time_units_left_extension - initial_shift
+
+  if(extra_left_steps > 0) {
+    current_estimate <- c(rep(first_recorded_incidence, times = extra_left_steps), current_estimate)
+  } else if(extra_left_steps < 0) {
+    stop("Initial shift in R-L algo should be less than the number of steps padded on the left side.")
+  }
+
   chi_squared <- Inf
   count <- 1
 
-  if(NCOL(delay_distribution) == 1) {
-    delay_distribution_matrix <- .get_matrix_from_single_delay_distr(delay_distribution,
-                                                                     N=length(current_estimate))
-  } else {
-    delay_distribution_matrix <- delay_distribution
-  }
-
-  truncated_delay_distribution_matrix <- delay_distribution_matrix[(1 + first_guess_delay):NROW(delay_distribution_matrix),, drop = F]
+  truncated_delay_distribution_matrix <- delay_distribution_matrix[(1 + n_time_units_left_extension):NROW(delay_distribution_matrix),, drop = F]
 
   Q_vector <- apply(truncated_delay_distribution_matrix, MARGIN = 2, sum)
 
@@ -147,7 +163,8 @@ deconvolve_incidence <- function( incidence_data,
     current_estimate <- current_estimate / Q_vector *  as.vector(crossprod(B, delay_distribution_matrix))
     current_estimate <- tidyr::replace_na(current_estimate, 0)
 
-    chi_squared <- 1/length_original_vector * sum((E[(first_guess_delay + 1): length(E)] - original_incidence[(first_guess_delay + 1) : length(original_incidence)])^2/E[(first_guess_delay + 1): length(E)], na.rm = T)
+    #TODO check with pipeline implementation
+    chi_squared <- 1/length_original_vector * sum((E[(n_time_units_left_extension + 1): length(E)] - original_incidence[(n_time_units_left_extension + 1) : length(original_incidence)])^2/E[(n_time_units_left_extension + 1): length(E)], na.rm = T)
     count <- count + 1
   }
 
@@ -155,9 +172,9 @@ deconvolve_incidence <- function( incidence_data,
     cat("\tEnd of Richardson-Lucy algorithm\n")
   }
 
-  additional_offset <- - first_guess_delay
-  # Remove last values as they cannot be properly inferred
-  final_estimate <- current_estimate[1:(length(current_estimate) - first_guess_delay)]
+  additional_offset <- - initial_shift
+  # Remove first and last values as they cannot be properly inferred
+  final_estimate <- current_estimate[(1 + extra_left_steps):(length(current_estimate) - initial_shift)]
 
   return(.get_module_output(final_estimate, incidence_input, additional_offset))
 }

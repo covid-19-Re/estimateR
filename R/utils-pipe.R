@@ -1,5 +1,5 @@
 
-
+#TODO WIP, continue refactoring
 do_uncertainty_summary <- function(original_values,
                                    bootstrapped_values,
                                    uncertainty_summary_method,
@@ -47,6 +47,7 @@ do_uncertainty_summary <- function(original_values,
 
   } else {
     #TODO pass '...' args to 'summarise_uncertainty'
+    #TODO continue here
 
     cols_to_summarise <- names(bootstrapped_estimates)
     cols_to_summarise <- cols_to_summarise[!cols_to_summarise %in% c(index_col, bootstrap_id_col) ]

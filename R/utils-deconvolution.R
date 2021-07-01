@@ -111,7 +111,9 @@
   return(augmented_matrix)
 }
 
+#TODO redoc
 #TODO add options to take median, mode, mean...
+#TODO redoc quantile parm
 #' Get initial shift for deconvolution step
 #'
 #' This utility function returns the number of timesteps
@@ -122,8 +124,8 @@
 #'
 #' @return an integer value corresponding to the rounded median of
 #' the input delay distribution.
-.get_initial_deconvolution_shift <- function(delay_distribution_vector){
-    initial_shift <- ceiling(min(which(cumsum(delay_distribution_vector) > 0.5))) - 1
+.get_time_steps_quantile <- function(delay_distribution_vector, quantile = 0.5){
+    initial_shift <- ceiling(min(which(cumsum(delay_distribution_vector) > quantile))) - 1
     initial_shift <- max(initial_shift, 0, na.rm = TRUE)
     return(initial_shift)
 }
@@ -214,7 +216,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
   #TODO allow for different ways of specifying initial shift
   # Use median of reported delays as initial shift (needed for deconvolution step)
-  initial_shift <- round(stats::median(empirical_delays$report_delay, na.rm = T))
+  initial_shift <- ceiling(stats::quantile(empirical_delays$report_delay, probs = 0.95, na.rm = T))[1]
 
   # Left-pad the dates we are looking at to account for shift between event dates and observation dates.
   all_dates <- c(rev(seq.Date(from = ref_date, by = paste0("-1 ", time_step), length.out = initial_shift + 1)),
