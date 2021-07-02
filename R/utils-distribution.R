@@ -21,6 +21,8 @@
 #'
 #' @return Density, distribution function, quantile function or random generation function for \code{distribution}
 .get_distribution_function <- function(distribution, function_prefix){
+  .are_valid_argument_values(list(list(distribution, "distribution"),
+                                  list(function_prefix, "function_prefix")))
   f <- get(paste0(function_prefix, distribution[["name"]]), envir = loadNamespace("stats"))
   return(f)
 }
@@ -32,7 +34,8 @@
 #'
 #' @return vector of quantiles
 .get_quantiles <- function(distribution, p) {
-
+  .are_valid_argument_values(list(list(distribution, "distribution"),
+                                  list(p, "probability_distr_vector_high_tolerance")))
   q_distribution_function <- .get_distribution_function(distribution = distribution,
                                                         function_prefix = "q")
 
@@ -49,6 +52,9 @@
 #'
 #' @return vector containing \code{n} samples of \code{distribution}
 .sample_from_distribution <- function(distribution, n) {
+  .are_valid_argument_values(list(list(distribution, "distribution"),
+                                  list(n, "integer")))
+  
   r_distribution_function <- .get_distribution_function(distribution = distribution,
                                                         function_prefix = "r")
 
@@ -69,7 +75,11 @@
 #'
 #' @return vector containing weights of the discretized probability distribution.
 .get_discretized_distribution <- function(distribution, right_boundary, offset_by_one){
-
+  
+  .are_valid_argument_values(list(list(distribution, "distribution"),
+                                  list(right_boundary, "positive_number"),
+                                  list(offset_by_one, "boolean")))
+  
   p_distribution_function <-  .get_distribution_function(distribution = distribution,
                                                          function_prefix = "p")
 
@@ -98,6 +108,10 @@
 #'
 #' @return number of time steps required to for the probability distribution to reach \code{max_quantile}
 .get_right_boundary_for_distribution_vector <- function(distribution, max_quantile){
+  
+  .are_valid_argument_values(list(list(distribution, "distribution"),
+                                  list(max_quantile, "numeric_between_zero_one")))
+  
   right_boundary <- ceiling(.get_quantiles(distribution, p = max_quantile)) + 1
 
   # Set the right boundary to at least two
@@ -121,6 +135,9 @@ build_delay_distribution <- function(distribution,
                                      max_quantile = 0.999,
                                      offset_by_one = FALSE){
 
+  .are_valid_argument_values(list(list(distribution, "distribution"),
+                                  list(max_quantile, "numeric_between_zero_one"),
+                                  list(offset_by_one, "boolean")))
   #TODO revisit this return of false, maybe if fails we throw error always
   if(!.is_valid_distribution(distribution)) {
     return(0)
@@ -166,7 +183,10 @@ build_delay_distribution <- function(distribution,
 
   #TODO validate other arguments
   # We put '1' here, because we do not care here about checking the dimension of the matrix.
-  .are_valid_argument_values(list(list(delay, "delay_object", 1)))
+  .are_valid_argument_values(list(list(delay, "delay_object", 1),
+                                  list(n_report_time_steps, "null_or_int"),
+                                  list(ref_date, "null_or_date"),
+                                  list(time_step, "time_step")))
 
   dots_args <- .get_dots_as_list(...)
 

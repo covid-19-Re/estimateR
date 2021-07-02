@@ -82,11 +82,11 @@ estimate_Re <- function( incidence_data,
 
   .are_valid_argument_values(list(list(incidence_input, "module_input"),
                                   list(minimum_cumul_incidence, "non_negative_number"),
-                                  list(estimation_window, "number"),
-                                  list(mean_serial_interval, "number"),
+                                  list(estimation_window, "positive_integer"),
+                                  list(mean_serial_interval, "positive_number"),
                                   list(std_serial_interval, "non_negative_number"),
-                                  list(mean_Re_prior, "number")))
-
+                                  list(mean_Re_prior, "positive_number")))
+  
   incidence_vector <- .get_values(incidence_input)
 
   if(sum(incidence_vector) < minimum_cumul_incidence) {

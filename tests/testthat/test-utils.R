@@ -9,14 +9,12 @@ test_that(".get_module_input() deals with well-formatted input", {
 })
 
 test_that(".get_module_input() checks input format", {
-  toy_incidence <- c(1,23,1,-50)
+  toy_incidence <- c(1,23,1,50)
   data_1 <- list(values = toy_incidence, index_offset = -2, baz = 6)
   invalid_input_1 <- list(a = toy_incidence, b = -2, c = 6)
 
   expect_identical(.get_module_input(data_1), list(values = toy_incidence, index_offset = -2))
-  skip("Input format is not validated yet.")
-  #TODO unskip when input is validated
-  expect_error(.get_module_input(invalid_input_1), "Wrong input format.")
+  expect_error(.get_module_input(invalid_input_1))
 })
 
 test_that(".get_module_output() deals with well-formatted input", {

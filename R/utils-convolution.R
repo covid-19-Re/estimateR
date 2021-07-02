@@ -8,8 +8,8 @@
 #' @return discretized probability distribution vector
 .convolve_delay_distribution_vectors <- function(vector_a, vector_b){
 
-  .check_is_probability_distr_vector(vector_a)
-  .check_is_probability_distr_vector(vector_b)
+  .are_valid_argument_values(list(list(vector_a, "probability_distr_vector"),
+                                  list(vector_b, "probability_distr_vector")))
 
   # Right-pad vectors with zeroes to bring them to the same length
   final_length <- length(vector_b) + length(vector_a)
@@ -38,6 +38,9 @@
 #' @return discretized delay distribution matrix
 .convolve_delay_distribution_vector_with_matrix <- function(vector_a, matrix_b, vector_first = TRUE){
 
+  .are_valid_argument_values(list(list(vector_a, "probability_distr_vector"),
+                                  list(matrix_b, "probability_distr_matrix", 0),
+                                  list(vector_first, "boolean")))
   if( vector_first ) {
     # Increase size of matrix_b to account for the fact that the output matrix will be shifted in time by the vector_a delay
     n_col_augment <- .get_initial_deconvolution_shift(vector_a)
@@ -85,7 +88,9 @@
 
   stop("This function is not ready.\n
        Need to consider if left augmentation is required like for .convolve_delay_distribution_vector_with_matrix")
-
+  .are_valid_argument_values(list(list(matrix_a, "probability_distr_matrix", 0),
+                                  list(matrix_b, "probability_distr_matrix", 0)))
+  
   if(nrow(matrix_a) != nrow(matrix_b)) {
     stop("Convolved matrices must have the same dimensions.")
   }
@@ -123,7 +128,8 @@
 .convolve_delay_distributions <- function(first_delay,
                                           second_delay) {
 
-  #TODO check that elements are either delay distribution vectors or matrices: validate input
+  .are_valid_argument_values(list(list(first_delay, "delay_object", 1), # TODO EXPLAIN WHY
+                                  list(second_delay, "delay_object", 1))) #
 
   if( .is_numeric_vector(first_delay) ){
     if ( .is_numeric_vector(second_delay) ){
@@ -184,9 +190,11 @@ convolve_delay_inputs <- function(delay_incubation,
                                   delay_onset_to_report,
                                   n_report_time_steps = NULL,
                                   ...){
-
+  
+  # We put '1' here, because we do not care here about checking the dimension of the matrix.
   .are_valid_argument_values(list(list(delay_incubation, "delay_object", 1),
-                                  list(delay_onset_to_report, "delay_object", 1)))
+                                  list(delay_onset_to_report, "delay_object", 1),
+                                  list(n_report_time_steps, "null_or_int")))
 
   dots_args <- .get_dots_as_list(...)
 
