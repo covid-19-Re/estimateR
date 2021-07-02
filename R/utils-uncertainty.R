@@ -30,24 +30,14 @@ summarise_uncertainty <- function(bootstrapped_values,
                                   bootstrap_id_col = "bootstrap_id",
                                   index_col = "idx",
                                   ...){
+  
+  .are_valid_argument_values(list(list(bootstrapped_values, "bootstrap_estimates", c(value_col, bootstrap_id_col, index_col)),
+                                  list(uncertainty_summary_method, "uncertainty_summary_method"),
+                                  list(value_col, "string"),
+                                  list(output_value_col, "string"),
+                                  list(bootstrap_id_col, "string"),
+                                  list(index_col, "string")))
 
-  #TODO validate input
-  #TODO validate the bootstrapped_values format
-
-  if(value_col %!in% names(bootstrapped_values)) {
-    stop(paste0("Missing ", value_col, " column in 'bootstrapped values' argument,
-                or 'value_col' was not set to the corresponding column name."))
-  }
-
-  if(bootstrap_id_col %!in% names(bootstrapped_values)) {
-    stop(paste0("Missing ", bootstrap_id_col, " column in 'bootstrapped values' argument,
-                or 'bootstrap_id_col' was not set to the corresponding column name."))
-  }
-
-  if(index_col %!in% names(bootstrapped_values)) {
-    stop(paste0("Missing ", index_col, " column in 'bootstrapped values' argument,
-                or 'index_col' was not set to the corresponding column name."))
-  }
 
   dots_args <- .get_dots_as_list(...)
 
@@ -55,6 +45,7 @@ summarise_uncertainty <- function(bootstrapped_values,
     dplyr::rename(!!output_value_col := .data[[value_col]])
 
   if(!is.null(original_values)) {
+    .are_valid_argument_values(list(list(original_values, "estimates", index_col)))
     original_values <- original_values %>%
       dplyr::rename(!!output_value_col := .data[[value_col]])
   }
@@ -120,16 +111,17 @@ summarise_uncertainty <- function(bootstrapped_values,
                                     prefix_up = "CI_up",
                                     prefix_down = "CI_down"){
 
+  .are_valid_argument_values(list(list(central_values, "estimates", index_col),
+                                  list(bootstrapped_values, "bootstrap_estimates", c(value_col, bootstrap_id_col, index_col)),
+                                  list(value_col, "string"),
+                                  list(bootstrap_id_col, "string"),
+                                  list(index_col, "string"),
+                                  list(alpha, "numeric_between_zero_one"),
+                                  list(prefix_up, "string"),
+                                  list(prefix_down, "string")))
   #TODO proper validation of input (check that numeric between 0 and 1,
   # strings and dataframes with the right columns and with no NA in index_col)
 
-  if(any(is.na(bootstrapped_values[[index_col]]))) {
-    stop(paste("NA value(s) in column", index_col, "in", deparse(substitute(bootstrapped_values))))
-  }
-
-  if(any(is.na(central_values[[index_col]]))) {
-    stop(paste("NA value(s) in column", index_col, "in", deparse(substitute(central_values))))
-  }
 
   CI_down <- paste(prefix_down, value_col, sep = "_")
   CI_up <- paste(prefix_up, value_col, sep = "_")
@@ -173,18 +165,16 @@ summarise_uncertainty <- function(bootstrapped_values,
                                    index_col) {
 
   #TODO proper validation of input (check that strings and dataframes with the right columns and with no NA in index_col)
-
-  if(any(is.na(bootstrapped_values[[index_col]]))) {
-    stop(paste("NA value(s) in column", index_col, "in", deparse(substitute(bootstrapped_values))))
-  }
+  .are_valid_argument_values(list(list(bootstrapped_values, "bootstrap_estimates", c(value_col, bootstrap_id_col, index_col)),
+                                  list(value_col, "string"),
+                                  list(bootstrap_id_col, "string"),
+                                  list(index_col, "string")))
 
   bootstrapped_values <- bootstrapped_values %>%
     dplyr::select(.data[[index_col]], .data[[value_col]])
 
   if(!is.null(original_values)) {
-    if(any(is.na(original_values[[index_col]]))) {
-      stop(paste("NA value(s) in column", index_col, "in", deparse(substitute(original_values))))
-    }
+    .are_valid_argument_values(list(list(original_values, "estimates", index_col)))
 
     original_values <- original_values %>%
       dplyr::select(.data[[index_col]], .data[[value_col]])

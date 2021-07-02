@@ -12,6 +12,9 @@
 #' delay distribution.
 .get_matrix_from_single_delay_distr <- function(delay_distribution_vector, N) {
 
+  .are_valid_argument_values(list(list(delay_distribution_vector, "probability_distr_vector"),
+                                  list(N, "positive_integer")))
+
   if(N >= length(delay_distribution_vector)) {
     delay_distribution_vector <- c(delay_distribution_vector, rep(0, times = N - length(delay_distribution_vector)))
   }
@@ -34,8 +37,10 @@
 #'
 #' @return delay distribution matrix
 .get_delay_matrix_from_delay_distribution_parms <- function(distributions, ...) {
-  #TODO add checks on validity of input
 
+  for(i in 1:length(distributions)){
+    .are_valid_argument_values(list(list(distributions[[i]], "distribution")))
+  }
   dots_args <- .get_dots_as_list(...)
 
   # Generate list of delay distribution vectors
@@ -90,6 +95,9 @@
 .left_augment_delay_distribution <- function(delay_distribution_matrix,
                                              n_col_augment){
 
+  .are_valid_argument_values(list(list(delay_distribution_matrix, "probability_distr_matrix", 0),
+                                  list(n_col_augment, "positive_integer")))
+
   n_col_original <- ncol(delay_distribution_matrix)
   n_col_augmented <- n_col_original + n_col_augment
 
@@ -114,6 +122,7 @@
 #TODO redoc
 #TODO add options to take median, mode, mean...
 #TODO redoc quantile parm
+#TODO validate 'quantile'
 #' Get initial shift for deconvolution step
 #'
 #' This utility function returns the number of timesteps
@@ -125,12 +134,12 @@
 #' @return an integer value corresponding to the rounded median of
 #' the input delay distribution.
 .get_time_steps_quantile <- function(delay_distribution_vector, quantile = 0.5){
+  .are_valid_argument_values(list(list(delay_distribution_vector, "probability_distr_vector")))
+
     initial_shift <- ceiling(min(which(cumsum(delay_distribution_vector) > quantile))) - 1
     initial_shift <- max(initial_shift, 0, na.rm = TRUE)
     return(initial_shift)
 }
-
-
 
 
 #TODO test
@@ -183,6 +192,15 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   ##TODO need to account for offset if onset data (or not onset data?)
   ##TODO reconsider if we make gamma fit (allow to turn it off, or to use different distribution)
 
+  .are_valid_argument_values(list(list(empirical_delays, "empirical_delay_data"),
+                                  list(n_report_time_steps, "positive_integer"),
+                                  list(ref_date, "null_or_date"),
+                                  list(time_step, "time_step"),
+                                  list(min_number_cases, "null_or_int"),
+                                  list(upper_quantile_threshold, "numeric_between_zero_one"),
+                                  list(min_number_cases_fraction, "numeric_between_zero_one"),
+                                  list(min_min_number_cases, "positive_integer")))
+
   if(is.null(ref_date)) {
     ref_date <- min(dplyr::pull(empirical_delays, .data$event_date), na.rm = TRUE)
   }
@@ -234,56 +252,150 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   distribution_list <- vector(mode = "list", length = last_varying_col)
 
   # Populate the delay_distribution_matrix by column
-  for(i in 1:last_varying_col) {
+  if(n_time_steps > threshold_right_truncation){
+    for(i in 1:last_varying_col) {
 
-    # Shuffle rows so as to get rid of potential biases
-    shuffled_delays <- empirical_delays %>%
-      dplyr::slice( sample(1:dplyr::n()) )
+      # Shuffle rows so as to get rid of potential biases
+      shuffled_delays <- empirical_delays %>%
+        dplyr::slice( sample(1:dplyr::n()) )
 
-    recent_counts <- shuffled_delays %>%
-      dplyr::arrange( dplyr::desc(.data$event_date) ) %>%
-      dplyr::filter( .data$event_date <= all_dates[i] )
+      recent_counts <- shuffled_delays %>%
+        dplyr::arrange( dplyr::desc(.data$event_date) ) %>%
+        dplyr::filter( .data$event_date <= all_dates[i] )
 
-    if( nrow(recent_counts) >= min_number_cases ) {
-      # If enough data points before date of interest,
-      # take most recent observations before this date.
+      if( nrow(recent_counts) >= min_number_cases ) {
+        # If enough data points before date of interest,
+        # take most recent observations before this date.
 
-      recent_counts_distribution <- recent_counts %>%
-        dplyr::slice_head( n = min_number_cases )  %>%
-        dplyr::pull(.data$report_delay)
-    } else {
-      # Otherwise, take 'min_number_of_cases' observations,
-      # even after date of interest.
-      recent_counts_distribution <- shuffled_delays %>%
-        dplyr::arrange( .data$event_date ) %>%
-        dplyr::slice_head( n = min_number_cases )  %>%
-        dplyr::pull(.data$report_delay)
+        recent_counts_distribution <- recent_counts %>%
+          dplyr::slice_head( n = min_number_cases )  %>%
+          dplyr::pull(.data$report_delay)
+      } else {
+        # Otherwise, take 'min_number_of_cases' observations,
+        # even after date of interest.
+        recent_counts_distribution <- shuffled_delays %>%
+          dplyr::arrange( .data$event_date ) %>%
+          dplyr::slice_head( n = min_number_cases )  %>%
+          dplyr::pull(.data$report_delay)
+      }
+
+      gamma_fit <- try(suppressWarnings(fitdistrplus::fitdist(recent_counts_distribution + 1, distr = "gamma")),
+                       silent = T)
+      if ("try-error" %in% class(gamma_fit)) {
+        #TODO only output this if verbose output
+        cat("    mle failed to estimate the parameters. Trying method = \"mme\"\n")
+        gamma_fit <- fitdistrplus::fitdist(recent_counts_distribution + 1, distr = "gamma", method = "mme")
+      }
+      #TODO if none work revert to empirical distribution
+
+      shape_fit <- gamma_fit$estimate[["shape"]]
+      scale_fit <- 1/gamma_fit$estimate[["rate"]]
+
+      distribution_list[[i]] <- list(name = "gamma", shape = shape_fit, scale = scale_fit)
     }
 
-    gamma_fit <- try(suppressWarnings(fitdistrplus::fitdist(recent_counts_distribution + 1, distr = "gamma")),
-                     silent = T)
-    if ("try-error" %in% class(gamma_fit)) {
-      #TODO only output this if verbose output
-      cat("    mle failed to estimate the parameters. Trying method = \"mme\"\n")
-      gamma_fit <- fitdistrplus::fitdist(recent_counts_distribution + 1, distr = "gamma", method = "mme")
-    }
-    #TODO if none work revert to empirical distribution
+  } else { # if n_time_steps <= threshold_right_truncation
 
-    shape_fit <- gamma_fit$estimate[["shape"]]
-    scale_fit <- 1/gamma_fit$estimate[["rate"]]
+      # Shuffle rows so as to get rid of potential biases
+      shuffled_delays <- empirical_delays %>%
+        dplyr::slice( sample(1:dplyr::n()) )
 
-    distribution_list[[i]] <- list(name = "gamma", shape = shape_fit, scale = scale_fit)
+      recent_counts <- shuffled_delays %>%
+        dplyr::arrange( dplyr::desc(.data$event_date) ) %>%
+        dplyr::filter( .data$event_date <= all_dates[1] )
+
+      if( nrow(recent_counts) >= min_number_cases ) {
+        # If enough data points before date of interest,
+        # take most recent observations before this date.
+
+        recent_counts_distribution <- recent_counts %>%
+          dplyr::slice_head( n = min_number_cases )  %>%
+          dplyr::pull(.data$report_delay)
+      } else {
+        # Otherwise, take 'min_number_of_cases' observations,
+        # even after date of interest.
+        recent_counts_distribution <- shuffled_delays %>%
+          dplyr::arrange( .data$event_date ) %>%
+          dplyr::slice_head( n = min_number_cases )  %>%
+          dplyr::pull(.data$report_delay)
+      }
+
+      gamma_fit <- try(suppressWarnings(fitdistrplus::fitdist(recent_counts_distribution + 1, distr = "gamma")),
+                       silent = T)
+      if ("try-error" %in% class(gamma_fit)) {
+        #TODO only output this if verbose output
+        cat("    mle failed to estimate the parameters. Trying method = \"mme\"\n")
+        gamma_fit <- fitdistrplus::fitdist(recent_counts_distribution + 1, distr = "gamma", method = "mme")
+      }
+      #TODO if none work revert to empirical distribution
+
+      shape_fit <- gamma_fit$estimate[["shape"]]
+      scale_fit <- 1/gamma_fit$estimate[["rate"]]
+
+      for(i in 1:last_varying_col) {
+        distribution_list[[i]] <- list(name = "gamma", shape = shape_fit, scale = scale_fit)
+      }
   }
 
-  if(last_varying_col <= n_time_steps) {
+
+    if(last_varying_col < n_time_steps) {
     for( i in 1: threshold_right_truncation ) {
       distribution_list <- append(distribution_list, distribution_list[last_varying_col])
     }
   }
 
+  global_distrib_list <<- distribution_list
   delay_distribution_matrix <- .get_delay_matrix_from_delay_distribution_parms(distribution_list,
                                                                                offset_by_one = TRUE)
 
   return( delay_distribution_matrix )
 }
+
+#' Utility function that generates delay data, assuming a different delay between event and observation for each individual day.
+#' It then generates the delay matrix and computes the RMSE between the parameters of the gamma distributions passed as arguments and the ones recovered from the delay matrix.
+#' The shapes and scales of the gamma distributions are specified as parameters, and the number of timesteps is assumed to be equal to the length of these vectors.
+#'
+#' @param original_distribution_shapes vector. Specifies the shapes for the gamma distributions.
+#' @param original_distribution_scales vector. Specifies the scales for the gamma distributions.
+#' @param nr_distribution_samples integer. How many cases to be sampled for each timestep.
+#'
+#' @return A list with the computed RMSE. It has two elements: $shape_rmse and $scale_rmse
+.delay_distribution_matrix_rmse_compute <- function(original_distribution_shapes, original_distribution_scales, nr_distribution_samples = 500){
+
+  #Create a vector with all dates in observation interval
+  start_date <- as.Date('2021/04/01')
+  time_steps = length(original_distribution_shapes)
+  end_date <- start_date + time_steps
+  available_dates <- seq(start_date, end_date, by="day")
+
+  #Build the delay data; Events on each individual day are assumed to be observed according to a different gamma distribution, as specified by original_distribution_shapes and original_distribution_scales,
+  sampled_report_delays <- c()
+  report_dates <- as.Date(c())
+  for (i in 1:time_steps){
+    new_sampled_report_delays <- .sample_from_distribution(list(name="gamma", shape=original_distribution_shapes[i], scale=original_distribution_scales[i]), nr_distribution_samples)
+    sampled_report_delays <- c(sampled_report_delays, new_sampled_report_delays)
+    new_report_dates <- rep(available_dates[i], nr_distribution_samples)
+    report_dates <- c(report_dates, new_report_dates)
+  }
+  delay_data <- tibble(event_date = report_dates, report_delay = sampled_report_delays)
+  delay_matrix <- get_matrix_from_empirical_delay_distr(delay_data, time_steps)
+
+
+  #Get the shapes and scales of the gamma distributions fitted by the get_matrix_from_empirical_delay_distr function
+  distribution_shapes <- c()
+  distribution_scales <- c()
+
+  for (distribution in global_distrib_list){
+    distribution_shapes <- c(distribution_shapes, distribution$shape)
+    distribution_scales <- c(distribution_scales, distribution$scale)
+  }
+
+  #Compute the RMSE between the desired gamma distribution shapes and scales, and the ones obtained by the get_matrix_from_empirical_delay_distr function
+  start_index <- length(distribution_shapes) - length(original_distribution_shapes) + 1
+  shape_rmse <- rmse(distribution_shapes[start_index:length(distribution_shapes)], original_distribution_shapes)/mean(original_distribution_shapes)
+  scale_rmse <- rmse(distribution_scales[start_index:length(distribution_scales)], original_distribution_scales)/mean(original_distribution_scales)
+
+  return(list(shape_rmse=shape_rmse, scale_rmse=scale_rmse))
+}
+
 

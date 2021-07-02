@@ -8,12 +8,6 @@
 # Useful operator
 `%!in%` <- Negate(`%in%`)
 
-#List containing predefined accepted string inputs for exported functions, for parameters for which validity is tested using the.is_value_in_accepted_values_vector() function
-accepted_parameter_value <- list(smoothing_method = c("LOESS"),
-                                 deconvolution_method = c("Richardson-Lucy delay distribution"),
-                                 estimation_method = c("EpiEstim sliding window", "EpiEstim piecewise constant"),
-                                 bootstrapping_method = c("non-parametric block boostrap"),
-                                 uncertainty_summary_method = c("original estimate - CI from bootstrap estimates", "bagged mean - CI from bootstrap estimates"))
 
 
 #' Merge multiple module outputs into tibble
@@ -38,7 +32,15 @@ merge_outputs <- function(output_list,
                           time_step = "day",
                           include_index = is.null(ref_date),
                           index_col = "idx"){
-
+  
+  .are_valid_argument_values(list(list(ref_date, "null_or_date"),
+                                  list(time_step, "time_step"),
+                                  list(index_col, "string"),
+                                  list(include_index, "boolean")))
+  for(i in 1:length(output_list)){
+    .are_valid_argument_values(list(list(output_list[[i]], "module_input")))
+  }
+  
   tibble_list <- lapply(1:length(output_list),
                         function(i) {
                           .make_tibble_from_output(output = output_list[[i]],
@@ -74,7 +76,11 @@ merge_outputs <- function(output_list,
 .make_tibble_from_output <- function(output,
                                      output_name,
                                      index_col = "idx"){
-
+  
+  .are_valid_argument_values(list(list(output, "module_input"),
+                                  list(output_name, "string"),
+                                  list(index_col, "string")))
+  
   tmp_output <- .get_module_input(output)
   indices <- seq(from = .get_offset(tmp_output), by = 1, length.out = length(.get_values(tmp_output)))
 
@@ -96,6 +102,13 @@ merge_outputs <- function(output_list,
                              index_col = "idx",
                              keep_index_col = FALSE) {
 
+  
+  .are_valid_argument_values(list(list(estimates, "estimates", index_col),
+                                  list(ref_date, "date"),
+                                  list(time_step, "time_step"),
+                                  list(index_col, "string"),
+                                  list(keep_index_col, "boolean")))
+  
   dates <- seq.Date(from = ref_date + min(estimates[[index_col]]),
                     by = time_step,
                     along.with = estimates[[index_col]])
@@ -126,7 +139,9 @@ merge_outputs <- function(output_list,
 #' List with a \code{values} and an \code{index_offset} element.
 #'
 .get_module_input <- function(data) {
-  #TODO properly check input format
+  
+  .are_valid_argument_values(list(list(data, "module_input")))
+  
   if (is.list(data)) {
     values <- as.double(data$values)
     index_offset <- data$index_offset
@@ -153,6 +168,8 @@ merge_outputs <- function(output_list,
 #'
 #' @return vector containing \code{values} only
 .get_values <- function(module_object) {
+  
+  .are_valid_argument_values(list(list(module_object, "module_input")))
   if(is.list(module_object)) {
     return(module_object$values)
   } else {
@@ -169,6 +186,8 @@ merge_outputs <- function(output_list,
 #'
 #' @return numeric scalar. \code{index_offset} of the \code{module_object}
 .get_offset <- function(module_object) {
+  
+  .are_valid_argument_values(list(list(module_object, "module_input")))
   if(is.list(module_object)) {
     return(module_object$index_offset)
   } else {
@@ -190,6 +209,9 @@ merge_outputs <- function(output_list,
 #' @return module output object
 .get_module_output <- function(results, input, offset = 0) {
 
+  .are_valid_argument_values(list(list(results, "numeric_vector"),
+                                  list(input, "module_input"),
+                                  list(offset, "integer")))
   if(length(results) == 0) {
     return(.make_empty_module_output())
   }
@@ -217,6 +239,10 @@ merge_outputs <- function(output_list,
 #' @return
 #' @export
 inner_addition <- function(input_a, input_b){
+  
+  .are_valid_argument_values(list(list(input_a, "module_input"),
+                                  list(input_b, "module_input")))
+  
   length_a <- .get_input_length(input_a)
   length_b <- .get_input_length(input_b)
 
@@ -241,7 +267,10 @@ inner_addition <- function(input_a, input_b){
 #' @return
 #' @export
 left_addition <- function(input_a, input_b){
-  #TODO validate input
+  
+  .are_valid_argument_values(list(list(input_a, "module_input"),
+                                  list(input_b, "module_input")))
+  
   offset_a <- .get_offset(input_a)
   offset_b <- .get_offset(input_b)
 
@@ -262,7 +291,11 @@ left_addition <- function(input_a, input_b){
 
 #TODO doc
 leftpad_input <- function(input, new_offset, padding_value = 0){
-  #TODO validate input
+  
+  .are_valid_argument_values(list(list(input, "module_input"),
+                                  list(new_offset, "number"),
+                                  list(padding_value, "number")))
+  
   if(new_offset >= .get_offset(input)) {
     return(input)
   } else {
@@ -307,10 +340,11 @@ correct_for_partially_observed_data <- function( incidence_data,
                                                  time_step = "day",
                                                  ...) {
 
-
-  #TODO validate cutoff_observation_probability argument
   .are_valid_argument_values(list(list(incidence_data, "module_input"),
-                                  list(delay_distribution_final_report, "delay_object", .get_input_length(incidence_data))))
+                                  list(delay_distribution_final_report, "delay_object", .get_input_length(incidence_data)),
+                                  list(cutoff_observation_probability, "numeric_between_zero_one"),
+                                  list(ref_date, "null_or_date"),
+                                  list(time_step, "time_step")))
 
   input <- .get_module_input(incidence_data)
   incidence_vector <- .get_values(input)
@@ -374,6 +408,9 @@ correct_for_partially_observed_data <- function( incidence_data,
 #'
 #' @return numeric vector or module output object.
 .simplify_output <- function(output){
+  .are_valid_argument_values(list(list(output, "module_input")))
+                                  
+  
   if(.get_offset(output) == 0) {
     return(.get_values(output))
   } else {
@@ -396,6 +433,7 @@ correct_for_partially_observed_data <- function( incidence_data,
 #'
 #' @return integer. length of values vector.
 .get_input_length <- function(input) {
+  .are_valid_argument_values(list(list(input, "module_input")))
   return(length(.get_values(input)))
 }
 
@@ -431,6 +469,13 @@ correct_for_partially_observed_data <- function( incidence_data,
                                  distribution_initial_delay = list(name = "gamma", shape = 6, scale = 5),
                                  seed = NULL){
 
+  .are_valid_argument_values(list(list(origin_date, "date"),
+                                  list(n_time_steps, "positive_integer"),
+                                  list(time_step, "time_step"),
+                                  list(ratio_delay_end_to_start, "number"),
+                                  list(distribution_initial_delay, "distribution"),
+                                  list(seed, "null_or_int")))
+  
   if(!is.null(seed)) {
     set.seed(seed)
   }
@@ -504,304 +549,4 @@ correct_for_partially_observed_data <- function( incidence_data,
     func_arg_names <- unlist(lapply(func_list, .get_arg_names))
   }
   return(dots_args[names(dots_args) %in% func_arg_names])
-}
-
-
-#' @description Utility function that checks if a specific user given parameter value is among the accepted ones, in which case it returns TRUE
-#' Throws an error otherwise.
-#'
-#' @inherit validation_utility_params
-.is_value_in_accepted_values_vector <- function(string_user_input, parameter_name){
-  if(!is.character(string_user_input)){
-    stop(paste("Expected parameter", parameter_name, "to be a string."))
-  }
-  if(!(string_user_input %in% accepted_parameter_value[[parameter_name]])){
-    stop(paste("Expected parameter", parameter_name, "to have one of the following values:", toString(accepted_parameter_value[[parameter_name]]),". Given input was:", string_user_input))
-  }
-  return(TRUE)
-}
-
-
-#' @description Utility function that checks if a specific user given parameter value an accepted time_step, in which case it returns TRUE
-#' An accepted time_step is considered to be:
-#' <<A character string, containing one of "day", "week", "month", "quarter" or "year".
-#' This can optionally be preceded by a (positive or negative) integer and a space, or followed by "s".>>
-#' (from \url{https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/seq.Date})
-#' @inherit validation_utility_params
-#'
-.is_value_valid_time_step <- function(string_user_input, parameter_name){
-  if(!is.character(string_user_input)){
-    stop(paste("Expected parameter", parameter_name, "to be a string."))
-  }
-  is_valid_time_step <- grepl("^([-+]?\\d+ )?(day|week|month|quarter|year)s?$", string_user_input)
-  if(!is_valid_time_step){
-    stop(paste("Expected parameter", parameter_name, "to be a character string, containing one of \"day\", \"week\", \"month\", \"quarter\" or \"year\". This can optionally be preceded by a (positive or negative) integer and a space, or followed by \"s\"."))
-  }
-  return(TRUE)
-}
-
-
-#' @description Utility function to determine whether an object is a numeric vector with all positive (or zero) values.
-#'
-#' @inherit validation_utility_params
-#' @param vector vector to be tested
-#'
-#' @return boolean. TRUE if vector is a positive numeric vector. FALSE otherwise
-.is_positive_numeric_vector <- function(vector){
-  if(!is.vector(vector, mode="numeric")){
-    return(FALSE)
-  }
-  if(!all(vector >= 0)){
-    return(FALSE)
-  }
-  return(TRUE)
-}
-
-
-#' @description Utility function that checks if a user input is one of:
-#' \itemize{
-#'     \item a numeric vector with values > 0
-#'     \item a list with two elements: \code{values} (a numeric vector with values > 0) and \code{index_offset} (an integer)
-#' }
-#' @inherit validation_utility_params
-#' @param module_input_object the vector/list the user passed as a parameter, to be tested
-#'
-.is_valid_module_input <- function(module_input_object, parameter_name){
-  if(is.list(module_input_object)){
-    if("values" %!in% names(module_input_object)){
-      stop(paste("When passed as a list,", parameter_name, "has to contain a $values element."))
-    }
-
-    if("index_offset" %!in% names(module_input_object)){
-      stop(paste("When passed as a list,", parameter_name, "has to contain a $index_offset element."))
-    }
-
-    if(!.is_positive_numeric_vector(module_input_object$values)){
-      stop(paste("The $values element of", parameter_name, "has to be a numeric vector with values greater or equal to 0."))
-    }
-
-    if(module_input_object$index_offset != as.integer(module_input_object$index_offset)){ #if index_offset is not an integer
-      stop(paste("The $index_offset element of", parameter_name, "has to be an integer."))
-    }
-
-  } else if(is.numeric(module_input_object)){
-    if(!.is_positive_numeric_vector(module_input_object)){
-      stop(paste(parameter_name, "has to be a numeric vector with values greater or equal to 0."))
-    }
-
-  } else {
-    stop(paste(parameter_name, "has to be either a numeric vector or a list."))
-  }
-  return(TRUE)
-}
-
-.is_list_of_outputs <- function(output_list){
-  if(!is.list(output_list)) {
-    return(FALSE)
-  }
-
-  check_if_simple_output <- try(.is_valid_module_input(output_list, deparse(substitute(output_list))),
-                                silent = TRUE)
-
-  # Return FALSE if input is an output object itself
-  if(!("try-error" %in% class(check_if_simple_output))) {
-    return(FALSE)
-  }
-
-  for(i in 1:length(output_list)) {
-    test_output_i <- try(.is_valid_module_input(output_list[[i]], names(output_list)[i]),
-                         silent = TRUE)
-    if("try-error" %in% class(test_output_i)) {
-      return(FALSE)
-    }
-  }
-
-  return(TRUE)
-}
-
-#TODO reconsider whether we need the incidence_data_length here.
-# Is it acceptable if dim(matrix) > incidence data length?
-# And is it needed to check whether ncol(delay_matrix) < incidence_data_length
-#' @description Utility function that checks if a given matrix is a valid delay distribution matrix.
-#' For this, the matrix needs to fulfill the following conditions:
-#' \itemize{
-#'     \item is a numeric matrix
-#'     \item has no values < 0
-#'     \item is a lower triangular matrix
-#'     \item no column sums up to more than 1
-#'     \item no NA values
-#'     \item the size of the matrix is greater than the length of the incidence data
-#' }
-#'
-#' @inherit validation_utility_params
-#' @param delay_matrix A matrix to be tested
-#'
-.check_is_delay_distribution_matrix <- function(delay_matrix, incidence_data_length){
-  if(!is.matrix(delay_matrix) || !is.numeric(delay_matrix)){
-    stop("The delay distribution object needs to be a numeric matrix.")
-  }
-
-  if(any(is.na(delay_matrix))){
-    stop("The delay distribution matrix cannot contain any NA values.")
-  }
-
-  if(!all(delay_matrix >= 0)){
-    stop("The delay distribution matrix needs to contain non-negative values.")
-  }
-
-  if(ncol(delay_matrix) != nrow(delay_matrix)){
-    stop("The delay distribution matrix needs to be square.")
-  }
-
-  if(!all(delay_matrix == delay_matrix*lower.tri(delay_matrix, diag = TRUE))){ #check if matrix is lower triangular
-    stop("The delay distribution matrix needs to be lower triangular.")
-  }
-
-  if(!all(colSums(delay_matrix) < 1)){
-    stop("The delay distribution matrix is not valid. At least one column sums up to a value greater than 1.")
-  }
-
-  if(ncol(delay_matrix) < incidence_data_length){
-    stop("The delay distribution matrix needs to have a greater size than the length of the incidence data.")
-  }
-
-  return(TRUE)
-
-}
-
-#' @description Utility function that checks whether a user input is a valid delay object. This means it can be one of the following:
-#'      \itemize{
-#'         \item a probability distribution vector: a numeric vector with no \code{NA} or negative values, whose entries sum up to 1
-#'         \item an empirical delay data: a data frame with two columns: \code{event_date} and \code{report_delay}. The columns cannot contain \code{NA} values. \code{report_delay} only contains non-negative values
-#'         \item a delay distribution matrix (as described in \code{\link{.check_is_delay_distribution_matrix}})
-#'         \item a distribution object (e.g. list(name = 'gamma', scale = X, shape = Y))
-#'      }
-#' @inherit validation_utility_params
-#' @param delay_object user inputted object to be tested
-#'
-.is_valid_delay_object <- function(delay_object, parameter_name, incidence_data_length){
-
-  if(.is_numeric_vector(delay_object)){
-
-    .check_is_probability_distr_vector(delay_object)
-
-  } else if(is.data.frame(delay_object)){
-
-    .check_is_empirical_delay_data(delay_object)
-
-  } else if(is.matrix(delay_object)){
-
-    .check_is_delay_distribution_matrix(delay_object, incidence_data_length)
-
-  } else if(is.list(delay_object)){
-
-    .is_valid_distribution(delay_object)
-
-  } else {
-    stop(paste("Invalid", parameter_name, "input.", parameter_name, "must be either:
-         a numeric vector representing a discretized probability distribution,
-         or a matrix representing discretized probability distributions,
-         or a distribution object (e.g. list(name = 'gamma', scale = X, shape = Y)),
-         or empirical delay data."))
-  }
-  return(TRUE)
-}
-
-#' @description  Utility function to check whether an object belongs to a particular class.
-#' Wrapper function over \code{\link{.check_class}} needed because, being called from \code{\link{.are_valid_argument_values}},
-#' the parameter name will not be the same as the one from the original function.
-#'
-#' @inherit validation_utility_params
-#' @inherit .check_class
-#'
-.check_class_parameter_name <- function(object, proper_class, parameter_name, mode = "any"){
-  tryCatch(
-    {
-      if(is.na(object)){
-        stop("Object was NA") # This error message is never shown. Overwritten below.
-      }
-      .check_class(object, proper_class, mode)
-    },
-    error=function(error) {
-      stop(paste("Expected parameter", parameter_name, "to be of type", proper_class, "and not NA."))
-    }
-  )
-  return(TRUE)
-}
-
-#' @description Utility function to check whether an object is null or belongs to a particular class.
-#'
-#' @inherit validation_utility_params
-#' @inherit .check_class
-#'
-.check_if_null_or_belongs_to_class <- function(object, proper_class, parameter_name, mode="any"){
-  if(!is.null(object)){
-    .check_class_parameter_name(object, proper_class, parameter_name, mode)
-  }
-  return(TRUE)
-}
-
-
-#' @description Utility function to check whether an object is a number.
-#'
-#' @inherit validation_utility_params
-#' @param number The value to be tested
-#'
-.check_if_number <- function(number, parameter_name){
-  if(!is.numeric(number)){
-    stop(paste(parameter_name, "is expected to be a number."))
-  }
-  if(length(number) > 1){
-    stop(paste(parameter_name, "is expected to be a number."))
-  }
-  return(TRUE)
-}
-
-
-#' @description Utility function to check whether an object is a positive number or 0.
-#'
-#' @inherit validation_utility_params
-#' @inherit  .check_if_number
-#'
-.check_if_non_negative_number <- function(number, parameter_name){
-  .check_if_number(number, parameter_name)
-
-  if(number < 0){
-    stop(paste(parameter_name, "is expected to be positive."))
-  }
-
-  return(TRUE)
-}
-
-#' @description Utility function that checks that the values the user passed when calling a function are valid.
-#'
-#' @inherit validation_utility_params
-#' @param user_inputs A list of lists with two elements: the first is the value of the parameter to be tested. The second is the expected type of that parameter.
-#'
-.are_valid_argument_values <- function(user_inputs){
-  for(i in 1:length(user_inputs)){
-    user_input <- user_inputs[[i]][[1]]
-    input_type <- user_inputs[[i]][[2]]
-    parameter_name <- deparse(substitute(user_inputs)[[i+1]][[2]])
-    if(length(user_inputs[[i]]) > 2){
-      additional_function_parameter <- user_inputs[[i]][[3]]
-    }
-
-    switch (input_type,
-            "smoothing_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
-            "deconvolution_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
-            "estimation_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
-            "uncertainty_summary_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
-            "bootstrapping_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
-            "time_step" = .is_value_valid_time_step(user_input, parameter_name),
-            "module_input" = .is_valid_module_input(user_input, parameter_name),
-            "boolean" = .check_class_parameter_name(user_input,"logical", parameter_name),
-            "delay_object" = .is_valid_delay_object(user_input, parameter_name, additional_function_parameter),
-            "number" = .check_if_number(user_input, parameter_name),
-            "non_negative_number" = .check_if_non_negative_number(user_input, parameter_name),
-            "null_or_date" = .check_if_null_or_belongs_to_class(user_input, "Date", parameter_name),
-            stop(paste("Checking function for type", input_type, "not found."))
-    )
-  }
-  return(TRUE)
 }
