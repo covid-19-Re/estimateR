@@ -102,7 +102,7 @@ deconvolve_incidence <- function( incidence_data,
 
   #TODO reorganize this: build matrix beforehand and get shift uniquely from matrix size
   if(NCOL(delay_distribution) == 1) {
-    n_time_units_left_extension <- .get_time_steps_quantile(delay_distribution, quantile = 0.95)
+    n_time_units_left_extension <- .get_time_steps_quantile(delay_distribution, quantile = 0.99)
     initial_shift <- .get_time_steps_quantile(delay_distribution, quantile = 0.5)
 
     delay_distribution_matrix <- .get_matrix_from_single_delay_distr(

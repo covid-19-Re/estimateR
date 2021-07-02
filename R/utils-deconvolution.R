@@ -216,7 +216,8 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
   #TODO allow for different ways of specifying initial shift
   # Use median of reported delays as initial shift (needed for deconvolution step)
-  initial_shift <- ceiling(stats::quantile(empirical_delays$report_delay, probs = 0.95, na.rm = T))[1]
+  #TODO it may be simpler to just do the augmentation during the deconvolution step
+  initial_shift <- ceiling(stats::quantile(empirical_delays$report_delay, probs = 0.99, na.rm = T))[1]
 
   # Left-pad the dates we are looking at to account for shift between event dates and observation dates.
   all_dates <- c(rev(seq.Date(from = ref_date, by = paste0("-1 ", time_step), length.out = initial_shift + 1)),
