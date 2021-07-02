@@ -4,7 +4,10 @@
 \alias{.is_valid_distribution}
 \title{Check if valid distribution list}
 \usage{
-.is_valid_distribution(distribution)
+.is_valid_distribution(
+  distribution,
+  parameter_name = deparse(substitute(distribution))
+)
 }
 \arguments{
 \item{distribution}{list. probability distribution specified in list format

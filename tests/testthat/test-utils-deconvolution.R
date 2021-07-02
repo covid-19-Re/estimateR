@@ -238,40 +238,40 @@ test_that(".get_matrix_from_empirical_delay_distr returns valid output",{
 
 
   expect_delay_matrix_sums_lte_1(empirical_delays_matrix, full_cols = 20)
-  
+
 })
 
 test_that(".get_matrix_from_empirical_delay_distr returns a matrix with the expected distributions when using fit_gamma_distrib = TRUE",{
 
   nr_distribution_samples = 500
   time_steps = 30
-  
+
   #Testing delay matrix with data sampled from constant gamma distribution
   original_distribution_shapes <- rep(6, time_steps)
   original_distribution_scales <- rep(5, time_steps)
   set.seed(1)
   result <- .delay_distribution_matrix_rmse_compute(original_distribution_shapes, original_distribution_scales, nr_distribution_samples)
-  expect_equal(max(result$shape_rmse, 0.0316407), 0.0316407, tolerance = 1E-2)
-  expect_equal(max(result$scale_rmse, 0.02179239), 0.02179239, tolerance = 1E-2)
-  
-  
-  #Testing delay matrix with data sampled from two different gamma distributions 
+  expect_equal(max(result$shape_rmse, 0.07829915), 0.07829915, tolerance = 1E-2)
+  expect_equal(max(result$scale_rmse, 0.05670633), 0.05670633, tolerance = 1E-2)
+
+
+  #Testing delay matrix with data sampled from two different gamma distributions
   original_distribution_shapes <- c(rep(3.5, time_steps/2), rep(6.5, time_steps/2))
   original_distribution_scales <- c(rep(2, time_steps/2), rep(3, time_steps/2))
   set.seed(1)
   result <- .delay_distribution_matrix_rmse_compute(original_distribution_shapes, original_distribution_scales, nr_distribution_samples)
-  expect_equal(max(result$shape_rmse, 0.3178616), 0.3178616, tolerance = 1E-2) # the RMSE gets lower with more time_steps; 
-  expect_equal(max(result$scale_rmse, 0.3522306), 0.3522306, tolerance = 1E-2) # kept the lower time_steps value to reduce running time 
+  expect_equal(max(result$shape_rmse,0.3193425), 0.3193425, tolerance = 1E-2) # the RMSE gets lower with more time_steps;
+  expect_equal(max(result$scale_rmse, 0.3491427), 0.3491427, tolerance = 1E-2) # kept the lower time_steps value to reduce running time
 
-  
+
   #Testing delay matrix with data sampled from a different gamma distribution for each timestep
   original_distribution_shapes <- sample(seq(3.9, 7.1, by = 0.1), time_steps, replace = TRUE)
   original_distribution_scales <- sample(seq(2.9, 6.1, by = 0.1), time_steps, replace = TRUE)
   set.seed(1)
   result <- .delay_distribution_matrix_rmse_compute(original_distribution_shapes, original_distribution_scales, nr_distribution_samples)
-  expect_equal(max(result$shape_rmse,  0.2932824), 0.2932824, tolerance = 1E-2)
-  expect_equal(max(result$scale_rmse, 0.2883487), 0.2883487, tolerance = 1E-2)
-  
+  expect_equal(max(result$shape_rmse,  0.1604508), 0.1604508, tolerance = 1E-2)
+  expect_equal(max(result$scale_rmse, 0.2854936), 0.2854936, tolerance = 1E-2)
+
 })
 
 

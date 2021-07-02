@@ -4,7 +4,10 @@
 \alias{.check_is_empirical_delay_data}
 \title{Check if input is in the proper empirical delay data format}
 \usage{
-.check_is_empirical_delay_data(delay)
+.check_is_empirical_delay_data(
+  delay,
+  parameter_name = deparse(substitute(distribution))
+)
 }
 \arguments{
 \item{delay}{object to be tested}

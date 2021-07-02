@@ -377,7 +377,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     new_report_dates <- rep(available_dates[i], nr_distribution_samples)
     report_dates <- c(report_dates, new_report_dates)
   }
-  delay_data <- tibble(event_date = report_dates, report_delay = sampled_report_delays)
+  delay_data <- dplyr::tibble(event_date = report_dates, report_delay = sampled_report_delays)
   delay_matrix <- get_matrix_from_empirical_delay_distr(delay_data, time_steps)
 
 
@@ -392,8 +392,8 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
   #Compute the RMSE between the desired gamma distribution shapes and scales, and the ones obtained by the get_matrix_from_empirical_delay_distr function
   start_index <- length(distribution_shapes) - length(original_distribution_shapes) + 1
-  shape_rmse <- rmse(distribution_shapes[start_index:length(distribution_shapes)], original_distribution_shapes)/mean(original_distribution_shapes)
-  scale_rmse <- rmse(distribution_scales[start_index:length(distribution_scales)], original_distribution_scales)/mean(original_distribution_scales)
+  shape_rmse <- Metrics::rmse(distribution_shapes[start_index:length(distribution_shapes)], original_distribution_shapes)/mean(original_distribution_shapes)
+  scale_rmse <- Metrics::rmse(distribution_scales[start_index:length(distribution_scales)], original_distribution_scales)/mean(original_distribution_scales)
 
   return(list(shape_rmse=shape_rmse, scale_rmse=scale_rmse))
 }

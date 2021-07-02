@@ -115,6 +115,7 @@ deconvolve_incidence <- function( incidence_data,
       stop("The dimension of 'delay_distribution' cannot be smaller than the length of 'incidence_input'.")
     }
     n_time_units_left_extension <- NCOL(delay_distribution_matrix) - length_original_vector
+
     initial_shift <- min(n_time_units_left_extension,
                          .get_time_steps_quantile(delay_distribution_matrix[,1], quantile = 0.5))
   }

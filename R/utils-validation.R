@@ -19,8 +19,8 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #' @param tolerance_on_sum Numeric tolerance in checking that vector elements sum to 1.
 #'
 #' @return TRUE if no error was raised.
-.check_is_probability_distr_vector <- function(distribution, tolerate_NAs = FALSE, tolerance_on_sum = 1E-3, parameter_name = deparse(substitute(distribution))) {
-  
+.check_is_probability_distr_vector <- function(distribution, tolerate_NAs = FALSE, tolerance_on_sum = 1E-2, parameter_name = deparse(substitute(distribution))) {
+
   .check_class_parameter_name(distribution, "vector", parameter_name, mode = "numeric")
   if( !tolerate_NAs && any(is.na(distribution)) ) {
     stop("Not a proper delay distribution vector. Contains one or more NAs.")
@@ -51,31 +51,31 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
   if ("character" %!in% class(proper_class) || length(proper_class) > 1 ) {
     stop("'proper_class' must be a single string.")
   }
-  
+
   if ("character" %!in% class(mode) || length(mode) > 1 ) {
     stop("'mode' must be a single string.")
   }
-  
+
   if(proper_class == "vector") {
     if(mode == "Date") {
       stop("Mode cannot be 'Date'.")
     }
-    
+
     if(!is.vector(object, mode = mode)) {
       stop(paste0(deparse(substitute(object)), " must be a ", mode, " vector."))
     }
-    
+
     return(TRUE)
   }
-  
+
   # validation function
   is_proper_class <- get(paste0("is.", proper_class), envir = loadNamespace("lubridate")) # need lubridate in case proper_class is Date
-  
+
   if (!is_proper_class(object)) {
     # deparse(substitute(...)) lets you do basically the reverse of get(..)
     stop(paste0(deparse(substitute(object)), " must be a ", proper_class, "."))
   }
-  
+
   return(TRUE)
 }
 
@@ -230,7 +230,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #' @description Utility function that checks if a user input is one of:
 #' \itemize{
 #'     \item a numeric vector with values > 0
-#'     \item a list with two elements: \code{values} (a numeric vector with values > 0) and \code{index_offset} (an integer)   
+#'     \item a list with two elements: \code{values} (a numeric vector with values > 0) and \code{index_offset} (an integer)
 #' }
 #' @inherit validation_utility_params
 #' @param module_input_object the vector/list the user passed as a parameter, to be tested
@@ -240,24 +240,24 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
     if("values" %!in% names(module_input_object)){
       stop(paste("When passed as a list,", parameter_name, "has to contain a $values element."))
     }
-    
+
     if("index_offset" %!in% names(module_input_object)){
       stop(paste("When passed as a list,", parameter_name, "has to contain a $index_offset element."))
-    } 
-    
+    }
+
     if(!.is_positive_numeric_vector(module_input_object$values)){
       stop(paste("The $values element of", parameter_name, "has to be a numeric vector with values greater or equal to 0."))
     }
-    
+
     if(module_input_object$index_offset != as.integer(module_input_object$index_offset)){ #if index_offset is not an integer
       stop(paste("The $index_offset element of", parameter_name, "has to be an integer."))
-    } 
-    
+    }
+
   } else if(is.numeric(module_input_object)){
     if(!.is_positive_numeric_vector(module_input_object)){
       stop(paste(parameter_name, "has to be a numeric vector with values greater or equal to 0."))
     }
-    
+
   } else {
     stop(paste(parameter_name, "has to be either a numeric vector or a list."))
   }
@@ -296,7 +296,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 # And is it needed to check whether ncol(delay_matrix) < incidence_data_length
 #' @description Utility function that checks if a given matrix is a valid delay distribution matrix.
 #' For this, the matrix needs to fulfill the following conditions:
-#' \itemize{ 
+#' \itemize{
 #'     \item is a numeric matrix
 #'     \item has no values < 0
 #'     \item is a lower triangular matrix
@@ -304,44 +304,44 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #'     \item no NA values
 #'     \item the size of the matrix is greater than the length of the incidence data
 #' }
-#' 
+#'
 #' @inherit validation_utility_params
 #' @param delay_matrix A matrix to be tested
-#' 
+#'
 .check_is_delay_distribution_matrix <- function(delay_matrix, incidence_data_length, parameter_name){
   if(!is.matrix(delay_matrix) || !is.numeric(delay_matrix)){
     stop(paste(parameter_name, "needs to be a numeric matrix."))
   }
-  
+
   if(any(is.na(delay_matrix))){
     stop(paste(parameter_name, "cannot contain any NA values."))
   }
-  
+
   if(!all(delay_matrix >= 0)){
     stop(paste(parameter_name, "needs to contain non-negative values."))
   }
-  
+
   if(ncol(delay_matrix) != nrow(delay_matrix)){
     stop(paste(parameter_name, "needs to be a square matrix."))
   }
-  
+
   if(!all(delay_matrix == delay_matrix*lower.tri(delay_matrix, diag = TRUE))){ #check if matrix is lower triangular
     stop(paste(parameter_name, "needs to be a lower triangular matrix."))
   }
-  
+
   if(!all(colSums(delay_matrix) <= 1)){
     stop(paste(parameter_name, "is not a valid delay distribution matrix. At least one column sums up to a value greater than 1."))
   }
-  
+
   if(ncol(delay_matrix) < incidence_data_length){
     stop(paste(parameter_name,"needs to have a greater size than the length of the incidence data."))
   }
-  
+
   return(TRUE)
-  
+
 }
 
-#' @description Utility function that checks whether a user input is a valid delay object. This means it can be one of the following: 
+#' @description Utility function that checks whether a user input is a valid delay object. This means it can be one of the following:
 #'      \itemize{
 #'         \item a probability distribution vector: a numeric vector with no \code{NA} or negative values, whose entries sum up to 1
 #'         \item an empirical delay data: a data frame with two columns: \code{event_date} and \code{report_delay}. The columns cannot contain \code{NA} values. \code{report_delay} only contains non-negative values
@@ -352,23 +352,23 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #' @param delay_object user inputted object to be tested
 #'
 .is_valid_delay_object <- function(delay_object, parameter_name, incidence_data_length){
-  
+
   if(.is_numeric_vector(delay_object)){
-    
+
     .check_is_probability_distr_vector(delay_object, parameter_name = parameter_name)
-    
+
   } else if(is.data.frame(delay_object)){
-    
+
     .check_is_empirical_delay_data(delay_object, parameter_name)
-    
+
   } else if(is.matrix(delay_object)){
-    
+
     .check_is_delay_distribution_matrix(delay_object, incidence_data_length, parameter_name)
-    
+
   } else if(is.list(delay_object)){
-    
+
     .is_valid_distribution(delay_object, parameter_name)
-    
+
   } else {
     stop(paste("Invalid", parameter_name, "input.", parameter_name, "must be either:
          a numeric vector representing a discretized probability distribution,
@@ -418,7 +418,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #'
 #' @inherit validation_utility_params
 #' @param number The value to be tested
-#' 
+#'
 .check_if_number <- function(number, parameter_name){
   if(!is.numeric(number)){
     stop(paste(parameter_name, "is expected to be a number."))
@@ -434,14 +434,14 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #'
 #' @inherit validation_utility_params
 #' @inherit  .check_if_number
-#' 
+#'
 .check_if_non_negative_number <- function(number, parameter_name){
   .check_if_number(number, parameter_name)
-  
+
   if(number < 0){
     stop(paste(parameter_name, "is expected to be positive."))
   }
-  
+
   return(TRUE)
 }
 
@@ -449,22 +449,22 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #'
 #' @inherit validation_utility_params
 #' @inherit  .check_if_number
-#' 
+#'
 .check_if_positive_number <- function(number, parameter_name){
   .check_if_number(number, parameter_name)
-  
+
   if(number <= 0){
     stop(paste(parameter_name, "is expected to be strictly positive."))
   }
-  
+
   return(TRUE)
-  
+
 }
 
 #' @description Utility function to check whether an object is an integer
 #'
 #' @inherit validation_utility_params
-#' 
+#'
 .check_if_integer <- function(number, parameter_name){
   if(as.integer(number) != number){ # did not use .check_class_parameter_name since is.integer(1) returns false
     stop(paste(parameter_name, "needs to be an integer."))
@@ -475,7 +475,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #' @description Utility function to check whether an object is an integer or null
 #'
 #' @inherit validation_utility_params
-#' 
+#'
 .check_if_null_or_integer <- function(number, parameter_name){
   if(!is.null(number)){
     .check_if_integer(number, parameter_name)
@@ -488,7 +488,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #'
 #' @inherit validation_utility_params
 #' @inherit  .check_if_number
-#' 
+#'
 .check_if_positive_integer <- function(number, parameter_name){
   .check_if_positive_number(number, parameter_name)
   .check_if_integer(number, parameter_name)
@@ -498,7 +498,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #'
 #' @inherit validation_utility_params
 #' @inherit  .check_if_number
-#' 
+#'
 .check_is_numeric_in_interval  <- function(user_input, parameter_name, interval_start, interval_end){
   .check_if_number(user_input, parameter_name)
   if(user_input < interval_start || user_input > interval_end){
@@ -510,17 +510,17 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 
 
 #' TODO docs
-#' 
+#'
 .check_is_estimate  <- function(user_input, parameter_name, index_col_name){
   .check_class_parameter_name(user_input, "data.frame", parameter_name)
   # if(ncol(user_input) < 4){
   #   stop(paste0("Expected ", parameter_name, " to have at least 4 columns for: index, Re estimates, upper and lower confidence interval limits."))
   # }
-  
+
   if(index_col_name %!in% names(user_input)){
     stop(paste("Missing index column. No column named ", index_col_name, "in", parameter_name))
   }
-  
+
   if(any(is.na(user_input[[index_col_name]]))) {
     stop(paste("NA value(s) in column", index_col_name, "in", parameter_name))
   }
@@ -536,33 +536,33 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
   Re_estimate_col = col_names[1]
   bootstrap_id_col = col_names[2]
   index_col = col_names[3]
-  
+
   .check_is_estimate(user_input, parameter_name, index_col)
-  
+
   for(i in 1:2){#the bootstrap_id column name and Re_estimate column name; index column is already checked by .check_is_estimate
     if(col_names[i] %!in% names(user_input)) {
       stop(paste0("Missing ", col_names[i], " column in 'bootstrapped estimates' argument,
                 or '", col_names[i],"' was not set to the corresponding column name."))
     }
   }
-  
+
   return(TRUE)
 }
 
 #' @description Utility function that checks that the values the user passed when calling a function are valid.
-#' 
+#'
 #' @inherit validation_utility_params
 #' @param user_inputs A list of lists with two elements: the first is the value of the parameter to be tested. The second is the expected type of that parameter.
-#' 
+#'
 .are_valid_argument_values <- function(user_inputs){
   for(i in 1:length(user_inputs)){
-    user_input <- user_inputs[[i]][[1]] 
+    user_input <- user_inputs[[i]][[1]]
     input_type <- user_inputs[[i]][[2]]
     parameter_name <- deparse(substitute(user_inputs)[[i+1]][[2]])
     if(length(user_inputs[[i]]) > 2){
-      additional_function_parameter <- user_inputs[[i]][[3]] 
+      additional_function_parameter <- user_inputs[[i]][[3]]
     }
-    
+
     switch (input_type,
             "smoothing_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
             "deconvolution_method" = .is_value_in_accepted_values_vector(user_input, parameter_name),
