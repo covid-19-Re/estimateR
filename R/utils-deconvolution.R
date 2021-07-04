@@ -176,6 +176,8 @@
 #' @param min_min_number_cases numeric. Lower bound
 #' for number of cases used to build an instant delay distribution.
 #' @param upper_quantile_threshold numeric. Between 0 and 1. TODO add details
+#' @param fit string. One of "gamma" or "none". Specifies the type of fit that 
+#' is applied to the columns of the delay matrix
 #' @inheritParams dating
 #'
 #' @return a discretized delay distribution matrix.
@@ -329,21 +331,23 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 }
 
 
-#' Title
+#' Build a specific column of the delay distribution matrix
 #'
-#' @param recent_counts_distribution 
-#' @param fit 
-#' @param col_number 
-#' @param N 
+#' @param recent_counts_distribution numeric vector of report delays, as used in \code{get_matrix_from_empirical_delay_distr}
+#' @param fit string. Can be either "none" or "gamma". Specifies the type of fitting applied to the computed column
+#' @param col_number positive integer. The index the computed column has in the delay matrix
+#' @param N positive integer. Size of delay matrix.
 #'
-#' @return
+#' @return the \code{col_number}th column of the delay matrix, based on the vector of report delays given.
 .get_delay_matrix_column <- function(recent_counts_distribution, fit = "none", col_number, N){
-  #todo test params
+  .are_valid_argument_values(list(list(recent_counts_distribution, "numeric_vector"),
+                                  list(fit, "delay_matrix_column_fit"),
+                                  list(col_number, "positive_integer"),
+                                  list(N, "positive_integer")))
   i <- col_number
   new_column <- c()
 
   if(fit == "gamma"){
-    # .get_delay_matrix_from_delay_distribution_parms(distribution_list, offset_by_one = TRUE)  
     gamma_fit <- try(suppressWarnings(fitdistrplus::fitdist(recent_counts_distribution + 1, distr = "gamma")), silent = T)
     if ("try-error" %in% class(gamma_fit)) {
       #TODO only output this if verbose output
