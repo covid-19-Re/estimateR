@@ -24,10 +24,11 @@ test_that("estimate_Re_from_noisy_delayed_incidence yields consistent results on
                                                         ref_date = as.Date("2020-02-04"),
                                                         time_step = "day")
 
-  reference_R_values <- c(NA,NA,NA,NA,4.785,3.426,2.882,2.644,2.518,2.426,2.343,
-                          2.255,2.16,2.064,1.969,1.873,1.78,1.691,1.605,1.522,1.444,
-                          1.37,1.3,1.23,1.159,1.09,1.023,0.96,0.903,0.855,0.818,0.788,
-                          0.762,0.737,0.709,0.677,0.641,NA,NA,NA,NA,NA)
+  reference_R_values <- c(NA,NA,NA,NA,5.13,3.74,3.15,2.86,2.67,
+                          2.53,2.41,2.29,2.18,2.08,1.98,1.88,
+                          1.78,1.69,1.61,1.52,1.44,1.37,1.3,1.23,
+                          1.16,1.09,1.02,0.96,0.9,0.86,0.82,0.79,
+                          0.76,0.74,0.71,0.68,0.64,NA,NA,NA,NA,NA)
 
   reference_dates <- seq.Date(from = as.Date("2020-01-30"), to = as.Date("2020-03-11"), by = "day")
 
@@ -64,12 +65,10 @@ test_that("estimate_Re_from_noisy_delayed_incidence passes '...' arguments consi
                                                         output_Re_only = FALSE,
                                                         index_col = "date_index")
 
-  reference_R_values <- c(NA,NA,NA,NA,NA,NA,NA,9.493,7.178,
-                          5.892,5.114,4.591,4.201,3.887,3.609,
-                          3.345,3.099,2.868,2.645,2.436,2.244,
-                          2.063,1.895,1.74,1.593,1.454,1.324,
-                          1.203,1.092,0.994,0.909,0.836,0.775,
-                          0.722,0.674,0.629,0.586,NA,NA,NA,NA,NA)
+  reference_R_values <- c(NA,NA,NA,NA,NA,NA,NA,10.53,7.96,6.47,5.54,4.9,4.42,
+    4.03,3.7,3.4,3.13,2.89,2.66,2.44,2.25,2.07,1.9,1.74,
+    1.59,1.45,1.32,1.2,1.09,0.99,0.91,0.84,0.77,0.72,
+    0.67,0.63,0.59,NA,NA,NA,NA,NA)
 
   reference_indices <- -5:36
 
@@ -428,11 +427,11 @@ test_that("get_bootstrapped_estimate_from_combined_observations can deal with em
                                                                               degree = 1)
 
 
-  reference_R_values <- c(3.54,2.43,2.01,1.86,1.81,1.79,1.78,
-                          1.77,1.76,1.75,1.71,1.65,1.58,1.52,
-                          1.45,1.39,1.33,1.28,1.23,1.17,1.12,
-                          1.07,1.02,0.97,0.93,0.88,0.84,0.8,
-                          0.76,0.72,0.69)
+  reference_R_values <- c(3.7,2.55,2.09,1.9,1.81,1.77,1.74,1.73,
+                          1.72,1.71,1.68,1.63,1.57,1.5,1.44,
+                          1.38,1.33,1.28,1.24,1.2,1.16,1.13,
+                          1.1,1.09,1.07,1.07,1.07,1.07,1.07,
+                          1.06,1.06,1.06)
 
   expect_equal(results_estimation$Re_estimate, reference_R_values, tolerance = 1E-1)
 })

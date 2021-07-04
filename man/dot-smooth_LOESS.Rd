@@ -14,7 +14,7 @@
 \item{degree}{integer. LOESS degree.}
 }
 \value{
-module output. Smoothed incidence TODO add details.
+module output object. Smoothed incidence.
 }
 \description{
 Prefer the use of the wrapper function \code{smooth_incidence(..., smoothing_method = "LOESS")}

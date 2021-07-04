@@ -62,7 +62,7 @@ test_that("deconvolve_incidence yields consistent results on a toy moving-throug
                         88,110,138,170,204,238,277,314,
                         344,371,389,392,386,372,347,320,
                         291,259,227,195,160,124,91,62)
-  reference_offset <- -14
+  reference_offset <- -13
 
   expect_equal( .get_values(deconvolved_incidence), reference_values, tolerance = 1 )
   expect_identical( .get_offset(deconvolved_incidence), reference_offset )

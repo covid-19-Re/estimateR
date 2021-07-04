@@ -3,7 +3,7 @@
 #' Apply a bootstrapping procedure on some original incidence data.
 #' Estimating Re over many bootstrapped replicates allows one to estimate
 #' the uncertainty over the estimated Re value due to observation noise.
-#' In future versions, the user will be able to choose between different
+#' In future updates, the user will be able to choose between different
 #' bootstrapping procedures.
 #' For now, only one bootstrapping function is implemented.
 #' It performs a non-parametric block bootstrapping.
@@ -12,7 +12,7 @@
 #' @inheritParams module_structure
 #' @inheritDotParams .block_bootstrap -incidence_input
 #'
-#' @return a module output object. A boostrapped replicate.
+#' @return a module output object. A boostrapped replicate. TODO improve
 #' @export
 get_bootstrap_replicate <- function( incidence_data,
                                      bootstrapping_method = "non-parametric block boostrap",
@@ -56,7 +56,7 @@ get_bootstrap_replicate <- function( incidence_data,
 #'This function works by resampling blocks of differences (on the log-scale)
 #' between the original data and a smoothed version of the original data.
 #'
-#' @param round_incidence boolean. Round the bootstrapped incidence?
+#' @param round_incidence boolean. If \code{TRUE}, the bootstrapped incidence is rounded to the nearest integer.
 #' @inheritParams module_methods
 #' @inheritParams inner_module
 #' @inheritDotParams .block_bootstrap_overlap_func -incidence_vector
@@ -108,7 +108,8 @@ get_bootstrap_replicate <- function( incidence_data,
 #'
 #' @param incidence_vector numeric vector. Original incidence to bootstrap over.
 #' @param block_size integer. Size of a bootstrapping block.
-#' @param keep_weekdays_aligned boolean. Set to FALSE if not daily incidence, or if no weekly noise pattern.
+#' @param keep_weekdays_aligned boolean.
+#' Set to \code{FALSE} if not daily incidence, or if no weekly noise pattern that would require to apply errors to the same day of the week as they were in the original data.
 #'
 #' @return numeric vector. Bootstrapped differences.
 .block_bootstrap_overlap_func <- function(incidence_vector, block_size = 10, keep_weekdays_aligned = TRUE){

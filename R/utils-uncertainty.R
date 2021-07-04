@@ -116,9 +116,9 @@ summarise_uncertainty <- function(bootstrapped_values,
                                   list(value_col, "string"),
                                   list(bootstrap_id_col, "string"),
                                   list(index_col, "string"),
+                                  list(alpha, "numeric_between_zero_one"),
                                   list(prefix_up, "string"),
-                                  list(prefix_down, "string"),
-                                  list(alpha, "numeric_between_zero_one")))
+                                  list(prefix_down, "string")))
   #TODO proper validation of input (check that numeric between 0 and 1,
   # strings and dataframes with the right columns and with no NA in index_col)
 
@@ -174,8 +174,8 @@ summarise_uncertainty <- function(bootstrapped_values,
     dplyr::select(.data[[index_col]], .data[[value_col]])
 
   if(!is.null(original_values)) {
-    
     .are_valid_argument_values(list(list(original_values, "estimates", index_col)))
+
     original_values <- original_values %>%
       dplyr::select(.data[[index_col]], .data[[value_col]])
 

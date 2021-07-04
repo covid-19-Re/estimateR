@@ -8,6 +8,8 @@
 # Useful operator
 `%!in%` <- Negate(`%in%`)
 
+
+
 #' Merge multiple module outputs into tibble
 #'
 #' Output tibble from list of unsynced module outputs, with an optional date column.
@@ -548,4 +550,3 @@ correct_for_partially_observed_data <- function( incidence_data,
   }
   return(dots_args[names(dots_args) %in% func_arg_names])
 }
-

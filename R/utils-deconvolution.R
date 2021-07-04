@@ -14,7 +14,7 @@
 
   .are_valid_argument_values(list(list(delay_distribution_vector, "probability_distr_vector"),
                                   list(N, "positive_integer")))
-  
+
   if(N >= length(delay_distribution_vector)) {
     delay_distribution_vector <- c(delay_distribution_vector, rep(0, times = N - length(delay_distribution_vector)))
   }
@@ -97,7 +97,7 @@
 
   .are_valid_argument_values(list(list(delay_distribution_matrix, "probability_distr_matrix", 0),
                                   list(n_col_augment, "positive_integer")))
-  
+
   n_col_original <- ncol(delay_distribution_matrix)
   n_col_augmented <- n_col_original + n_col_augment
 
@@ -119,7 +119,10 @@
   return(augmented_matrix)
 }
 
+#TODO redoc
 #TODO add options to take median, mode, mean...
+#TODO redoc quantile parm
+#TODO validate 'quantile'
 #' Get initial shift for deconvolution step
 #'
 #' This utility function returns the number of timesteps
@@ -130,9 +133,10 @@
 #'
 #' @return an integer value corresponding to the rounded median of
 #' the input delay distribution.
-.get_initial_deconvolution_shift <- function(delay_distribution_vector){
-    .are_valid_argument_values(list(list(delay_distribution_vector, "probability_distr_vector")))
-    initial_shift <- ceiling(min(which(cumsum(delay_distribution_vector) > 0.5))) - 1
+.get_time_steps_quantile <- function(delay_distribution_vector, quantile = 0.5){
+  .are_valid_argument_values(list(list(delay_distribution_vector, "probability_distr_vector")))
+
+    initial_shift <- ceiling(min(which(cumsum(delay_distribution_vector) > quantile))) - 1
     initial_shift <- max(initial_shift, 0, na.rm = TRUE)
     return(initial_shift)
 }
@@ -232,7 +236,8 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
   #TODO allow for different ways of specifying initial shift
   # Use median of reported delays as initial shift (needed for deconvolution step)
-  initial_shift <- round(stats::median(empirical_delays$report_delay, na.rm = T))
+  #TODO it may be simpler to just do the augmentation during the deconvolution step
+  initial_shift <- ceiling(stats::quantile(empirical_delays$report_delay, probs = 0.99, na.rm = T))[1]
 
   # Left-pad the dates we are looking at to account for shift between event dates and observation dates.
   all_dates <- c(rev(seq.Date(from = ref_date, by = paste0("-1 ", time_step), length.out = initial_shift + 1)),
@@ -368,23 +373,23 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   return(new_column)
 }
 
-#' Utility function that generates delay data, assuming a different delay between event and observation for each individual day. 
+#' Utility function that generates delay data, assuming a different delay between event and observation for each individual day.
 #' It then generates the delay matrix and computes the RMSE between the parameters of the gamma distributions passed as arguments and the ones recovered from the delay matrix.
-#' The shapes and scales of the gamma distributions are specified as parameters, and the number of timesteps is assumed to be equal to the length of these vectors. 
+#' The shapes and scales of the gamma distributions are specified as parameters, and the number of timesteps is assumed to be equal to the length of these vectors.
 #'
 #' @param original_distribution_shapes vector. Specifies the shapes for the gamma distributions.
 #' @param original_distribution_scales vector. Specifies the scales for the gamma distributions.
 #' @param nr_distribution_samples integer. How many cases to be sampled for each timestep.
 #'
-#' @return A list with the computed RMSE. It has two elements: $shape_rmse and $scale_rmse 
+#' @return A list with the computed RMSE. It has two elements: $shape_rmse and $scale_rmse
 .delay_distribution_matrix_rmse_compute <- function(original_distribution_shapes, original_distribution_scales, nr_distribution_samples = 500){
 
-  #Create a vector with all dates in observation interval   
+  #Create a vector with all dates in observation interval
   start_date <- as.Date('2021/04/01')
   time_steps = length(original_distribution_shapes)
-  end_date <- start_date + time_steps 
+  end_date <- start_date + time_steps
   available_dates <- seq(start_date, end_date, by="day")
-  
+
   #Build the delay data; Events on each individual day are assumed to be observed according to a different gamma distribution, as specified by original_distribution_shapes and original_distribution_scales,
   sampled_report_delays <- c()
   report_dates <- as.Date(c())
@@ -394,23 +399,23 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     new_report_dates <- rep(available_dates[i], nr_distribution_samples)
     report_dates <- c(report_dates, new_report_dates)
   }
-  delay_data <- tibble(event_date = report_dates, report_delay = sampled_report_delays)
+  delay_data <- dplyr::tibble(event_date = report_dates, report_delay = sampled_report_delays)
   delay_matrix <- get_matrix_from_empirical_delay_distr(delay_data, time_steps, fit = "gamma")
   
   
   #Get the shapes and scales of the gamma distributions fitted by the get_matrix_from_empirical_delay_distr function
   distribution_shapes <- c()
   distribution_scales <- c()
-  
+
   for (distribution in global_distrib_list){
     distribution_shapes <- c(distribution_shapes, distribution$shape)
     distribution_scales <- c(distribution_scales, distribution$scale)
   }
-  
+
   #Compute the RMSE between the desired gamma distribution shapes and scales, and the ones obtained by the get_matrix_from_empirical_delay_distr function
   start_index <- length(distribution_shapes) - length(original_distribution_shapes) + 1
-  shape_rmse <- rmse(distribution_shapes[start_index:length(distribution_shapes)], original_distribution_shapes)/mean(original_distribution_shapes)
-  scale_rmse <- rmse(distribution_scales[start_index:length(distribution_scales)], original_distribution_scales)/mean(original_distribution_scales)
+  shape_rmse <- Metrics::rmse(distribution_shapes[start_index:length(distribution_shapes)], original_distribution_shapes)/mean(original_distribution_shapes)
+  scale_rmse <- Metrics::rmse(distribution_scales[start_index:length(distribution_scales)], original_distribution_scales)/mean(original_distribution_scales)
 
   return(list(shape_rmse=shape_rmse, scale_rmse=scale_rmse))
 }

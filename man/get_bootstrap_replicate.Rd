@@ -28,7 +28,7 @@ output object if output offset is zero? TODO to be described better.}
 \item{...}{
   Arguments passed on to \code{\link[=.block_bootstrap]{.block_bootstrap}}
   \describe{
-    \item{\code{round_incidence}}{boolean. Round the bootstrapped incidence?}
+    \item{\code{round_incidence}}{boolean. If \code{TRUE}, the bootstrapped incidence is rounded to the nearest integer.}
     \item{\code{smoothing_method}}{string. Method used to smooth the original incidence data.
 Available options are:
 \itemize{
@@ -37,13 +37,13 @@ Available options are:
   }}
 }
 \value{
-a module output object. A boostrapped replicate.
+a module output object. A boostrapped replicate. TODO improve
 }
 \description{
 Apply a bootstrapping procedure on some original incidence data.
 Estimating Re over many bootstrapped replicates allows one to estimate
 the uncertainty over the estimated Re value due to observation noise.
-In future versions, the user will be able to choose between different
+In future updates, the user will be able to choose between different
 bootstrapping procedures.
 For now, only one bootstrapping function is implemented.
 It performs a non-parametric block bootstrapping.

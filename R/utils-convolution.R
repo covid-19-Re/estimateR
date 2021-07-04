@@ -43,7 +43,7 @@
                                   list(vector_first, "boolean")))
   if( vector_first ) {
     # Increase size of matrix_b to account for the fact that the output matrix will be shifted in time by the vector_a delay
-    n_col_augment <- .get_initial_deconvolution_shift(vector_a)
+    n_col_augment <- .get_time_steps_quantile(vector_a, quantile = 0.5)
     matrix_b <- .left_augment_delay_distribution(delay_distribution_matrix = matrix_b,
                                                  n_col_augment = n_col_augment)
   }

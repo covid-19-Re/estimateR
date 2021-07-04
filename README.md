@@ -8,6 +8,8 @@ reproductive number through time from delayed and indirect observations
 of infection events. This package is under development. The README file
 is still at a super rough stage.
 
+The full documentation is available **[here](https://covid-19-re.github.io/estimateR/)**.
+
 ## Quick toy example
 
 We demonstrate below a basic use of the *estimateR* package. Check out
@@ -27,11 +29,11 @@ toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
                           348,331,311,267,288,254,239)
 
 
-## The numbers below are part of the user input, 
+## The numbers below are part of the user input,
 ## they need to be adapted to the particular disease studied.
 
 # Incubation period - gamma distribution parameters
-shape_incubation = 3.2 
+shape_incubation = 3.2
 scale_incubation = 1.3
 incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
 
@@ -49,7 +51,7 @@ std_serial_interval = 2.3
 # The estimation window corresponds to the size of the sliding window used in EpiEstim.
 # See help(estimate_Re) for additional details.
 # Here, it is set to three days.
-estimation_window = 3 
+estimation_window = 3
 
 ## End of user input
 
