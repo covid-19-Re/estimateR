@@ -107,6 +107,8 @@ get_block_bootstrapped_estimate <- function(incidence_data,
     # Remove them from the original_result variable
     original_result <- original_result %>%
       dplyr::select(!c(.data$Re_highHPD, .data$Re_lowHPD))
+  } else {
+    Re_HPDs <- NULL
   }
 
   original_result[[bootstrap_id_col]] <- 0
@@ -155,63 +157,20 @@ get_block_bootstrapped_estimate <- function(incidence_data,
   bootstrapped_estimates <- bootstrapped_estimates %>%
     dplyr::filter(.data[[bootstrap_id_col]] > 0)
 
-  if(output_Re_only) {
-    #TODO pass '...' args to 'summarise_uncertainty'
-    estimates_with_uncertainty <- summarise_uncertainty(original_values = original_estimates,
-                                                        bootstrapped_values = bootstrapped_estimates,
-                                                        uncertainty_summary_method = uncertainty_summary_method,
-                                                        value_col = "Re_estimate",
-                                                        output_value_col = "Re_estimate",
-                                                        bootstrap_id_col = bootstrap_id_col,
-                                                        index_col = index_col)
+  estimates_with_uncertainty <- do.call(
+    'do_uncertainty_summary',
+    c(list(original_values = original_estimates,
+           bootstrapped_values = bootstrapped_estimates,
+           uncertainty_summary_method = uncertainty_summary_method,
+           value_col = "Re_estimate",
+           bootstrap_id_col = bootstrap_id_col,
+           index_col = index_col,
+           output_Re_only = output_Re_only,
+           combine_bootstrap_and_estimation_uncertainties = combine_bootstrap_and_estimation_uncertainties,
+           Re_HPDs = Re_HPDs),
+      .get_shared_args(.summarise_CI_bootstrap, dots_args))
+  )
 
-    if(combine_bootstrap_and_estimation_uncertainties) {
-      estimates_with_uncertainty <- dplyr::full_join(estimates_with_uncertainty,
-                                                     Re_HPDs,
-                                                     by = index_col) %>%
-        dplyr::mutate(CI_down_Re_estimate = dplyr::if_else(.data$CI_down_Re_estimate > .data$Re_lowHPD,
-                                                           .data$Re_lowHPD, .data$CI_down_Re_estimate),
-                      CI_up_Re_estimate = dplyr::if_else(.data$CI_up_Re_estimate < .data$Re_highHPD,
-                                                         .data$Re_highHPD, .data$CI_up_Re_estimate)) %>%
-        dplyr::select(!c(.data$Re_lowHPD, .data$Re_highHPD))
-    }
-  } else {
-    #TODO pass '...' args to 'summarise_uncertainty'
-
-    cols_to_summarise <- names(bootstrapped_estimates)
-    cols_to_summarise <- cols_to_summarise[!cols_to_summarise %in% c(index_col, bootstrap_id_col) ]
-
-    summaries <- lapply(cols_to_summarise, function(col_x){
-      bootstrapped_estimates_of_interest <- bootstrapped_estimates %>%
-        dplyr::select(.data[[col_x]], .data[[index_col]], .data[[bootstrap_id_col]])
-
-      original_estimates_of_interest <- original_estimates %>%
-        dplyr::select(.data[[col_x]], .data[[index_col]], .data[[bootstrap_id_col]])
-
-      summarise_uncertainty(original_values = original_estimates_of_interest,
-                            bootstrapped_values = bootstrapped_estimates_of_interest,
-                            uncertainty_summary_method = uncertainty_summary_method,
-                            value_col = col_x,
-                            output_value_col = col_x,
-                            bootstrap_id_col = bootstrap_id_col,
-                            index_col = index_col)
-    })
-
-    estimates_with_uncertainty <- summaries %>%
-      purrr::reduce(dplyr::full_join, by = index_col)
-
-    if(combine_bootstrap_and_estimation_uncertainties) {
-      estimates_with_uncertainty <- dplyr::full_join(estimates_with_uncertainty,
-                                                     Re_HPDs,
-                                                     by = index_col) %>%
-        dplyr::mutate(bootstrapped_CI_down_Re_estimate = .data$CI_down_Re_estimate,
-                      bootstrapped_CI_up_Re_estimate = .data$CI_up_Re_estimate) %>%
-        dplyr::mutate(CI_down_Re_estimate = dplyr::if_else(.data$CI_down_Re_estimate > .data$Re_lowHPD,
-                                                           .data$Re_lowHPD, .data$CI_down_Re_estimate),
-                      CI_up_Re_estimate = dplyr::if_else(.data$CI_up_Re_estimate < .data$Re_highHPD,
-                                                         .data$Re_highHPD, .data$CI_up_Re_estimate))
-    }
-  }
 
   if(!is.null(ref_date)) {
     estimates_with_uncertainty <- .add_date_column(estimates_with_uncertainty,
@@ -657,6 +616,8 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
     # Remove them from the original_result variable
     original_result <- original_result %>%
       dplyr::select(!c(.data$Re_highHPD, .data$Re_lowHPD))
+  } else {
+    Re_HPDs <- NULL
   }
 
   original_result[[bootstrap_id_col]] <- 0
@@ -716,64 +677,19 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
   bootstrapped_estimates <- bootstrapped_estimates %>%
     dplyr::filter(.data[[bootstrap_id_col]] > 0)
 
-  #TODO isolate in a function to remove duplication with get_block_bootstrapped_estimate and simplify this function
-  if(output_Re_only) {
-    #TODO pass '...' args to 'summarise_uncertainty'
-    estimates_with_uncertainty <- summarise_uncertainty(original_values = original_estimates,
-                                                        bootstrapped_values = bootstrapped_estimates,
-                                                        uncertainty_summary_method = uncertainty_summary_method,
-                                                        value_col = "Re_estimate",
-                                                        output_value_col = "Re_estimate",
-                                                        bootstrap_id_col = bootstrap_id_col,
-                                                        index_col = index_col)
-
-    if(combine_bootstrap_and_estimation_uncertainties) {
-      estimates_with_uncertainty <- dplyr::full_join(estimates_with_uncertainty,
-                                                     Re_HPDs,
-                                                     by = index_col) %>%
-        dplyr::mutate(CI_down_Re_estimate = dplyr::if_else(.data$CI_down_Re_estimate > .data$Re_lowHPD,
-                                                           .data$Re_lowHPD, .data$CI_down_Re_estimate),
-                      CI_up_Re_estimate = dplyr::if_else(.data$CI_up_Re_estimate < .data$Re_highHPD,
-                                                         .data$Re_highHPD, .data$CI_up_Re_estimate)) %>%
-        dplyr::select(!c(.data$Re_lowHPD, .data$Re_highHPD))
-    }
-
-  } else {
-    #TODO pass '...' args to 'summarise_uncertainty'
-
-    cols_to_summarise <- names(bootstrapped_estimates)
-    cols_to_summarise <- cols_to_summarise[!cols_to_summarise %in% c(index_col, bootstrap_id_col) ]
-    summaries <- lapply(cols_to_summarise, function(col_x){
-      bootstrapped_estimates_of_interest <- bootstrapped_estimates %>%
-        dplyr::select(.data[[col_x]], .data[[index_col]], .data[[bootstrap_id_col]])
-
-      original_estimates_of_interest <- original_estimates %>%
-        dplyr::select(.data[[col_x]], .data[[index_col]], .data[[bootstrap_id_col]])
-
-      summarise_uncertainty(original_values = original_estimates_of_interest,
-                            bootstrapped_values = bootstrapped_estimates_of_interest,
-                            uncertainty_summary_method = uncertainty_summary_method,
-                            value_col = col_x,
-                            output_value_col = col_x,
-                            bootstrap_id_col = bootstrap_id_col,
-                            index_col = index_col)
-    })
-
-    estimates_with_uncertainty <- summaries %>%
-      purrr::reduce(dplyr::full_join, by = index_col)
-
-    if(combine_bootstrap_and_estimation_uncertainties) {
-      estimates_with_uncertainty <- dplyr::full_join(estimates_with_uncertainty, Re_HPDs,
-                                                     by = index_col) %>%
-        dplyr::mutate(bootstrapped_CI_down_Re_estimate = .data$CI_down_Re_estimate,
-                      bootstrapped_CI_up_Re_estimate = .data$CI_up_Re_estimate) %>%
-        dplyr::mutate(CI_down_Re_estimate = dplyr::if_else(.data$CI_down_Re_estimate > .data$Re_lowHPD,
-                                                           .data$Re_lowHPD, .data$CI_down_Re_estimate),
-                      CI_up_Re_estimate = dplyr::if_else(.data$CI_up_Re_estimate < .data$Re_highHPD,
-                                                         .data$Re_highHPD, .data$CI_up_Re_estimate))
-    }
-  }
-
+  estimates_with_uncertainty <- do.call(
+    'do_uncertainty_summary',
+    c(list(original_values = original_estimates,
+           bootstrapped_values = bootstrapped_estimates,
+           uncertainty_summary_method = uncertainty_summary_method,
+           value_col = "Re_estimate",
+           bootstrap_id_col = bootstrap_id_col,
+           index_col = index_col,
+           output_Re_only = output_Re_only,
+           combine_bootstrap_and_estimation_uncertainties = combine_bootstrap_and_estimation_uncertainties,
+           Re_HPDs = Re_HPDs),
+      .get_shared_args(.summarise_CI_bootstrap, dots_args))
+    )
 
   if(!is.null(ref_date)) {
     estimates_with_uncertainty <- .add_date_column(estimates_with_uncertainty,
