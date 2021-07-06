@@ -1,5 +1,4 @@
-
-#TODO WIP, continue refactoring
+#TODO doc
 do_uncertainty_summary <- function(original_values,
                                    bootstrapped_values,
                                    uncertainty_summary_method,
@@ -7,8 +6,8 @@ do_uncertainty_summary <- function(original_values,
                                    bootstrap_id_col,
                                    index_col,
                                    output_Re_only,
-                                   combine_bootstrap_and_estimation_uncertainties,
-                                   Re_HPDs,
+                                   combine_bootstrap_and_estimation_uncertainties = FALSE,
+                                   Re_HPDs = NULL,
                                    ...){
 
   dots_args <- .get_dots_as_list(...)
@@ -33,7 +32,6 @@ do_uncertainty_summary <- function(original_values,
     CI_down_col_name <- paste0("CI_down_", value_col)
     CI_up_col_name <- paste0("CI_up_", value_col)
 
-
     if(combine_bootstrap_and_estimation_uncertainties) {
       estimates_with_uncertainty <- dplyr::full_join(estimates_with_uncertainty,
                                                      Re_HPDs,
@@ -46,20 +44,17 @@ do_uncertainty_summary <- function(original_values,
     }
 
   } else {
-    #TODO pass '...' args to 'summarise_uncertainty'
-    #TODO continue here
 
-    cols_to_summarise <- names(bootstrapped_estimates)
+    cols_to_summarise <- names(bootstrapped_values)
     cols_to_summarise <- cols_to_summarise[!cols_to_summarise %in% c(index_col, bootstrap_id_col) ]
 
     summaries <- lapply(cols_to_summarise, function(col_x){
-      bootstrapped_estimates_of_interest <- bootstrapped_estimates %>%
+      bootstrapped_estimates_of_interest <- bootstrapped_values %>%
         dplyr::select(.data[[col_x]], .data[[index_col]], .data[[bootstrap_id_col]])
 
-      original_estimates_of_interest <- original_estimates %>%
+      original_estimates_of_interest <- original_values %>%
         dplyr::select(.data[[col_x]], .data[[index_col]], .data[[bootstrap_id_col]])
 
-      #TODO continue here
       do.call( 'summarise_uncertainty',
         c(list(original_values = original_estimates_of_interest,
                bootstrapped_values = bootstrapped_estimates_of_interest,
@@ -91,5 +86,7 @@ do_uncertainty_summary <- function(original_values,
                                                          .data$Re_highHPD, .data$CI_up_Re_estimate))
     }
   }
+
+  return(estimates_with_uncertainty)
 }
 
