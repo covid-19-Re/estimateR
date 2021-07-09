@@ -16,7 +16,7 @@ do_uncertainty_summary <- function(original_values,
   CI_up_col_name <- paste0("CI_up_", value_col)
 
   if(output_Re_only) {
-
+#TODO remove leading NAs from output
     estimates_with_uncertainty <- do.call(
       'summarise_uncertainty',
       c(list(original_values = original_values,
