@@ -4,7 +4,8 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
                                  estimation_method = c("EpiEstim sliding window", "EpiEstim piecewise constant"),
                                  bootstrapping_method = c("non-parametric block boostrap"),
                                  function_prefix = c("d", "q", "p", "r"),
-                                 uncertainty_summary_method = c("original estimate - CI from bootstrap estimates", "bagged mean - CI from bootstrap estimates"))
+                                 uncertainty_summary_method = c("original estimate - CI from bootstrap estimates", "bagged mean - CI from bootstrap estimates"),
+                                 fit = c("none", "gamma"))
 
 #' Check that an object represents a probability distribution.
 #'
@@ -263,7 +264,6 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
   }
   return(TRUE)
 }
-
 
 .is_list_of_outputs <- function(output_list){
   if(!is.list(output_list)) {
@@ -592,6 +592,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
             "empirical_delay_data" = .check_is_empirical_delay_data(user_input, parameter_name),
             "estimates" = .check_is_estimate(user_input, parameter_name, additional_function_parameter),
             "bootstrap_estimates" = .check_is_bootstrap_estimate(user_input, parameter_name, additional_function_parameter),
+            "delay_matrix_column_fit" = .is_value_in_accepted_values_vector(user_input, parameter_name),
             stop(paste("Checking function for type", input_type, "not found."))
     )
     }

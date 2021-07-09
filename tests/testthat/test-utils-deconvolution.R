@@ -211,7 +211,8 @@ test_that(".get_matrix_from_empirical_delay_distr returns valid output",{
                                         n_report_time_steps = 90,
                                         time_step = "day",
                                         min_number_cases = 10,
-                                        upper_quantile_threshold = 0.99)
+                                        upper_quantile_threshold = 0.99,
+                                        fit = "none")
 
   expect_delay_matrix_sums_lte_1(empirical_matrix, full_cols = 50)
 
@@ -234,6 +235,7 @@ test_that(".get_matrix_from_empirical_delay_distr returns valid output",{
   empirical_delays_matrix <- get_matrix_from_empirical_delay_distr(empirical_delays = generated_empirical_delays,
                                                                    ref_date = ref_date,
                                                                    n_report_time_steps = 50,
+                                                                   fit = "none",
                                                                    min_number_cases = 5)
 
 
@@ -241,7 +243,7 @@ test_that(".get_matrix_from_empirical_delay_distr returns valid output",{
 
 })
 
-test_that(".get_matrix_from_empirical_delay_distr returns a matrix with the expected distributions when using fit_gamma_distrib = TRUE",{
+test_that(".get_matrix_from_empirical_delay_distr returns a matrix with the expected distributions when using fit = gamma",{
 
   nr_distribution_samples = 500
   time_steps = 30
