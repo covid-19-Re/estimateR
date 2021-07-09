@@ -32,7 +32,7 @@ merge_outputs <- function(output_list,
                           time_step = "day",
                           include_index = is.null(ref_date),
                           index_col = "idx"){
-  
+
   .are_valid_argument_values(list(list(ref_date, "null_or_date"),
                                   list(time_step, "time_step"),
                                   list(index_col, "string"),
@@ -40,7 +40,7 @@ merge_outputs <- function(output_list,
   for(i in 1:length(output_list)){
     .are_valid_argument_values(list(list(output_list[[i]], "module_input")))
   }
-  
+
   tibble_list <- lapply(1:length(output_list),
                         function(i) {
                           .make_tibble_from_output(output = output_list[[i]],
@@ -76,11 +76,11 @@ merge_outputs <- function(output_list,
 .make_tibble_from_output <- function(output,
                                      output_name,
                                      index_col = "idx"){
-  
+
   .are_valid_argument_values(list(list(output, "module_input"),
                                   list(output_name, "string"),
                                   list(index_col, "string")))
-  
+
   tmp_output <- .get_module_input(output)
   indices <- seq(from = .get_offset(tmp_output), by = 1, length.out = length(.get_values(tmp_output)))
 
@@ -102,13 +102,13 @@ merge_outputs <- function(output_list,
                              index_col = "idx",
                              keep_index_col = FALSE) {
 
-  
+
   .are_valid_argument_values(list(list(estimates, "estimates", index_col),
                                   list(ref_date, "date"),
                                   list(time_step, "time_step"),
                                   list(index_col, "string"),
                                   list(keep_index_col, "boolean")))
-  
+
   dates <- seq.Date(from = ref_date + min(estimates[[index_col]]),
                     by = time_step,
                     along.with = estimates[[index_col]])
@@ -139,9 +139,9 @@ merge_outputs <- function(output_list,
 #' List with a \code{values} and an \code{index_offset} element.
 #'
 .get_module_input <- function(data) {
-  
+
   .are_valid_argument_values(list(list(data, "module_input")))
-  
+
   if (is.list(data)) {
     values <- as.double(data$values)
     index_offset <- data$index_offset
@@ -168,7 +168,7 @@ merge_outputs <- function(output_list,
 #'
 #' @return vector containing \code{values} only
 .get_values <- function(module_object) {
-  
+
   .are_valid_argument_values(list(list(module_object, "module_input")))
   if(is.list(module_object)) {
     return(module_object$values)
@@ -186,7 +186,7 @@ merge_outputs <- function(output_list,
 #'
 #' @return numeric scalar. \code{index_offset} of the \code{module_object}
 .get_offset <- function(module_object) {
-  
+
   .are_valid_argument_values(list(list(module_object, "module_input")))
   if(is.list(module_object)) {
     return(module_object$index_offset)
@@ -239,10 +239,10 @@ merge_outputs <- function(output_list,
 #' @return
 #' @export
 inner_addition <- function(input_a, input_b){
-  
+
   .are_valid_argument_values(list(list(input_a, "module_input"),
                                   list(input_b, "module_input")))
-  
+
   length_a <- .get_input_length(input_a)
   length_b <- .get_input_length(input_b)
 
@@ -267,10 +267,10 @@ inner_addition <- function(input_a, input_b){
 #' @return
 #' @export
 left_addition <- function(input_a, input_b){
-  
+
   .are_valid_argument_values(list(list(input_a, "module_input"),
                                   list(input_b, "module_input")))
-  
+
   offset_a <- .get_offset(input_a)
   offset_b <- .get_offset(input_b)
 
@@ -291,11 +291,11 @@ left_addition <- function(input_a, input_b){
 
 #TODO doc
 leftpad_input <- function(input, new_offset, padding_value = 0){
-  
+
   .are_valid_argument_values(list(list(input, "module_input"),
                                   list(new_offset, "number"),
                                   list(padding_value, "number")))
-  
+
   if(new_offset >= .get_offset(input)) {
     return(input)
   } else {
@@ -335,7 +335,7 @@ leftpad_input <- function(input, new_offset, padding_value = 0){
 #' @export
 correct_for_partially_observed_data <- function( incidence_data,
                                                  delay_distribution_final_report,
-                                                 cutoff_observation_probability = 0.1,
+                                                 cutoff_observation_probability = 0.1, #TODO set to a higher value i.e. 0.25 by default
                                                  ref_date = NULL,
                                                  time_step = "day",
                                                  ...) {
@@ -409,8 +409,8 @@ correct_for_partially_observed_data <- function( incidence_data,
 #' @return numeric vector or module output object.
 .simplify_output <- function(output){
   .are_valid_argument_values(list(list(output, "module_input")))
-                                  
-  
+
+
   if(.get_offset(output) == 0) {
     return(.get_values(output))
   } else {
@@ -475,7 +475,7 @@ correct_for_partially_observed_data <- function( incidence_data,
                                   list(ratio_delay_end_to_start, "number"),
                                   list(distribution_initial_delay, "distribution"),
                                   list(seed, "null_or_int")))
-  
+
   if(!is.null(seed)) {
     set.seed(seed)
   }
