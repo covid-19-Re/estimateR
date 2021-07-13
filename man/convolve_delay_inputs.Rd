@@ -32,6 +32,8 @@ times the total number of reported delays.}
     \item{\code{min_min_number_cases}}{numeric. Lower bound
 for number of cases used to build an instant delay distribution.}
     \item{\code{upper_quantile_threshold}}{numeric. Between 0 and 1. TODO add details}
+    \item{\code{fit}}{string. One of "gamma" or "none". Specifies the type of fit that
+is applied to the columns of the delay matrix}
     \item{\code{ref_date}}{Date. Optional. Date of the first data entry in \code{incidence_data}}
     \item{\code{time_step}}{string. Time between two consecutive incidence datapoints.
 "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}

@@ -27,7 +27,8 @@ Available options are:
   \describe{
     \item{\code{block_size}}{integer. Size of a bootstrapping block.}
     \item{\code{keep_weekdays_aligned}}{boolean.
-Set to \code{FALSE} if not daily incidence, or if no weekly noise pattern that would require to apply errors to the same day of the week as they were in the original data.}
+Set to \code{FALSE} if not daily incidence, or if no weekly noise pattern that would require
+to apply errors to the same day of the week as they were in the original data.}
   }}
 }
 \value{

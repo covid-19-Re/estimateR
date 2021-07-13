@@ -12,7 +12,8 @@ get_matrix_from_empirical_delay_distr(
   min_number_cases = NULL,
   upper_quantile_threshold = 0.99,
   min_number_cases_fraction = 0.05,
-  min_min_number_cases = 10
+  min_min_number_cases = 10,
+  fit = "none"
 )
 }
 \arguments{
@@ -39,6 +40,9 @@ times the total number of reported delays.}
 
 \item{min_min_number_cases}{numeric. Lower bound
 for number of cases used to build an instant delay distribution.}
+
+\item{fit}{string. One of "gamma" or "none". Specifies the type of fit that
+is applied to the columns of the delay matrix}
 }
 \value{
 a discretized delay distribution matrix.

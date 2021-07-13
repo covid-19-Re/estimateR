@@ -22,6 +22,22 @@ NULL
 #' @param simplify_output boolean. Return a numeric vector instead of module
 #'  output object if output offset is zero? TODO to be described better.
 #'
+#'  @return A list with two elements.
+#'  \enumerate{
+#'  \item A numeric vector named \code{values}: the result of the computations on the input data.
+#'  \item An integer named \code{index_offset}: the offset, counted in number of time steps,
+#'  by which the result is shifted compared to an \code{index_offset} of \code{0}.
+#'  This parameter allows one to keep track of the date of the first value in \code{values}
+#'  without needing to carry a \code{date} column around.
+#'  A positive offset means \code{values} are delayed in the future compared to the reference values.
+#'  A negative offset means \code{values} the opposite.
+#'  Note that the \code{index_offset} of the output of the function call
+#'  accounts for the (optional) \code{index_offset} of the input.
+#'  }
+#'  If \code{index_offset} is \code{0} and \code{simplify_output = TRUE},
+#'  the \code{index_offset} is dropped and only a numeric vector is returned.
+#'
+#'
 #' @name module_structure
 NULL
 
@@ -150,7 +166,7 @@ NULL
 #' @name empirical_delay_data_format
 NULL
 
-#TODO redo to accomodate change from 'estimates' to 'values'
+# TODO redo to accomodate change from 'estimates' to 'values'
 #' Uncertainty summary
 #'
 #' @param original_estimates Optional. Estimates obtained on the original data.
@@ -186,9 +202,3 @@ NULL
 #'
 #' @name module_objects
 NULL
-
-
-
-
-
-

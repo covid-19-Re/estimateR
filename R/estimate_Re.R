@@ -1,5 +1,5 @@
-#TODO redoc with piecewise constant
-#TODO add details about the two options for estimating Re
+# TODO redoc with piecewise constant
+# TODO add details about the two options for estimating Re
 #' Estimate effective reproductive number Re from incidence data
 #'
 #' The incidence data input should represent infections,
@@ -15,38 +15,43 @@
 #'
 #' @return a module output object. Re estimates.
 #' @export
-estimate_Re <- function( incidence_data,
-                         estimation_method = "EpiEstim sliding window",
-                         simplify_output = FALSE,
-                         ... ) {
-
-  .are_valid_argument_values(list(list(incidence_data, "module_input"),
-                                  list(estimation_method, "estimation_method"),
-                                  list(simplify_output, "boolean")))
+estimate_Re <- function(incidence_data,
+                        estimation_method = "EpiEstim sliding window",
+                        simplify_output = FALSE,
+                        ...) {
+  .are_valid_argument_values(list(
+    list(incidence_data, "module_input"),
+    list(estimation_method, "estimation_method"),
+    list(simplify_output, "boolean")
+  ))
 
 
   dots_args <- .get_dots_as_list(...)
   input <- .get_module_input(incidence_data)
 
-  if(estimation_method == "EpiEstim sliding window") {
+  if (estimation_method == "EpiEstim sliding window") {
     Re_estimate <- do.call(
-      '.estimate_Re_EpiEstim_sliding_window',
-      c(list(incidence_input = input),
-        .get_shared_args(.estimate_Re_EpiEstim_sliding_window, dots_args))
+      ".estimate_Re_EpiEstim_sliding_window",
+      c(
+        list(incidence_input = input),
+        .get_shared_args(.estimate_Re_EpiEstim_sliding_window, dots_args)
+      )
     )
   } else if (estimation_method == "EpiEstim piecewise constant") {
     Re_estimate <- do.call(
-      '.estimate_Re_EpiEstim_piecewise_constant',
-      c(list(incidence_input = input),
-        .get_shared_args(.estimate_Re_EpiEstim_piecewise_constant, dots_args))
+      ".estimate_Re_EpiEstim_piecewise_constant",
+      c(
+        list(incidence_input = input),
+        .get_shared_args(.estimate_Re_EpiEstim_piecewise_constant, dots_args)
+      )
     )
   } else {
     Re_estimate <- .make_empty_module_output()
   }
 
-  if(simplify_output) {
-    if(.is_list_of_outputs(Re_estimate)) {
-    #TODO test if this works as intended
+  if (simplify_output) {
+    if (.is_list_of_outputs(Re_estimate)) {
+      # TODO test if this works as intended
       Re_estimate <- merge_outputs(Re_estimate)
     } else {
       Re_estimate <- .simplify_output(Re_estimate)
@@ -57,7 +62,7 @@ estimate_Re <- function( incidence_data,
 }
 
 
-#TODO polish doc
+# TODO polish doc
 #' Estimate Re with EpiEstim using a sliding window
 #'
 #' The Re value reported for time t corresponds to the value estimated
@@ -73,29 +78,31 @@ estimate_Re <- function( incidence_data,
 #'
 #' @return module output object. mean of Re estimates
 .estimate_Re_EpiEstim_sliding_window <- function(incidence_input,
-                        minimum_cumul_incidence = 10,
-                        estimation_window = 3,
-                        mean_serial_interval = 4.8,
-                        std_serial_interval  = 2.3,
-                        mean_Re_prior = 1,
-                        output_HPD = FALSE) {
+                                                 minimum_cumul_incidence = 12,
+                                                 estimation_window = 3,
+                                                 mean_serial_interval = 4.8,
+                                                 std_serial_interval = 2.3,
+                                                 mean_Re_prior = 1,
+                                                 output_HPD = FALSE) {
+  .are_valid_argument_values(list(
+    list(incidence_input, "module_input"),
+    list(minimum_cumul_incidence, "non_negative_number"),
+    list(estimation_window, "positive_integer"),
+    list(mean_serial_interval, "positive_number"),
+    list(std_serial_interval, "non_negative_number"),
+    list(mean_Re_prior, "positive_number")
+  ))
 
-  .are_valid_argument_values(list(list(incidence_input, "module_input"),
-                                  list(minimum_cumul_incidence, "non_negative_number"),
-                                  list(estimation_window, "positive_integer"),
-                                  list(mean_serial_interval, "positive_number"),
-                                  list(std_serial_interval, "non_negative_number"),
-                                  list(mean_Re_prior, "positive_number")))
-  
   incidence_vector <- .get_values(incidence_input)
 
-  if(sum(incidence_vector) < minimum_cumul_incidence) {
+  if (sum(incidence_vector) < minimum_cumul_incidence) {
     stop("minimum_cumul_incidence parameter is set higher than total cumulative incidence.")
   }
 
   offset <- which(cumsum(incidence_vector) >= minimum_cumul_incidence)[1]
-  # offset needs to be at least two for EpiEstim
-  offset <- max(2, offset)
+  # We use the criteria on the offset from Cori et al. 2013
+  # (and that offset needs to be at least two for EpiEstim)
+  offset <- max(estimation_window, ceiling(mean_serial_interval), offset, 2)
 
   right_bound <- length(incidence_vector) - (estimation_window - 1)
 
@@ -117,32 +124,41 @@ estimate_Re <- function( incidence_data,
         std_si = std_serial_interval,
         t_start = t_start,
         t_end = t_end,
-        mean_prior = mean_Re_prior)
+        mean_prior = mean_Re_prior
+      )
     )
   )
 
   additional_offset <- t_end[1] - 1
-  Re_estimate <- .get_module_output(R_instantaneous$R$`Mean(R)`,
-                               incidence_input,
-                              additional_offset)
-  if(output_HPD){
-    Re_highHPD <- .get_module_output(R_instantaneous$R$`Quantile.0.975(R)`,
-                                 incidence_input,
-                                 additional_offset)
+  Re_estimate <- .get_module_output(
+    R_instantaneous$R$`Mean(R)`,
+    incidence_input,
+    additional_offset
+  )
+  if (output_HPD) {
+    Re_highHPD <- .get_module_output(
+      R_instantaneous$R$`Quantile.0.975(R)`,
+      incidence_input,
+      additional_offset
+    )
 
-    Re_lowHPD <- .get_module_output(R_instantaneous$R$`Quantile.0.025(R)`,
-                                 incidence_input,
-                                 additional_offset)
+    Re_lowHPD <- .get_module_output(
+      R_instantaneous$R$`Quantile.0.025(R)`,
+      incidence_input,
+      additional_offset
+    )
 
-    return(list(Re_estimate=Re_estimate,
-                Re_highHPD=Re_highHPD,
-                Re_lowHPD=Re_lowHPD))
+    return(list(
+      Re_estimate = Re_estimate,
+      Re_highHPD = Re_highHPD,
+      Re_lowHPD = Re_lowHPD
+    ))
   } else {
     return(Re_estimate)
   }
 }
 
-#TODO doc
+# TODO doc
 #' Estimate Re with EpiEstim in a piecewise-constant fashion
 #'
 #' @param minimum_cumul_incidence Numeric scalar. Minimum number of cumulated infections before starting the Re estimation
@@ -153,24 +169,26 @@ estimate_Re <- function( incidence_data,
 #'
 #' @return module output object. mean of Re estimates
 .estimate_Re_EpiEstim_piecewise_constant <- function(incidence_input,
-                                                 minimum_cumul_incidence = 10,
-                                                 interval_ends = NULL,
-                                                 interval_length = 7,
-                                                 mean_serial_interval = 4.8,
-                                                 std_serial_interval  = 2.3,
-                                                 mean_Re_prior = 1,
-                                                 output_HPD = FALSE) {
+                                                     minimum_cumul_incidence = 10,
+                                                     interval_ends = NULL,
+                                                     interval_length = 7,
+                                                     mean_serial_interval = 4.8,
+                                                     std_serial_interval = 2.3,
+                                                     mean_Re_prior = 1,
+                                                     output_HPD = FALSE) {
 
-  #TODO validate new args
-  .are_valid_argument_values(list(list(incidence_input, "module_input"),
-                                  list(minimum_cumul_incidence, "non_negative_number"),
-                                  list(mean_serial_interval, "number"),
-                                  list(std_serial_interval, "non_negative_number"),
-                                  list(mean_Re_prior, "number")))
+  # TODO validate new args
+  .are_valid_argument_values(list(
+    list(incidence_input, "module_input"),
+    list(minimum_cumul_incidence, "non_negative_number"),
+    list(mean_serial_interval, "number"),
+    list(std_serial_interval, "non_negative_number"),
+    list(mean_Re_prior, "number")
+  ))
 
   incidence_vector <- .get_values(incidence_input)
 
-  if(sum(incidence_vector) < minimum_cumul_incidence) {
+  if (sum(incidence_vector) < minimum_cumul_incidence) {
     stop("minimum_cumul_incidence parameter is set higher than total cumulative incidence.")
   }
 
@@ -179,8 +197,8 @@ estimate_Re <- function( incidence_data,
   offset <- max(2, offset)
   right_bound <- length(incidence_vector)
 
-  if(!is.null(interval_ends)) {
-    #TODO validate interval ends (not necessarily positive)
+  if (!is.null(interval_ends)) {
+    # TODO validate interval ends (not necessarily positive)
     # we make these be relative to index_offset (IMPORTANT, TODO doc)
     index_offset <- .get_offset(incidence_input)
 
@@ -188,14 +206,14 @@ estimate_Re <- function( incidence_data,
 
     interval_ends <- interval_ends[interval_ends > offset & interval_ends <= right_bound]
   } else {
-    #TODO validate interval_length (must be positive integer)
-    interval_ends <- seq(from = offset + interval_length -1, to = right_bound, by = interval_length)
-    if(max(interval_ends) < right_bound) {
+    # TODO validate interval_length (must be positive integer)
+    interval_ends <- seq(from = offset + interval_length - 1, to = right_bound, by = interval_length)
+    if (max(interval_ends) < right_bound) {
       interval_ends <- c(interval_ends, right_bound)
     }
   }
 
-  if(length(interval_ends) < 1) {
+  if (length(interval_ends) < 1) {
     stop("No valid interval to estimate Re on.
          Check 'minimum_cumul_incidence', 'interval_ends' or 'interval_length' parameters.")
   }
@@ -211,34 +229,38 @@ estimate_Re <- function( incidence_data,
         std_si = std_serial_interval,
         t_start = interval_starts,
         t_end = interval_ends,
-        mean_prior = mean_Re_prior)
+        mean_prior = mean_Re_prior
+      )
     )
   )
 
   additional_offset <- interval_starts[1] - 1
 
   replicate_estimates_on_interval <- function(estimates, interval_starts, interval_ends) {
-    replicated_estimates <- unlist(lapply(seq_along(interval_starts),
-                                          function(x) {
-                                            rep(estimates[x], interval_ends[x] - interval_starts[x] + 1)
-                                          }))
+    replicated_estimates <- unlist(lapply(
+      seq_along(interval_starts),
+      function(x) {
+        rep(estimates[x], interval_ends[x] - interval_starts[x] + 1)
+      }
+    ))
     return(replicated_estimates)
   }
 
   Re_estimate <- replicate_estimates_on_interval(R_instantaneous$R$`Mean(R)`, interval_starts, interval_ends)
   Re_estimate <- .get_module_output(Re_estimate, incidence_input, additional_offset)
 
-  if(output_HPD){
-
+  if (output_HPD) {
     Re_highHPD <- replicate_estimates_on_interval(R_instantaneous$R$`Quantile.0.975(R)`, interval_starts, interval_ends)
     Re_highHPD <- .get_module_output(Re_highHPD, incidence_input, additional_offset)
 
     Re_lowHPD <- replicate_estimates_on_interval(R_instantaneous$R$`Quantile.0.025(R)`, interval_starts, interval_ends)
     Re_lowHPD <- .get_module_output(Re_lowHPD, incidence_input, additional_offset)
 
-    return(list(Re_estimate=Re_estimate,
-                Re_highHPD=Re_highHPD,
-                Re_lowHPD=Re_lowHPD))
+    return(list(
+      Re_estimate = Re_estimate,
+      Re_highHPD = Re_highHPD,
+      Re_lowHPD = Re_lowHPD
+    ))
   } else {
     return(Re_estimate)
   }
