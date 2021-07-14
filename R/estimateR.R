@@ -16,13 +16,30 @@ NULL
 
 #' Module structure characteristics
 #'
-#' @param incidence_data numeric vector. Incidence data (TODO improve definition)
+#' @param incidence_data An object containing incidence data through time.
+#' It can either be:
+#' \itemize{
+#' \item A list with two elements:
+#'  \enumerate{
+#'  \item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+#'  \item An integer named \code{index_offset}: the offset, counted in number of time steps,
+#'  by which the first value in \code{values} is shifted compared to a reference time step
+#'  This parameter allows one to keep track of the date of the first value in \code{values}
+#'  without needing to carry a \code{date} column around.
+#'  A positive offset means \code{values} are delayed in the future compared to the reference values.
+#'  A negative offset means the opposite.
+#'  }
+#'  \item A numeric vector. The vector corresponds to the \code{values} element
+#'  descrived above, and \code{index_offset} is implicitely zero.
+#'  This means that the first value in \code{incidence_data}
+#'  is associated with the reference time step (no shift towards the future or past).
+#' }
 #' @param partially_delayed_incidence TODO add details
 #' @param fully_delayed_incidence TODO add details
 #' @param simplify_output boolean. Return a numeric vector instead of module
-#'  output object if output offset is zero? TODO to be described better.
+#'  output object if output offset is zero?
 #'
-#'  @return A list with two elements.
+#'  @return A list with two elements:
 #'  \enumerate{
 #'  \item A numeric vector named \code{values}: the result of the computations on the input data.
 #'  \item An integer named \code{index_offset}: the offset, counted in number of time steps,
@@ -30,12 +47,13 @@ NULL
 #'  This parameter allows one to keep track of the date of the first value in \code{values}
 #'  without needing to carry a \code{date} column around.
 #'  A positive offset means \code{values} are delayed in the future compared to the reference values.
-#'  A negative offset means \code{values} the opposite.
+#'  A negative offset means the opposite.
 #'  Note that the \code{index_offset} of the output of the function call
 #'  accounts for the (optional) \code{index_offset} of the input.
 #'  }
 #'  If \code{index_offset} is \code{0} and \code{simplify_output = TRUE},
-#'  the \code{index_offset} is dropped and only a numeric vector is returned.
+#'  the \code{index_offset} is dropped and the \code{values}
+#'  element is returned as a numeric vector.
 #'
 #'
 #' @name module_structure
@@ -43,8 +61,41 @@ NULL
 
 #' Inner module option characteristics
 #'
-#' @param incidence_input module input object.
+#' @param incidence_input Module input object.
+#' List with two elements:
+#'  \enumerate{
+#'  \item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+#'  \item An integer named \code{index_offset}: the offset, counted in number of time steps,
+#'  by which the first value in \code{values} is shifted compared to a reference time step
+#'  This parameter allows one to keep track of the date of the first value in \code{values}
+#'  without needing to carry a \code{date} column around.
+#'  A positive offset means \code{values} are delayed in the future compared to the reference values.
+#'  A negative offset means the opposite.
+#'  }
 #' @name inner_module
+NULL
+
+#' EpiEstim wrappers arguments
+#'
+#' @param minimum_cumul_incidence Numeric value.
+#' Minimum number of cumulated infections before starting the Re estimation.
+#' Default is \code{12} as recommended in Cori et al., 2013.
+#' @param mean_serial_interval Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R()}}
+#' @param std_serial_interval Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R()}}
+#' @param mean_Re_prior Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R()}}
+#'
+#' @return If \code{output_HPD = FALSE},
+#' value is a module object (a list of the same kind as \code{incidence_input}).
+#' The \code{values} element of the list then contains the Re estimates.
+#' If \code{output_HPD = TRUE}, a list of three module objects is returned.
+#' \itemize{
+#' \item \code{Re_estimate} contains the Re estimates.
+#' \item \code{Re_highHPD} and \code{Re_lowHPD} contain
+#' the higher and lower boundaries of the HPD interval,
+#' as computed by \code{\link[EpiEstim]{estimate_R()}}
+#' }
+#'
+#' @name EpiEstim_wrapper
 NULL
 
 #' Universal parameters

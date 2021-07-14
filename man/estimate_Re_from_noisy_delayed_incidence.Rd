@@ -18,7 +18,24 @@ estimate_Re_from_noisy_delayed_incidence(
 )
 }
 \arguments{
-\item{incidence_data}{numeric vector. Incidence data (TODO improve definition)}
+\item{incidence_data}{An object containing incidence data through time.
+It can either be:
+\itemize{
+\item A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+\item A numeric vector. The vector corresponds to the \code{values} element
+descrived above, and \code{index_offset} is implicitely zero.
+This means that the first value in \code{incidence_data}
+is associated with the reference time step (no shift towards the future or past).
+}}
 
 \item{smoothing_method}{string. Method used to smooth the original incidence data.
 Available options are:
@@ -65,11 +82,15 @@ implemented in \code{\link{.estimate_Re_EpiEstim_piecewise_constant}}}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
     \item{\code{verbose}}{Boolean. Print verbose output?}
-    \item{\code{minimum_cumul_incidence}}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
-    \item{\code{estimation_window}}{Integer scalar. Number of data points over which to assume Re to be constant.}
-    \item{\code{mean_serial_interval}}{Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
-    \item{\code{std_serial_interval}}{Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
-    \item{\code{mean_Re_prior}}{Numeric positive scalar. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{estimation_window}}{Use with \code{estimation_method = "EpiEstim sliding window"}
+Positive integer value.
+Number of data points over which to assume Re to be constant.}
+    \item{\code{minimum_cumul_incidence}}{Numeric value.
+Minimum number of cumulated infections before starting the Re estimation.
+Default is \code{12} as recommended in Cori et al., 2013.}
+    \item{\code{mean_serial_interval}}{Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R()}}}
+    \item{\code{std_serial_interval}}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R()}}}
+    \item{\code{mean_Re_prior}}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R()}}}
   }}
 }
 \value{

@@ -12,7 +12,24 @@ smooth_incidence(
 )
 }
 \arguments{
-\item{incidence_data}{numeric vector. Incidence data (TODO improve definition)}
+\item{incidence_data}{An object containing incidence data through time.
+It can either be:
+\itemize{
+\item A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+\item A numeric vector. The vector corresponds to the \code{values} element
+descrived above, and \code{index_offset} is implicitely zero.
+This means that the first value in \code{incidence_data}
+is associated with the reference time step (no shift towards the future or past).
+}}
 
 \item{smoothing_method}{string. Method used to smooth the original incidence data.
 Available options are:
@@ -21,7 +38,23 @@ Available options are:
 }}
 
 \item{simplify_output}{boolean. Return a numeric vector instead of module
-output object if output offset is zero? TODO to be described better.}
+output object if output offset is zero?
+
+@return A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the result of the computations on the input data.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the result is shifted compared to an \code{index_offset} of \code{0}.
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+Note that the \code{index_offset} of the output of the function call
+accounts for the (optional) \code{index_offset} of the input.
+}
+If \code{index_offset} is \code{0} and \code{simplify_output = TRUE},
+the \code{index_offset} is dropped and the \code{values}
+element is returned as a numeric vector.}
 
 \item{...}{
   Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}

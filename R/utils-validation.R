@@ -451,9 +451,21 @@ accepted_parameter_value <- list(
 #'
 #' @inherit validation_utility_params
 #'
-.check_if_integer <- function(number, parameter_name) {
-  if (as.integer(number) != number) { # did not use .check_class_parameter_name since is.integer(1) returns false
-    stop(paste(parameter_name, "needs to be an integer."))
+.check_if_integer_value <- function(number, parameter_name) {
+  if (round(number) != number || length(number) != 1) { # did not use .check_class_parameter_name since is.integer(1) returns false
+    stop(paste(parameter_name, "needs to be an integer value."))
+  }
+  return(TRUE)
+}
+
+
+#' @description Utility function to check whether an object is an integer
+#'
+#' @inherit validation_utility_params
+#'
+.check_if_integer_vector <- function(number, parameter_name) {
+  if (isFALSE(all.equal(round(number), number))) { # did not use .check_class_parameter_name since is.integer(1) returns false
+    stop(paste(parameter_name, "needs to be an integer vector."))
   }
   return(TRUE)
 }
@@ -464,7 +476,7 @@ accepted_parameter_value <- list(
 #'
 .check_if_null_or_integer <- function(number, parameter_name) {
   if (!is.null(number)) {
-    .check_if_integer(number, parameter_name)
+    .check_if_integer_value(number, parameter_name)
   }
   return(TRUE)
 }
@@ -477,7 +489,7 @@ accepted_parameter_value <- list(
 #'
 .check_if_positive_integer <- function(number, parameter_name) {
   .check_if_positive_number(number, parameter_name)
-  .check_if_integer(number, parameter_name)
+  .check_if_integer_value(number, parameter_name)
 }
 
 #' @description Utility function to check whether an object is a number that belongs to a given interval
@@ -567,7 +579,8 @@ accepted_parameter_value <- list(
       "positive_number" = .check_if_positive_number(user_input, parameter_name),
       "string" = .check_if_null_or_belongs_to_class(user_input, "character", parameter_name),
       "date" = .check_class_parameter_name(user_input, "Date", parameter_name),
-      "integer" = .check_if_integer(user_input, parameter_name),
+      "integer" = .check_if_integer_value(user_input, parameter_name),
+      "integer_vector" = .check_if_integer_vector(user_input, parameter_name),
       "distribution" = .is_valid_distribution(user_input, parameter_name),
       "numeric_between_zero_one" = .check_is_numeric_in_interval(user_input, parameter_name, 0, 1),
       "function_prefix" = .is_value_in_accepted_values_vector(user_input, parameter_name),

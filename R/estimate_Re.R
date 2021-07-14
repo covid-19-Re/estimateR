@@ -1,19 +1,72 @@
-# TODO redoc with piecewise constant
-# TODO add details about the two options for estimating Re
-#' Estimate effective reproductive number Re from incidence data
+#' Estimate the effective reproductive number Re through time from incidence data
 #'
-#' The incidence data input should represent infections,
+#' \code{estimate_Re()} takes the number of infections through time
+#' and computes the Re value through time (also known as Rt).
+#'
+#' The incidence input should represent infections,
 #' as opposed to representing delayed observations of infections.
-#' If the incidence data represents delayed observations of infections
-#' then one should deconvolve it first with \code{deconvolve_incidence}.
-#' TODO add details on inner function, that it wraps around EpiEstim and so on.
+#' If the incidence data represents delayed observations of infections,
+#' one should first reconstruct the incidence of infections using
+#' \code{deconvolve_incidence()} or \code{get_infections_from_incidence()}
+#' which wraps around it and includes a smoothing step of the delayed observations.
+#'
+#' \code{estimate_Re()} wraps around the \code{estimate_R()} function
+#' of the \code{EpiEstim} package from Cori et al, 2013.
+#' \code{estimate_Re()} allows for two types of Re estimations:
+#' \enumerate{
+#' \item A sliding-window estimation.
+#' For each time step T, the Re(T) value is computed by assuming that Re is constant
+#' for time steps (T-X+1, ..., T-1, T), with X being the sliding window size.
+#' This option is chosen by setting \code{estimation_method = "EpiEstim sliding window"}
+#' \item A piecewise-constant estimation.
+#' Re(t) is computed as being a piecewise-constant function of time.
+#' The length of each step can be a fixed number of time steps.
+#' That number is specified using the \code{interval_length} parameter.
+#' The length of each step can also be irregular.
+#' This can be useful if the boundaries of the steps are meant to coincide with particular events
+#' such as the implementation or cancellation of public health interventions.
+#' The right boundaries of the steps are specified using the \code{interval_ends} parameter.
+#' This option is chosen by setting \code{estimation_method = "EpiEstim piecewise constant"}
+#' }
 #'
 #'
+#' @param simplify_output boolean. Simplify the output when possible?
 #' @inheritParams module_methods
 #' @inheritParams module_structure
 #' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
+#' @inheritDotParams .estimate_Re_EpiEstim_piecewise_constant -incidence_input
 #'
-#' @return a module output object. Re estimates.
+#' @return A list with two elements:
+#'  \enumerate{
+#'  \item A numeric vector named \code{values}: the result of the computations on the input data.
+#'  \item An integer named \code{index_offset}: the offset, counted in number of time steps,
+#'  by which the result is shifted compared to an \code{index_offset} of \code{0}.
+#'  This parameter allows one to keep track of the date of the first value in \code{values}
+#'  without needing to carry a \code{date} column around.
+#'  A positive offset means \code{values} are delayed in the future compared to the reference values.
+#'  A negative offset means the opposite.
+#'  Note that the \code{index_offset} of the output of the function call
+#'  accounts for the (optional) \code{index_offset} of the input.
+#'  }
+#'  If \code{index_offset} is \code{0} and \code{simplify_output = TRUE},
+#'  the \code{index_offset} is dropped and the \code{values}
+#'  element is returned as a numeric vector.
+#'
+#'  If \code{output_HPD = TRUE} (additional parameter),
+#'  the highest posterior density interval boundaries are output along with the mean Re estimates.
+#'  In that case, a list of three lists is returned:
+#' \itemize{
+#' \item \code{Re_estimate} contains the Re estimates.
+#' \item \code{Re_highHPD} and \code{Re_lowHPD} contain
+#' the higher and lower boundaries of the HPD interval,
+#' as computed by \code{\link[EpiEstim]{estimate_R()}}
+#' }
+#' If, in addition, \code{simplify_output = TRUE},
+#' then the 3 elements are merged into a single dataframe by \code{merge_outputs()}.
+#' A date column can be added to the dataframe by passing an extra \code{ref_date} argument
+#' (see \code{\link{merge_outputs}} for details).
+#'
+#'
 #' @export
 estimate_Re <- function(incidence_data,
                         estimation_method = "EpiEstim sliding window",
@@ -51,8 +104,12 @@ estimate_Re <- function(incidence_data,
 
   if (simplify_output) {
     if (.is_list_of_outputs(Re_estimate)) {
-      # TODO test if this works as intended
-      Re_estimate <- merge_outputs(Re_estimate)
+      Re_estimate <- do.call(
+        "merge_outputs",
+        c(list(output_list = Re_estimate),
+          .get_shared_args(merge_outputs, dots_args)
+        )
+      )
     } else {
       Re_estimate <- .simplify_output(Re_estimate)
     }
@@ -61,22 +118,17 @@ estimate_Re <- function(incidence_data,
   return(Re_estimate)
 }
 
-
-# TODO polish doc
 #' Estimate Re with EpiEstim using a sliding window
 #'
 #' The Re value reported for time t corresponds to the value estimated
 #' when assuming that is Re is constant over e.g. (T-3, T-2, T-1, T),
 #' for a sliding window of 4 time steps.
 #'
-#' @param minimum_cumul_incidence Numeric scalar. Minimum number of cumulated infections before starting the Re estimation
-#' @param estimation_window Integer scalar. Number of data points over which to assume Re to be constant.
-#' @param mean_serial_interval Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}
-#' @param std_serial_interval Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}
-#' @param mean_Re_prior Numeric positive scalar. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}
+#' @param estimation_window Use with \code{estimation_method = "EpiEstim sliding window"}
+#' Positive integer value.
+#' Number of data points over which to assume Re to be constant.
 #' @inheritParams inner_module
-#'
-#' @return module output object. mean of Re estimates
+#' @inherit EpiEstim_wrapper
 .estimate_Re_EpiEstim_sliding_window <- function(incidence_input,
                                                  minimum_cumul_incidence = 12,
                                                  estimation_window = 3,
@@ -101,7 +153,7 @@ estimate_Re <- function(incidence_data,
 
   offset <- which(cumsum(incidence_vector) >= minimum_cumul_incidence)[1]
   # We use the criteria on the offset from Cori et al. 2013
-  # (and that offset needs to be at least two for EpiEstim)
+  # (and offset needs to be at least two for EpiEstim)
   offset <- max(estimation_window, ceiling(mean_serial_interval), offset, 2)
 
   right_bound <- length(incidence_vector) - (estimation_window - 1)
@@ -158,18 +210,28 @@ estimate_Re <- function(incidence_data,
   }
 }
 
-# TODO doc
 #' Estimate Re with EpiEstim in a piecewise-constant fashion
 #'
-#' @param minimum_cumul_incidence Numeric scalar. Minimum number of cumulated infections before starting the Re estimation
-#' @param mean_serial_interval Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}
-#' @param std_serial_interval Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}
-#' @param mean_Re_prior Numeric positive scalar. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}
-#' @inheritParams inner_module
+#' This function returns piecewise-constant Re estimates.
 #'
-#' @return module output object. mean of Re estimates
+#' @param interval_ends Use with \code{estimation_method = "EpiEstim piecewise constant"}
+#' Integer vector. Optional argument.
+#' If provided, \code{interval_ends} overrides the \code{interval_length} argument.
+#' Each element of \code{interval_ends} specifies the right boundary
+#' of an interval over which Re is assumed to be constant for the calculation.
+#' Values in \code{interval_ends} must be integer values corresponding
+#' with the same numbering of time steps as given by \code{incidence_input}.
+#' In other words, \code{interval_ends} and \code{incidence_input},
+#' use the same time step as the zero-th time step.
+#' @param interval_length Use with \code{estimation_method = "EpiEstim piecewise constant"}
+#' Positive integer value.
+#' Re is assumed constant over steps of size \code{interval_length}.
+#'
+#' @inheritParams inner_module
+#' @inherit EpiEstim_wrapper
+#'
 .estimate_Re_EpiEstim_piecewise_constant <- function(incidence_input,
-                                                     minimum_cumul_incidence = 10,
+                                                     minimum_cumul_incidence = 12,
                                                      interval_ends = NULL,
                                                      interval_length = 7,
                                                      mean_serial_interval = 4.8,
@@ -177,10 +239,10 @@ estimate_Re <- function(incidence_data,
                                                      mean_Re_prior = 1,
                                                      output_HPD = FALSE) {
 
-  # TODO validate new args
   .are_valid_argument_values(list(
     list(incidence_input, "module_input"),
     list(minimum_cumul_incidence, "non_negative_number"),
+    list(interval_length, "positive_integer"),
     list(mean_serial_interval, "number"),
     list(std_serial_interval, "non_negative_number"),
     list(mean_Re_prior, "number")
@@ -198,15 +260,17 @@ estimate_Re <- function(incidence_data,
   right_bound <- length(incidence_vector)
 
   if (!is.null(interval_ends)) {
-    # TODO validate interval ends (not necessarily positive)
-    # we make these be relative to index_offset (IMPORTANT, TODO doc)
+    .are_valid_argument_values(list(
+      list(interval_ends, "integer_vector")
+      ))
+
+    # we make these be relative to index_offset
     index_offset <- .get_offset(incidence_input)
 
     interval_ends <- sort(interval_ends - index_offset)
 
     interval_ends <- interval_ends[interval_ends > offset & interval_ends <= right_bound]
   } else {
-    # TODO validate interval_length (must be positive integer)
     interval_ends <- seq(from = offset + interval_length - 1, to = right_bound, by = interval_length)
     if (max(interval_ends) < right_bound) {
       interval_ends <- c(interval_ends, right_bound)

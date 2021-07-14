@@ -2,7 +2,7 @@
 % Please edit documentation in R/estimate_Re.R
 \name{estimate_Re}
 \alias{estimate_Re}
-\title{Estimate effective reproductive number Re from incidence data}
+\title{Estimate the effective reproductive number Re through time from incidence data}
 \usage{
 estimate_Re(
   incidence_data,
@@ -12,7 +12,24 @@ estimate_Re(
 )
 }
 \arguments{
-\item{incidence_data}{numeric vector. Incidence data (TODO improve definition)}
+\item{incidence_data}{An object containing incidence data through time.
+It can either be:
+\itemize{
+\item A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+\item A numeric vector. The vector corresponds to the \code{values} element
+descrived above, and \code{index_offset} is implicitely zero.
+This means that the first value in \code{incidence_data}
+is associated with the reference time step (no shift towards the future or past).
+}}
 
 \item{estimation_method}{string. Method used to estimate reproductive number
 values through time from the reconstructed infection timings.
@@ -24,26 +41,93 @@ implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
 implemented in \code{\link{.estimate_Re_EpiEstim_piecewise_constant}}}
 }}
 
-\item{simplify_output}{boolean. Return a numeric vector instead of module
-output object if output offset is zero? TODO to be described better.}
+\item{simplify_output}{boolean. Simplify the output when possible?}
 
 \item{...}{
-  Arguments passed on to \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}
+  Arguments passed on to \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}, \code{\link[=.estimate_Re_EpiEstim_piecewise_constant]{.estimate_Re_EpiEstim_piecewise_constant}}
   \describe{
-    \item{\code{minimum_cumul_incidence}}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
-    \item{\code{estimation_window}}{Integer scalar. Number of data points over which to assume Re to be constant.}
-    \item{\code{mean_serial_interval}}{Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
-    \item{\code{std_serial_interval}}{Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
-    \item{\code{mean_Re_prior}}{Numeric positive scalar. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{estimation_window}}{Use with \code{estimation_method = "EpiEstim sliding window"}
+Positive integer value.
+Number of data points over which to assume Re to be constant.}
+    \item{\code{minimum_cumul_incidence}}{Numeric value.
+Minimum number of cumulated infections before starting the Re estimation.
+Default is \code{12} as recommended in Cori et al., 2013.}
+    \item{\code{mean_serial_interval}}{Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R()}}}
+    \item{\code{std_serial_interval}}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R()}}}
+    \item{\code{mean_Re_prior}}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R()}}}
+    \item{\code{interval_ends}}{Use with \code{estimation_method = "EpiEstim piecewise constant"}
+Integer vector. Optional argument.
+If provided, \code{interval_ends} overrides the \code{interval_length} argument.
+Each element of \code{interval_ends} specifies the right boundary
+of an interval over which Re is assumed to be constant for the calculation.
+Values in \code{interval_ends} must be integer values corresponding
+with the same numbering of time steps as given by \code{incidence_input}.
+In other words, \code{interval_ends} and \code{incidence_input},
+use the same time step as the zero-th time step.}
+    \item{\code{interval_length}}{Use with \code{estimation_method = "EpiEstim piecewise constant"}
+Positive integer value.
+Re is assumed constant over steps of size \code{interval_length}.}
   }}
 }
 \value{
-a module output object. Re estimates.
+A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the result of the computations on the input data.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the result is shifted compared to an \code{index_offset} of \code{0}.
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+Note that the \code{index_offset} of the output of the function call
+accounts for the (optional) \code{index_offset} of the input.
+}
+If \code{index_offset} is \code{0} and \code{simplify_output = TRUE},
+the \code{index_offset} is dropped and the \code{values}
+element is returned as a numeric vector.
+
+If \code{output_HPD = TRUE} (additional parameter),
+the highest posterior density interval boundaries are output along with the mean Re estimates.
+In that case, a list of three lists is returned:
+\itemize{
+\item \code{Re_estimate} contains the Re estimates.
+\item \code{Re_highHPD} and \code{Re_lowHPD} contain
+the higher and lower boundaries of the HPD interval,
+as computed by \code{\link[EpiEstim]{estimate_R()}}
+}
+If, in addition, \code{simplify_output = TRUE},
+then the 3 elements are merged into a single dataframe by \code{merge_outputs()}.
+A date column can be added to the dataframe by passing an extra \code{ref_date} argument
+(see \code{\link{merge_outputs}} for details).
 }
 \description{
-The incidence data input should represent infections,
+\code{estimate_Re()} takes the number of infections through time
+and computes the Re value through time (also known as Rt).
+}
+\details{
+The incidence input should represent infections,
 as opposed to representing delayed observations of infections.
-If the incidence data represents delayed observations of infections
-then one should deconvolve it first with \code{deconvolve_incidence}.
-TODO add details on inner function, that it wraps around EpiEstim and so on.
+If the incidence data represents delayed observations of infections,
+one should first reconstruct the incidence of infections using
+\code{deconvolve_incidence()} or \code{get_infections_from_incidence()}
+which wraps around it and includes a smoothing step of the delayed observations.
+
+\code{estimate_Re()} wraps around the \code{estimate_R()} function
+of the \code{EpiEstim} package from Cori et al, 2013.
+\code{estimate_Re()} allows for two types of Re estimations:
+\enumerate{
+\item A sliding-window estimation.
+For each time step T, the Re(T) value is computed by assuming that Re is constant
+for time steps (T-X+1, ..., T-1, T), with X being the sliding window size.
+This option is chosen by setting \code{estimation_method = "EpiEstim sliding window"}
+\item A piecewise-constant estimation.
+Re(t) is computed as being a piecewise-constant function of time.
+The length of each step can be a fixed number of time steps.
+That number is specified using the \code{interval_length} parameter.
+The length of each step can also be irregular.
+This can be useful if the boundaries of the steps are meant to coincide with particular events
+such as the implementation or cancellation of public health interventions.
+The right boundaries of the steps are specified using the \code{interval_ends} parameter.
+This option is chosen by setting \code{estimation_method = "EpiEstim piecewise constant"}
+}
 }
