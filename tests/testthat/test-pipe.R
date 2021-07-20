@@ -91,7 +91,6 @@ test_that("estimate_Re_from_noisy_delayed_incidence passes '...' arguments consi
   expect_equal(estimates$date_index, reference_indices)
 })
 
-
 # TODO skip on CRAN as it can fail by chance
 test_that("get_block_bootstrapped_estimate yields consistent results on a toy example", {
   toy_incidence_data <- c(
@@ -491,14 +490,12 @@ test_that("get_bootstrapped_estimate_from_combined_observations can deal with em
     degree = 1
   )
 
-
-  reference_R_values <- c(
-    2.09, 1.9, 1.81, 1.77, 1.74, 1.73,
-    1.72, 1.71, 1.68, 1.63, 1.57, 1.5, 1.44,
-    1.38, 1.33, 1.28, 1.24, 1.2, 1.16, 1.13,
-    1.1, 1.09, 1.07, 1.07, 1.07, 1.07, 1.07,
-    1.06, 1.06, 1.06
-  )
+  reference_R_values <- c(2.06,1.91,1.85,1.81,1.77,
+                          1.73,1.7,1.67,1.64,1.6,1.55,
+                          1.5,1.44,1.38,1.32,1.27,1.22,
+                          1.18,1.15,1.12,1.09,1.07,1.05,
+                          1.03,1.01,0.98,0.96,0.94,0.92,
+                          0.91,0.9,0.9)
 
   expect_equal(results_estimation$Re_estimate, reference_R_values, tolerance = 1E-1)
 })

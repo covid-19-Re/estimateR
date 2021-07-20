@@ -400,10 +400,13 @@ correct_for_partially_observed_data <- function(incidence_data,
   Q_vector_observation_to_final_report <- apply(delay_distribution_matrix_final_report, MARGIN = 2, sum)
 
   # TODO improve this error
-  if (any(is.na(Q_vector_observation_to_final_report)) || isTRUE(any(Q_vector_observation_to_final_report == 0, na.rm = FALSE))) {
+  # if (any(is.na(Q_vector_observation_to_final_report)) || isTRUE(any(Q_vector_observation_to_final_report == 0, na.rm = FALSE))) {
+  if (any(is.na(Q_vector_observation_to_final_report))) {
     warning("Invalid delay_distribution_final_report argument.")
   }
   # TODO need to make sure that the matrix is the same size (as opposed to having extra columns leading)
+  # TODO we need to send an error if non zero incidence but zero probability of observation probably need a minimum value to replace zeroes by
+  # TODO fix incidence vector if NaN or Inf values (there is cutoff anyway)
   incidence_vector <- incidence_vector / Q_vector_observation_to_final_report
 
   # Now we cut off values at the end of the time series,

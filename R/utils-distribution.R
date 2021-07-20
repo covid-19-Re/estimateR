@@ -229,8 +229,7 @@ build_delay_distribution <- function(distribution,
           empirical_delays = delay,
           n_report_time_steps = n_report_time_steps,
           ref_date = ref_date,
-          time_step = time_step,
-          fit = "gamma"
+          time_step = time_step
         ),
         .get_shared_args(list(get_matrix_from_empirical_delay_distr), dots_args)
       )

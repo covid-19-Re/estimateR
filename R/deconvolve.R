@@ -46,7 +46,10 @@ deconvolve_incidence <- function(incidence_data,
         delay_onset_to_report = delay_onset_to_report,
         n_report_time_steps = .get_input_length(input)
       ),
-      .get_shared_args(convolve_delay_inputs, dots_args)
+      .get_shared_args(list(
+        convolve_delay_inputs,
+        build_delay_distribution,
+        get_matrix_from_empirical_delay_distr), dots_args)
     )
   )
 

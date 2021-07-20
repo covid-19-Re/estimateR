@@ -88,7 +88,10 @@ get_block_bootstrapped_estimate <- function(incidence_data,
     list(
       .smooth_LOESS,
       .deconvolve_incidence_Richardson_Lucy,
-      .estimate_Re_EpiEstim_sliding_window
+      .estimate_Re_EpiEstim_sliding_window,
+      .estimate_Re_EpiEstim_piecewise_constant,
+      get_matrix_from_empirical_delay_distr,
+      build_delay_distribution
     ),
     dots_args
   )
@@ -698,7 +701,10 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
     list(
       .smooth_LOESS,
       .deconvolve_incidence_Richardson_Lucy,
-      .estimate_Re_EpiEstim_sliding_window
+      .estimate_Re_EpiEstim_sliding_window,
+      .estimate_Re_EpiEstim_piecewise_constant,
+      get_matrix_from_empirical_delay_distr,
+      build_delay_distribution
     ),
     dots_args
   )
