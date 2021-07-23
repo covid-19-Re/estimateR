@@ -285,6 +285,34 @@ test_that(".get_matrix_from_empirical_delay_distr returns valid output", {
   expect_delay_matrix_sums_lte_1(empirical_delays_matrix, full_cols = 20)
 })
 
+test_that(".get_matrix_from_empirical_delay_distr handles returning data over a full number of weeks", {
+  # First toy data test
+  ref_date <- as.Date("2020-03-01")
+  time_series_length <- 100
+
+  report_delays <- sample(c(0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 7, 8, 9, 10), 1000, replace = T)
+  event_dates <- sample(seq.Date(from = ref_date, length.out = time_series_length, by = "day"), 1000, replace = T)
+
+  empirical_delay_data <- tibble::tibble(
+    event_date = event_dates,
+    report_delay = report_delays
+  ) %>%
+    dplyr::arrange(event_date)
+
+  empirical_matrix <- get_matrix_from_empirical_delay_distr(
+    empirical_delays = empirical_delay_data,
+    ref_date = ref_date,
+    n_report_time_steps = 90,
+    time_step = "day",
+    min_number_cases = 10,
+    upper_quantile_threshold = 0.99,
+    fit = "none",
+    num_steps_in_a_unit = 7
+  )
+
+  expect_delay_matrix_sums_lte_1(empirical_matrix, full_cols = 50)
+})
+
 test_that(".get_matrix_from_empirical_delay_distr returns a matrix with the expected distributions when using fit = gamma", {
   nr_distribution_samples <- 500
   time_steps <- 30

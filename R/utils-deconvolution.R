@@ -144,6 +144,60 @@
 }
 
 
+
+#TODO doc
+.get_delays_over_full_time_units <- function(delays,
+                                             date_of_interest,
+                                             num_steps_in_a_unit = 7,
+                                             min_number_cases) {
+
+  recent_counts <- delays %>%
+    dplyr::arrange(dplyr::desc(.data$event_date)) %>%
+    dplyr::filter(.data$event_date <= date_of_interest)
+
+  if(nrow(recent_counts) < min_number_cases) {
+    first_observation_dates <- delays %>%
+      dplyr::arrange(.data$event_date) %>%
+      dplyr::slice_head(n = min_number_cases) %>%
+      dplyr::pull(.data$event_date)
+
+    max_date <- max(first_observation_dates)
+    num_steps_since_start <- trunc(as.double(max_date - min(delays$event_date), units = "auto"))
+
+    if((num_steps_since_start %% num_steps_in_a_unit) == 0) {
+      max_date_with_full_weeks <- max_date
+    } else {
+      max_date_with_full_weeks <- max_date + num_steps_in_a_unit - (num_steps_since_start %% num_steps_in_a_unit)
+    }
+
+    recent_counts_distribution <- delays %>%
+      dplyr::filter(.data$event_date <= max_date_with_full_weeks) %>%
+      dplyr::pull(.data$report_delay)
+
+  } else {
+    first_observation_dates <- recent_counts %>%
+      dplyr::slice_head(n = min_number_cases) %>%
+      dplyr::pull(.data$event_date)
+
+    min_date <- min(first_observation_dates)
+    num_steps_since_start <- trunc(as.double(date_of_interest - min_date, units = "auto"))
+
+    if((num_steps_since_start %% num_steps_in_a_unit) == 0) {
+      min_date_with_full_weeks <- min_date
+    } else {
+      min_date_with_full_weeks <- min_date - num_steps_in_a_unit + (num_steps_since_start %% num_steps_in_a_unit)
+    }
+    recent_counts_distribution <- delays %>%
+      dplyr::filter(.data$event_date >= min_date_with_full_weeks,
+                    .data$event_date <= date_of_interest) %>%
+      dplyr::pull(.data$report_delay)
+  }
+  return(recent_counts_distribution)
+}
+
+
+
+#TODO redoc (full_time_units)
 # TODO test
 # TODO possibly allow for other ways to specifiy initial shift than median of all reports.
 # TODO allow for other distributions than gamma for fit.
@@ -192,7 +246,8 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
                                                   upper_quantile_threshold = 0.99,
                                                   min_number_cases_fraction = 0.05,
                                                   min_min_number_cases = 10,
-                                                  fit = "none") {
+                                                  fit = "none",
+                                                  num_steps_in_a_unit = NULL) {
   ## TODO need to account for offset if onset data (or not onset data?)
   ## TODO reconsider if we make gamma fit (allow to turn it off, or to use different distribution)
 
@@ -259,17 +314,51 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
   global_distrib_list <<- list() # needed for the test that checks if get_matrix_from_empirical_delay_distr returns a matrix with the expected distributions when using fit = "gamma"
 
+  # Shuffle rows so as to get rid of potential biases associated
+  shuffled_delays <- empirical_delays %>%
+    dplyr::slice(sample(1:dplyr::n()))
+
   # Populate the delay_distribution_matrix by column
   if (n_time_steps > threshold_right_truncation) {
     for (i in 1:last_varying_col) {
 
-      # Shuffle rows so as to get rid of potential biases
-      shuffled_delays <- empirical_delays %>%
-        dplyr::slice(sample(1:dplyr::n()))
+      if(is.null(num_steps_in_a_unit)) {
+        #TODO take out in internal function to reduce duplication
+        recent_counts <- shuffled_delays %>%
+          dplyr::arrange(dplyr::desc(.data$event_date)) %>%
+          dplyr::filter(.data$event_date <= all_dates[i])
 
+        if (nrow(recent_counts) >= min_number_cases) {
+          # If enough data points before date of interest,
+          # take most recent observations before this date.
+
+          recent_counts_distribution <- recent_counts %>%
+            dplyr::slice_head(n = min_number_cases) %>%
+            dplyr::pull(.data$report_delay)
+        } else {
+          # Otherwise, take 'min_number_of_cases' observations,
+          # even after date of interest.
+          recent_counts_distribution <- shuffled_delays %>%
+            dplyr::arrange(.data$event_date) %>%
+            dplyr::slice_head(n = min_number_cases) %>%
+            dplyr::pull(.data$report_delay)
+        }
+      } else {
+        recent_counts_distribution <- .get_delays_over_full_time_units(delays = shuffled_delays,
+                                                                       date_of_interest = all_dates[i],
+                                                                       num_steps_in_a_unit = num_steps_in_a_unit,
+                                                                       min_number_cases = min_number_cases)
+      }
+
+      new_column <- .get_delay_matrix_column(recent_counts_distribution, fit, col_number = i, n_time_steps)
+      delay_distribution_matrix[, i] <- new_column
+    }
+  } else { # if n_time_steps <= threshold_right_truncation
+
+    if(is.null(num_steps_in_a_unit)) {
       recent_counts <- shuffled_delays %>%
         dplyr::arrange(dplyr::desc(.data$event_date)) %>%
-        dplyr::filter(.data$event_date <= all_dates[i])
+        dplyr::filter(.data$event_date <= all_dates[1])
 
       if (nrow(recent_counts) >= min_number_cases) {
         # If enough data points before date of interest,
@@ -286,34 +375,14 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
           dplyr::slice_head(n = min_number_cases) %>%
           dplyr::pull(.data$report_delay)
       }
-
-      new_column <- .get_delay_matrix_column(recent_counts_distribution, fit, col_number = i, n_time_steps)
-      delay_distribution_matrix[, i] <- new_column
-    }
-  } else { # if n_time_steps <= threshold_right_truncation
-    # Shuffle rows so as to get rid of potential biases
-    shuffled_delays <- empirical_delays %>%
-      dplyr::slice(sample(1:dplyr::n()))
-
-    recent_counts <- shuffled_delays %>%
-      dplyr::arrange(dplyr::desc(.data$event_date)) %>%
-      dplyr::filter(.data$event_date <= all_dates[1])
-
-    if (nrow(recent_counts) >= min_number_cases) {
-      # If enough data points before date of interest,
-      # take most recent observations before this date.
-
-      recent_counts_distribution <- recent_counts %>%
-        dplyr::slice_head(n = min_number_cases) %>%
-        dplyr::pull(.data$report_delay)
     } else {
-      # Otherwise, take 'min_number_of_cases' observations,
-      # even after date of interest.
-      recent_counts_distribution <- shuffled_delays %>%
-        dplyr::arrange(.data$event_date) %>%
-        dplyr::slice_head(n = min_number_cases) %>%
-        dplyr::pull(.data$report_delay)
+      recent_counts_distribution <- .get_delays_over_full_time_units(delays = shuffled_delays,
+                                                                     date_of_interest = all_dates[1],
+                                                                     num_steps_in_a_unit = num_steps_in_a_unit,
+                                                                     min_number_cases = min_number_cases)
     }
+
+
 
     new_column <- .get_delay_matrix_column(recent_counts_distribution, fit, col_number = 1, n_time_steps)
 

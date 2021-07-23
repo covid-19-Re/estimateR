@@ -13,7 +13,8 @@ get_matrix_from_empirical_delay_distr(
   upper_quantile_threshold = 0.99,
   min_number_cases_fraction = 0.05,
   min_min_number_cases = 10,
-  fit = "none"
+  fit = "none",
+  num_steps_in_a_unit = NULL
 )
 }
 \arguments{
