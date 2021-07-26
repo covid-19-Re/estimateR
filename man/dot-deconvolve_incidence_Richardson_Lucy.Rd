@@ -25,16 +25,13 @@ A positive offset means \code{values} are delayed in the future compared to the 
 A negative offset means the opposite.
 }}
 
-\item{delay_distribution}{numeric square matrix or vector. TODO refactor to estimateR}
+\item{delay_distribution}{numeric square matrix or vector.}
 
 \item{threshold_chi_squared}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
 
 \item{max_iterations}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
 
 \item{verbose}{Boolean. Print verbose output?}
-}
-\value{
-module output object. Deconvolved incidence.
 }
 \description{
 Deconvolve the incidence input with the Richardson-Lucy (R-L) algorithm

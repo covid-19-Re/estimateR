@@ -74,7 +74,7 @@ implemented in \code{\link{.deconvolve_incidence_Richardson_Lucy}}}
 The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
 the ratio of \code{data_points_incl} and the number of time steps in the input data.}
     \item{\code{degree}}{integer. LOESS degree. Must be 0, 1 or 2.}
-    \item{\code{delay_distribution}}{numeric square matrix or vector. TODO refactor to estimateR}
+    \item{\code{delay_distribution}}{numeric square matrix or vector.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
     \item{\code{verbose}}{Boolean. Print verbose output?}

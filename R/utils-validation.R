@@ -366,6 +366,28 @@ accepted_parameter_value <- list(
   return(TRUE)
 }
 
+#' @description Utility function that checks whether a user input is a valid computation-ready delay object.
+#' This means it can be one of the following:
+#'      \itemize{
+#'         \item a probability distribution vector: a numeric vector with no \code{NA} or negative values, whose entries sum up to 1
+#'         \item a delay distribution matrix (as described in \code{\link{.check_is_delay_distribution_matrix}})
+#'      }
+#' @inherit validation_utility_params
+#' @param delay_object user input object to be tested
+#'
+.is_valid_computation_ready_delay_object <- function(delay_object, parameter_name, incidence_data_length) {
+  if (.is_numeric_vector(delay_object)) {
+    .check_is_probability_distr_vector(delay_object, parameter_name = parameter_name)
+  } else if (is.matrix(delay_object)) {
+    .check_is_delay_distribution_matrix(delay_object, incidence_data_length, parameter_name)
+  } else {
+    stop(paste("Invalid", parameter_name, "input.", parameter_name, "must be either:
+         a numeric vector representing a discretized probability distribution,
+         or a matrix representing discretized probability distributions."))
+  }
+  return(TRUE)
+}
+
 #' @description  Utility function to check whether an object belongs to a particular class.
 #' Wrapper function over \code{\link{.check_class}} needed because, being called from \code{\link{.are_valid_argument_values}},
 #' the parameter name will not be the same as the one from the original function.
@@ -570,6 +592,7 @@ accepted_parameter_value <- list(
       "time_step" = .is_value_valid_time_step(user_input, parameter_name),
       "module_input" = .is_valid_module_input(user_input, parameter_name),
       "boolean" = .check_class_parameter_name(user_input, "logical", parameter_name),
+      "computation_ready_delay_object" = .is_valid_computation_ready_delay_object(user_input, parameter_name, additional_function_parameter),
       "delay_object" = .is_valid_delay_object(user_input, parameter_name, additional_function_parameter),
       "number" = .check_if_number(user_input, parameter_name),
       "non_negative_number" = .check_if_non_negative_number(user_input, parameter_name),

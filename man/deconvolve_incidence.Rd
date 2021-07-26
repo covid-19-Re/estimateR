@@ -69,7 +69,7 @@ element is returned as a numeric vector.}
   \describe{
     \item{\code{n_report_time_steps}}{integer. Length of incidence time series.
 Use only when providing empirical delay data.}
-    \item{\code{delay_distribution}}{numeric square matrix or vector. TODO refactor to estimateR}
+    \item{\code{delay_distribution}}{numeric square matrix or vector.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
     \item{\code{verbose}}{Boolean. Print verbose output?}
@@ -81,5 +81,5 @@ from incidence data representing delayed observations.
 The assumption made is that delayed observations represent
 the convolution of the time series of infections with a delay distribution.
 \code{deconvolve_incidence} implements a deconvolution algorithm (Richardson-Lucy) to reconstruct
-a vector of infection events from input data representing delayed observations.
+a vector of infection events from input data that represents delayed observations.
 }
