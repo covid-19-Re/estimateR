@@ -19,12 +19,11 @@ A positive offset means \code{values} are delayed in the future compared to the 
 A negative offset means the opposite.
 }}
 
-\item{data_points_incl}{integer. Size of the window used in the LOESS algorithm.}
+\item{data_points_incl}{integer. Size of the window used in the LOESS algorithm.
+The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
+the ratio of \code{data_points_incl} and the number of time steps in the input data.}
 
-\item{degree}{integer. LOESS degree.}
-}
-\value{
-module output object. Smoothed incidence.
+\item{degree}{integer. LOESS degree. Must be 0, 1 or 2.}
 }
 \description{
 Prefer the use of the wrapper function \code{smooth_incidence(..., smoothing_method = "LOESS")}
@@ -32,8 +31,6 @@ instead of \code{.smooth_LOESS}.
 }
 \details{
 This function implements the LOESS method for smoothing noisy data.
-It is essentially a wrapper around \code{\link[stats]{loess}}.
+It relies on \code{\link[stats]{loess}}.
 See the help section for \code{\link[stats]{loess}} for details on LOESS.
-
-#TODO add details on how data_points_incl relates to span.
 }

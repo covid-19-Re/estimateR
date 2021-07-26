@@ -92,8 +92,10 @@ and centered around the mean of bootstrapped estimates and original estimates.}
 \item{...}{
   Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}
   \describe{
-    \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.}
-    \item{\code{degree}}{integer. LOESS degree.}
+    \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.
+The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
+the ratio of \code{data_points_incl} and the number of time steps in the input data.}
+    \item{\code{degree}}{integer. LOESS degree. Must be 0, 1 or 2.}
     \item{\code{delay_distribution}}{numeric square matrix or vector. TODO refactor to estimateR}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}

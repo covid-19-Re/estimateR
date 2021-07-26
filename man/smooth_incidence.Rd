@@ -59,13 +59,13 @@ element is returned as a numeric vector.}
 \item{...}{
   Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}
   \describe{
-    \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.}
-    \item{\code{degree}}{integer. LOESS degree.}
+    \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.
+The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
+the ratio of \code{data_points_incl} and the number of time steps in the input data.}
+    \item{\code{degree}}{integer. LOESS degree. Must be 0, 1 or 2.}
   }}
 }
-\value{
-module output. Smoothed incidence. TODO add details
-}
 \description{
+Smooth a time series of noisy observations.
 Currently only LOESS smoothing (\code{smoothing_method = "LOESS"}) is implemented.
 }

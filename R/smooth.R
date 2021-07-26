@@ -1,12 +1,12 @@
 #' Smooth noisy incidence data
 #'
+#' Smooth a time series of noisy observations.
 #' Currently only LOESS smoothing (\code{smoothing_method = "LOESS"}) is implemented.
 #'
 #' @inheritParams module_methods
-#' @inheritParams module_structure
+#' @inherit module_structure
 #' @inheritDotParams .smooth_LOESS -incidence_input
 #'
-#' @return module output. Smoothed incidence. TODO add details
 #' @export
 smooth_incidence <- function(incidence_data,
                              smoothing_method = "LOESS",
@@ -47,23 +47,23 @@ smooth_incidence <- function(incidence_data,
 #' instead of \code{.smooth_LOESS}.
 #'
 #' This function implements the LOESS method for smoothing noisy data.
-#' It is essentially a wrapper around \code{\link[stats]{loess}}.
+#' It relies on \code{\link[stats]{loess}}.
 #' See the help section for \code{\link[stats]{loess}} for details on LOESS.
 #'
-#' #TODO add details on how data_points_incl relates to span.
 #'
-#' @inheritParams module_structure
+#' @inherit module_structure
 #' @inheritParams inner_module
 #' @param data_points_incl integer. Size of the window used in the LOESS algorithm.
-#' @param degree integer. LOESS degree.
+#' The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
+#' the ratio of \code{data_points_incl} and the number of time steps in the input data.
+#' @param degree integer. LOESS degree. Must be 0, 1 or 2.
 #'
-#' @return module output object. Smoothed incidence.
 .smooth_LOESS <- function(incidence_input, data_points_incl = 21, degree = 1) {
   .are_valid_argument_values(list(
     list(incidence_input, "module_input"),
     list(data_points_incl, "non_negative_number"),
     list(degree, "non_negative_number")
-  )) # minimal test; needs to be one of {0,1,2}, but stats::loess already throws if it isn't
+  )) # minimal test; needs to be one of {0,1,2}, but stats::loess already throws an error if it isn't
 
   incidence_vector <- .get_values(incidence_input)
 
