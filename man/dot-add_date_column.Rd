@@ -20,8 +20,9 @@
 \item{time_step}{string. Time between two consecutive incidence datapoints.
 "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
 
-\item{index_col}{string. Index column to keep track of which data point
-in bootstrapped estimates corresponds to which data point in the original estimates.}
+\item{index_col}{string. Name of the index column.
+The index tracks which data point in bootstrapped estimates
+corresponds to which data point in the original estimates.}
 
 \item{keep_index_col}{boolean. Keep index column in output?}
 }

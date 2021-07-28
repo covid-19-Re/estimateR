@@ -436,7 +436,6 @@ correct_for_partially_observed_data <- function(incidence_data,
 .simplify_output <- function(output) {
   .are_valid_argument_values(list(list(output, "module_input")))
 
-
   if (.get_offset(output) == 0) {
     return(.get_values(output))
   } else {

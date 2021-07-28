@@ -220,27 +220,29 @@ NULL
 # TODO redo to accomodate change from 'estimates' to 'values'
 #' Uncertainty summary
 #'
-#' @param original_estimates Optional. Estimates obtained on the original data.
+#' @param original_values Optional. Values of reference
+#' used to construct the uncertainty interval around.
+#' Typically, these are estimates obtained on the original data.
 #' Must be a dataframe with a timestep index column named \code{index_col}
-#' and an estimate column named \code{Re_estimate_col}.
+#' and an estimate column named \code{value_col}.
 #' The index column must not contain any \code{NA} value.
-#' @param bootstrapped_estimates Estimates obtained on a number of bootstrap
+#' @param bootstrapped_values Estimates obtained on a number of bootstrap
 #' replicates of the original data.
 #' Must be a dataframe in the long format
 #' with a timestep index column named \code{index_col},
 #' a bootstrap replicate index column named \code{bootstrap_id_col},
-#' and an estimate column named \code{Re_estimate_col}.
+#' and an estimate column named \code{value_col}.
 #' The index column must not contain any \code{NA} value.
-#' @param central_estimates Estimates around which the confidence interval is going to be centered.
+#' @param central_values Estimates around which the confidence interval is going to be centered.
 #' Must be a dataframe with a timestep index column named \code{index_col}
-#' and an estimate column named \code{Re_estimate_col}.
+#' and an estimate column named \code{value_col}.
 #' The index column must not contain any \code{NA} value.
-#' @param Re_estimate_col string. Name of the column containing Re estimates
-#' @param estimate_col string. Name of the column containing estimates
+#' @param value_col string. Name of the column containing values.
 #' @param bootstrap_id_col string. Name of the column containing bootstrap samples numbering.
 #' Id 0 must correspond to the estimate on the original data.
-#' @param index_col string. Index column to keep track of which data point
-#'  in bootstrapped estimates corresponds to which data point in the original estimates.
+#' @param index_col string. Name of the index column.
+#' The index tracks which data point in bootstrapped estimates
+#' corresponds to which data point in the original estimates.
 #' @param alpha value between 0 and 1. Confidence level of the confidence interval.
 #'
 #' @name uncertainty

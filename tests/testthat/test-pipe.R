@@ -665,12 +665,12 @@ test_that("get_bootstrapped_estimate_from_combined_observations yields consisten
   )
 
   expect_equal(results_estimation$partially_delayed_observations,
-    reference_partially_delayed_observations_values,
-    tolerance = 1E-1
+               reference_partially_delayed_observations_values,
+               tolerance = 1E-1
   )
   expect_equal(results_estimation$CI_up_combined_deconvolved_incidence,
-    reference_CI_up_combined_deconvolved_incidence_values,
-    tolerance = 1E-1
+               reference_CI_up_combined_deconvolved_incidence_values,
+               tolerance = 1E-1
   )
   expect_equal(results_estimation$Re_estimate, reference_R_mean_values, tolerance = 1E-1)
   expect_equal(results_estimation$CI_up_Re_estimate, reference_CI_up_R_mean, tolerance = 1E-1)
@@ -732,42 +732,51 @@ test_that("get_block_bootstrapped_estimate consistently combines HPDs with boots
     output_Re_only = TRUE
   )
 
-  reference_CI_down <- c(
-    NA, NA, NA, NA, NA, NA, 2.27, 2.15, 2.09, 2.06, 2.01,
-    1.92, 1.85, 1.78, 1.71, 1.64, 1.57, 1.5, 1.45, 1.46, 1.52,
-    1.57, 1.6, 1.61, 1.62, 1.62, 1.61, 1.58, 1.54, 1.5, 1.47,
-    1.44, 1.41, 1.39, NA, NA, NA, NA, NA, NA
-  )
+  reference_CI_down <- c(NA,NA,NA,NA,NA,NA,2.51,2.37,2.28,
+                         2.2,2.12,2,1.91,1.83,1.76,1.67,1.58,
+                         1.49,1.43,1.44,1.49,1.55,1.59,1.61,
+                         1.63,1.63,1.61,1.58,1.54,1.5,1.46,
+                         1.43,1.41,1.38,NA,NA,NA,NA,NA,NA)
 
-  reference_bootstrap_CI_up <- c(
-    NA, NA, NA, NA, NA, NA, 2.94, 2.77,
-    2.68, 2.62, 2.57, 2.5, 2.4, 2.28,
-    2.16, 2.05, 1.97, 1.9, 1.86, 1.84, 1.87,
-    1.94, 2.01, 2.05, 2.08, 2.07, 2.03, 1.96,
-    1.88, 1.79, 1.71, 1.65, 1.6,
-    1.55, NA, NA, NA, NA, NA, NA
-  )
+  pretty_reference_CI_down <- c(2.51,2.37,2.28,
+                                2.2,2.12,2,1.91,1.83,1.76,1.67,
+                                1.58,1.49,1.43,1.44,1.49,1.55,
+                                1.59,1.61,1.63,1.63,1.61,1.58,
+                                1.54,1.5,1.46,1.43,1.41,1.38)
 
-  reference_highHPD <- c(
-    NA, NA, NA, NA, NA, NA, 3.29, 3, 2.84, 2.72, 2.61,
-    2.5, 2.38, 2.26, 2.13, 2.02, 1.92, 1.84, 1.79, 1.79,
-    1.83, 1.88, 1.93, 1.94, 1.95, 1.94, 1.9, 1.84, 1.77,
-    1.7, 1.64, 1.59, 1.55, 1.52, NA, NA, NA, NA, NA, NA
-  )
+  reference_bootstrap_CI_up <- c(NA,NA,NA,NA,NA,NA,3.27,3.08,2.93,
+                                 2.82,2.72,2.61,2.47,2.31,2.16,2.05,
+                                 1.97,1.92,1.89,1.89,1.93,1.99,2.05,
+                                 2.07,2.08,2.07,2.03,1.96,1.87,1.79,
+                                 1.71,1.64,1.59,1.55,NA,NA,NA,NA,NA,NA)
+
+  reference_highHPD <- c(NA,NA,NA,NA,NA,NA,3.67,3.33,
+                         3.1,2.91,2.74,2.61,2.47,
+                         2.31,2.16,2.05,1.97,1.92,1.89,
+                         1.89,1.93,1.99,2.05,2.07,2.08,
+                         2.07,2.03,1.96,1.87,1.79,1.71,
+                         1.64,1.59,1.55,NA,NA,NA,NA,NA,NA)
 
   reference_Re_estimate <- c(
-    NA, NA, NA, NA, NA, NA, 2.76, 2.56, 2.45, 2.38,
-    2.31, 2.23, 2.15, 2.05, 1.94, 1.85, 1.77, 1.7, 1.66,
-    1.66, 1.71, 1.77, 1.82, 1.84, 1.86, 1.85, 1.82, 1.77,
-    1.7, 1.64, 1.58, 1.54, 1.5, 1.47, NA, NA, NA, NA, NA, NA
-  )
+    NA,NA,NA,NA,NA,NA,3.06,2.83,2.67,
+    2.54,2.42,2.31,2.19,2.07,1.96,1.86,
+    1.78,1.71,1.66,1.67,1.71,1.77,1.82,
+    1.84,1.86,1.85,1.82,1.77,1.7,1.64,1.58,
+    1.54,1.5,1.47,NA,NA,NA,NA,NA,NA)
 
-  expect_equal(simplified_estimates$CI_down_Re_estimate, reference_CI_down, tolerance = 1E-1)
+  pretty_reference_Re_estimate <- c(
+    3.06,2.83,2.67,
+    2.54,2.42,2.31,2.19,2.07,1.96,1.86,
+    1.78,1.71,1.66,1.67,1.71,1.77,1.82,
+    1.84,1.86,1.85,1.82,1.77,1.7,1.64,1.58,
+    1.54,1.5,1.47)
+
+  expect_equal(simplified_estimates$CI_down_Re_estimate, pretty_reference_CI_down, tolerance = 1E-1)
   expect_equal(estimates$CI_down_Re_estimate, reference_CI_down, tolerance = 1E-1)
   expect_equal(estimates$bootstrapped_CI_up_Re_estimate, reference_bootstrap_CI_up, tolerance = 1E-1)
   expect_equal(estimates$Re_highHPD, reference_highHPD, tolerance = 1E-1)
   expect_equal(estimates$Re_estimate, reference_Re_estimate, tolerance = 1E-1)
-  expect_equal(simplified_estimates$Re_estimate, reference_Re_estimate, tolerance = 1E-1)
+  expect_equal(simplified_estimates$Re_estimate, pretty_reference_Re_estimate, tolerance = 1E-1)
 })
 
 # TODO skip on CRAN as it can fail by chance
@@ -816,30 +825,29 @@ test_that("get_bootstrapped_estimate_from_combined_observations consistently com
   )
 
   reference_R_mean_values <- c(
-    NA, NA, NA, NA, NA, NA, 2.13, 1.93, 1.84,
-    1.81, 1.81, 1.82, 1.82, 1.82, 1.81, 1.8,
+    2.13, 1.93, 1.84, 1.81, 1.81, 1.82,
+    1.82, 1.82, 1.81, 1.8,
     1.78, 1.76, 1.73, 1.7, 1.67, 1.65, 1.62,
     1.63, 1.7, 1.85, 2.02, 2.22, 2.45, 2.68,
     2.82, 2.81, 2.64, 2.39, 2.14, 1.94,
-    1.79, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA
+    1.79
   )
 
   reference_CI_down_R_mean <- c(
-    NA, NA, NA, NA, NA, NA, 1.64, 1.48, 1.43, 1.43,
+    1.64, 1.48, 1.43, 1.43,
     1.45, 1.49, 1.52, 1.55, 1.57, 1.58, 1.59, 1.58,
     1.57, 1.52, 1.47, 1.43, 1.35, 1.28, 1.27, 1.35,
     1.49, 1.7, 1.93, 1.92, 1.68, 1.46, 1.4, 1.44,
-    1.48, 1.47, 1.42, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA
+    1.48, 1.47, 1.42
   )
 
   reference_CI_up_R_mean <- c(
-    NA, NA, NA, NA, NA, NA, 2.42, 2.21, 2.1,
+    2.42, 2.21, 2.1,
     2.05, 2.03, 2.03, 2.02, 2.01, 1.98, 1.96,
     1.93, 1.91, 1.9, 1.89, 1.87, 1.87, 1.89,
     1.99, 2.14, 2.34, 2.55, 2.74, 2.98, 3.44,
     3.97, 4.16, 3.88, 3.34, 2.81, 2.41,
-    2.15, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA
-  )
+    2.15)
 
   expect_equal(results_estimation$Re_estimate, reference_R_mean_values, tolerance = 1E-1)
   expect_equal(results_estimation$CI_down_Re_estimate, reference_CI_down_R_mean, tolerance = 1E-1)

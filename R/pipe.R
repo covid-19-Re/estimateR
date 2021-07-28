@@ -217,7 +217,13 @@ get_block_bootstrapped_estimate <- function(incidence_data,
   # utils::setTxtProgressBar(progress_bar, N_bootstrap_replicates + 1)
   # close(progress_bar)
 
-  return(estimates_with_uncertainty)
+  pretty_results <- do.call(
+    ".prettify_result",
+    c(list(data = estimates_with_uncertainty),
+      .get_shared_args(.prettify_result, dots_args))
+  )
+
+  return(pretty_results)
 }
 
 
@@ -315,7 +321,7 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
   )
 
   if (output_Re_only) {
-    return(estimated_Re)
+    merged_results <- estimated_Re
   } else {
     # TODO simplify this call (create util function)
     test_if_single_output <- try(.is_valid_module_input(estimated_Re, "estimated_Re"), silent = TRUE)
@@ -341,15 +347,20 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
         .get_shared_args(merge_outputs, dots_args)
       )
     )
-
-    return(merged_results)
   }
+
+  pretty_results <- do.call(
+    ".prettify_result",
+    c(list(data = merged_results),
+      .get_shared_args(.prettify_result, dots_args))
+  )
+
+  return(pretty_results)
 }
+
 
 # TODO polish doc
 # TODO test
-# TODO test output when output_infection_incidence_only = FALSE
-# TODO rework on way delays are input (delay_incubation and delay_onset_to_report args)
 #' Infer timeseries of infection events from incidence data of delayed observations
 #'
 #' This function takes as input incidence data of delayed observations of infections events,
@@ -450,7 +461,7 @@ get_infections_from_incidence <- function(incidence_data,
   )
 
   if (output_infection_incidence_only) {
-    return(deconvolved_incidence)
+    merged_results <- deconvolved_incidence
   } else {
     if (is_partially_reported_data) {
       output_list <- list(
@@ -478,9 +489,15 @@ get_infections_from_incidence <- function(incidence_data,
         .get_shared_args(merge_outputs, dots_args)
       )
     )
-
-    return(merged_results)
   }
+
+  pretty_results <- do.call(
+    ".prettify_result",
+    c(list(data = merged_results),
+      .get_shared_args(.prettify_result, dots_args))
+  )
+
+  return(pretty_results)
 }
 
 
@@ -598,7 +615,7 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
   )
 
   if (output_Re_only) {
-    return(estimated_Re)
+    merged_results <- estimated_Re
   } else {
     test_if_single_output <- try(.is_valid_module_input(estimated_Re, "estimated_Re"), silent = TRUE)
     if (!("try-error" %in% class(test_if_single_output))) {
@@ -623,9 +640,14 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
         .get_shared_args(merge_outputs, dots_args)
       )
     )
-
-    return(merged_results)
   }
+  pretty_results <- do.call(
+    ".prettify_result",
+    c(list(data = merged_results),
+      .get_shared_args(.prettify_result, dots_args))
+  )
+
+  return(pretty_results)
 }
 
 # TODO polish doc (e.g. '...' args)
@@ -696,7 +718,6 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
     )
   }
 
-  # TODO recheck that this is all the required dot args
   estimate_from_combined_observations_dots_args <- .get_shared_args(
     list(
       .smooth_LOESS,
@@ -708,8 +729,6 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
     ),
     dots_args
   )
-
-
 
   original_result <- do.call(
     "estimate_from_combined_observations",
@@ -848,5 +867,11 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
     )
   }
 
-  return(estimates_with_uncertainty)
+  pretty_results <- do.call(
+    ".prettify_result",
+    c(list(data = estimates_with_uncertainty),
+      .get_shared_args(.prettify_result, dots_args))
+  )
+
+  return(pretty_results)
 }
