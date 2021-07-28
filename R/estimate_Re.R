@@ -93,9 +93,8 @@ estimate_Re <- function( incidence_data,
     stop("minimum_cumul_incidence parameter is set higher than total cumulative incidence.")
   }
 
-  offset <- which(cumsum(incidence_vector) >= minimum_cumul_incidence)[1]
-  # offset needs to be at least two for EpiEstim
-  offset <- max(2, offset)
+  offset <- which(cumsum(incidence_vector) >= max(12, minimum_cumul_incidence))[1]
+  offset <- max(2, estimation_window, ceiling(mean_serial_interval), offset)
 
   right_bound <- length(incidence_vector) - (estimation_window - 1)
 
