@@ -8,15 +8,6 @@
 #' sequences of computations that weave together the different
 #' modules provided by \code{estimateR}.
 #'
-#' @param uncertainty_summary_method One of these options:
-#' \itemize{
-#' \item{'original estimate - CI from bootstrap estimates'.
-#' The confidence interval is built using bootstrapped estimates
-#' and centered around the original estimates.}
-#' \item{'bagged mean - CI from bootstrap estimates'.
-#' The confidence interval is built using bootstrapped estimates
-#' and centered around the mean of bootstrapped estimates and original estimates.}
-#' }
 #' @inherit uncertainty
 #' @inheritDotParams .summarise_CI_bootstrap
 #'
@@ -214,21 +205,24 @@ summarise_uncertainty <- function(bootstrapped_values,
 }
 
 
-#' Title
+#' Utility for summarising uncertainty
 #'
-#' @param original_values
-#' @param bootstrapped_values
-#' @param uncertainty_summary_method
-#' @param value_col
-#' @param bootstrap_id_col
-#' @param index_col
-#' @param output_Re_only
-#' @param combine_bootstrap_and_estimation_uncertainties
-#' @param Re_HPDs
-#' @param ...
+#' This function is not meant to be used by typical users.
+#' It can be used to build custom pipes with \code{estimateR}.
 #'
-#' @return
-#' @export
+#' @inherit uncertainty
+#' @inherit pipe_params
+#' @inheritDotParams .summarise_CI_bootstrap
+#'
+#' @return A dataframe containing Re estimates (column 'Re_estimate')
+#' and confidence interval boundaries, with 4 columns like so:
+#' \itemize{
+#' \item{\code{index_col}, the timestep index column}
+#' \item{A column named \code{output_value_col},
+#' containing the central values (typically these are Re estimates) }
+#' \item{\code{CI_up}, upper limit of the confidence interval}
+#' \item{\code{CI_down}, the lower limit of the confidence interval}
+#' }
 do_uncertainty_summary <- function(original_values,
                                    bootstrapped_values,
                                    uncertainty_summary_method,
@@ -245,7 +239,6 @@ do_uncertainty_summary <- function(original_values,
   CI_up_col_name <- paste0("CI_up_", value_col)
 
   if (output_Re_only) {
-    # TODO remove leading NAs from output
     estimates_with_uncertainty <- do.call(
       "summarise_uncertainty",
       c(

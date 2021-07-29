@@ -61,7 +61,7 @@ NULL
 
 #' Inner module option characteristics
 #'
-#' @param incidence_input Module input object.
+#' @param incidence_input,input,output Module input object.
 #' List with two elements:
 #'  \enumerate{
 #'  \item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
@@ -217,33 +217,48 @@ NULL
 #' @name empirical_delay_data_format
 NULL
 
-# TODO redo to accomodate change from 'estimates' to 'values'
 #' Uncertainty summary
 #'
+#' @param uncertainty_summary_method One of these options:
+#' \itemize{
+#' \item{'original estimate - CI from bootstrap estimates'.
+#' The confidence interval is built using bootstrapped estimates
+#' and centered around the original estimates.}
+#' \item{'bagged mean - CI from bootstrap estimates'.
+#' The confidence interval is built using bootstrapped estimates
+#' and centered around the mean of bootstrapped estimates and original estimates.}
+#' }
 #' @param original_values Optional. Values of reference
 #' used to construct the uncertainty interval around.
 #' Typically, these are estimates obtained on the original data.
 #' Must be a dataframe with a timestep index column named \code{index_col}
-#' and an estimate column named \code{value_col}.
+#' and a value column named \code{value_col}.
 #' The index column must not contain any \code{NA} value.
-#' @param bootstrapped_values Estimates obtained on a number of bootstrap
+#' @param bootstrapped_values  Bootstrap
 #' replicates of the original data.
 #' Must be a dataframe in the long format
 #' with a timestep index column named \code{index_col},
 #' a bootstrap replicate index column named \code{bootstrap_id_col},
-#' and an estimate column named \code{value_col}.
+#' and a value column named \code{value_col}.
 #' The index column must not contain any \code{NA} value.
-#' @param central_values Estimates around which the confidence interval is going to be centered.
+#' @param central_values Values around which the confidence interval is going to be centered.
 #' Must be a dataframe with a timestep index column named \code{index_col}
-#' and an estimate column named \code{value_col}.
+#' and a value column named \code{value_col}.
 #' The index column must not contain any \code{NA} value.
 #' @param value_col string. Name of the column containing values.
 #' @param bootstrap_id_col string. Name of the column containing bootstrap samples numbering.
-#' Id 0 must correspond to the estimate on the original data.
+#' Id 0 must correspond to values associated to the original data.
 #' @param index_col string. Name of the index column.
-#' The index tracks which data point in bootstrapped estimates
-#' corresponds to which data point in the original estimates.
+#' The index tracks which data point in bootstrapped values
+#' corresponds to which data point in the original values.
 #' @param alpha value between 0 and 1. Confidence level of the confidence interval.
+#' @param combine_bootstrap_and_estimation_uncertainties boolean.
+#' Combine uncertainty from Re estimation with uncertainty from observation process?
+#' If \code{TRUE}, the credible intervals for Re estimates must be passed via \code{Re_HPDs}.
+#' The output credible intervals
+#' will be the union of bootstrapping intervals and Re estimation intervals.
+#' @param Re_HPDs Optional. Credible intervals for Re estimates.
+#' Use only if \code{combine_bootstrap_and_estimation_uncertainties} is \code{TRUE}.
 #'
 #' @name uncertainty
 NULL

@@ -16,19 +16,19 @@ summarise_uncertainty(
 )
 }
 \arguments{
-\item{bootstrapped_values}{Estimates obtained on a number of bootstrap
+\item{bootstrapped_values}{Bootstrap
 replicates of the original data.
 Must be a dataframe in the long format
 with a timestep index column named \code{index_col},
 a bootstrap replicate index column named \code{bootstrap_id_col},
-and an estimate column named \code{value_col}.
+and a value column named \code{value_col}.
 The index column must not contain any \code{NA} value.}
 
 \item{original_values}{Optional. Values of reference
 used to construct the uncertainty interval around.
 Typically, these are estimates obtained on the original data.
 Must be a dataframe with a timestep index column named \code{index_col}
-and an estimate column named \code{value_col}.
+and a value column named \code{value_col}.
 The index column must not contain any \code{NA} value.}
 
 \item{uncertainty_summary_method}{One of these options:
@@ -44,18 +44,18 @@ and centered around the mean of bootstrapped estimates and original estimates.}
 \item{value_col}{string. Name of the column containing values.}
 
 \item{bootstrap_id_col}{string. Name of the column containing bootstrap samples numbering.
-Id 0 must correspond to the estimate on the original data.}
+Id 0 must correspond to values associated to the original data.}
 
 \item{index_col}{string. Name of the index column.
-The index tracks which data point in bootstrapped estimates
-corresponds to which data point in the original estimates.}
+The index tracks which data point in bootstrapped values
+corresponds to which data point in the original values.}
 
 \item{...}{
   Arguments passed on to \code{\link[=.summarise_CI_bootstrap]{.summarise_CI_bootstrap}}
   \describe{
-    \item{\code{central_values}}{Estimates around which the confidence interval is going to be centered.
+    \item{\code{central_values}}{Values around which the confidence interval is going to be centered.
 Must be a dataframe with a timestep index column named \code{index_col}
-and an estimate column named \code{value_col}.
+and a value column named \code{value_col}.
 The index column must not contain any \code{NA} value.}
     \item{\code{alpha}}{value between 0 and 1. Confidence level of the confidence interval.}
   }}

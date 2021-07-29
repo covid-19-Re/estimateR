@@ -1,6 +1,3 @@
-
-# TODO add input validations in all utilities (create validation utilities when needed)
-
 #' Convolve two discretized probability distribution vectors.
 #'
 #' @inheritParams distribution

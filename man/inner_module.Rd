@@ -4,7 +4,7 @@
 \alias{inner_module}
 \title{Inner module option characteristics}
 \arguments{
-\item{incidence_input}{Module input object.
+\item{incidence_input, input, output}{Module input object.
 List with two elements:
 \enumerate{
 \item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.

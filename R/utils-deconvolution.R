@@ -451,9 +451,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   new_column <- c(rep(0, times = i - 1), delay_distr[1:(N - i + 1)])
 
   return(new_column)
-}
-
-#' Utility function that generates delay data, assuming a different delay between event and observation for each individual day.
+}#' Utility function that generates delay data, assuming a different delay between event and observation for each individual day.
 #' It then generates the delay matrix and computes the RMSE between the parameters of the gamma distributions passed as arguments and the ones recovered from the delay matrix.
 #' The shapes and scales of the gamma distributions are specified as parameters, and the number of timesteps is assumed to be equal to the length of these vectors.
 #'
