@@ -17,7 +17,7 @@ correspond to one of the types of \code{\link[stats:Distributions]{distributions
 Maximum number of time steps to discretize the \code{distribution} over.}
 
 \item{offset_by_one}{boolean.
-Set to TRUE if \code{distribution} represent the fit of data that was offset by one
+Set to TRUE if \code{distribution} represents the fit of data that was offset by one
 (\code{fitted_data = original_data + 1}) to accommodate zeroes in \code{original_data}.}
 }
 \value{

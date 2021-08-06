@@ -7,8 +7,7 @@
 deconvolve_incidence(
   incidence_data,
   deconvolution_method = "Richardson-Lucy delay distribution",
-  delay_incubation,
-  delay_onset_to_report = c(1),
+  delay,
   simplify_output = TRUE,
   ...
 )
@@ -41,10 +40,6 @@ Available options are:
 implemented in \code{\link{.deconvolve_incidence_Richardson_Lucy}}}
 }}
 
-\item{delay_incubation}{TODO add details}
-
-\item{delay_onset_to_report}{TODO add details}
-
 \item{simplify_output}{boolean. Return a numeric vector instead of module
 output object if output offset is zero?
 
@@ -65,10 +60,11 @@ the \code{index_offset} is dropped and the \code{values}
 element is returned as a numeric vector.}
 
 \item{...}{
-  Arguments passed on to \code{\link[=convolve_delay_inputs]{convolve_delay_inputs}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}
+  Arguments passed on to \code{\link[=convolve_delays]{convolve_delays}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}
   \describe{
     \item{\code{n_report_time_steps}}{integer. Length of incidence time series.
 Use only when providing empirical delay data.}
+    \item{\code{delays}}{list of delays, with flexible structure. TODO ADD DETAILS}
     \item{\code{delay_distribution}}{numeric square matrix or vector.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}

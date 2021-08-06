@@ -13,6 +13,8 @@ correspond to one of the types of \code{\link[stats:Distributions]{distributions
 \item{vector_a, vector_b, delay_distribution_vector}{discretized probability distribution vector}
 
 \item{matrix_a, matrix_b, delay_distribution_matrix}{discretized delay distribution matrix}
+
+\item{quantile}{Value between 0 and 1. Quantile of the distribution.}
 }
 \description{
 Distribution

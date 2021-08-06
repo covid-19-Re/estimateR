@@ -83,8 +83,8 @@ Default is \code{12} as recommended in Cori et al., 2013.}
     \item{\code{std_serial_interval}}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R()}}}
     \item{\code{mean_Re_prior}}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R()}}}
     \item{\code{cutoff_observation_probability}}{value between 0 and 1.
-Only datapoints for timesteps that have a probability to be observed higher
-than \code{cutoff_observation_probability} are kept.
+Only datapoints for timesteps that have a probability of observing a event
+higher than \code{cutoff_observation_probability} are kept.
 The few datapoints with a lower probability to be observed are trimmed off
 the tail of the timeseries.}
   }}

@@ -9,8 +9,7 @@ estimate_Re_from_noisy_delayed_incidence(
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
-  delay_incubation,
-  delay_onset_to_report = c(1),
+  delay,
   ref_date = NULL,
   time_step = "day",
   output_Re_only = TRUE,
@@ -60,10 +59,6 @@ implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
 \item{'EpiEstim piecewise constant',
 implemented in \code{\link{.estimate_Re_EpiEstim_piecewise_constant}}}
 }}
-
-\item{delay_incubation}{TODO add details}
-
-\item{delay_onset_to_report}{TODO add details}
 
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 

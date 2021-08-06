@@ -1,7 +1,9 @@
 # TODO reduce duplication between bootstrapping pipe functions
+# TODO redoc everywhere for refactoring delays
 
 # TODO polish doc (e.g. '...' args)
 # TODO redoc (combine_bootstrap_and_estimation_uncertainties)
+# TODO redoc (delay)
 #' Estimate Re from incidence and estimate uncertainty with block-bootstrapping
 #'
 #' An estimation of the effective reproductive number through time is made
@@ -39,8 +41,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
                                             estimation_method = "EpiEstim sliding window",
                                             uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
                                             combine_bootstrap_and_estimation_uncertainties = FALSE,
-                                            delay_incubation,
-                                            delay_onset_to_report = c(1.0),
+                                            delay,
                                             ref_date = NULL,
                                             time_step = "day",
                                             output_Re_only = TRUE,
@@ -53,8 +54,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
     list(estimation_method, "estimation_method"),
     list(uncertainty_summary_method, "uncertainty_summary_method"),
     list(combine_bootstrap_and_estimation_uncertainties, "boolean"),
-    list(delay_incubation, "delay_object", .get_input_length(incidence_data)),
-    list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)),
+    list(delay, "delay_single_or_list", .get_input_length(incidence_data)),
     list(ref_date, "null_or_date"),
     list(time_step, "time_step"),
     list(output_Re_only, "boolean")
@@ -71,16 +71,15 @@ get_block_bootstrapped_estimate <- function(incidence_data,
 
   # Prepare delay distribution vector or matrix early on as it spares the need to redo the same operation for each bootstrap replicate
   total_delay_distribution <- do.call(
-    "convolve_delay_inputs",
+    "convolve_delays",
     c(
       list(
-        delay_incubation = delay_incubation,
-        delay_onset_to_report = delay_onset_to_report,
+        delays = delay,
         n_report_time_steps = length(incidence_data),
         ref_date = ref_date,
         time_step = time_step
       ),
-      .get_shared_args(convolve_delay_inputs, dots_args)
+      .get_shared_args(convolve_delays, dots_args)
     )
   )
 
@@ -104,7 +103,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
         smoothing_method = smoothing_method,
         deconvolution_method = deconvolution_method,
         estimation_method = estimation_method,
-        delay_incubation = total_delay_distribution,
+        delay = total_delay_distribution,
         ref_date = NULL,
         output_Re_only = FALSE,
         include_index = TRUE,
@@ -161,7 +160,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
           smoothing_method = smoothing_method,
           deconvolution_method = deconvolution_method,
           estimation_method = estimation_method,
-          delay_incubation = total_delay_distribution,
+          delay = total_delay_distribution,
           ref_date = NULL,
           output_Re_only = FALSE,
           include_index = TRUE,
@@ -226,7 +225,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
   return(pretty_results)
 }
 
-
+#TODO redoc (delay)
 #' Estimate Re from incidence data
 #'
 #' This pipe function combines a smoothing step using (to remove noise from the original observations),
@@ -253,8 +252,7 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
                                                      smoothing_method = "LOESS",
                                                      deconvolution_method = "Richardson-Lucy delay distribution",
                                                      estimation_method = "EpiEstim sliding window",
-                                                     delay_incubation,
-                                                     delay_onset_to_report = c(1.0),
+                                                     delay,
                                                      ref_date = NULL,
                                                      time_step = "day",
                                                      output_Re_only = TRUE,
@@ -264,8 +262,7 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
     list(smoothing_method, "smoothing_method"),
     list(deconvolution_method, "deconvolution_method"),
     list(estimation_method, "estimation_method"),
-    list(delay_incubation, "delay_object", .get_input_length(incidence_data)), # need to pass length of incidence data as well in order
-    list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)), # to validate when the delay is passed as a matrix
+    list(delay, "delay_single_or_list", .get_input_length(incidence_data)),
     list(ref_date, "null_or_date"),
     list(time_step, "time_step"),
     list(output_Re_only, "boolean")
@@ -295,13 +292,12 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
       list(
         incidence_data = smoothed_incidence,
         deconvolution_method = deconvolution_method,
-        delay_incubation = delay_incubation,
-        delay_onset_to_report = delay_onset_to_report
+        delay = delay
       ),
       .get_shared_args(
         list(
           .deconvolve_incidence_Richardson_Lucy,
-          convolve_delay_inputs
+          convolve_delays
         ),
         dots_args
       )
@@ -379,17 +375,16 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
 #' @inheritDotParams .smooth_LOESS -incidence_input
 #' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #' @inheritDotParams merge_outputs -output_list -include_index -index_col
-#' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_distribution_final_report
+#' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_until_final_report
 #'
 #' @return
 #' @export
 get_infections_from_incidence <- function(incidence_data,
                                           smoothing_method = "LOESS",
                                           deconvolution_method = "Richardson-Lucy delay distribution",
-                                          delay_incubation,
-                                          delay_onset_to_report = c(1.0),
+                                          delay,
                                           is_partially_reported_data = FALSE,
-                                          delay_distribution_final_report = NULL,
+                                          delay_until_final_report = NULL,
                                           output_infection_incidence_only = TRUE,
                                           ref_date = NULL,
                                           time_step = "day",
@@ -398,8 +393,7 @@ get_infections_from_incidence <- function(incidence_data,
     list(incidence_data, "module_input"),
     list(smoothing_method, "smoothing_method"),
     list(deconvolution_method, "deconvolution_method"),
-    list(delay_incubation, "delay_object", .get_input_length(incidence_data)), # need to pass length of incidence data as well in order
-    list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)), # to validate when the delay is passed as a matrix
+    list(delay, "delay_single_or_list", .get_input_length(incidence_data)),
     list(is_partially_reported_data, "boolean"),
     list(output_infection_incidence_only, "boolean"),
     list(ref_date, "null_or_date"),
@@ -411,14 +405,14 @@ get_infections_from_incidence <- function(incidence_data,
   original_incidence_data <- incidence_data
 
   if (is_partially_reported_data) {
-    .are_valid_argument_values(list(list(delay_distribution_final_report, "delay_object", .get_input_length(incidence_data))))
+    .are_valid_argument_values(list(list(delay_until_final_report, "delay_single_or_list", .get_input_length(incidence_data))))
 
     incidence_data <- do.call(
       "correct_for_partially_observed_data",
       c(
         list(
           incidence_data = incidence_data,
-          delay_distribution_final_report = delay_distribution_final_report,
+          delay_until_final_report = delay_until_final_report,
           ref_date = NULL,
           time_step = "day"
         ),
@@ -438,22 +432,18 @@ get_infections_from_incidence <- function(incidence_data,
     )
   )
 
-  # TODO when generalizing to list of delays,
-  # possibly take the convolution out of the deconvolution step.
-  # to improve readability
   deconvolved_incidence <- do.call(
     "deconvolve_incidence",
     c(
       list(
         incidence_data = smoothed_incidence,
         deconvolution_method = deconvolution_method,
-        delay_incubation = delay_incubation,
-        delay_onset_to_report = delay_onset_to_report
+        delay = delay
       ),
       .get_shared_args(
         list(
           .deconvolve_incidence_Richardson_Lucy,
-          convolve_delay_inputs
+          convolve_delays
         ),
         dots_args
       )
@@ -526,7 +516,7 @@ get_infections_from_incidence <- function(incidence_data,
 #' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
 #' @inheritDotParams merge_outputs -output_list -include_index -index_col
-#' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_distribution_final_report
+#' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_until_final_report
 #'
 #' @return
 #' @export
@@ -549,8 +539,8 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
     list(deconvolution_method, "deconvolution_method"),
     list(estimation_method, "estimation_method"),
     # TODO figure out what we do for making sure the two traces are the same size in input.
-    list(delay_until_partial, "delay_object", .get_input_length(partially_delayed_incidence)), # need to pass length of incidence data as well in order
-    list(delay_from_partial_to_full, "delay_object", .get_input_length(fully_delayed_incidence)), # to validate when the delay is passed as a matrix
+    list(delay_until_partial, "delay_single_or_list", .get_input_length(partially_delayed_incidence)), # need to pass length of incidence data as well in order
+    list(delay_from_partial_to_full, "delay_single_or_list", .get_input_length(fully_delayed_incidence)), # to validate when the delay is passed as a matrix
     list(partial_observation_requires_full_observation, "boolean"),
     list(ref_date, "null_or_date"),
     list(time_step, "time_step"),
@@ -565,20 +555,29 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
       list(partially_delayed_incidence,
         smoothing_method = smoothing_method,
         deconvolution_method = deconvolution_method,
-        delay_incubation = delay_until_partial,
+        delay = delay_until_partial,
         is_partially_reported_data = partial_observation_requires_full_observation,
-        delay_distribution_final_report = delay_from_partial_to_full,
+        delay_until_final_report = delay_from_partial_to_full,
         output_infection_incidence_only = TRUE
       ),
       .get_shared_args(
         list(
           .deconvolve_incidence_Richardson_Lucy,
-          convolve_delay_inputs
+          convolve_delays
         ),
         dots_args
       )
     )
   )
+
+  delay_until_partial_as_list <- ifelse(.is_single_delay(delay_until_partial),
+                                         list(delay_until_partial),
+                                         delay_until_partial)
+
+  delay_from_partial_to_full_as_list <- ifelse(.is_single_delay(delay_from_partial_to_full),
+                                                list(delay_from_partial_to_full),
+                                                delay_from_partial_to_full)
+  combined_delay_list <- append(delay_until_partial_as_list, delay_from_partial_to_full_as_list)
 
   infections_from_fully_delayed_observations <- do.call(
     "get_infections_from_incidence",
@@ -586,15 +585,14 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
       list(fully_delayed_incidence,
         smoothing_method = smoothing_method,
         deconvolution_method = deconvolution_method,
-        delay_incubation = delay_until_partial,
-        delay_onset_to_report = delay_from_partial_to_full,
+        delay = combined_delay_list,
         is_partially_reported_data = FALSE,
         output_infection_incidence_only = TRUE
       ),
       .get_shared_args(
         list(
           .deconvolve_incidence_Richardson_Lucy,
-          convolve_delay_inputs
+          convolve_delays
         ),
         dots_args
       )
@@ -665,7 +663,7 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
 #' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
 #' @inheritDotParams merge_outputs -output_list -include_index -index_col
-#' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_distribution_final_report
+#' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_until_final_report
 #'
 #' @return
 #' @export
@@ -698,11 +696,36 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
   bootstrap_id_col <- "bootstrap_id"
 
   # Precompute delay distribution vector or matrix to avoid repeating costly computations needlessly for each bootstrap sample
-  delay_distribution_until_partial <- .get_delay_distribution(delay_until_partial,
-    n_report_time_steps = .get_input_length(partially_delayed_incidence)
+  delay_distribution_until_partial <- do.call(
+    "convolve_delays",
+    c(
+      list(
+        delays = delay_until_partial,
+        n_report_time_steps = .get_input_length(partially_delayed_incidence),
+        ref_date = ref_date,
+        time_step = time_step
+      ),
+      .get_shared_args(list(
+        convolve_delays,
+        build_delay_distribution,
+        get_matrix_from_empirical_delay_distr), dots_args)
+    )
   )
-  delay_distribution_partial_to_full <- .get_delay_distribution(delay_from_partial_to_full,
-    n_report_time_steps = .get_input_length(fully_delayed_incidence)
+
+  delay_distribution_partial_to_full <- do.call(
+    "convolve_delays",
+    c(
+      list(
+        delays = delay_from_partial_to_full,
+        n_report_time_steps = .get_input_length(partially_delayed_incidence),
+        ref_date = ref_date,
+        time_step = time_step
+      ),
+      .get_shared_args(list(
+        convolve_delays,
+        build_delay_distribution,
+        get_matrix_from_empirical_delay_distr), dots_args)
+    )
   )
 
   if (partial_observation_requires_full_observation) {
@@ -711,7 +734,7 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
       c(
         list(
           incidence_data = partially_delayed_incidence,
-          delay_distribution_final_report = delay_distribution_partial_to_full
+          delay_until_final_report = delay_distribution_partial_to_full
         ),
         .get_shared_args(correct_for_partially_observed_data, dots_args)
       )

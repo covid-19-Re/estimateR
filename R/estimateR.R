@@ -109,7 +109,9 @@ NULL
 #'
 #' @param output_Re_only boolean. Should the output only contain Re estimates?
 #' (as opposed to containing results for each intermediate step)
-#' @param output_infection_incidence_only boolean. TODO add details
+#' @param output_infection_incidence_only boolean.
+#' Should the output contain only the estimated infection incidence?
+#' (as opposed to containing results for intermediary steps)
 #'
 #' @name pipe_params
 NULL
@@ -123,9 +125,15 @@ NULL
 
 #' High-level delay parameters
 #'
-#' @param delay_incubation TODO add details
-#' @param delay_onset_to_report TODO add details
-#' @param delay_distribution_final_report TODO add details
+#' @param delays list of delays, with flexible structure. TODO ADD DETAILS
+#' @param delay_distribution_final_report
+#' Distribution of the delay between the events collected in the incidence data
+#' and the a posteriori observations of these events.
+#' @param cutoff_observation_probability value between 0 and 1.
+#' Only datapoints for timesteps that have a probability of observing a event
+#' higher than \code{cutoff_observation_probability} are kept.
+#' The few datapoints with a lower probability to be observed are trimmed off
+#' the tail of the timeseries.
 #' @param is_partially_reported_data boolean TODO add details
 #' @param delay_until_partial TODO add details
 #' @param delay_from_partial_to_full TODO add details
@@ -133,6 +141,55 @@ NULL
 #'
 #' @name delay_high
 NULL
+
+#' Empirical delays parameters
+#'
+#' @param empirical_delays,delays dataframe containing the empirical data. See Details.
+#' @param n_report_time_steps integer. Length of the incidence time series in the accompanying analysis.
+#' This argument is needed to determine the dimensions of the output matrix.
+#' @param min_number_cases integer.
+#' Minimal number of cases to build the empirical distribution from.
+#' If \code{num_steps_in_a_unit} is \code{NULL}, for any time step T,
+#' the \code{min_number_cases} records prior to T are used.
+#' If less than \code{min_number_cases} delays were recorded before T,
+#' then T is ignored and the \code{min_number_cases} earliest-recorded delays are used.
+#' If \code{num_steps_in_a_unit} is given a value, a similar same procedure is applied,
+#' except that, now at least \code{min_number_cases} must be taken over a round number of
+#' time units. For example, if \code{num_steps_in_a_unit = 7}, and time steps represent consecutive days,
+#' to build the distribution for time step T,
+#' we find the smallest number of weeks starting from T and going in the past,
+#' for which at least \code{min_number_cases} delays were recorded.
+#' We then use all the delays recorded during these weeks.
+#' Weeks are not meant as necessarily being Monday to Sunday,
+#' but simply 7 days in a row, e.g. it can be Thursday-Wednesday.
+#' Again, if less than \code{min_number_cases} delays were recorded before T,
+#' then T is ignored.
+#' We then find the minimum number of weeks, starting from the first recorded delay
+#' that contains at least \code{min_number_cases}.
+#'
+#' @param min_number_cases_fraction numeric. Between 0 and 1.
+#' If \code{min_number_cases} is not provided (kept to \code{NULL}),
+#' the number of most-recent cases used to build
+#' the instant delay distribution is \code{min_number_cases_fraction}
+#' times the total number of reported delays.
+#' @param min_min_number_cases numeric. Lower bound
+#' for number of cases used to build an instant delay distribution.
+#' @param upper_quantile_threshold numeric. Between 0 and 1.
+#' Argument for internal use.
+#' @param fit string. One of "gamma" or "none". Specifies the type of fit that
+#' is applied to the columns of the delay matrix
+#' @param date_of_interest Date. Date for which the most recent recorded delays are sought.
+#' @param num_steps_in_a_unit Optional argument.
+#' Number of time steps in a full time unit (e.g. 7 if looking at weeks).
+#' If set, the delays used to build a particular
+#' delay distribution will span over a round number of such time units.
+#' This option is included for comparison with legacy code.
+#'
+#'
+#' @name delay_empirical
+NULL
+
+
 
 #' Dating parameters
 #'
@@ -196,6 +253,7 @@ NULL
 #' \code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.
 #' @param vector_a,vector_b,delay_distribution_vector discretized probability distribution vector
 #' @param matrix_a,matrix_b,delay_distribution_matrix discretized delay distribution matrix
+#' @param quantile Value between 0 and 1. Quantile of the distribution.
 #'
 #' @name distribution
 NULL

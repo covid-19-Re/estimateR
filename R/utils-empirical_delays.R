@@ -1,151 +1,12 @@
-# TODO reorganize files between utils-deconvolution, utils-convolution, utils-distribution
-# TODO write deconvolution step that takes into account that data is onset data (when it is). That should apply to Swiss onset data
-# TODO add a way to deal with Spanish data specificity
-# TODO add way to pass list of distributions in pipe
-
-#' Make delay distribution matrix from vector of delay distribution.
+#' Get delay entries corresponding to a round number of weeks (months...)
 #'
-#' @inheritParams distribution
-#' @param N integer. Dimension of output matrix.
+#' The main use of this function is to allow comparison with legacy code.
 #'
-#' @return discretized delay distribution matrix, representing a constant-through-time
-#' delay distribution.
-.get_matrix_from_single_delay_distr <- function(delay_distribution_vector, N) {
-  .are_valid_argument_values(list(
-    list(delay_distribution_vector, "probability_distr_vector"),
-    list(N, "positive_integer")
-  ))
-
-  if (N >= length(delay_distribution_vector)) {
-    delay_distribution_vector <- c(delay_distribution_vector, rep(0, times = N - length(delay_distribution_vector)))
-  }
-
-  delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
-  for (i in 1:N) {
-    delay_distribution_matrix[, i] <- c(rep(0, times = i - 1), delay_distribution_vector[1:(N - i + 1)])
-  }
-
-  return(delay_distribution_matrix)
-}
-
-# TODO maybe export
-# TODO maybe merge with .get_matrix_from_single_delay_distr by adding N parm and checking if list or unique vector
-#' Build delay distribution matrix from list of delay distributions
+#' @inherit empirical_delay_data_format
+#' @inherit delay_empirical
 #'
-#' @param distributions list of distributions,
-#' each element is either a distribution list or discretized probability distribution vector.
-#' @inheritDotParams build_delay_distribution -distribution
-#'
-#' @return delay distribution matrix
-.get_delay_matrix_from_delay_distribution_parms <- function(distributions, ...) {
-  for (i in 1:length(distributions)) {
-    .are_valid_argument_values(list(list(distributions[[i]], "distribution")))
-  }
-  dots_args <- .get_dots_as_list(...)
-
-  # Generate list of delay distribution vectors
-  delay_distribution_list <- lapply(distributions, function(distr) {
-    do.call(
-      "build_delay_distribution",
-      c(
-        list(distribution = distr),
-        .get_shared_args(build_delay_distribution, dots_args)
-      )
-    )
-  })
-
-  N <- length(distributions)
-
-  # Initialize empty matrix
-  delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
-
-  # Fill matrix by column
-  for (i in 1:N) {
-    delay_distr <- delay_distribution_list[[i]]
-
-    # Right-pad delay_distr vector with zeroes if needed
-    if (length(delay_distr) < N - i + 1) {
-      delay_distr <- c(delay_distr, rep(0, times = N - i + 1 - length(delay_distr)))
-    }
-    delay_distribution_matrix[, i] <- c(rep(0, times = i - 1), delay_distr[1:(N - i + 1)])
-  }
-
-  return(delay_distribution_matrix)
-}
-
-#' Augment a delay distribution by left padding with new columns.
-#'
-#' This function reshapes a discretized delay distribution matrix
-#' by left-padding it with \code{n_col_augment} columns.
-#' Because the output matrix must also be lower-triangular,
-#' additional rows are also padded to the top rows.
-#' This function allows one to extend further in the past
-#' the range of the initial delay distribution matrix.
-#' This is useful when convolving that delay distribution matrix
-#' with another delay distribution.
-#'
-#' The columns that are added replicate the left-most column of
-#' \code{delay_distribution_matrix}.
-#'
-#' @inheritParams distribution
-#' @param n_col_augment an integer. Number of columns to left-pad
-#' \code{delay_distribution_matrix} with.
-#'
-#' @return If \code{delay_distribution_matrix} is of dimension N,
-#' then the result is of dimension N + \code{n_col_augment}.
-.left_augment_delay_distribution <- function(delay_distribution_matrix,
-                                             n_col_augment) {
-  .are_valid_argument_values(list(
-    list(delay_distribution_matrix, "probability_distr_matrix", 0),
-    list(n_col_augment, "positive_integer")
-  ))
-
-  n_col_original <- ncol(delay_distribution_matrix)
-  n_col_augmented <- n_col_original + n_col_augment
-
-  # Initialize empty matrix
-  augmented_matrix <- matrix(0, nrow = n_col_augmented, ncol = n_col_augmented)
-
-  # Fill matrix by column
-
-  # Start by duplicating first column in original matrix into 'n_col_augment' first columns of augmented_matrix
-  for (i in 1:n_col_augment) {
-    augmented_matrix[, i] <- c(rep(0, times = i - 1), delay_distribution_matrix[, 1], rep(0, times = n_col_augment - i + 1))
-  }
-
-  # Then fill with original matrix, adding the required zero on the top rows
-  for (i in (n_col_augment + 1):n_col_augmented) {
-    augmented_matrix[, i] <- c(rep(0, times = n_col_augment), delay_distribution_matrix[, i - n_col_augment])
-  }
-
-  return(augmented_matrix)
-}
-
-# TODO redoc
-# TODO add options to take median, mode, mean...
-# TODO redoc quantile parm
-# TODO validate 'quantile'
-#' Get initial shift for deconvolution step
-#'
-#' This utility function returns the number of timesteps
-#' by which the incidence data should be shifted back in the past
-#' for the initial step of the Richardson-Lucy deconvolution algorithm.
-#'
-#' @inheritParams distribution
-#'
-#' @return an integer value corresponding to the rounded median of
-#' the input delay distribution.
-.get_time_steps_quantile <- function(delay_distribution_vector, quantile = 0.5) {
-  .are_valid_argument_values(list(list(delay_distribution_vector, "probability_distr_vector")))
-
-  initial_shift <- ceiling(min(which(cumsum(delay_distribution_vector) > quantile))) - 1
-  initial_shift <- max(initial_shift, 0, na.rm = TRUE)
-  return(initial_shift)
-}
-
-
-
-#TODO doc
+#' @return A vector of length at least \code{min_number_cases}, containing
+#' records of delays.
 .get_delays_over_full_time_units <- function(delays,
                                              date_of_interest,
                                              num_steps_in_a_unit = 7,
@@ -196,13 +57,6 @@
 }
 
 
-
-#TODO redoc (full_time_units)
-# TODO test
-# TODO possibly allow for other ways to specifiy initial shift than median of all reports.
-# TODO allow for other distributions than gamma for fit.
-# TODO doc fact that if ref_date is not given then ref_date is earliest reported date.
-# TODO also doc emphasize fact that ref_date parameter is important here.
 #' Build matrix of delay distributions through time from empirical delay data.
 #'
 #' This function takes a record of delays between events and their observations
@@ -217,23 +71,16 @@
 #' of epidemic of interest, this will be reflected in the recorded empirical delays
 #' and will be accounted for by \code{estimateR} when estimating the reproductive number.
 #'
+#' The \code{ref_date} argument here will be understood as the date of the first record in the incidence data
+#' for which the empirical delay data will be used.
+#' If \code{ref_date} is not provided, the reference date will be taken as being the earliest date in the
+#' \code{event_date} column of \code{empirical_delays}. In other words, the date of the first record in the incidence data
+#' will be assumed to be the same as the date of the first record in the empirical delay data.
+#' If this is not the case in your analysis, make sure to specify a \code{ref_date} argument.
+#'
 #' @inherit empirical_delay_data_format
 #'
-#' @param empirical_delays dataframe containing the empirical data. See Details.
-#' @param n_report_time_steps integer. Length of the incidence time series in the accompanying analysis.
-#' This argument is needed to determine the dimensions of the output matrix.
-#' @param min_number_cases integer. Minimal number of cases to build
-#' the empirical distribution from. TODO add details
-#' @param min_number_cases_fraction numeric. Between 0 and 1.
-#' If \code{min_number_cases} is not provided (kept to \code{NULL}),
-#' the number of most-recent cases used to build
-#' the instant delay distribution is \code{min_number_cases_fraction}
-#' times the total number of reported delays.
-#' @param min_min_number_cases numeric. Lower bound
-#' for number of cases used to build an instant delay distribution.
-#' @param upper_quantile_threshold numeric. Between 0 and 1. TODO add details
-#' @param fit string. One of "gamma" or "none". Specifies the type of fit that
-#' is applied to the columns of the delay matrix
+#' @inherit delay_empirical
 #' @inheritParams dating
 #'
 #' @return a discretized delay distribution matrix.
@@ -248,8 +95,6 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
                                                   min_min_number_cases = 10,
                                                   fit = "none",
                                                   num_steps_in_a_unit = NULL) {
-  ## TODO need to account for offset if onset data (or not onset data?)
-  ## TODO reconsider if we make gamma fit (allow to turn it off, or to use different distribution)
 
   .are_valid_argument_values(list(
     list(empirical_delays, "empirical_delay_data"),
@@ -260,7 +105,8 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     list(upper_quantile_threshold, "numeric_between_zero_one"),
     list(min_number_cases_fraction, "numeric_between_zero_one"),
     list(min_min_number_cases, "positive_integer"),
-    list(fit, "delay_matrix_column_fit")
+    list(fit, "delay_matrix_column_fit"),
+    list(num_steps_in_a_unit, "null_or_int")
   ))
 
 
@@ -295,8 +141,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     utils::head(n = 1) %>%
     dplyr::pull(.data$report_delay)
 
-  # TODO allow for different ways of specifying initial shift
-  # Use median of reported delays as initial shift (needed for deconvolution step)
+  # We left-pad the time range with a number of time steps corresponding in the initial shift in the deconvolution.
   # TODO it may be simpler to just do the augmentation during the deconvolution step
   initial_shift <- ceiling(stats::quantile(empirical_delays$report_delay, probs = 0.99, na.rm = T))[1]
 
@@ -430,8 +275,8 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
       # TODO only output this if verbose output
       cat("    mle failed to estimate the parameters. Trying method = \"mme\"\n")
       gamma_fit <- fitdistrplus::fitdist(recent_counts_distribution + 1, distr = "gamma", method = "mme")
+      # TODO if none work revert to empirical distribution
     }
-    # TODO if none work revert to empirical distribution
 
     shape_fit <- gamma_fit$estimate[["shape"]]
     scale_fit <- 1 / gamma_fit$estimate[["rate"]]
@@ -451,7 +296,10 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   new_column <- c(rep(0, times = i - 1), delay_distr[1:(N - i + 1)])
 
   return(new_column)
-}#' Utility function that generates delay data, assuming a different delay between event and observation for each individual day.
+}
+
+
+#' Utility function that generates delay data, assuming a different delay between event and observation for each individual day.
 #' It then generates the delay matrix and computes the RMSE between the parameters of the gamma distributions passed as arguments and the ones recovered from the delay matrix.
 #' The shapes and scales of the gamma distributions are specified as parameters, and the number of timesteps is assumed to be equal to the length of these vectors.
 #'

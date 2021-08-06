@@ -8,10 +8,9 @@ get_infections_from_incidence(
   incidence_data,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
-  delay_incubation,
-  delay_onset_to_report = c(1),
+  delay,
   is_partially_reported_data = FALSE,
-  delay_distribution_final_report = NULL,
+  delay_until_final_report = NULL,
   output_infection_incidence_only = TRUE,
   ref_date = NULL,
   time_step = "day",
@@ -52,15 +51,11 @@ Available options are:
 implemented in \code{\link{.deconvolve_incidence_Richardson_Lucy}}}
 }}
 
-\item{delay_incubation}{TODO add details}
-
-\item{delay_onset_to_report}{TODO add details}
-
 \item{is_partially_reported_data}{boolean TODO add details}
 
-\item{delay_distribution_final_report}{TODO add details}
-
-\item{output_infection_incidence_only}{boolean. TODO add details}
+\item{output_infection_incidence_only}{boolean.
+Should the output contain only the estimated infection incidence?
+(as opposed to containing results for intermediary steps)}
 
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
@@ -79,8 +74,8 @@ the ratio of \code{data_points_incl} and the number of time steps in the input d
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
     \item{\code{verbose}}{Boolean. Print verbose output?}
     \item{\code{cutoff_observation_probability}}{value between 0 and 1.
-Only datapoints for timesteps that have a probability to be observed higher
-than \code{cutoff_observation_probability} are kept.
+Only datapoints for timesteps that have a probability of observing a event
+higher than \code{cutoff_observation_probability} are kept.
 The few datapoints with a lower probability to be observed are trimmed off
 the tail of the timeseries.}
   }}

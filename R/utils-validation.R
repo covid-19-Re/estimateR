@@ -366,6 +366,41 @@ accepted_parameter_value <- list(
   return(TRUE)
 }
 
+#' @description Utility function that checks whether a user input is a list of or itself a single valid delay object.
+#' This means the user input can be a list in which each element can be one of the following:
+#'      \itemize{
+#'         \item a probability distribution vector: a numeric vector with no \code{NA} or negative values, whose entries sum up to 1
+#'         \item an empirical delay data: a data frame with two columns: \code{event_date} and \code{report_delay}. The columns cannot contain \code{NA} values. \code{report_delay} only contains non-negative values
+#'         \item a delay distribution matrix (as described in \code{\link{.check_is_delay_distribution_matrix}})
+#'         \item a distribution object (e.g. list(name = 'gamma', scale = X, shape = Y))
+#'      }
+#'
+#'  Or the user input can itself be one of these types.
+#' @inherit validation_utility_params
+#' @param delay_list user inputted object to be tested
+#'
+.is_valid_delay_single_or_list <- function(delay_list, parameter_name, incidence_data_length) {
+
+  if(is.list(delay_list) && !is.data.frame(delay_list)) {
+    is_distribution <- try(.is_valid_distribution(delay_list, parameter_name), silent = TRUE)
+    if ("try-error" %in% class(is_distribution)) {
+      is_delay_list <- try(lapply(delay_list, function(delay) {
+        .is_valid_delay_object(delay, parameter_name, incidence_data_length)
+        } ), silent =TRUE)
+
+      if("try-error" %in% class(is_delay_list)) {
+        stop(paste("Invalid", parameter_name,
+                   "Either one of the delay objects is invalid or", parameter_name,
+                   "is an invalid distribution object."))
+      }
+    }
+
+  } else {
+    .is_valid_delay_object(delay_list, parameter_name, incidence_data_length)
+  }
+  return(TRUE)
+}
+
 #' @description Utility function that checks whether a user input is a valid computation-ready delay object.
 #' This means it can be one of the following:
 #'      \itemize{
@@ -593,6 +628,7 @@ accepted_parameter_value <- list(
       "module_input" = .is_valid_module_input(user_input, parameter_name),
       "boolean" = .check_class_parameter_name(user_input, "logical", parameter_name),
       "computation_ready_delay_object" = .is_valid_computation_ready_delay_object(user_input, parameter_name, additional_function_parameter),
+      "delay_single_or_list" = .is_valid_delay_single_or_list(user_input, parameter_name, additional_function_parameter),
       "delay_object" = .is_valid_delay_object(user_input, parameter_name, additional_function_parameter),
       "number" = .check_if_number(user_input, parameter_name),
       "non_negative_number" = .check_if_non_negative_number(user_input, parameter_name),

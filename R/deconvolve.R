@@ -10,14 +10,13 @@
 #' @inheritParams module_methods
 #' @inherit module_structure
 #' @inheritParams delay_high
-#' @inheritDotParams convolve_delay_inputs
+#' @inheritDotParams convolve_delays
 #' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #'
 #' @export
 deconvolve_incidence <- function(incidence_data,
                                  deconvolution_method = "Richardson-Lucy delay distribution",
-                                 delay_incubation,
-                                 delay_onset_to_report = c(1.0),
+                                 delay,
                                  simplify_output = TRUE,
                                  ...) {
 
@@ -27,24 +26,22 @@ deconvolve_incidence <- function(incidence_data,
   .are_valid_argument_values(list(
     list(incidence_data, "module_input"),
     list(deconvolution_method, "deconvolution_method"),
-    list(delay_incubation, "delay_object", .get_input_length(incidence_data)),
-    list(delay_onset_to_report, "delay_object", .get_input_length(incidence_data)),
-    list(simplify_output, "boolean")
+    list(simplify_output, "boolean"),
+    list(delay, "delay_single_or_list", .get_input_length(incidence_data))
   ))
 
   dots_args <- .get_dots_as_list(...)
   input <- .get_module_input(incidence_data)
 
   total_delay_distribution <- do.call(
-    "convolve_delay_inputs",
+    "convolve_delays",
     c(
       list(
-        delay_incubation = delay_incubation,
-        delay_onset_to_report = delay_onset_to_report,
+        delays = delay,
         n_report_time_steps = .get_input_length(input)
       ),
       .get_shared_args(list(
-        convolve_delay_inputs,
+        convolve_delays,
         build_delay_distribution,
         get_matrix_from_empirical_delay_distr), dots_args)
     )

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-distribution.R
 \name{build_delay_distribution}
 \alias{build_delay_distribution}
-\title{Build a discretized probability distribution vector from a delay distribution list}
+\title{Build a discretized probability distribution vector}
 \usage{
 build_delay_distribution(
   distribution,
@@ -17,16 +17,17 @@ The \code{distribution} list must contain a 'name' element, this element must be
 correspond to one of the types of \code{\link[stats:Distributions]{distributions}} supported in the \link[stats]{Distributions} package.
 \code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.}
 
-\item{max_quantile}{numeric value between 0 and 1. TODO add details
+\item{max_quantile}{numeric value between 0 and 1.
 Upper quantile reached by the last element in the discretized distribution vector.}
 
 \item{offset_by_one}{boolean.
-Set to TRUE if \code{distribution} represent the fit of data that was offset by one
+Set to TRUE if \code{distribution} represents the fit of data that was offset by one
 (\code{fitted_data = original_data + 1}) to accommodate zeroes in \code{original_data}.}
 }
 \value{
 vector containing the discretized probability distribution vector of \code{distribution}.
 }
 \description{
-Build a discretized probability distribution vector from a delay distribution list
+The discretization is done by integrating the probability density
+on (0, 0.5), (0.5, 1.5), (1.5, 2.5)...
 }

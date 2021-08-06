@@ -16,19 +16,19 @@ test_that("deconvolve_incidence yields consistent results on a toy constant-dela
   deconvolved_incidence <- deconvolve_incidence(
     incidence_data = toy_incidence_data,
     deconvolution_method = "Richardson-Lucy delay distribution",
-    delay_incubation = delay_distribution,
+    delay = delay_distribution,
     threshold_chi_squared = 1,
     max_iterations = 100
   )
 
-  reference_values <- c(
-    6, 8, 9, 12, 15, 19, 27, 37, 47, 60, 75, 92, 111, 133,
-    158, 186, 217, 247, 272, 299, 321, 334, 343, 345, 337,
-    323, 306, 283, 261, 239, 216, 193, 169, 143, 114, 85, 59
-  )
+  reference_values <- c(4.9,6.6,8.3,10.9,14.4,18.8,27,36.5,47.4,
+                        60.3,75.1,91.9,110.9,133,157.6,185.9,216.9,
+                        246.6,272.5,299.2,320.7,333.6,343,345.4,
+                        336.7,323.2,306.1,282.8,260.8,239.2,215.9,
+                        192.7,169.4,142.8,113.9,85.3,59.4)
   reference_offset <- -5
 
-  expect_equal(.get_values(deconvolved_incidence), reference_values, tolerance = 1)
+  expect_lte( max(abs(.get_values(deconvolved_incidence) - reference_values)), expected = 1)
   expect_identical(.get_offset(deconvolved_incidence), reference_offset)
 })
 
@@ -63,23 +63,25 @@ test_that("deconvolve_incidence yields consistent results on a toy moving-throug
   deconvolved_incidence <- deconvolve_incidence(
     incidence_data = toy_incidence_data,
     deconvolution_method = "Richardson-Lucy delay distribution",
-    delay_incubation = distribution_incubation,
-    delay_onset_to_report = generated_empirical_delays,
+    delay = list(distribution_incubation,
+                  generated_empirical_delays),
     ref_date = ref_date,
     min_number_cases = 20,
     threshold_chi_squared = 1,
-    max_iterations = 100
+    max_iterations = 100,
+    fit = "none"
   )
 
-  reference_values <- c(3.53,4.81,6.09,8.01,10.72,
-                        14.37,21.12,29.24,39.02,
-                        51.75,67.99,87.85,110.71,
-                        136.73,164.73,196.98,234.54,
-                        273.46,309.18,344.9,372.96,
-                        389.07,398.1,395.98,378.43,
-                        353.4,323.17,286.36,252.26,
-                        220.97,191.15,163.87,137.36,
-                        109.48,83.23,60.16,40.46)
+ reference_values <- c(3.6,4.9,6.2,8.2,11,14.8,
+                       21.8,30.2,40.4,53.2,69,
+                       87.6,108.7,133.8,162.3,
+                       195.9,234.5,273.8,309.5,
+                       345.2,373.3,389.3,398.3,
+                       396.1,378.5,353.5,323.2,
+                       286.4,252.3,221,191.1,
+                       163.9,137.3,109.5,83.2,
+                       60.2,40.5)
+
   reference_offset <- -11
 
   expect_lte( max(abs(.get_values(deconvolved_incidence) - reference_values)), expected = 0.1)
@@ -119,8 +121,8 @@ test_that("deconvolve_incidence takes into account extra parameters for get_matr
   deconvolved_incidence <- deconvolve_incidence(
     incidence_data = toy_incidence_data,
     deconvolution_method = "Richardson-Lucy delay distribution",
-    delay_incubation = distribution_incubation,
-    delay_onset_to_report = generated_empirical_delays,
+    delay = list(distribution_incubation,
+                  generated_empirical_delays),
     ref_date = ref_date,
     threshold_chi_squared = 1,
     max_iterations = 100,

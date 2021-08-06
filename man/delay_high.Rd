@@ -4,11 +4,16 @@
 \alias{delay_high}
 \title{High-level delay parameters}
 \arguments{
-\item{delay_incubation}{TODO add details}
+\item{delays}{list of delays, with flexible structure. TODO ADD DETAILS}
 
-\item{delay_onset_to_report}{TODO add details}
+\item{delay_distribution_final_report}{Distribution of the delay between the events collected in the incidence data
+and the a posteriori observations of these events.}
 
-\item{delay_distribution_final_report}{TODO add details}
+\item{cutoff_observation_probability}{value between 0 and 1.
+Only datapoints for timesteps that have a probability of observing a event
+higher than \code{cutoff_observation_probability} are kept.
+The few datapoints with a lower probability to be observed are trimmed off
+the tail of the timeseries.}
 
 \item{is_partially_reported_data}{boolean TODO add details}
 

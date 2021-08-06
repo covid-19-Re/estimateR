@@ -12,8 +12,7 @@ get_block_bootstrapped_estimate(
   estimation_method = "EpiEstim sliding window",
   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
   combine_bootstrap_and_estimation_uncertainties = FALSE,
-  delay_incubation,
-  delay_onset_to_report = c(1),
+  delay,
   ref_date = NULL,
   time_step = "day",
   output_Re_only = TRUE,
@@ -76,10 +75,6 @@ and centered around the original estimates.}
 The confidence interval is built using bootstrapped estimates
 and centered around the mean of bootstrapped estimates and original estimates.}
 }}
-
-\item{delay_incubation}{TODO add details}
-
-\item{delay_onset_to_report}{TODO add details}
 
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
