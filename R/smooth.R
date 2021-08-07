@@ -77,13 +77,7 @@ smooth_incidence <- function(incidence_data,
   avg_change_rate[!is.finite(avg_change_rate)] <- 1
   avg_change_rate <- mean(avg_change_rate)
   
-  previous_day_assumed_cases <- incidence_vector[1]/avg_change_rate
-  values_to_pad_with <- c(previous_day_assumed_cases)
-  
-  for (i in 1:(n_pad-1)){
-    previous_day_assumed_cases <- previous_day_assumed_cases / avg_change_rate
-    values_to_pad_with <- c(previous_day_assumed_cases, values_to_pad_with)
-  }
+  values_to_pad_with <- incidence_vector[1] * (avg_change_rate^(-n_pad:-1))
   
   c_data <- data.frame(value = c(values_to_pad_with, incidence_vector),
                        date_num = 1:(n_pad + n_points))
