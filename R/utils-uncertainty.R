@@ -164,7 +164,6 @@ summarise_uncertainty <- function(bootstrapped_values,
                                    bootstrap_id_col,
                                    index_col) {
 
-  #TODO proper validation of input (check that strings and dataframes with the right columns and with no NA in index_col)
   .are_valid_argument_values(list(list(bootstrapped_values, "bootstrap_estimates", c(value_col, bootstrap_id_col, index_col)),
                                   list(value_col, "string"),
                                   list(bootstrap_id_col, "string"),

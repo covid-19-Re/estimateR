@@ -19,7 +19,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #' @param tolerate_NAs Can the distribution contain NA values?
 #' @param tolerance_on_sum Numeric tolerance in checking that vector elements sum to 1.
 #'
-#' @return TRUE if no error was raised.
+#' @inherit validation_utility_params
 .check_is_probability_distr_vector <- function(distribution, tolerate_NAs = FALSE, tolerance_on_sum = 1E-2, parameter_name = deparse(substitute(distribution))) {
 
   .check_class_parameter_name(distribution, "vector", parameter_name, mode = "numeric")
@@ -84,12 +84,13 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #TODO reconsider if can return FALSE
 #' Check if valid distribution list
 #'
-#' Throws an error if not a list, or not a list with the appropriate elements.
-#' Returns FALSE if parameter values return an improper distribution (if gamma distr)
+#'
 #'
 #' @inheritParams distribution
+#' @inheritParams validation_utility_params
 #'
-#' @return a boolean value.
+#'
+#' @return boolean. Returns FALSE if parameter values return an improper distribution (if gamma distr). Throws an  Throws an error if not a list, or not a list with the appropriate elements. Returns TRUE otherwise.
 .is_valid_distribution <- function(distribution, parameter_name = deparse(substitute(distribution))){
 
   .check_class_parameter_name(distribution, "list", parameter_name)
@@ -136,6 +137,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #' Otherwise, an error is thrown if \code{delay} does not follow the expected format.
 #'
 #' @inherit empirical_delay_data_format details
+#' @inherit validation_utility_params
 #' @param delay object to be tested
 #'
 #' @return boolean. \code{TRUE} if the input is a dataframe in the proper format.
@@ -464,6 +466,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #' @description Utility function to check whether an object is an integer
 #'
 #' @inherit validation_utility_params
+#' @param number The value to be tested
 #'
 .check_if_integer <- function(number, parameter_name){
   if(as.integer(number) != number){ # did not use .check_class_parameter_name since is.integer(1) returns false
@@ -475,6 +478,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #' @description Utility function to check whether an object is an integer or null
 #'
 #' @inherit validation_utility_params
+#' @inherit  .check_if_integer
 #'
 .check_if_null_or_integer <- function(number, parameter_name){
   if(!is.null(number)){
@@ -487,7 +491,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #' @description Utility function to check whether an object is a strictly positive integer
 #'
 #' @inherit validation_utility_params
-#' @inherit  .check_if_number
+#' @inherit  .check_if_integer
 #'
 .check_if_positive_integer <- function(number, parameter_name){
   .check_if_positive_number(number, parameter_name)
@@ -508,15 +512,14 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 }
 
 
-
-#' TODO docs
+#' @description Utility function to check whether an object is a valid estimates object.
+#' It must be a dataframe and have an index column named \code{index_col_name} that doesn't contain any \code{NA} values.
+#' @inherit validation_utility_params
+#' @param index_col_name string. Name of the index column in the \code{user_input} dataframe.
 #'
 .check_is_estimate  <- function(user_input, parameter_name, index_col_name){
   .check_class_parameter_name(user_input, "data.frame", parameter_name)
-  # if(ncol(user_input) < 4){
-  #   stop(paste0("Expected ", parameter_name, " to have at least 4 columns for: index, Re estimates, upper and lower confidence interval limits."))
-  # }
-
+ 
   if(index_col_name %!in% names(user_input)){
     stop(paste("Missing index column. No column named ", index_col_name, "in", parameter_name))
   }
@@ -528,9 +531,11 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 }
 
 
-#'TODO docs
-#'
-#'
+#' @description Utility function to check whether an object a valid bootstrap estimates object. 
+#' It has to be a valid estimates object, and to have the columns specified by \code{col_names}.
+#' 
+#' @inherit validation_utility_params
+#' @param col_names vector. Contains the column names of \code{index_col}, \code{bootstrap_id_col} and \code{Re_estimate_col}, as described by the \code{summarise_uncertainty} function.
 #'
 .check_is_bootstrap_estimate  <- function(user_input, parameter_name, col_names){
   Re_estimate_col = col_names[1]
