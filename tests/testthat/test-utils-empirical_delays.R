@@ -109,6 +109,6 @@ test_that(".get_matrix_from_empirical_delay_distr returns a matrix with the expe
   original_distribution_scales <- sample(seq(2.9, 6.1, by = 0.1), time_steps, replace = TRUE)
   set.seed(1)
   result <- .delay_distribution_matrix_rmse_compute(original_distribution_shapes, original_distribution_scales, nr_distribution_samples)
-  expect_equal(max(result$shape_rmse, 0.1604508), 0.1604508, tolerance = 1E-2)
-  expect_equal(max(result$scale_rmse, 0.2854936), 0.2854936, tolerance = 1E-2)
+  expect_equal(max(result$shape_rmse, 0.2932824), 0.2932824, tolerance = 1E-2)
+  expect_equal(max(result$scale_rmse, 0.2883487), 0.2883487, tolerance = 1E-2)
 })
