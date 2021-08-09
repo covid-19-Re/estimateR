@@ -283,9 +283,6 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
     )
   )
 
-  # TODO when generalizing to list of delays,
-  # possibly take the convolution out of the deconvolution step.
-  # to improve readability
   deconvolved_incidence <- do.call(
     "deconvolve_incidence",
     c(
@@ -491,10 +488,8 @@ get_infections_from_incidence <- function(incidence_data,
 }
 
 
-# TODO refactor arguments: we are using delay_from_partial_to_full and delay_distribution_final_report to refer to the same thing
 # TODO allow to pass a third argument for delays: the convolution of all delays (to speed up bootstrapping)
 # TODO polish doc
-# TODO test
 #' Estimate Re from delayed observations of infection events.
 #'
 #' This function allows for combining two different incidence timeseries.
@@ -526,7 +521,7 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
                                                 deconvolution_method = "Richardson-Lucy delay distribution",
                                                 estimation_method = "EpiEstim sliding window",
                                                 delay_until_partial,
-                                                delay_from_partial_to_full,
+                                                delay_until_final_report,
                                                 partial_observation_requires_full_observation = TRUE,
                                                 ref_date = NULL,
                                                 time_step = "day",
@@ -540,7 +535,7 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
     list(estimation_method, "estimation_method"),
     # TODO figure out what we do for making sure the two traces are the same size in input.
     list(delay_until_partial, "delay_single_or_list", .get_input_length(partially_delayed_incidence)), # need to pass length of incidence data as well in order
-    list(delay_from_partial_to_full, "delay_single_or_list", .get_input_length(fully_delayed_incidence)), # to validate when the delay is passed as a matrix
+    list(delay_until_final_report, "delay_single_or_list", .get_input_length(fully_delayed_incidence)), # to validate when the delay is passed as a matrix
     list(partial_observation_requires_full_observation, "boolean"),
     list(ref_date, "null_or_date"),
     list(time_step, "time_step"),
@@ -557,7 +552,7 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
         deconvolution_method = deconvolution_method,
         delay = delay_until_partial,
         is_partially_reported_data = partial_observation_requires_full_observation,
-        delay_until_final_report = delay_from_partial_to_full,
+        delay_until_final_report = delay_until_final_report,
         output_infection_incidence_only = TRUE
       ),
       .get_shared_args(
@@ -574,10 +569,10 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
                                          list(delay_until_partial),
                                          delay_until_partial)
 
-  delay_from_partial_to_full_as_list <- ifelse(.is_single_delay(delay_from_partial_to_full),
-                                                list(delay_from_partial_to_full),
-                                                delay_from_partial_to_full)
-  combined_delay_list <- append(delay_until_partial_as_list, delay_from_partial_to_full_as_list)
+  delay_until_final_report_as_list <- ifelse(.is_single_delay(delay_until_final_report),
+                                                list(delay_until_final_report),
+                                                delay_until_final_report)
+  combined_delay_list <- append(delay_until_partial_as_list, delay_until_final_report_as_list)
 
   infections_from_fully_delayed_observations <- do.call(
     "get_infections_from_incidence",
@@ -677,7 +672,7 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
                                                                   combine_bootstrap_and_estimation_uncertainties = FALSE,
                                                                   N_bootstrap_replicates = 100,
                                                                   delay_until_partial,
-                                                                  delay_from_partial_to_full,
+                                                                  delay_until_final_report,
                                                                   partial_observation_requires_full_observation = TRUE,
                                                                   ref_date = NULL,
                                                                   time_step = "day",
@@ -716,7 +711,7 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
     "convolve_delays",
     c(
       list(
-        delays = delay_from_partial_to_full,
+        delays = delay_until_final_report,
         n_report_time_steps = .get_input_length(partially_delayed_incidence),
         ref_date = ref_date,
         time_step = time_step
@@ -763,7 +758,7 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
         deconvolution_method = deconvolution_method,
         estimation_method = estimation_method,
         delay_until_partial = delay_distribution_until_partial,
-        delay_from_partial_to_full = delay_distribution_partial_to_full,
+        delay_until_final_report = delay_distribution_partial_to_full,
         partial_observation_requires_full_observation = FALSE,
         ref_date = NULL,
         output_Re_only = FALSE,
@@ -838,7 +833,7 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
           deconvolution_method = deconvolution_method,
           estimation_method = estimation_method,
           delay_until_partial = delay_distribution_until_partial,
-          delay_from_partial_to_full = delay_distribution_partial_to_full,
+          delay_until_final_report = delay_distribution_partial_to_full,
           partial_observation_requires_full_observation = FALSE,
           ref_date = NULL,
           output_Re_only = FALSE,
