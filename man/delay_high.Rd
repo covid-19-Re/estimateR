@@ -4,7 +4,23 @@
 \alias{delay_high}
 \title{High-level delay parameters}
 \arguments{
-\item{delays}{list of delays, with flexible structure. TODO ADD DETAILS}
+\item{delays}{List of delays, with flexible structure.
+Each delay in the \code{delays} list can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
+
+\item{delay}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
 
 \item{delay_distribution_final_report}{Distribution of the delay between the events collected in the incidence data
 and the a posteriori observations of these events.}
@@ -15,13 +31,33 @@ higher than \code{cutoff_observation_probability} are kept.
 The few datapoints with a lower probability to be observed are trimmed off
 the tail of the timeseries.}
 
-\item{is_partially_reported_data}{boolean TODO add details}
+\item{is_partially_reported_data}{boolean.
+Set to \code{TRUE} if \code{incidence_data} represents delayed observations
+of infection events that themselves rely on further-delayed observations.}
 
-\item{delay_until_partial}{TODO add details}
+\item{delay_until_partial}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
 
-\item{delay_from_partial_to_full}{TODO add details}
+\item{delay_from_partial_to_full}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
 
-\item{partial_observation_requires_full_observation}{boolean TODO add details}
+\item{partial_observation_requires_full_observation}{boolean
+Set to \code{TRUE} if \code{partially_delayed_incidence} represent
+delayed observations of infection events that
+themselves rely on further-delayed observations.
+See Details for more details.}
 }
 \description{
 High-level delay parameters

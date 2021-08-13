@@ -34,8 +34,42 @@ NULL
 #'  This means that the first value in \code{incidence_data}
 #'  is associated with the reference time step (no shift towards the future or past).
 #' }
-#' @param partially_delayed_incidence TODO add details
-#' @param fully_delayed_incidence TODO add details
+#' @param partially_delayed_incidence An object containing incidence data through time.
+#' It can be:
+#' \itemize{
+#' \item A list with two elements:
+#'  \enumerate{
+#'  \item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+#'  \item An integer named \code{index_offset}: the offset, counted in number of time steps,
+#'  by which the first value in \code{values} is shifted compared to a reference time step
+#'  This parameter allows one to keep track of the date of the first value in \code{values}
+#'  without needing to carry a \code{date} column around.
+#'  A positive offset means \code{values} are delayed in the future compared to the reference values.
+#'  A negative offset means the opposite.
+#'  }
+#'  \item A numeric vector. The vector corresponds to the \code{values} element
+#'  descrived above, and \code{index_offset} is implicitely zero.
+#'  This means that the first value in \code{incidence_data}
+#'  is associated with the reference time step (no shift towards the future or past).
+#' }
+#' @param fully_delayed_incidence An object containing incidence data through time.
+#' It can be:
+#' \itemize{
+#' \item A list with two elements:
+#'  \enumerate{
+#'  \item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+#'  \item An integer named \code{index_offset}: the offset, counted in number of time steps,
+#'  by which the first value in \code{values} is shifted compared to a reference time step
+#'  This parameter allows one to keep track of the date of the first value in \code{values}
+#'  without needing to carry a \code{date} column around.
+#'  A positive offset means \code{values} are delayed in the future compared to the reference values.
+#'  A negative offset means the opposite.
+#'  }
+#'  \item A numeric vector. The vector corresponds to the \code{values} element
+#'  descrived above, and \code{index_offset} is implicitely zero.
+#'  This means that the first value in \code{incidence_data}
+#'  is associated with the reference time step (no shift towards the future or past).
+#' }
 #' @param simplify_output boolean. Return a numeric vector instead of module
 #'  output object if output offset is zero?
 #'
@@ -59,9 +93,67 @@ NULL
 #' @name module_structure
 NULL
 
+
+#' Details on combining observations
+#' @details
+#' With this function, one can specify two types of delayed observations of
+#' infection events (in the same epidemic). The two incidence records are
+#' passed with the \code{partially_delayed_incidence} and \code{fully_delayed_incidence}.
+#' These two types of delayed observations must not overlap with one another:
+#' a particular infection event should not be recorded in both time series.
+#'
+#' If the two sets of observations are completely independent from one another,
+#' meaning that they represents two different ways infection events
+#' can be observed, with two different delays
+#' then set \code{partial_observation_requires_full_observation} to \code{FALSE}.
+#' The \code{delay_until_final_report} delay then corresponds to the delay
+#' from infection until observation in \code{fully_delayed_incidence}.
+#' And the \code{delay_until_partial} delay then corresponds to the delay
+#' from infection until observation in \code{partially_delayed_incidence}.
+#' Note that a particular infection events should NOT be recorded twice:
+#' it cannot be recorded both in \code{partially_delayed_incidence} and in \code{fully_delayed_incidence}.
+#'
+#' An alternative use-case is when the two sets of observations are not independent
+#' from one another. For instance, if to record a "partially-delayed" event,
+#' one had to wait to record it as a "fully-delayed" event first.
+#' A typical example of this occurs when recording symptom onset events:
+#' in most cases, you must first wait until a case is confirmed via a positive test result
+#' to learn about the symptom onset event (assuming the case was symptomatic in the first place).
+#' But you typically do not have the date of onset of symptoms
+#' for all cases confirmed (even assumed they were all symptomatic cases).
+#' In such a case, we set the \code{partial_observation_requires_full_observation} flag
+#' to \code{TRUE} and we call the incidence constructed from events of
+#' symptom onset \code{partially_delayed_incidence} and
+#' the incidence constructed from case confirmation events
+#' \code{fully_delayed_incidence}.
+#' The full delay from infection to positive test in this example is
+#' specified with the \code{delay_until_final_report} argument.
+#' The delay from infection to symptom onset events is
+#' specified with the \code{delay_until_partial} argument.
+#' Note that, for a particular patient,
+#' if the date of onset of symptom is known, the patient must not be counted again
+#' in the incidence of case confirmation.
+#' Otherwise, the infection event would have been counted twice.
+#'
+#'
+#' @name combining_observations
+NULL
+
 #' Inner module option characteristics
 #'
-#' @param incidence_input,input,output Module input object.
+#' @param incidence_input,input,output,input_a,input_b Module input object.
+#' List with two elements:
+#'  \enumerate{
+#'  \item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+#'  \item An integer named \code{index_offset}: the offset, counted in number of time steps,
+#'  by which the first value in \code{values} is shifted compared to a reference time step
+#'  This parameter allows one to keep track of the date of the first value in \code{values}
+#'  without needing to carry a \code{date} column around.
+#'  A positive offset means \code{values} are delayed in the future compared to the reference values.
+#'  A negative offset means the opposite.
+#'  }
+#'
+#'  @return Module input object.
 #' List with two elements:
 #'  \enumerate{
 #'  \item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
@@ -123,9 +215,33 @@ NULL
 #' @name bootstrap_params
 NULL
 
+#' Bootstrapping pipe
+#'
+#' @return Effective reproductive estimates through time with confidence interval boundaries.
+#' If \code{output_Re_only} is \code{FALSE}, then transformations made
+#' on the input observations during calculations are output as well.
+#'
+#' @name bootstrap_return
+NULL
+
 #' High-level delay parameters
 #'
-#' @param delays list of delays, with flexible structure. TODO ADD DETAILS
+#' @param delays List of delays, with flexible structure.
+#' Each delay in the \code{delays} list can be one of:
+#' \itemize{
+#' \item{a list representing a distribution object}
+#' \item{a discretized delay distribution vector}
+#' \item{a discretized delay distribution matrix}
+#' \item{a dataframe containing empirical delay data}
+#' }
+#' @param delay Single delay or list of delays.
+#' Each delay can be one of:
+#' \itemize{
+#' \item{a list representing a distribution object}
+#' \item{a discretized delay distribution vector}
+#' \item{a discretized delay distribution matrix}
+#' \item{a dataframe containing empirical delay data}
+#' }
 #' @param delay_distribution_final_report
 #' Distribution of the delay between the events collected in the incidence data
 #' and the a posteriori observations of these events.
@@ -134,10 +250,30 @@ NULL
 #' higher than \code{cutoff_observation_probability} are kept.
 #' The few datapoints with a lower probability to be observed are trimmed off
 #' the tail of the timeseries.
-#' @param is_partially_reported_data boolean TODO add details
-#' @param delay_until_partial TODO add details
-#' @param delay_from_partial_to_full TODO add details
-#' @param partial_observation_requires_full_observation boolean TODO add details
+#' @param is_partially_reported_data boolean.
+#' Set to \code{TRUE} if \code{incidence_data} represents delayed observations
+#' of infection events that themselves rely on further-delayed observations.
+#' @param delay_until_partial Single delay or list of delays.
+#' Each delay can be one of:
+#' \itemize{
+#' \item{a list representing a distribution object}
+#' \item{a discretized delay distribution vector}
+#' \item{a discretized delay distribution matrix}
+#' \item{a dataframe containing empirical delay data}
+#' }
+#' @param delay_from_partial_to_full Single delay or list of delays.
+#' Each delay can be one of:
+#' \itemize{
+#' \item{a list representing a distribution object}
+#' \item{a discretized delay distribution vector}
+#' \item{a discretized delay distribution matrix}
+#' \item{a dataframe containing empirical delay data}
+#' }
+#' @param partial_observation_requires_full_observation boolean
+#' Set to \code{TRUE} if \code{partially_delayed_incidence} represent
+#' delayed observations of infection events that
+#' themselves rely on further-delayed observations.
+#' See Details for more details.
 #'
 #' @name delay_high
 NULL

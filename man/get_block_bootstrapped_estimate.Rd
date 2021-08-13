@@ -76,6 +76,15 @@ The confidence interval is built using bootstrapped estimates
 and centered around the mean of bootstrapped estimates and original estimates.}
 }}
 
+\item{delay}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
+
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
 \item{time_step}{string. Time between two consecutive incidence datapoints.
@@ -107,7 +116,9 @@ Default is \code{12} as recommended in Cori et al., 2013.}
   }}
 }
 \value{
-tibble. Re estimations along with results from each pipeline step. TODO add details
+Effective reproductive estimates through time with confidence interval boundaries.
+If \code{output_Re_only} is \code{FALSE}, then transformations made
+on the input observations during calculations are output as well.
 }
 \description{
 An estimation of the effective reproductive number through time is made
@@ -115,13 +126,4 @@ on the original incidence data.
 Then, the same estimation is performed on a number of bootstrap samples built from the original incidence data.
 The estimate on the original data is output along with confidence interval boundaries
 built from the distribution of bootstrapped estimates.
-}
-\details{
-A base assumption made here is that the delay between infection can be split into two independent delays
-(with the second delay being optional).
-The first waiting time corresponds to the time between the infection event and the onset of symptoms.
-The second (optional) waiting time corresponds to the delay between the onset of symptoms and the case observation.
-If this second waiting time is omitted, observation is assumed to have happened at the end of the first waiting time.
-In latter case, the first waiting time distribution does not need to correspond to an incubation period per se,
-but it must in any case correspond to the delay between infection and case observation.
 }

@@ -7,7 +7,7 @@
 .get_module_input(data)
 }
 \arguments{
-\item{data}{TODO specify what format data can take}
+\item{data}{A module input object or numeric vector.}
 }
 \value{
 module input object.

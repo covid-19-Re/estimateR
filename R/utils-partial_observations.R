@@ -25,7 +25,7 @@
 #' @export
 correct_for_partially_observed_data <- function(incidence_data,
                                                 delay_until_final_report,
-                                                cutoff_observation_probability = 0.1, # TODO set to a higher value i.e. 0.25 by default
+                                                cutoff_observation_probability = 0.33,
                                                 ref_date = NULL,
                                                 time_step = "day",
                                                 ...) {

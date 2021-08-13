@@ -51,7 +51,18 @@ Available options are:
 implemented in \code{\link{.deconvolve_incidence_Richardson_Lucy}}}
 }}
 
-\item{is_partially_reported_data}{boolean TODO add details}
+\item{delay}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
+
+\item{is_partially_reported_data}{boolean.
+Set to \code{TRUE} if \code{incidence_data} represents delayed observations
+of infection events that themselves rely on further-delayed observations.}
 
 \item{output_infection_incidence_only}{boolean.
 Should the output contain only the estimated infection incidence?
@@ -81,14 +92,21 @@ the tail of the timeseries.}
   }}
 }
 \value{
-
+Time series of infections through time.
+If \code{ref_date} is provided then a date column is included with the output.
 }
 \description{
 This function takes as input incidence data of delayed observations of infections events,
 as well as the probability distribution(s) of the delay(s).
 It returns an inferred incidence of infection events.
-This function can account for the observations being dependent on future delayed observations.
+}
+\details{
+This function can account for the observations being dependent on future delayed observations,
+with the \code{is_partially_reported_data} flag.
 For instance, if the incidence data represents symptom onset events, usually these events
 are dependent on a secondary delayed observation: a case confirmation typically, or
-a hospital admission or any other type of event,
+a hospital admission or any other type of event.
+When setting \code{is_partially_reported_data} to \code{TRUE},
+use the \code{delay_until_final_report} argument to specify the delay
+from infection until this secondary delayed observation.
 }

@@ -11,7 +11,7 @@ estimate_from_combined_observations(
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
   delay_until_partial,
-  delay_from_partial_to_full,
+  delay_until_final_report,
   partial_observation_requires_full_observation = TRUE,
   ref_date = NULL,
   time_step = "day",
@@ -20,9 +20,43 @@ estimate_from_combined_observations(
 )
 }
 \arguments{
-\item{partially_delayed_incidence}{TODO add details}
+\item{partially_delayed_incidence}{An object containing incidence data through time.
+It can be:
+\itemize{
+\item A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+\item A numeric vector. The vector corresponds to the \code{values} element
+descrived above, and \code{index_offset} is implicitely zero.
+This means that the first value in \code{incidence_data}
+is associated with the reference time step (no shift towards the future or past).
+}}
 
-\item{fully_delayed_incidence}{TODO add details}
+\item{fully_delayed_incidence}{An object containing incidence data through time.
+It can be:
+\itemize{
+\item A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+\item A numeric vector. The vector corresponds to the \code{values} element
+descrived above, and \code{index_offset} is implicitely zero.
+This means that the first value in \code{incidence_data}
+is associated with the reference time step (no shift towards the future or past).
+}}
 
 \item{smoothing_method}{string. Method used to smooth the original incidence data.
 Available options are:
@@ -48,11 +82,20 @@ implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
 implemented in \code{\link{.estimate_Re_EpiEstim_piecewise_constant}}}
 }}
 
-\item{delay_until_partial}{TODO add details}
+\item{delay_until_partial}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
 
-\item{delay_from_partial_to_full}{TODO add details}
-
-\item{partial_observation_requires_full_observation}{boolean TODO add details}
+\item{partial_observation_requires_full_observation}{boolean
+Set to \code{TRUE} if \code{partially_delayed_incidence} represent
+delayed observations of infection events that
+themselves rely on further-delayed observations.
+See Details for more details.}
 
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
@@ -90,10 +133,13 @@ the tail of the timeseries.}
   }}
 }
 \value{
-
+Effective reproductive estimates through time.
+If \code{output_Re_only} is \code{FALSE}, then transformations made
+on the input observations during calculations are output as well.
 }
 \description{
-This function allows for combining two different incidence timeseries.
+This function allows for combining two different incidence time series,
+see Details .
 The two timeseries can represent events that are differently delayed from the original infection events.
 The two data sources must not have any overlap in the events recorded.
 The function can account for the one of the two types of events to require
@@ -101,4 +147,44 @@ the future observation of the other type of event.
 For instance, one type can be events of symptom onset, and the other be case confirmation.
 Typically, the recording of a symptom onset event will require a future case confirmation.
 If so, the \code{partial_observation_requires_full_observation} flag should be set to \code{TRUE}.
+}
+\details{
+With this function, one can specify two types of delayed observations of
+infection events (in the same epidemic). The two incidence records are
+passed with the \code{partially_delayed_incidence} and \code{fully_delayed_incidence}.
+These two types of delayed observations must not overlap with one another:
+a particular infection event should not be recorded in both time series.
+
+If the two sets of observations are completely independent from one another,
+meaning that they represents two different ways infection events
+can be observed, with two different delays
+then set \code{partial_observation_requires_full_observation} to \code{FALSE}.
+The \code{delay_until_final_report} delay then corresponds to the delay
+from infection until observation in \code{fully_delayed_incidence}.
+And the \code{delay_until_partial} delay then corresponds to the delay
+from infection until observation in \code{partially_delayed_incidence}.
+Note that a particular infection events should NOT be recorded twice:
+it cannot be recorded both in \code{partially_delayed_incidence} and in \code{fully_delayed_incidence}.
+
+An alternative use-case is when the two sets of observations are not independent
+from one another. For instance, if to record a "partially-delayed" event,
+one had to wait to record it as a "fully-delayed" event first.
+A typical example of this occurs when recording symptom onset events:
+in most cases, you must first wait until a case is confirmed via a positive test result
+to learn about the symptom onset event (assuming the case was symptomatic in the first place).
+But you typically do not have the date of onset of symptoms
+for all cases confirmed (even assumed they were all symptomatic cases).
+In such a case, we set the \code{partial_observation_requires_full_observation} flag
+to \code{TRUE} and we call the incidence constructed from events of
+symptom onset \code{partially_delayed_incidence} and
+the incidence constructed from case confirmation events
+\code{fully_delayed_incidence}.
+The full delay from infection to positive test in this example is
+specified with the \code{delay_until_final_report} argument.
+The delay from infection to symptom onset events is
+specified with the \code{delay_until_partial} argument.
+Note that, for a particular patient,
+if the date of onset of symptom is known, the patient must not be counted again
+in the incidence of case confirmation.
+Otherwise, the infection event would have been counted twice.
 }

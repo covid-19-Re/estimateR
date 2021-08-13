@@ -7,7 +7,14 @@
 convolve_delays(delays, n_report_time_steps = NULL, ...)
 }
 \arguments{
-\item{delays}{list of delays, with flexible structure. TODO ADD DETAILS}
+\item{delays}{List of delays, with flexible structure.
+Each delay in the \code{delays} list can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
 
 \item{n_report_time_steps}{integer. Length of incidence time series.
 Use only when providing empirical delay data.}

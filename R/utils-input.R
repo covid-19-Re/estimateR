@@ -4,7 +4,7 @@
 #' and an \code{index_offset} element, potentially among others.
 #' It can also be a vector containing numeric values.
 #'
-#' @param data TODO specify what format data can take
+#' @param data A module input object or numeric vector.
 #'
 #' @return module input object.
 #' List with a \code{values} and an \code{index_offset} element.
@@ -57,7 +57,7 @@
 
 #' Get length of values vector in a module input object.
 #'
-#' @param input module input object.
+#' @inheritParams inner_module
 #'
 #' @return integer. length of values vector.
 .get_input_length <- function(input) {
@@ -65,14 +65,13 @@
   return(length(.get_values(input)))
 }
 
-
-# TODO doc
-#' Title
+#' Add values from two module objects
 #'
-#' @param input_a
-#' @param input_b
+#' Values in the output object are values added from the two objects.
+#' The \code{offset} of the output is the maximum offset between the two input objects.
 #'
-#' @return
+#' @inherit inner_module
+#'
 #' @export
 inner_addition <- function(input_a, input_b) {
   .are_valid_argument_values(list(
@@ -95,13 +94,11 @@ inner_addition <- function(input_a, input_b) {
   return(.get_module_input(list(values = inner_a + inner_b, index_offset = inner_offset)))
 }
 
-# TODO doc
-#' Title
+#' Add values from two module objects
 #'
-#' @param input_a
-#' @param input_b
+#' The \code{offset} of the output object is the minimum offset between \code{input_a} and \code{input_b}.
+#' @inherit inner_module
 #'
-#' @return
 #' @export
 left_addition <- function(input_a, input_b) {
   .are_valid_argument_values(list(
@@ -127,7 +124,13 @@ left_addition <- function(input_a, input_b) {
   return(.get_module_input(list(values = values_a + values_b, index_offset = min_offset)))
 }
 
-# TODO doc
+#' Pad values on the left side of input
+#'
+#' @param new_offset Offset of output.
+#' @param padding_value Value to left-pad input with.
+#' @inherit inner_module
+#'
+#' @export
 leftpad_input <- function(input, new_offset, padding_value = 0) {
   .are_valid_argument_values(list(
     list(input, "module_input"),

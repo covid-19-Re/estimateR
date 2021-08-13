@@ -40,6 +40,15 @@ Available options are:
 implemented in \code{\link{.deconvolve_incidence_Richardson_Lucy}}}
 }}
 
+\item{delay}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
+
 \item{simplify_output}{boolean. Return a numeric vector instead of module
 output object if output offset is zero?
 
@@ -64,7 +73,14 @@ element is returned as a numeric vector.}
   \describe{
     \item{\code{n_report_time_steps}}{integer. Length of incidence time series.
 Use only when providing empirical delay data.}
-    \item{\code{delays}}{list of delays, with flexible structure. TODO ADD DETAILS}
+    \item{\code{delays}}{List of delays, with flexible structure.
+Each delay in the \code{delays} list can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
     \item{\code{delay_distribution}}{numeric square matrix or vector.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}

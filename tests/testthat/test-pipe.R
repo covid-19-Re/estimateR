@@ -285,7 +285,8 @@ test_that("get_infections_from_incidence handles partially-delayed data correctl
     delay_until_final_report = delay_onset_to_report,
     output_infection_incidence_only = FALSE,
     data_points_incl = 21,
-    degree = 1
+    degree = 1,
+    cutoff_observation_probability = 0.1
   )
 
   reference_deconvolved_incidence <- c(
@@ -482,7 +483,8 @@ test_that("get_bootstrapped_estimate_from_combined_observations can deal with em
     output_Re_only = TRUE,
     minimum_cumul_incidence = 0,
     data_points_incl = 21,
-    degree = 1
+    degree = 1,
+    cutoff_observation_probability = 0.1
   )
 
   reference_R_values <- c(2.06,1.91,1.85,1.81,1.77,
@@ -619,7 +621,8 @@ test_that("get_bootstrapped_estimate_from_combined_observations yields consisten
     output_Re_only = FALSE,
     minimum_cumul_incidence = 0,
     data_points_incl = 21,
-    degree = 1
+    degree = 1,
+    cutoff_observation_probability = 0.1
   )
 
   reference_partially_delayed_observations_values <- c(

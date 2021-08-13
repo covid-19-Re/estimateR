@@ -2,16 +2,60 @@
 % Please edit documentation in R/utils-input.R
 \name{inner_addition}
 \alias{inner_addition}
-\title{Title}
+\title{Add values from two module objects}
 \usage{
 inner_addition(input_a, input_b)
 }
 \arguments{
-\item{input_b}{}
+\item{input_a}{Module input object.
+List with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
 }
-\value{
 
+@return Module input object.
+List with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}}
+
+\item{input_b}{Module input object.
+List with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+
+@return Module input object.
+List with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}}
 }
 \description{
-Title
+Values in the output object are values added from the two objects.
+The \code{offset} of the output is the maximum offset between the two input objects.
 }

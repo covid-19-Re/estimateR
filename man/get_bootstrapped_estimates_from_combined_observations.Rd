@@ -15,7 +15,7 @@ get_bootstrapped_estimates_from_combined_observations(
   combine_bootstrap_and_estimation_uncertainties = FALSE,
   N_bootstrap_replicates = 100,
   delay_until_partial,
-  delay_from_partial_to_full,
+  delay_until_final_report,
   partial_observation_requires_full_observation = TRUE,
   ref_date = NULL,
   time_step = "day",
@@ -24,9 +24,43 @@ get_bootstrapped_estimates_from_combined_observations(
 )
 }
 \arguments{
-\item{partially_delayed_incidence}{TODO add details}
+\item{partially_delayed_incidence}{An object containing incidence data through time.
+It can be:
+\itemize{
+\item A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+\item A numeric vector. The vector corresponds to the \code{values} element
+descrived above, and \code{index_offset} is implicitely zero.
+This means that the first value in \code{incidence_data}
+is associated with the reference time step (no shift towards the future or past).
+}}
 
-\item{fully_delayed_incidence}{TODO add details}
+\item{fully_delayed_incidence}{An object containing incidence data through time.
+It can be:
+\itemize{
+\item A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+\item A numeric vector. The vector corresponds to the \code{values} element
+descrived above, and \code{index_offset} is implicitely zero.
+This means that the first value in \code{incidence_data}
+is associated with the reference time step (no shift towards the future or past).
+}}
 
 \item{smoothing_method}{string. Method used to smooth the original incidence data.
 Available options are:
@@ -73,11 +107,20 @@ and centered around the mean of bootstrapped estimates and original estimates.}
 
 \item{N_bootstrap_replicates}{integer. Number of bootstrap samples.}
 
-\item{delay_until_partial}{TODO add details}
+\item{delay_until_partial}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
 
-\item{delay_from_partial_to_full}{TODO add details}
-
-\item{partial_observation_requires_full_observation}{boolean TODO add details}
+\item{partial_observation_requires_full_observation}{boolean
+Set to \code{TRUE} if \code{partially_delayed_incidence} represent
+delayed observations of infection events that
+themselves rely on further-delayed observations.
+See Details for more details.}
 
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
@@ -115,8 +158,24 @@ the tail of the timeseries.}
   }}
 }
 \value{
-
+Effective reproductive estimates through time with confidence interval boundaries.
+If \code{output_Re_only} is \code{FALSE}, then transformations made
+on the input observations during calculations are output as well.
 }
 \description{
-Estimate Re from incidence and estimate uncertainty by bootstrapping
+An estimation of the effective reproductive number through time is made
+on the original incidence data.
+Then, the same estimation is performed on a number of bootstrap samples built from the original incidence data.
+The estimate on the original data is output along with confidence interval boundaries
+built from the distribution of bootstrapped estimates.
+}
+\details{
+This function allows for combining two different incidence timeseries.
+The two timeseries can represent events that are differently delayed from the original infection events.
+The two data sources must not have any overlap in the events recorded.
+The function can account for the one of the two types of events to require
+the future observation of the other type of event.
+For instance, one type can be events of symptom onset, and the other be case confirmation.
+Typically, the recording of a symptom onset event will require a future case confirmation.
+If so, the \code{partial_observation_requires_full_observation} flag should be set to \code{TRUE}.
 }

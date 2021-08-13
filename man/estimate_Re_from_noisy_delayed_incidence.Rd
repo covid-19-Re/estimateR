@@ -60,6 +60,15 @@ implemented in \code{\link{.estimate_Re_EpiEstim_sliding_window}}}
 implemented in \code{\link{.estimate_Re_EpiEstim_piecewise_constant}}}
 }}
 
+\item{delay}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
+
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
 \item{time_step}{string. Time between two consecutive incidence datapoints.
@@ -91,7 +100,8 @@ Default is \code{12} as recommended in Cori et al., 2013.}
   }}
 }
 \value{
-effective reproductive number estimates through time TODO add details
+Time series of effective reproductive number estimates through time.
+If \code{ref_date} is provided then a date column is included with the output.
 }
 \description{
 This pipe function combines a smoothing step using (to remove noise from the original observations),
