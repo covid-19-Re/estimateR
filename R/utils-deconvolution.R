@@ -179,6 +179,7 @@
 #' @param fit string. One of "gamma" or "none". Specifies the type of fit that 
 #' is applied to the columns of the delay matrix
 #' @inheritParams dating
+#' @inheritParams .get_delay_matrix_column
 #'
 #' @return a discretized delay distribution matrix.
 #' @export
@@ -355,8 +356,10 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 #' @param fit string. Can be either "none" or "gamma". Specifies the type of fitting applied to the computed column
 #' @param col_number positive integer. The index the computed column has in the delay matrix
 #' @param N positive integer. Size of delay matrix.
+#' @param return_fitted_distribution boolean. If TRUE, the function also returns the gamma distribution that was fitted to the respective column.
 #'
-#' @return the \code{col_number}th column of the delay matrix, based on the vector of report delays given.
+#' @return If \code{return_fitted_distribution = FALSE}, returns the \code{col_number}th column of the delay matrix, based on the vector of report delays given. 
+#' If \code{return_fitted_distribution = TRUE}, it returns a list with two elements: \code{column} - delay matrix column as described above, and \code{distribution} - the delay distribution that was fitted to the column. 
 .get_delay_matrix_column <- function(recent_counts_distribution, fit = "none", col_number, N, return_fitted_distribution = FALSE){
   .are_valid_argument_values(list(list(recent_counts_distribution, "numeric_vector"),
                                   list(fit, "delay_matrix_column_fit"),
