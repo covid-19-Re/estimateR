@@ -82,6 +82,7 @@
 #'
 #' @inherit delay_empirical
 #' @inheritParams dating
+#' @inheritParams .get_delay_matrix_column
 #'
 #' @return a discretized delay distribution matrix.
 #' @export
@@ -94,6 +95,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
                                                   min_number_cases_fraction = 0.05,
                                                   min_min_number_cases = 10,
                                                   fit = "none",
+                                                  return_fitted_distribution = FALSE,
                                                   num_steps_in_a_unit = NULL) {
 
   .are_valid_argument_values(list(
@@ -106,6 +108,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     list(min_number_cases_fraction, "numeric_between_zero_one"),
     list(min_min_number_cases, "positive_integer"),
     list(fit, "delay_matrix_column_fit"),
+    list(return_fitted_distribution, "boolean"),
     list(num_steps_in_a_unit, "null_or_int")
   ))
 
@@ -157,7 +160,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
   last_varying_col <- dplyr::if_else(n_time_steps > threshold_right_truncation, n_time_steps - threshold_right_truncation, n_time_steps)
 
-  global_distrib_list <<- list() # needed for the test that checks if get_matrix_from_empirical_delay_distr returns a matrix with the expected distributions when using fit = "gamma"
+  distrib_list <- list() #needed for the test that checks if get_matrix_from_empirical_delay_distr returns a matrix with the expected distributions when using fit = "gamma"
 
   # Shuffle rows so as to get rid of potential biases associated
   shuffled_delays <- empirical_delays %>%
@@ -195,7 +198,13 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
                                                                        min_number_cases = min_number_cases)
       }
 
-      new_column <- .get_delay_matrix_column(recent_counts_distribution, fit, col_number = i, n_time_steps)
+      result <- .get_delay_matrix_column(recent_counts_distribution, fit, col_number = i, n_time_steps, return_fitted_distribution)
+      if(is.list(result)){
+        distrib_list[[i]] <- result$distribution
+        new_column <- result$column
+      } else {
+        new_column <- result
+      }
       delay_distribution_matrix[, i] <- new_column
     }
   } else { # if n_time_steps <= threshold_right_truncation
@@ -229,12 +238,18 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
 
 
-    new_column <- .get_delay_matrix_column(recent_counts_distribution, fit, col_number = 1, n_time_steps)
+    result <- .get_delay_matrix_column(recent_counts_distribution, fit, col_number = 1, n_time_steps, return_fitted_distribution)
+    if(is.list(result)){
+      distrib_list[[i]] <- result$distribution
+      new_column <- result$column
+    } else {
+      new_column <- result
+    }
 
     for (i in 0:(last_varying_col - 1)) {
       delay_distribution_matrix[, i + 1] <- c(rep(0, times = i), new_column[1:(length(new_column) - i)])
       if (fit == "gamma") {
-        global_distrib_list <<- append(global_distrib_list, global_distrib_list[length(global_distrib_list)])
+        distrib_list <- append(distrib_list, distrib_list[length(distrib_list)])
       }
     }
   }
@@ -243,10 +258,15 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     for (j in 1:threshold_right_truncation) {
       delay_distribution_matrix[, i + j] <- c(rep(0, times = j), delay_distribution_matrix[1:(nrow(delay_distribution_matrix) - j), i])
       if (fit == "gamma") {
-        global_distrib_list <<- append(global_distrib_list, global_distrib_list[length(global_distrib_list)])
+        distrib_list <- append(distrib_list, distrib_list[length(distrib_list)])
       }
     }
   }
+
+  if(return_fitted_distribution){
+    return(list(matrix = delay_distribution_matrix, distributions = distrib_list))
+  }
+
   return(delay_distribution_matrix)
 }
 
@@ -257,14 +277,20 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 #' @param fit string. Can be either "none" or "gamma". Specifies the type of fitting applied to the computed column
 #' @param col_number positive integer. The index the computed column has in the delay matrix
 #' @param N positive integer. Size of delay matrix.
+#' @param return_fitted_distribution boolean. If TRUE, the function also returns the gamma distribution that was fitted to the respective column.
 #'
-#' @return the \code{col_number}th column of the delay matrix, based on the vector of report delays given.
-.get_delay_matrix_column <- function(recent_counts_distribution, fit = "none", col_number, N) {
+#' @return If \code{return_fitted_distribution = FALSE},
+#' returns the \code{col_number}th column of the delay matrix, based on the vector of report delays given.
+#' If \code{return_fitted_distribution = TRUE}, it returns a list with two elements:
+#' \code{column} - delay matrix column as described above,
+#' and \code{distribution} - the delay distribution that was fitted to the column.
+.get_delay_matrix_column <- function(recent_counts_distribution, fit = "none", col_number, N, return_fitted_distribution = FALSE){
   .are_valid_argument_values(list(
     list(recent_counts_distribution, "numeric_vector"),
     list(fit, "delay_matrix_column_fit"),
     list(col_number, "positive_integer"),
-    list(N, "positive_integer")
+    list(N, "positive_integer"),
+    list(return_fitted_distribution, "boolean")
   ))
   i <- col_number
   new_column <- c()
@@ -284,7 +310,6 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     distribution <- list(name = "gamma", shape = shape_fit, scale = scale_fit)
     delay_distr <- build_delay_distribution(distribution, offset_by_one = TRUE)
 
-    global_distrib_list[[col_number]] <<- distribution
   } else { # no fit
     delay_distr <- hist(recent_counts_distribution, breaks = seq(0, N, l = N + 1), plot = FALSE)
     delay_distr <- delay_distr$density
@@ -295,6 +320,9 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   }
   new_column <- c(rep(0, times = i - 1), delay_distr[1:(N - i + 1)])
 
+  if(fit == "gamma" && return_fitted_distribution == TRUE){
+    return(list(column = new_column, distribution = distribution))
+  }
   return(new_column)
 }
 
@@ -326,14 +354,17 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     report_dates <- c(report_dates, new_report_dates)
   }
   delay_data <- dplyr::tibble(event_date = report_dates, report_delay = sampled_report_delays)
-  delay_matrix <- get_matrix_from_empirical_delay_distr(delay_data, time_steps, fit = "gamma")
+  result <- get_matrix_from_empirical_delay_distr(delay_data, time_steps, fit = "gamma", return_fitted_distribution = TRUE)
+
+  delay_matrix <- result$matrix
+  distrib_list <- result$distributions
 
 
   # Get the shapes and scales of the gamma distributions fitted by the get_matrix_from_empirical_delay_distr function
   distribution_shapes <- c()
   distribution_scales <- c()
 
-  for (distribution in global_distrib_list) {
+  for (distribution in distrib_list){
     distribution_shapes <- c(distribution_shapes, distribution$shape)
     distribution_scales <- c(distribution_scales, distribution$scale)
   }
