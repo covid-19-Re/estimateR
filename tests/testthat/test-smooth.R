@@ -48,7 +48,7 @@ test_that("smooth_incidence output values are bounded by bounds of noisy values"
 
 test_that("smooth_incidence output stays consistent for LOESS method", {
   noisy_values <- c(272, 78, 859, 642, 411, 612, 192, 262, 399, 371, 69, 80, 221, 945, 198, 896, 705, 155, 498, 795)
-  ref_smoothed_values <- c(213.481, 238.774, 265.581, 293.119, 317.855, 341.012, 365.157, 388.764, 410.31, 430.617, 451.25, 471.793, 491.829, 511.203, 530.235, 549.217, 568.446, 587.809, 607.097, 626.452)
+  ref_smoothed_values <- c(220.682,245.42,271.962,299.524,323.565,345.538,368.764,391.508,412.034,431.246,450.882,470.464,489.509,507.909,526.037,544.136,562.446,580.942,599.448,617.983)
   smoothed_values <- .get_values(smooth_incidence(noisy_values, smoothing_method = "LOESS"))
   expect_equal(smoothed_values, ref_smoothed_values, tolerance = 1E-3)
 })

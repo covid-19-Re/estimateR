@@ -884,6 +884,7 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
     dplyr::filter(.data[[bootstrap_id_col]] > 0)
 
   estimates_with_uncertainty <- do.call(
+
     "do_uncertainty_summary",
     c(
       list(
@@ -900,6 +901,7 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
       .get_shared_args(.summarise_CI_bootstrap, dots_args)
     )
   )
+
 
   if (!is.null(ref_date)) {
     estimates_with_uncertainty <- .add_date_column(estimates_with_uncertainty,

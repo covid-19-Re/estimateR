@@ -150,7 +150,6 @@ estimate_Re <- function(incidence_data,
   if (sum(incidence_vector) < minimum_cumul_incidence) {
     stop("minimum_cumul_incidence parameter is set higher than total cumulative incidence.")
   }
-
   offset <- which(cumsum(incidence_vector) >= minimum_cumul_incidence)[1]
   # We use the criteria on the offset from Cori et al. 2013
   # (and offset needs to be at least two for EpiEstim)

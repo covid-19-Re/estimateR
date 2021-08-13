@@ -37,6 +37,13 @@ test_that("estimate_Re_from_noisy_delayed_incidence yields consistent results on
     0.76, 0.74, 0.71, 0.68, 0.64, NA, NA, NA, NA, NA
   )
 
+  # master
+  # reference_R_values <- c(NA,NA,NA,NA,4.98,3.63,3.06,2.78,2.62,
+  #                         2.49,2.38,2.27,2.17,2.07,1.97,1.87,
+  #                         1.78,1.69,1.61,1.52,1.44,1.37,1.3,1.23,
+  #                         1.16,1.09,1.02,0.96,0.9,0.86,0.82,0.79,
+  #                         0.76,0.74,0.71,0.68,0.64,NA,NA,NA,NA,NA)
+
   reference_dates <- seq.Date(from = as.Date("2020-01-30"), to = as.Date("2020-03-11"), by = "day")
 
   expect_equal(estimates$Re_estimate, reference_R_values, tolerance = 5E-2)
@@ -84,6 +91,11 @@ test_that("estimate_Re_from_noisy_delayed_incidence passes '...' arguments consi
     0.99, 0.91, 0.84, 0.77, 0.72,
     0.67, 0.63, 0.59, NA, NA, NA, NA, NA
   )
+
+  # master: reference_R_values <- c(NA,NA,NA,NA,NA,NA,NA,10.14,7.67,6.25,5.38,4.77,4.33,
+  #                         3.97,3.66,3.37,3.12,2.88,2.65,2.44,2.25,2.06,1.9,1.74,
+  #                         1.59,1.45,1.32,1.2,1.09,0.99,0.91,0.84,0.77,0.72,
+  #                         0.67,0.63,0.59,NA,NA,NA,NA,NA)
 
   reference_indices <- -5:36
 
@@ -252,6 +264,25 @@ test_that("get_block_bootstrapped_estimate passes '...' arguments to inner funct
     1.26, 1.17, 1.08, 1, 0.93, 0.87,
     0.81, 0.75, 0.68, 0.61, 0.53, 0.44
   )
+
+  # master
+  # reference_R_mean_values <- c(6.83,5.37,4.53,4.05,3.71,3.43,3.21,3.02,2.84,
+  #                              2.66,2.5,2.34,2.18,2.04,1.9,1.77,1.64,
+  #                              1.53,1.42,1.32,1.22,1.13,1.05,0.98,0.92,
+  #                              0.86,0.8,0.74,0.67,0.6,0.52,0.42)
+  #
+  # reference_CI_down_values <- c(6.29,4.95,4.21,3.8,3.51,3.27,
+  #                               3.07,2.9,2.73,2.57,2.42,2.28,2.12,
+  #                               1.99,1.86,1.73,1.61,1.5,1.39,1.29,
+  #                               1.19,1.11,1.03,0.96,0.9,0.84,0.78,
+  #                               0.73,0.66,0.59,0.5,0.4)
+  #
+  # reference_CI_up_values <- c(7.37,5.79,4.85,4.29,3.9,
+  #                             3.59,3.34,3.14,2.94,2.74,
+  #                             2.57,2.4,2.24,2.09,1.95,
+  #                             1.81,1.68,1.56,1.45,1.34,
+  #                             1.25,1.16,1.08,1,0.94,0.87,
+  #                             0.81,0.75,0.69,0.62,0.54,0.45)
 
 
   expect_equal(estimates$Re_estimate, reference_R_mean_values, tolerance = 1E-1)

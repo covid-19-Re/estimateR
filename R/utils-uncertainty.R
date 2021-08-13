@@ -180,6 +180,7 @@ summarise_uncertainty <- function(bootstrapped_values,
     list(index_col, "string")
   ))
 
+
   bootstrapped_values <- bootstrapped_values %>%
     dplyr::select(.data[[index_col]], .data[[value_col]])
 
