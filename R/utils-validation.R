@@ -90,7 +90,7 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
 #' @inheritParams validation_utility_params
 #'
 #'
-#' @return boolean. Returns FALSE if parameter values return an improper distribution (if gamma distr). Throws an  Throws an error if not a list, or not a list with the appropriate elements. Returns TRUE otherwise.
+#' @return boolean. Returns FALSE if parameter values return an improper distribution (if gamma distr). Throws an error if not a list, or not a list with the appropriate elements. Returns TRUE otherwise.
 .is_valid_distribution <- function(distribution, parameter_name = deparse(substitute(distribution))){
 
   .check_class_parameter_name(distribution, "list", parameter_name)
