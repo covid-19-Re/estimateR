@@ -40,7 +40,8 @@
 
 
 <meta property="og:title" content="Smooth noisy incidence data — smooth_incidence" />
-<meta property="og:description" content="Currently only LOESS smoothing (smoothing_method = &quot;LOESS&quot;) is implemented." />
+<meta property="og:description" content="Smooth a time series of noisy observations.
+Currently only LOESS smoothing (smoothing_method = &quot;LOESS&quot;) is implemented." />
 
 
 
@@ -101,6 +102,9 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -130,7 +134,8 @@
     </div>
 
     <div class="ref-description">
-    <p>Currently only LOESS smoothing (<code>smoothing_method = "LOESS"</code>) is implemented.</p>
+    <p>Smooth a time series of noisy observations.
+Currently only LOESS smoothing (<code>smoothing_method = "LOESS"</code>) is implemented.</p>
     </div>
 
     <pre class="usage"><span class='fu'>smooth_incidence</span><span class='op'>(</span>
@@ -145,7 +150,22 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>incidence_data</th>
-      <td><p>numeric vector. Incidence data (TODO improve definition)</p></td>
+      <td><p>An object containing incidence data through time.
+It can either be:</p><ul>
+<li><p>A list with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the first value in <code>values</code> is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.</p></li>
+</ol></li>
+<li><p>A numeric vector. The vector corresponds to the <code>values</code> element
+descrived above, and <code>index_offset</code> is implicitely zero.
+This means that the first value in <code>incidence_data</code>
+is associated with the reference time step (no shift towards the future or past).</p></li>
+</ul></td>
     </tr>
     <tr>
       <th>smoothing_method</th>
@@ -157,21 +177,37 @@ Available options are:</p><ul>
     <tr>
       <th>simplify_output</th>
       <td><p>boolean. Return a numeric vector instead of module
-output object if output offset is zero? TODO to be described better.</p></td>
+output object if output offset is zero?</p>
+<p>@return A list with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the result of the computations on the input data.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the result is shifted compared to an <code>index_offset</code> of <code>0</code>.
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+Note that the <code>index_offset</code> of the output of the function call
+accounts for the (optional) <code>index_offset</code> of the input.</p></li>
+</ol><p>If <code>index_offset</code> is <code>0</code> and <code>simplify_output = TRUE</code>,
+the <code>index_offset</code> is dropped and the <code>values</code>
+element is returned as a numeric vector.</p></td>
     </tr>
     <tr>
       <th>...</th>
       <td><p>Arguments passed on to <code><a href='.smooth_LOESS.html'>.smooth_LOESS</a></code></p><dl>
-    <dt><code>data_points_incl</code></dt><dd><p>integer. Size of the window used in the LOESS algorithm.</p></dd>
-    <dt><code>degree</code></dt><dd><p>integer. LOESS degree.</p></dd>
+    <dt><code>data_points_incl</code></dt><dd><p>integer. Size of the window used in the LOESS algorithm.
+The <code>span</code> parameter passed to <code><a href='https://rdrr.io/r/stats/loess.html'>loess</a></code> is computed as
+the ratio of <code>data_points_incl</code> and the number of time steps in the input data.</p></dd>
+    <dt><code>degree</code></dt><dd><p>integer. LOESS degree. Must be 0, 1 or 2.</p></dd>
+    <dt><code>initial_Re_estimate_window</code></dt><dd><p>integer. In order to help with the smoothing, the function extends
+the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
+the number of timesteps in the beginning of <code>incidence_input</code> to take into account when computing
+the average initial Re.</p></dd>
   
 </dl></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>module output. Smoothed incidence. TODO add details</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

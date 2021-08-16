@@ -40,7 +40,7 @@
 
 
 <meta property="og:title" content="Estimate Re with EpiEstim in a piecewise-constant fashion — .estimate_Re_EpiEstim_piecewise_constant" />
-<meta property="og:description" content="Estimate Re with EpiEstim in a piecewise-constant fashion" />
+<meta property="og:description" content="This function returns piecewise-constant Re estimates." />
 
 
 
@@ -101,6 +101,9 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -130,12 +133,12 @@
     </div>
 
     <div class="ref-description">
-    <p>Estimate Re with EpiEstim in a piecewise-constant fashion</p>
+    <p>This function returns piecewise-constant Re estimates.</p>
     </div>
 
     <pre class="usage"><span class='fu'>.estimate_Re_EpiEstim_piecewise_constant</span><span class='op'>(</span>
   <span class='va'>incidence_input</span>,
-  minimum_cumul_incidence <span class='op'>=</span> <span class='fl'>10</span>,
+  minimum_cumul_incidence <span class='op'>=</span> <span class='fl'>12</span>,
   interval_ends <span class='op'>=</span> <span class='cn'>NULL</span>,
   interval_length <span class='op'>=</span> <span class='fl'>7</span>,
   mean_serial_interval <span class='op'>=</span> <span class='fl'>4.8</span>,
@@ -149,29 +152,82 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>incidence_input</th>
-      <td><p>module input object.</p></td>
+      <td><p>Module input object.
+List with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the first value in <code>values</code> is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.</p></li>
+</ol>
+
+<p>@return Module input object.
+List with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the first value in <code>values</code> is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.</p></li>
+</ol></td>
     </tr>
     <tr>
       <th>minimum_cumul_incidence</th>
-      <td><p>Numeric scalar. Minimum number of cumulated infections before starting the Re estimation</p></td>
+      <td><p>Numeric value.
+Minimum number of cumulated infections before starting the Re estimation.
+Default is <code>12</code> as recommended in Cori et al., 2013.</p></td>
+    </tr>
+    <tr>
+      <th>interval_ends</th>
+      <td><p>Use with <code>estimation_method = "EpiEstim piecewise constant"</code>
+Integer vector. Optional argument.
+If provided, <code>interval_ends</code> overrides the <code>interval_length</code> argument.
+Each element of <code>interval_ends</code> specifies the right boundary
+of an interval over which Re is assumed to be constant for the calculation.
+Values in <code>interval_ends</code> must be integer values corresponding
+with the same numbering of time steps as given by <code>incidence_input</code>.
+In other words, <code>interval_ends</code> and <code>incidence_input</code>,
+use the same time step as the zero-th time step.</p></td>
+    </tr>
+    <tr>
+      <th>interval_length</th>
+      <td><p>Use with <code>estimation_method = "EpiEstim piecewise constant"</code>
+Positive integer value.
+Re is assumed constant over steps of size <code>interval_length</code>.</p></td>
     </tr>
     <tr>
       <th>mean_serial_interval</th>
-      <td><p>Numeric positive scalar. <code>mean_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></td>
+      <td><p>Numeric positive value. <code>mean_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></td>
     </tr>
     <tr>
       <th>std_serial_interval</th>
-      <td><p>Numeric positive scalar. <code>std_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></td>
+      <td><p>Numeric positive value. <code>std_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></td>
     </tr>
     <tr>
       <th>mean_Re_prior</th>
-      <td><p>Numeric positive scalar. <code>mean prior</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></td>
+      <td><p>Numeric positive value. <code>mean prior</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></td>
+    </tr>
+    <tr>
+      <th>output_HPD</th>
+      <td><p>Boolean. If TRUE, return the highest posterior density interval with the output.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>module output object. mean of Re estimates</p>
+    <p>If <code>output_HPD = FALSE</code>,
+value is a module object (a list of the same kind as <code>incidence_input</code>).
+The <code>values</code> element of the list then contains the Re estimates.
+If <code>output_HPD = TRUE</code>, a list of three module objects is returned.</p><ul>
+<li><p><code>Re_estimate</code> contains the Re estimates.</p></li>
+<li><p><code>Re_highHPD</code> and <code>Re_lowHPD</code> contain
+the higher and lower boundaries of the HPD interval,
+as computed by <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></li>
+</ul>
+
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

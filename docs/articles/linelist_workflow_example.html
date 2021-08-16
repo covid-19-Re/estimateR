@@ -60,6 +60,9 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -240,8 +243,9 @@
   fully_delayed_incidence <span class="op">=</span> <span class="va">CH_incidence_data</span><span class="op">$</span><span class="va">confirmation_incidence</span>,
   N_bootstrap_replicates <span class="op">=</span> <span class="va">N_bootstrap_replicates</span>,
   delay_until_partial <span class="op">=</span> <span class="va">distribution_incubation</span>,
-  delay_from_partial_to_full <span class="op">=</span> <span class="va">CH_delay_data</span>,
+  delay_until_final_report <span class="op">=</span> <span class="va">CH_delay_data</span>,
   partial_observation_requires_full_observation <span class="op">=</span> <span class="cn">TRUE</span>,
+  combine_bootstrap_and_estimation_uncertainties <span class="op">=</span> <span class="cn">TRUE</span>,
   estimation_window <span class="op">=</span> <span class="va">estimation_window</span>,
   minimum_cumul_incidence <span class="op">=</span> <span class="va">minimum_cumul_incidence</span>,
   mean_serial_interval <span class="op">=</span> <span class="va">mean_serial_interval</span>,
@@ -254,12 +258,12 @@
 <span class="co">#&gt; # A tibble: 6 x 4</span>
 <span class="co">#&gt;   date       Re_estimate CI_down_Re_estimate CI_up_Re_estimate</span>
 <span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;               &lt;dbl&gt;             &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 2020-02-21        3.23                2.95              3.52</span>
-<span class="co">#&gt; 2 2020-02-22        3.05                2.78              3.32</span>
-<span class="co">#&gt; 3 2020-02-23        2.96                2.70              3.22</span>
-<span class="co">#&gt; 4 2020-02-24        2.92                2.66              3.18</span>
-<span class="co">#&gt; 5 2020-02-25        2.87                2.60              3.14</span>
-<span class="co">#&gt; 6 2020-02-26        2.77                2.51              3.02</span></code></pre></div>
+<span class="co">#&gt; 1 2020-02-21        3.05               2.35               3.74</span>
+<span class="co">#&gt; 2 2020-02-22        2.53               1.20               3.86</span>
+<span class="co">#&gt; 3 2020-02-23        2.28               1.59               2.98</span>
+<span class="co">#&gt; 4 2020-02-24        2.33               1.91               2.75</span>
+<span class="co">#&gt; 5 2020-02-25        2.63               0.748              4.51</span>
+<span class="co">#&gt; 6 2020-02-26        3.00               1.64               4.36</span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">CH_estimates</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">Re_estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html">geom_line</a></span><span class="op">(</span>lwd<span class="op">=</span>  <span class="fl">1.1</span><span class="op">)</span> <span class="op">+</span>

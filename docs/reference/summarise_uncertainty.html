@@ -40,7 +40,8 @@
 
 
 <meta property="og:title" content="Summarise the uncertainty obtained from bootstrapping — summarise_uncertainty" />
-<meta property="og:description" content="Summarise the uncertainty obtained from bootstrapping" />
+<meta property="og:description" content="This function takes as input bootstrapped values: Re estimates or others
+and builds uncertainty intervals from these bootstrapped values." />
 
 
 
@@ -101,6 +102,9 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -130,7 +134,8 @@
     </div>
 
     <div class="ref-description">
-    <p>Summarise the uncertainty obtained from bootstrapping</p>
+    <p>This function takes as input bootstrapped values: Re estimates or others
+and builds uncertainty intervals from these bootstrapped values.</p>
     </div>
 
     <pre class="usage"><span class='fu'>summarise_uncertainty</span><span class='op'>(</span>
@@ -148,6 +153,25 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>bootstrapped_values</th>
+      <td><p>Bootstrap
+replicates of the original data.
+Must be a dataframe in the long format
+with a timestep index column named <code>index_col</code>,
+a bootstrap replicate index column named <code>bootstrap_id_col</code>,
+and a value column named <code>value_col</code>.
+The index column must not contain any <code>NA</code> value.</p></td>
+    </tr>
+    <tr>
+      <th>original_values</th>
+      <td><p>Optional. Values of reference
+used to construct the uncertainty interval around.
+Typically, these are estimates obtained on the original data.
+Must be a dataframe with a timestep index column named <code>index_col</code>
+and a value column named <code>value_col</code>.
+The index column must not contain any <code>NA</code> value.</p></td>
+    </tr>
+    <tr>
       <th>uncertainty_summary_method</th>
       <td><p>One of these options:</p><ul>
 <li><p>'original estimate - CI from bootstrap estimates'.
@@ -159,19 +183,36 @@ and centered around the mean of bootstrapped estimates and original estimates.</
 </ul></td>
     </tr>
     <tr>
+      <th>value_col</th>
+      <td><p>string. Name of the column containing values.</p></td>
+    </tr>
+    <tr>
+      <th>output_value_col</th>
+      <td><p>string. Name of the output column with estimated values.</p></td>
+    </tr>
+    <tr>
       <th>bootstrap_id_col</th>
       <td><p>string. Name of the column containing bootstrap samples numbering.
-Id 0 must correspond to the estimate on the original data.</p></td>
+Id 0 must correspond to values associated to the original data.</p></td>
     </tr>
     <tr>
       <th>index_col</th>
-      <td><p>string. Index column to keep track of which data point
-in bootstrapped estimates corresponds to which data point in the original estimates.</p></td>
+      <td><p>string. Name of the index column.
+The index tracks which data point in bootstrapped values
+corresponds to which data point in the original values.</p></td>
     </tr>
     <tr>
       <th>...</th>
       <td><p>Arguments passed on to <code><a href='.summarise_CI_bootstrap.html'>.summarise_CI_bootstrap</a></code></p><dl>
+    <dt><code>central_values</code></dt><dd><p>Values around which the confidence interval is going to be centered.
+Must be a dataframe with a timestep index column named <code>index_col</code>
+and a value column named <code>value_col</code>.
+The index column must not contain any <code>NA</code> value.</p></dd>
     <dt><code>alpha</code></dt><dd><p>value between 0 and 1. Confidence level of the confidence interval.</p></dd>
+    <dt><code>prefix_up</code></dt><dd><p>string. prefix to add to <code>output_value_col</code>
+to name the column containing the upper limit of confidence interval</p></dd>
+    <dt><code>prefix_down</code></dt><dd><p>string. prefix to add to <code>output_value_col</code>
+to name the column containing the lower limit of confidence interval</p></dd>
   
 </dl></td>
     </tr>
@@ -179,14 +220,21 @@ in bootstrapped estimates corresponds to which data point in the original estima
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>dataframe containing Re estimates (column 'Re_estimate')
+    <p>A dataframe containing Re estimates (column 'Re_estimate')
 and confidence interval boundaries, with 4 columns like so:</p><ul>
 <li><p><code>index_col</code>, the timestep index column</p></li>
-<li><p><code>Re_estimate_col</code>, Re estimates</p></li>
-<li><p>CI_up, the upper limit of the confidence interval</p></li>
-<li><p>CI_down, the lower limit of the confidence interval</p></li>
+<li><p>A column named <code>output_value_col</code>,
+containing the central values (typically these are Re estimates)</p></li>
+<li><p><code>CI_up</code>, upper limit of the confidence interval</p></li>
+<li><p><code>CI_down</code>, the lower limit of the confidence interval</p></li>
 </ul>
 
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>This function is not meant to be needed by regular users.
+It is exported as it can be useful when building 'pipes':
+sequences of computations that weave together the different
+modules provided by <code>estimateR</code>.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

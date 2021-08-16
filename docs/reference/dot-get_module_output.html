@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Transform a result output of a module into a module output — .get_module_output • estimateR</title>
+<title>Transform a result output of a module into a module output 'object' — .get_module_output • estimateR</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Transform a result output of a module into a module output — .get_module_output" />
-<meta property="og:description" content="Also takes the module input object to calculate the offset of the output object.
+<meta property="og:title" content="Transform a result output of a module into a module output 'object' — .get_module_output" />
+<meta property="og:description" content="Also takes the module input object input
+given to the module to calculate the offset of the output object.
 The new offset is simply (module input offset) + (shift applied during module operations)
 The shift applied during module operations is the offset argument." />
 
@@ -103,6 +104,9 @@ The shift applied during module operations is the offset argument." />
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -126,13 +130,14 @@ The shift applied during module operations is the offset argument." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Transform a result output of a module into a module output</h1>
+    <h1>Transform a result output of a module into a module output 'object'</h1>
     
     <div class="hidden name"><code>dot-get_module_output.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Also takes the module input object to calculate the offset of the output object.
+    <p>Also takes the module input object <code>input</code>
+given to the module to calculate the offset of the output object.
 The new offset is simply (module input offset) + (shift applied during module operations)
 The shift applied during module operations is the <code>offset</code> argument.</p>
     </div>
@@ -148,7 +153,27 @@ The shift applied during module operations is the <code>offset</code> argument.<
     </tr>
     <tr>
       <th>input</th>
-      <td><p>module input object. Input originally given to module.</p></td>
+      <td><p>Module input object.
+List with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the first value in <code>values</code> is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.</p></li>
+</ol>
+
+<p>@return Module input object.
+List with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the first value in <code>values</code> is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.</p></li>
+</ol></td>
     </tr>
     <tr>
       <th>offset</th>
@@ -156,9 +181,6 @@ The shift applied during module operations is the <code>offset</code> argument.<
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>module output object</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

@@ -107,6 +107,9 @@ it must not contain any strictly-negative value.
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -148,7 +151,8 @@ it must not contain any strictly-negative value.
     <pre class="usage"><span class='fu'>.check_is_probability_distr_vector</span><span class='op'>(</span>
   <span class='va'>distribution</span>,
   tolerate_NAs <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  tolerance_on_sum <span class='op'>=</span> <span class='fl'>0.01</span>
+  tolerance_on_sum <span class='op'>=</span> <span class='fl'>0.01</span>,
+  parameter_name <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/deparse.html'>deparse</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/substitute.html'>substitute</a></span><span class='op'>(</span><span class='va'>distribution</span><span class='op'>)</span><span class='op'>)</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -166,11 +170,15 @@ it must not contain any strictly-negative value.
       <th>tolerance_on_sum</th>
       <td><p>Numeric tolerance in checking that vector elements sum to 1.</p></td>
     </tr>
+    <tr>
+      <th>parameter_name</th>
+      <td><p>A string containing the name the tested parameter had in the initial function in which it was passed.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>TRUE if no error was raised.</p>
+    <p>TRUE if all tests were passed. Throws an error otherwise.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

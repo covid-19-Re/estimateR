@@ -103,6 +103,9 @@ The linelist data is published by the Centre for Health Protection in Hong Kong.
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -142,9 +145,14 @@ The linelist data is published by the Centre for Health Protection in Hong Kong.
 
     <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>A data frame with 196 rows and 2 variables:</p><dl>
+    <p>A data frame with 196 rows and 4 variables:</p><dl>
 <dt>date</dt><dd><p>date of case reporting in YYYY-mm-dd format</p></dd>
-<dt>case_incidence</dt><dd><p>number of cases reported on this date</p></dd>
+<dt>case_incidence</dt><dd><p>total number of case confirmations
+reported on this date</p></dd>
+<dt>onset_incidence</dt><dd><p>number of events of onset of symptoms
+occurring on this date</p></dd>
+<dt>report_incidence</dt><dd><p>number of case confirmations reported on this date
+with no known date of onset of symptoms (or asymptomatoc cases)</p></dd>
 
 </dl>
 

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Infer Infection Events Dates from Delayed Observation — deconvolve_incidence • estimateR</title>
+<title>Infer infection events dates from delayed observations — deconvolve_incidence • estimateR</title>
 
 
 <!-- jquery -->
@@ -39,11 +39,13 @@
 
 
 
-<meta property="og:title" content="Infer Infection Events Dates from Delayed Observation — deconvolve_incidence" />
-<meta property="og:description" content="This function reconstructs an incidence of infection events from incidence data representing delayed observations.
-The assumption made is that delayed observations represent the convolution of the infections with a delay distribution.
+<meta property="og:title" content="Infer infection events dates from delayed observations — deconvolve_incidence" />
+<meta property="og:description" content="This function reconstructs an incidence of infection events
+from incidence data representing delayed observations.
+The assumption made is that delayed observations represent
+the convolution of the time series of infections with a delay distribution.
 deconvolve_incidence implements a deconvolution algorithm (Richardson-Lucy) to reconstruct
-a vector of infection events from input data representing delayed observations." />
+a vector of infection events from input data that represents delayed observations." />
 
 
 
@@ -104,6 +106,9 @@ a vector of infection events from input data representing delayed observations."
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -127,23 +132,24 @@ a vector of infection events from input data representing delayed observations."
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Infer Infection Events Dates from Delayed Observation</h1>
+    <h1>Infer infection events dates from delayed observations</h1>
     
     <div class="hidden name"><code>deconvolve_incidence.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This function reconstructs an incidence of infection events from incidence data representing delayed observations.
-The assumption made is that delayed observations represent the convolution of the infections with a delay distribution.
+    <p>This function reconstructs an incidence of infection events
+from incidence data representing delayed observations.
+The assumption made is that delayed observations represent
+the convolution of the time series of infections with a delay distribution.
 <code>deconvolve_incidence</code> implements a deconvolution algorithm (Richardson-Lucy) to reconstruct
-a vector of infection events from input data representing delayed observations.</p>
+a vector of infection events from input data that represents delayed observations.</p>
     </div>
 
     <pre class="usage"><span class='fu'>deconvolve_incidence</span><span class='op'>(</span>
   <span class='va'>incidence_data</span>,
   deconvolution_method <span class='op'>=</span> <span class='st'>"Richardson-Lucy delay distribution"</span>,
-  <span class='va'>delay_incubation</span>,
-  delay_onset_to_report <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>)</span>,
+  <span class='va'>delay</span>,
   simplify_output <span class='op'>=</span> <span class='cn'>TRUE</span>,
   <span class='va'>...</span>
 <span class='op'>)</span></pre>
@@ -153,7 +159,22 @@ a vector of infection events from input data representing delayed observations.<
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>incidence_data</th>
-      <td><p>numeric vector. Incidence data (TODO improve definition)</p></td>
+      <td><p>An object containing incidence data through time.
+It can either be:</p><ul>
+<li><p>A list with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the first value in <code>values</code> is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.</p></li>
+</ol></li>
+<li><p>A numeric vector. The vector corresponds to the <code>values</code> element
+descrived above, and <code>index_offset</code> is implicitely zero.
+This means that the first value in <code>incidence_data</code>
+is associated with the reference time step (no shift towards the future or past).</p></li>
+</ul></td>
     </tr>
     <tr>
       <th>deconvolution_method</th>
@@ -165,24 +186,47 @@ implemented in <code><a href='.deconvolve_incidence_Richardson_Lucy.html'>.decon
 </ul></td>
     </tr>
     <tr>
-      <th>delay_incubation</th>
-      <td><p>TODO add details</p></td>
-    </tr>
-    <tr>
-      <th>delay_onset_to_report</th>
-      <td><p>TODO add details</p></td>
+      <th>delay</th>
+      <td><p>Single delay or list of delays.
+Each delay can be one of:</p><ul>
+<li><p>a list representing a distribution object</p></li>
+<li><p>a discretized delay distribution vector</p></li>
+<li><p>a discretized delay distribution matrix</p></li>
+<li><p>a dataframe containing empirical delay data</p></li>
+</ul></td>
     </tr>
     <tr>
       <th>simplify_output</th>
       <td><p>boolean. Return a numeric vector instead of module
-output object if output offset is zero? TODO to be described better.</p></td>
+output object if output offset is zero?</p>
+<p>@return A list with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the result of the computations on the input data.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the result is shifted compared to an <code>index_offset</code> of <code>0</code>.
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+Note that the <code>index_offset</code> of the output of the function call
+accounts for the (optional) <code>index_offset</code> of the input.</p></li>
+</ol><p>If <code>index_offset</code> is <code>0</code> and <code>simplify_output = TRUE</code>,
+the <code>index_offset</code> is dropped and the <code>values</code>
+element is returned as a numeric vector.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Arguments passed on to <code><a href='convolve_delay_inputs.html'>convolve_delay_inputs</a></code>, <code><a href='.deconvolve_incidence_Richardson_Lucy.html'>.deconvolve_incidence_Richardson_Lucy</a></code></p><dl>
+      <td><p>Arguments passed on to <code><a href='convolve_delays.html'>convolve_delays</a></code>, <code><a href='.deconvolve_incidence_Richardson_Lucy.html'>.deconvolve_incidence_Richardson_Lucy</a></code></p><dl>
     <dt><code>n_report_time_steps</code></dt><dd><p>integer. Length of incidence time series.
 Use only when providing empirical delay data.</p></dd>
-    <dt><code>delay_distribution</code></dt><dd><p>numeric square matrix or vector. TODO refactor to estimateR</p></dd>
+    <dt><code>delays</code></dt><dd><p>List of delays, with flexible structure.
+Each delay in the <code>delays</code> list can be one of:
+<ul>
+<li><p>a list representing a distribution object</p></li>
+<li><p>a discretized delay distribution vector</p></li>
+<li><p>a discretized delay distribution matrix</p></li>
+<li><p>a dataframe containing empirical delay data</p></li>
+</ul></p></dd>
+    <dt><code>delay_distribution</code></dt><dd><p>numeric square matrix or vector.</p></dd>
     <dt><code>threshold_chi_squared</code></dt><dd><p>numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.</p></dd>
     <dt><code>max_iterations</code></dt><dd><p>integer. Maximum threshold for the number of iterations in the R-L algorithm.</p></dd>
     <dt><code>verbose</code></dt><dd><p>Boolean. Print verbose output?</p></dd>
@@ -191,9 +235,6 @@ Use only when providing empirical delay data.</p></dd>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>module output object. Inferred incidence of infection events.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
