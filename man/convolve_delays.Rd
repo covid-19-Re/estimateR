@@ -60,6 +60,7 @@ This option is included for comparison with legacy code.}
     \item{\code{ref_date}}{Date. Optional. Date of the first data entry in \code{incidence_data}}
     \item{\code{time_step}}{string. Time between two consecutive incidence datapoints.
 "day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+    \item{\code{return_fitted_distribution}}{boolean. If TRUE, the function also returns the gamma distribution that was fitted to the respective column.}
     \item{\code{max_quantile}}{numeric value between 0 and 1.
 Upper quantile reached by the last element in the discretized distribution vector.}
     \item{\code{offset_by_one}}{boolean.

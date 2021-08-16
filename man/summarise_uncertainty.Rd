@@ -43,6 +43,8 @@ and centered around the mean of bootstrapped estimates and original estimates.}
 
 \item{value_col}{string. Name of the column containing values.}
 
+\item{output_value_col}{string. Name of the output column with estimated values.}
+
 \item{bootstrap_id_col}{string. Name of the column containing bootstrap samples numbering.
 Id 0 must correspond to values associated to the original data.}
 
@@ -58,6 +60,10 @@ Must be a dataframe with a timestep index column named \code{index_col}
 and a value column named \code{value_col}.
 The index column must not contain any \code{NA} value.}
     \item{\code{alpha}}{value between 0 and 1. Confidence level of the confidence interval.}
+    \item{\code{prefix_up}}{string. prefix to add to \code{output_value_col}
+to name the column containing the upper limit of confidence interval}
+    \item{\code{prefix_down}}{string. prefix to add to \code{output_value_col}
+to name the column containing the lower limit of confidence interval}
   }}
 }
 \value{

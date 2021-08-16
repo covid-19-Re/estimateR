@@ -17,6 +17,14 @@
 Delay distribution to transform or validate
 into a vector of discretized probability distribution.}
 
+\item{n_report_time_steps}{integer. Length of the incidence time series in the accompanying analysis.
+This argument is needed to determine the dimensions of the output matrix.}
+
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
+
+\item{time_step}{string. Time between two consecutive incidence datapoints.
+"day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+
 \item{...}{
   Arguments passed on to \code{\link[=build_delay_distribution]{build_delay_distribution}}
   \describe{

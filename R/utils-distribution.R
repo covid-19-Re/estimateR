@@ -201,6 +201,8 @@ build_delay_distribution <- function(distribution,
 #' Delay distribution to transform or validate
 #' into a vector of discretized probability distribution.
 #' @inheritDotParams build_delay_distribution -distribution
+#' @inherit dating
+#' @inherit delay_empirical
 #'
 #' @return vector or matrix of discretized probability distribution.
 .get_delay_distribution <- function(delay,
@@ -402,7 +404,7 @@ build_delay_distribution <- function(distribution,
     list(delay_list, "delay_single_or_list", 1)))
 
   if(is.list(delay_list) && !is.data.frame(delay_list)){
-    is_distribution <- try(.is_valid_distribution(delay_list, parameter_name), silent = TRUE)
+    is_distribution <- try(.is_valid_distribution(delay_list, "dummy_name"), silent = TRUE)
     if ("try-error" %!in% class(is_distribution)) {
       return(TRUE)
     }

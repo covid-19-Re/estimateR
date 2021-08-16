@@ -64,6 +64,15 @@ Each delay can be one of:
 Set to \code{TRUE} if \code{incidence_data} represents delayed observations
 of infection events that themselves rely on further-delayed observations.}
 
+\item{delay_until_final_report}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
+
 \item{output_infection_incidence_only}{boolean.
 Should the output contain only the estimated infection incidence?
 (as opposed to containing results for intermediary steps)}
@@ -80,6 +89,10 @@ Should the output contain only the estimated infection incidence?
 The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
 the ratio of \code{data_points_incl} and the number of time steps in the input data.}
     \item{\code{degree}}{integer. LOESS degree. Must be 0, 1 or 2.}
+    \item{\code{initial_Re_estimate_window}}{integer. In order to help with the smoothing, the function extends
+the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
+the number of timesteps in the beginning of \code{incidence_input} to take into account when computing
+the average initial Re.}
     \item{\code{delay_distribution}}{numeric square matrix or vector.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}

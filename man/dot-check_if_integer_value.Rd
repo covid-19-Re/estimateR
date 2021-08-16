@@ -7,6 +7,8 @@
 .check_if_integer_value(number, parameter_name)
 }
 \arguments{
+\item{number}{The value to be tested}
+
 \item{parameter_name}{A string containing the name the tested parameter had in the initial function in which it was passed.}
 }
 \value{

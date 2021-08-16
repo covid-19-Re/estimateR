@@ -2,10 +2,21 @@
 % Please edit documentation in R/utils-validation.R
 \name{.check_is_bootstrap_estimate}
 \alias{.check_is_bootstrap_estimate}
-\title{TODO docs}
+\title{Utility functions for input validity.}
 \usage{
 .check_is_bootstrap_estimate(user_input, parameter_name, col_names)
 }
+\arguments{
+\item{user_input}{The variable to be tested}
+
+\item{parameter_name}{A string containing the name the tested parameter had in the initial function in which it was passed.}
+
+\item{col_names}{vector. Contains the column names of \code{index_col}, \code{bootstrap_id_col} and \code{Re_estimate_col}, as described by the \code{summarise_uncertainty} function.}
+}
+\value{
+TRUE if all tests were passed. Throws an error otherwise.
+}
 \description{
-TODO docs
+Utility function to check whether an object a valid bootstrap estimates object.
+It has to be a valid estimates object, and to have the columns specified by \code{col_names}.
 }

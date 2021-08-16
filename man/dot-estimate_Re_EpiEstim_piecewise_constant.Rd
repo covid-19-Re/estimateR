@@ -58,11 +58,13 @@ use the same time step as the zero-th time step.}
 Positive integer value.
 Re is assumed constant over steps of size \code{interval_length}.}
 
-\item{mean_serial_interval}{Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R()}}}
+\item{mean_serial_interval}{Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
 
-\item{std_serial_interval}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R()}}}
+\item{std_serial_interval}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
 
-\item{mean_Re_prior}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R()}}}
+\item{mean_Re_prior}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+
+\item{output_HPD}{Boolean. If TRUE, return the highest posterior density interval with the output.}
 }
 \value{
 If \code{output_HPD = FALSE},
@@ -73,7 +75,7 @@ If \code{output_HPD = TRUE}, a list of three module objects is returned.
 \item \code{Re_estimate} contains the Re estimates.
 \item \code{Re_highHPD} and \code{Re_lowHPD} contain
 the higher and lower boundaries of the HPD interval,
-as computed by \code{\link[EpiEstim]{estimate_R()}}
+as computed by \code{\link[EpiEstim]{estimate_R}}
 }
 }
 \description{

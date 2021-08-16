@@ -33,11 +33,66 @@ This means that the first value in \code{incidence_data}
 is associated with the reference time step (no shift towards the future or past).
 }}
 
+\item{delay_until_final_report}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
+
 \item{cutoff_observation_probability}{value between 0 and 1.
 Only datapoints for timesteps that have a probability of observing a event
 higher than \code{cutoff_observation_probability} are kept.
 The few datapoints with a lower probability to be observed are trimmed off
 the tail of the timeseries.}
+
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
+
+\item{time_step}{string. Time between two consecutive incidence datapoints.
+"day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+
+\item{...}{
+  Arguments passed on to \code{\link[=get_matrix_from_empirical_delay_distr]{get_matrix_from_empirical_delay_distr}}
+  \describe{
+    \item{\code{min_number_cases}}{integer.
+Minimal number of cases to build the empirical distribution from.
+If \code{num_steps_in_a_unit} is \code{NULL}, for any time step T,
+the \code{min_number_cases} records prior to T are used.
+If less than \code{min_number_cases} delays were recorded before T,
+then T is ignored and the \code{min_number_cases} earliest-recorded delays are used.
+If \code{num_steps_in_a_unit} is given a value, a similar same procedure is applied,
+except that, now at least \code{min_number_cases} must be taken over a round number of
+time units. For example, if \code{num_steps_in_a_unit = 7}, and time steps represent consecutive days,
+to build the distribution for time step T,
+we find the smallest number of weeks starting from T and going in the past,
+for which at least \code{min_number_cases} delays were recorded.
+We then use all the delays recorded during these weeks.
+Weeks are not meant as necessarily being Monday to Sunday,
+but simply 7 days in a row, e.g. it can be Thursday-Wednesday.
+Again, if less than \code{min_number_cases} delays were recorded before T,
+then T is ignored.
+We then find the minimum number of weeks, starting from the first recorded delay
+that contains at least \code{min_number_cases}.}
+    \item{\code{upper_quantile_threshold}}{numeric. Between 0 and 1.
+Argument for internal use.}
+    \item{\code{min_number_cases_fraction}}{numeric. Between 0 and 1.
+If \code{min_number_cases} is not provided (kept to \code{NULL}),
+the number of most-recent cases used to build
+the instant delay distribution is \code{min_number_cases_fraction}
+times the total number of reported delays.}
+    \item{\code{min_min_number_cases}}{numeric. Lower bound
+for number of cases used to build an instant delay distribution.}
+    \item{\code{fit}}{string. One of "gamma" or "none". Specifies the type of fit that
+is applied to the columns of the delay matrix}
+    \item{\code{num_steps_in_a_unit}}{Optional argument.
+Number of time steps in a full time unit (e.g. 7 if looking at weeks).
+If set, the delays used to build a particular
+delay distribution will span over a round number of such time units.
+This option is included for comparison with legacy code.}
+    \item{\code{return_fitted_distribution}}{boolean. If TRUE, the function also returns the gamma distribution that was fitted to the respective column.}
+  }}
 }
 \description{
 Use this function to correct the tail of an incidence time series

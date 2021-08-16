@@ -8,6 +8,9 @@ NULL
 #' @param string_user_input A string containing the value that the user passed for the tested string type parameter.
 #' @param parameter_name A string containing the name the tested parameter had in the initial function in which it was passed.
 #' @param incidence_data_length A number representing the length of the given incidence data.
+#' @param user_inputs A list of lists with two elements: the first is the value of the parameter to be tested. The second is the expected type of that parameter.
+#' @param number The value to be tested
+#' @param user_input The variable to be tested
 #'
 #' @return TRUE if all tests were passed. Throws an error otherwise.
 #'
@@ -172,9 +175,10 @@ NULL
 #' @param minimum_cumul_incidence Numeric value.
 #' Minimum number of cumulated infections before starting the Re estimation.
 #' Default is \code{12} as recommended in Cori et al., 2013.
-#' @param mean_serial_interval Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R()}}
-#' @param std_serial_interval Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R()}}
-#' @param mean_Re_prior Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R()}}
+#' @param mean_serial_interval Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}
+#' @param std_serial_interval Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}
+#' @param mean_Re_prior Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}
+#' @param output_HPD Boolean. If TRUE, return the highest posterior density interval with the output.
 #'
 #' @return If \code{output_HPD = FALSE},
 #' value is a module object (a list of the same kind as \code{incidence_input}).
@@ -184,7 +188,7 @@ NULL
 #' \item \code{Re_estimate} contains the Re estimates.
 #' \item \code{Re_highHPD} and \code{Re_lowHPD} contain
 #' the higher and lower boundaries of the HPD interval,
-#' as computed by \code{\link[EpiEstim]{estimate_R()}}
+#' as computed by \code{\link[EpiEstim]{estimate_R}}
 #' }
 #'
 #' @name EpiEstim_wrapper
@@ -211,6 +215,11 @@ NULL
 #' Bootstrapping parameters
 #'
 #' @param N_bootstrap_replicates integer. Number of bootstrap samples.
+#' @param combine_bootstrap_and_estimation_uncertainties boolean.
+#' If TRUE, the uncertainty interval reported is the union of
+#' the highest posterior density interval from the Re estimation
+#' with the confidence interval from the boostrapping of time series
+#' of observations.
 #'
 #' @name bootstrap_params
 NULL
@@ -261,7 +270,7 @@ NULL
 #' \item{a discretized delay distribution matrix}
 #' \item{a dataframe containing empirical delay data}
 #' }
-#' @param delay_from_partial_to_full Single delay or list of delays.
+#' @param delay_until_final_report Single delay or list of delays.
 #' Each delay can be one of:
 #' \itemize{
 #' \item{a list representing a distribution object}
@@ -439,12 +448,6 @@ NULL
 #' Must be a dataframe with a timestep index column named \code{index_col}
 #' and a value column named \code{value_col}.
 #' The index column must not contain any \code{NA} value.
-#' @param value_col string. Name of the column containing values.
-#' @param bootstrap_id_col string. Name of the column containing bootstrap samples numbering.
-#' Id 0 must correspond to values associated to the original data.
-#' @param index_col string. Name of the index column.
-#' The index tracks which data point in bootstrapped values
-#' corresponds to which data point in the original values.
 #' @param alpha value between 0 and 1. Confidence level of the confidence interval.
 #' @param combine_bootstrap_and_estimation_uncertainties boolean.
 #' Combine uncertainty from Re estimation with uncertainty from observation process?
@@ -453,6 +456,17 @@ NULL
 #' will be the union of bootstrapping intervals and Re estimation intervals.
 #' @param Re_HPDs Optional. Credible intervals for Re estimates.
 #' Use only if \code{combine_bootstrap_and_estimation_uncertainties} is \code{TRUE}.
+#' @param value_col string. Name of the column containing values.
+#' @param bootstrap_id_col string. Name of the column containing bootstrap samples numbering.
+#' Id 0 must correspond to values associated to the original data.
+#' @param index_col string. Name of the index column.
+#' The index tracks which data point in bootstrapped values
+#' corresponds to which data point in the original values.
+#' @param output_value_col string. Name of the output column with estimated values.
+#' @param prefix_up string. prefix to add to \code{output_value_col}
+#' to name the column containing the upper limit of confidence interval
+#' @param prefix_down string. prefix to add to \code{output_value_col}
+#' to name the column containing the lower limit of confidence interval
 #'
 #' @name uncertainty
 NULL

@@ -59,7 +59,7 @@
 #' \item \code{Re_estimate} contains the Re estimates.
 #' \item \code{Re_highHPD} and \code{Re_lowHPD} contain
 #' the higher and lower boundaries of the HPD interval,
-#' as computed by \code{\link[EpiEstim]{estimate_R()}}
+#' as computed by \code{\link[EpiEstim]{estimate_R}}
 #' }
 #' If, in addition, \code{simplify_output = TRUE},
 #' then the 3 elements are merged into a single dataframe by \code{merge_outputs()}.

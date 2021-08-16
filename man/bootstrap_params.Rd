@@ -5,6 +5,12 @@
 \title{Bootstrapping parameters}
 \arguments{
 \item{N_bootstrap_replicates}{integer. Number of bootstrap samples.}
+
+\item{combine_bootstrap_and_estimation_uncertainties}{boolean.
+If TRUE, the uncertainty interval reported is the union of
+the highest posterior density interval from the Re estimation
+with the confidence interval from the boostrapping of time series
+of observations.}
 }
 \description{
 Bootstrapping parameters

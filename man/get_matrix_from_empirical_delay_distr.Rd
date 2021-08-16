@@ -14,6 +14,7 @@ get_matrix_from_empirical_delay_distr(
   min_number_cases_fraction = 0.05,
   min_min_number_cases = 10,
   fit = "none",
+  return_fitted_distribution = FALSE,
   num_steps_in_a_unit = NULL
 )
 }
@@ -62,6 +63,8 @@ for number of cases used to build an instant delay distribution.}
 
 \item{fit}{string. One of "gamma" or "none". Specifies the type of fit that
 is applied to the columns of the delay matrix}
+
+\item{return_fitted_distribution}{boolean. If TRUE, the function also returns the gamma distribution that was fitted to the respective column.}
 
 \item{num_steps_in_a_unit}{Optional argument.
 Number of time steps in a full time unit (e.g. 7 if looking at weeks).

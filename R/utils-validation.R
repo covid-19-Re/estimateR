@@ -209,9 +209,9 @@ accepted_parameter_value <- list(
 }
 
 
+#' Utility functions for input validity.
 #' @description Utility function to determine whether an object is a numeric vector with all positive (or zero) values.
 #'
-#' @inherit validation_utility_params
 #' @param vector vector to be tested
 #'
 #' @return boolean. TRUE if vector is a positive numeric vector. FALSE otherwise
@@ -462,7 +462,6 @@ accepted_parameter_value <- list(
 #' @description Utility function to check whether an object is a number.
 #'
 #' @inherit validation_utility_params
-#' @param number The value to be tested
 #'
 .check_if_number <- function(number, parameter_name) {
   if (!is.numeric(number)) {
@@ -478,7 +477,6 @@ accepted_parameter_value <- list(
 #' @description Utility function to check whether an object is a positive number or 0.
 #'
 #' @inherit validation_utility_params
-#' @inherit  .check_if_number
 #'
 .check_if_non_negative_number <- function(number, parameter_name) {
   .check_if_number(number, parameter_name)
@@ -493,7 +491,6 @@ accepted_parameter_value <- list(
 #' @description Utility function to check whether an object is a strictly positive number
 #'
 #' @inherit validation_utility_params
-#' @inherit  .check_if_number
 #'
 .check_if_positive_number <- function(number, parameter_name) {
   .check_if_number(number, parameter_name)
@@ -532,7 +529,6 @@ accepted_parameter_value <- list(
 #' @description Utility function to check whether an object is an integer or null
 #'
 #' @inherit validation_utility_params
-#' @inherit  .check_if_integer
 #'
 .check_if_null_or_integer <- function(number, parameter_name) {
   if (!is.null(number)) {
@@ -545,7 +541,6 @@ accepted_parameter_value <- list(
 #' @description Utility function to check whether an object is a strictly positive integer
 #'
 #' @inherit validation_utility_params
-#' @inherit  .check_if_integer
 #'
 .check_if_positive_integer <- function(number, parameter_name) {
   .check_if_positive_number(number, parameter_name)
@@ -555,7 +550,8 @@ accepted_parameter_value <- list(
 #' @description Utility function to check whether an object is a number that belongs to a given interval
 #'
 #' @inherit validation_utility_params
-#' @inherit  .check_if_number
+#' @param interval_start Left-bound of the accepted interval
+#' @param interval_end Right-bound of the accepted interval
 #'
 .check_is_numeric_in_interval <- function(user_input, parameter_name, interval_start, interval_end) {
   .check_if_number(user_input, parameter_name)
@@ -611,7 +607,6 @@ accepted_parameter_value <- list(
 #' @description Utility function that checks that the values the user passed when calling a function are valid.
 #'
 #' @inherit validation_utility_params
-#' @param user_inputs A list of lists with two elements: the first is the value of the parameter to be tested. The second is the expected type of that parameter.
 #'
 .are_valid_argument_values <- function(user_inputs) {
   for (i in 1:length(user_inputs)) {

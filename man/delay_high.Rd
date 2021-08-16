@@ -44,7 +44,7 @@ Each delay can be one of:
 \item{a dataframe containing empirical delay data}
 }}
 
-\item{delay_from_partial_to_full}{Single delay or list of delays.
+\item{delay_until_final_report}{Single delay or list of delays.
 Each delay can be one of:
 \itemize{
 \item{a list representing a distribution object}

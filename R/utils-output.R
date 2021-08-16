@@ -56,6 +56,7 @@ make_tibble_from_output <- function(output,
 #'
 #' @param results numeric vector containing output of module operations.
 #' @param offset integer. Shift resulting from operations performed in module.
+#' @inheritParams inner_module
 #'
 #' @inherit module_structure
 .get_module_output <- function(results, input, offset = 0) {

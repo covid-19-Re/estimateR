@@ -8,11 +8,13 @@
 Minimum number of cumulated infections before starting the Re estimation.
 Default is \code{12} as recommended in Cori et al., 2013.}
 
-\item{mean_serial_interval}{Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R()}}}
+\item{mean_serial_interval}{Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
 
-\item{std_serial_interval}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R()}}}
+\item{std_serial_interval}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
 
-\item{mean_Re_prior}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R()}}}
+\item{mean_Re_prior}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+
+\item{output_HPD}{Boolean. If TRUE, return the highest posterior density interval with the output.}
 }
 \value{
 If \code{output_HPD = FALSE},
@@ -23,7 +25,7 @@ If \code{output_HPD = TRUE}, a list of three module objects is returned.
 \item \code{Re_estimate} contains the Re estimates.
 \item \code{Re_highHPD} and \code{Re_lowHPD} contain
 the higher and lower boundaries of the HPD interval,
-as computed by \code{\link[EpiEstim]{estimate_R()}}
+as computed by \code{\link[EpiEstim]{estimate_R}}
 }
 }
 \description{

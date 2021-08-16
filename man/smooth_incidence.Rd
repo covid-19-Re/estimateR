@@ -63,6 +63,10 @@ element is returned as a numeric vector.}
 The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
 the ratio of \code{data_points_incl} and the number of time steps in the input data.}
     \item{\code{degree}}{integer. LOESS degree. Must be 0, 1 or 2.}
+    \item{\code{initial_Re_estimate_window}}{integer. In order to help with the smoothing, the function extends
+the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
+the number of timesteps in the beginning of \code{incidence_input} to take into account when computing
+the average initial Re.}
   }}
 }
 \description{

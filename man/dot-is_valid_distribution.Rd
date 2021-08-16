@@ -15,11 +15,12 @@ e.g. list(name = "gamma", shape = 2, scale = 4).
 The \code{distribution} list must contain a 'name' element, this element must be  a string and
 correspond to one of the types of \code{\link[stats:Distributions]{distributions}} supported in the \link[stats]{Distributions} package.
 \code{distribution} must also contain parameters for the specified distribution, in the form '\code{parameter_name=parameter_value}'.}
+
+\item{parameter_name}{A string containing the name the tested parameter had in the initial function in which it was passed.}
 }
 \value{
-a boolean value.
+boolean. Returns FALSE if parameter values return an improper distribution (if gamma distr). Throws an error if not a list, or not a list with the appropriate elements. Returns TRUE otherwise.
 }
 \description{
-Throws an error if not a list, or not a list with the appropriate elements.
-Returns FALSE if parameter values return an improper distribution (if gamma distr)
+Check if valid distribution list
 }

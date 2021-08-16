@@ -311,7 +311,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     delay_distr <- build_delay_distribution(distribution, offset_by_one = TRUE)
 
   } else { # no fit
-    delay_distr <- hist(recent_counts_distribution, breaks = seq(0, N, l = N + 1), plot = FALSE)
+    delay_distr <- graphics::hist(recent_counts_distribution, breaks = seq(0, N, l = N + 1), plot = FALSE)
     delay_distr <- delay_distr$density
   }
 

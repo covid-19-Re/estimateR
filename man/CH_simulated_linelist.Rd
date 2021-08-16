@@ -11,9 +11,6 @@ A data frame with 31'950 rows and 2 columns:
 \item{symptom_onset_date}{If simulated, date of onset of symptoms in YYYY-mm-dd format}
 }
 }
-\source{
-
-}
 \usage{
 CH_simulated_linelist
 }

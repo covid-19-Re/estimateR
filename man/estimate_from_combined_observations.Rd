@@ -91,6 +91,15 @@ Each delay can be one of:
 \item{a dataframe containing empirical delay data}
 }}
 
+\item{delay_until_final_report}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
+
 \item{partial_observation_requires_full_observation}{boolean
 Set to \code{TRUE} if \code{partially_delayed_incidence} represent
 delayed observations of infection events that
@@ -112,6 +121,10 @@ See Details for more details.}
 The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
 the ratio of \code{data_points_incl} and the number of time steps in the input data.}
     \item{\code{degree}}{integer. LOESS degree. Must be 0, 1 or 2.}
+    \item{\code{initial_Re_estimate_window}}{integer. In order to help with the smoothing, the function extends
+the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
+the number of timesteps in the beginning of \code{incidence_input} to take into account when computing
+the average initial Re.}
     \item{\code{delay_distribution}}{numeric square matrix or vector.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
@@ -122,9 +135,10 @@ Number of data points over which to assume Re to be constant.}
     \item{\code{minimum_cumul_incidence}}{Numeric value.
 Minimum number of cumulated infections before starting the Re estimation.
 Default is \code{12} as recommended in Cori et al., 2013.}
-    \item{\code{mean_serial_interval}}{Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R()}}}
-    \item{\code{std_serial_interval}}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R()}}}
-    \item{\code{mean_Re_prior}}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R()}}}
+    \item{\code{mean_serial_interval}}{Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{std_serial_interval}}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{mean_Re_prior}}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{output_HPD}}{Boolean. If TRUE, return the highest posterior density interval with the output.}
     \item{\code{cutoff_observation_probability}}{value between 0 and 1.
 Only datapoints for timesteps that have a probability of observing a event
 higher than \code{cutoff_observation_probability} are kept.

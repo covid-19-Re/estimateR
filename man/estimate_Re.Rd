@@ -52,9 +52,10 @@ Number of data points over which to assume Re to be constant.}
     \item{\code{minimum_cumul_incidence}}{Numeric value.
 Minimum number of cumulated infections before starting the Re estimation.
 Default is \code{12} as recommended in Cori et al., 2013.}
-    \item{\code{mean_serial_interval}}{Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R()}}}
-    \item{\code{std_serial_interval}}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R()}}}
-    \item{\code{mean_Re_prior}}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R()}}}
+    \item{\code{mean_serial_interval}}{Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{std_serial_interval}}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{mean_Re_prior}}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{output_HPD}}{Boolean. If TRUE, return the highest posterior density interval with the output.}
     \item{\code{interval_ends}}{Use with \code{estimation_method = "EpiEstim piecewise constant"}
 Integer vector. Optional argument.
 If provided, \code{interval_ends} overrides the \code{interval_length} argument.
@@ -93,7 +94,7 @@ In that case, a list of three lists is returned:
 \item \code{Re_estimate} contains the Re estimates.
 \item \code{Re_highHPD} and \code{Re_lowHPD} contain
 the higher and lower boundaries of the HPD interval,
-as computed by \code{\link[EpiEstim]{estimate_R()}}
+as computed by \code{\link[EpiEstim]{estimate_R}}
 }
 If, in addition, \code{simplify_output = TRUE},
 then the 3 elements are merged into a single dataframe by \code{merge_outputs()}.

@@ -11,6 +11,8 @@
 }
 \arguments{
 \item{delay}{object to be tested}
+
+\item{parameter_name}{A string containing the name the tested parameter had in the initial function in which it was passed.}
 }
 \value{
 boolean. \code{TRUE} if the input is a dataframe in the proper format.

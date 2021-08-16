@@ -21,10 +21,15 @@
 #' This data was  put together by aggregating the publicly-available linelist data for SARS-CoV-2 in Hong Kong.
 #' The linelist data is published by the Centre for Health Protection in Hong Kong.
 #'
-#' @format A data frame with 196 rows and 2 variables:
+#' @format A data frame with 196 rows and 4 variables:
 #' \describe{
 #'   \item{date}{date of case reporting in YYYY-mm-dd format}
-#'   \item{case_incidence}{number of cases reported on this date}
+#'   \item{case_incidence}{total number of case confirmations
+#'   reported on this date}
+#'   \item{onset_incidence}{number of events of onset of symptoms
+#'   occurring on this date}
+#'   \item{report_incidence}{number of case confirmations reported on this date
+#'   with no known date of onset of symptoms (or asymptomatoc cases)}
 #' }
 #' @source \url{https://www.chp.gov.hk}
 "HK_incidence_data"
@@ -59,5 +64,4 @@
 #'   \item{confirmation_date}{date of case confirmation in YYYY-mm-dd format}
 #'   \item{symptom_onset_date}{If simulated, date of onset of symptoms in YYYY-mm-dd format}
 #' }
-#' @source
 "CH_simulated_linelist"

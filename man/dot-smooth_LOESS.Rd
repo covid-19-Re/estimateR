@@ -4,7 +4,12 @@
 \alias{.smooth_LOESS}
 \title{LOESS smoothing function}
 \usage{
-.smooth_LOESS(incidence_input, data_points_incl = 21, degree = 1)
+.smooth_LOESS(
+  incidence_input,
+  data_points_incl = 21,
+  degree = 1,
+  initial_Re_estimate_window = 5
+)
 }
 \arguments{
 \item{incidence_input}{Module input object.
@@ -36,6 +41,11 @@ The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
 the ratio of \code{data_points_incl} and the number of time steps in the input data.}
 
 \item{degree}{integer. LOESS degree. Must be 0, 1 or 2.}
+
+\item{initial_Re_estimate_window}{integer. In order to help with the smoothing, the function extends
+the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
+the number of timesteps in the beginning of \code{incidence_input} to take into account when computing
+the average initial Re.}
 }
 \description{
 Prefer the use of the wrapper function \code{smooth_incidence(..., smoothing_method = "LOESS")}

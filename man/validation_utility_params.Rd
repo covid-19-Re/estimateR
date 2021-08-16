@@ -9,6 +9,12 @@
 \item{parameter_name}{A string containing the name the tested parameter had in the initial function in which it was passed.}
 
 \item{incidence_data_length}{A number representing the length of the given incidence data.}
+
+\item{user_inputs}{A list of lists with two elements: the first is the value of the parameter to be tested. The second is the expected type of that parameter.}
+
+\item{number}{The value to be tested}
+
+\item{user_input}{The variable to be tested}
 }
 \value{
 TRUE if all tests were passed. Throws an error otherwise.

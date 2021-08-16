@@ -21,6 +21,8 @@
 #'
 #' @inherit module_structure
 #' @inherit delay_high
+#' @inherit dating
+#' @inheritDotParams get_matrix_from_empirical_delay_distr -empirical_delays -n_report_time_steps
 #'
 #' @export
 correct_for_partially_observed_data <- function(incidence_data,

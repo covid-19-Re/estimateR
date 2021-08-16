@@ -72,54 +72,54 @@
   return(dplyr::bind_rows(delays))
 }
 
-#' Utility function that generates delay data
-#'
-#' Function useful for testing purposes.
-#' It assumes a different delay between event and observation for each individual day.
-#' It then generates the delay matrix and computes the RMSE between the parameters of the gamma distributions passed as arguments and the ones recovered from the delay matrix.
+#' Utility function that generates delay data, assuming a different delay between event and observation for each individual day.
+#' It then generates a delay matrix and computes the RMSE between the parameters of the gamma distributions passed as arguments and the ones recovered from the delay matrix.
 #' The shapes and scales of the gamma distributions are specified as parameters, and the number of timesteps is assumed to be equal to the length of these vectors.
 #'
+#' This funciotn is useful for testing purposes.
 #' @param original_distribution_shapes vector. Specifies the shapes for the gamma distributions.
 #' @param original_distribution_scales vector. Specifies the scales for the gamma distributions.
 #' @param nr_distribution_samples integer. How many cases to be sampled for each timestep.
 #'
 #' @return A list with the computed RMSE. It has two elements: $shape_rmse and $scale_rmse
-.delay_distribution_matrix_rmse_compute <- function(original_distribution_shapes, original_distribution_scales, nr_distribution_samples = 500) {
+.delay_distribution_matrix_rmse_compute <- function(original_distribution_shapes, original_distribution_scales, nr_distribution_samples = 500){
 
-  # Create a vector with all dates in observation interval
-  start_date <- as.Date("2021/04/01")
+  #Create a vector with all dates in observation interval
+  start_date <- as.Date('2021/04/01')
   time_steps <- length(original_distribution_shapes)
   end_date <- start_date + time_steps
-  available_dates <- seq(start_date, end_date, by = "day")
+  available_dates <- seq(start_date, end_date, by="day")
 
-  # Build the delay data; Events on each individual day are assumed to be observed according to a different gamma distribution, as specified by original_distribution_shapes and original_distribution_scales,
+  #Build the delay data; Events on each individual day are assumed to be observed according to a different gamma distribution, as specified by original_distribution_shapes and original_distribution_scales,
   sampled_report_delays <- c()
   report_dates <- as.Date(c())
-  for (i in 1:time_steps) {
-    new_sampled_report_delays <- .sample_from_distribution(list(name = "gamma", shape = original_distribution_shapes[i], scale = original_distribution_scales[i]), nr_distribution_samples)
+  for (i in 1:time_steps){
+    new_sampled_report_delays <- .sample_from_distribution(list(name="gamma", shape=original_distribution_shapes[i], scale=original_distribution_scales[i]), nr_distribution_samples)
     sampled_report_delays <- c(sampled_report_delays, new_sampled_report_delays)
     new_report_dates <- rep(available_dates[i], nr_distribution_samples)
     report_dates <- c(report_dates, new_report_dates)
   }
   delay_data <- dplyr::tibble(event_date = report_dates, report_delay = sampled_report_delays)
-  delay_matrix <- get_matrix_from_empirical_delay_distr(delay_data, time_steps, fit = "gamma")
+  result <- get_matrix_from_empirical_delay_distr(delay_data, time_steps, fit = "gamma", return_fitted_distribution = TRUE)
 
+  delay_matrix <- result$matrix
+  distrib_list <- result$distributions
 
-  # Get the shapes and scales of the gamma distributions fitted by the get_matrix_from_empirical_delay_distr function
+  #Get the shapes and scales of the gamma distributions fitted by the get_matrix_from_empirical_delay_distr function
   distribution_shapes <- c()
   distribution_scales <- c()
 
-  for (distribution in global_distrib_list) {
+  for (distribution in distrib_list){
     distribution_shapes <- c(distribution_shapes, distribution$shape)
     distribution_scales <- c(distribution_scales, distribution$scale)
   }
 
-  # Compute the RMSE between the desired gamma distribution shapes and scales, and the ones obtained by the get_matrix_from_empirical_delay_distr function
+  #Compute the RMSE between the desired gamma distribution shapes and scales, and the ones obtained by the get_matrix_from_empirical_delay_distr function
   start_index <- length(distribution_shapes) - length(original_distribution_shapes) + 1
-  shape_rmse <- Metrics::rmse(distribution_shapes[start_index:length(distribution_shapes)], original_distribution_shapes) / mean(original_distribution_shapes)
-  scale_rmse <- Metrics::rmse(distribution_scales[start_index:length(distribution_scales)], original_distribution_scales) / mean(original_distribution_scales)
+  shape_rmse <- Metrics::rmse(distribution_shapes[start_index:length(distribution_shapes)], original_distribution_shapes)/mean(original_distribution_shapes)
+  scale_rmse <- Metrics::rmse(distribution_scales[start_index:length(distribution_scales)], original_distribution_scales)/mean(original_distribution_scales)
 
-  return(list(shape_rmse = shape_rmse, scale_rmse = scale_rmse))
+  return(list(shape_rmse=shape_rmse, scale_rmse=scale_rmse))
 }
 
 #' Test whether a delay matrix columns sum to less than one.
@@ -133,7 +133,7 @@
 expect_delay_matrix_sums_lte_1 <- function(matrix, full_cols = 0, tolerance = 1E-3) {
   if (full_cols > 0 && full_cols < ncol(matrix)) {
     sums_full_cols <- apply(matrix[, 1:full_cols], MARGIN = 2, FUN = sum)
-    expect_equal(sums_full_cols, rep(1, times = length(sums_full_cols)), tolerance = tolerance)
+    testthat::expect_equal(sums_full_cols, rep(1, times = length(sums_full_cols)), tolerance = tolerance)
   }
 
   sum_all_cols <- apply(matrix, MARGIN = 2, FUN = sum)

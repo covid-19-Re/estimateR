@@ -39,6 +39,12 @@ The index tracks which data point in bootstrapped values
 corresponds to which data point in the original values.}
 
 \item{alpha}{value between 0 and 1. Confidence level of the confidence interval.}
+
+\item{prefix_up}{string. prefix to add to \code{output_value_col}
+to name the column containing the upper limit of confidence interval}
+
+\item{prefix_down}{string. prefix to add to \code{output_value_col}
+to name the column containing the lower limit of confidence interval}
 }
 \value{
 dataframe with 4 columns:

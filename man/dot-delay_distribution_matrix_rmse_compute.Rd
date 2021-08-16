@@ -31,8 +31,5 @@ A list with the computed RMSE. It has two elements: $shape_rmse and $scale_rmse
 A list with the computed RMSE. It has two elements: $shape_rmse and $scale_rmse
 }
 \description{
-Function useful for testing purposes.
-It assumes a different delay between event and observation for each individual day.
-It then generates the delay matrix and computes the RMSE between the parameters of the gamma distributions passed as arguments and the ones recovered from the delay matrix.
-The shapes and scales of the gamma distributions are specified as parameters, and the number of timesteps is assumed to be equal to the length of these vectors.
+This funciotn is useful for testing purposes.
 }

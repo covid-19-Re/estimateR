@@ -8,7 +8,8 @@
   recent_counts_distribution,
   fit = "none",
   col_number,
-  N
+  N,
+  return_fitted_distribution = FALSE
 )
 }
 \arguments{
@@ -19,9 +20,15 @@
 \item{col_number}{positive integer. The index the computed column has in the delay matrix}
 
 \item{N}{positive integer. Size of delay matrix.}
+
+\item{return_fitted_distribution}{boolean. If TRUE, the function also returns the gamma distribution that was fitted to the respective column.}
 }
 \value{
-the \code{col_number}th column of the delay matrix, based on the vector of report delays given.
+If \code{return_fitted_distribution = FALSE},
+returns the \code{col_number}th column of the delay matrix, based on the vector of report delays given.
+If \code{return_fitted_distribution = TRUE}, it returns a list with two elements:
+\code{column} - delay matrix column as described above,
+and \code{distribution} - the delay distribution that was fitted to the column.
 }
 \description{
 Build a specific column of the delay distribution matrix
