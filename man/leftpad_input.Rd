@@ -17,9 +17,14 @@ This parameter allows one to keep track of the date of the first value in \code{
 without needing to carry a \code{date} column around.
 A positive offset means \code{values} are delayed in the future compared to the reference values.
 A negative offset means the opposite.
-}
+}}
 
-@return Module input object.
+\item{new_offset}{Offset of output.}
+
+\item{padding_value}{Value to left-pad input with.}
+}
+\value{
+Module input object.
 List with two elements:
 \enumerate{
 \item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
@@ -29,11 +34,7 @@ This parameter allows one to keep track of the date of the first value in \code{
 without needing to carry a \code{date} column around.
 A positive offset means \code{values} are delayed in the future compared to the reference values.
 A negative offset means the opposite.
-}}
-
-\item{new_offset}{Offset of output.}
-
-\item{padding_value}{Value to left-pad input with.}
+}
 }
 \description{
 Pad values on the left side of input

@@ -49,6 +49,19 @@ implemented in \code{\link{.estimate_Re_EpiEstim_piecewise_constant}}}
     \item{\code{estimation_window}}{Use with \code{estimation_method = "EpiEstim sliding window"}
 Positive integer value.
 Number of data points over which to assume Re to be constant.}
+    \item{\code{import_incidence_input}}{NULL or module input object.
+List with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+If not NULL, this data represents recorded imported cases.
+And then \code{incidence_input} represents only local cases.}
     \item{\code{minimum_cumul_incidence}}{Numeric value.
 Minimum number of cumulated infections before starting the Re estimation.
 Default is \code{12} as recommended in Cori et al., 2013.}

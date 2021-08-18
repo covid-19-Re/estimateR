@@ -1,6 +1,5 @@
-
-# TODO turn off on CRAN (due to the randomness element of the test)
 test_that("get_bootstrap_replicate outputs difference values with same median and bounds as original difference values", {
+  skip_on_cran()
   expect_bootstrapped_diff_bounded_by_original_diff <- function(...) {
     data_points_incl <- 21
     degree <- 1

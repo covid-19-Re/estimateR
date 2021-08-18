@@ -130,6 +130,7 @@ estimate_Re <- function(incidence_data,
 #' @inheritParams inner_module
 #' @inherit EpiEstim_wrapper
 .estimate_Re_EpiEstim_sliding_window <- function(incidence_input,
+                                                 import_incidence_input = NULL,
                                                  minimum_cumul_incidence = 12,
                                                  estimation_window = 3,
                                                  mean_serial_interval = 4.8,
@@ -146,16 +147,35 @@ estimate_Re <- function(incidence_data,
   ))
 
   incidence_vector <- .get_values(incidence_input)
-
   if (sum(incidence_vector) < minimum_cumul_incidence) {
     stop("minimum_cumul_incidence parameter is set higher than total cumulative incidence.")
   }
+
+  if(!is.null(import_incidence_input)) {
+    .are_valid_argument_values(list(
+      list(import_incidence_input, "module_input")
+    ))
+
+    incidence <- merge_outputs(output_list = list(local = incidence_input,
+                                imported = import_incidence_input),
+                           include_index = FALSE) %>%
+      tidyr::replace_na(list(local = 0, imported = 0))
+
+    incidence_length <- nrow(incidence)
+    input_offset <- min(.get_offset(incidence_input), .get_offset(import_incidence_input))
+
+  } else {
+    incidence <- incidence_vector
+    incidence_length <- length(incidence)
+    input_offset <- .get_offset(incidence_input)
+  }
+
   offset <- which(cumsum(incidence_vector) >= minimum_cumul_incidence)[1]
   # We use the criteria on the offset from Cori et al. 2013
   # (and offset needs to be at least two for EpiEstim)
   offset <- max(estimation_window, ceiling(mean_serial_interval), offset, 2)
 
-  right_bound <- length(incidence_vector) - (estimation_window - 1)
+  right_bound <- incidence_length - (estimation_window - 1)
 
   if (is.na(offset) | right_bound < offset) {
     # No valid data point, return empty estimate
@@ -166,8 +186,8 @@ estimate_Re <- function(incidence_data,
   t_start <- seq(offset, right_bound)
   t_end <- t_start + estimation_window - 1
 
-  R_instantaneous <- EpiEstim::estimate_R(
-    incidence_vector,
+  R_instantaneous <- suppressWarnings(EpiEstim::estimate_R(
+    incid = incidence,
     method = "parametric_si",
     config = EpiEstim::make_config(
       list(
@@ -179,23 +199,24 @@ estimate_Re <- function(incidence_data,
       )
     )
   )
+  )
 
   additional_offset <- t_end[1] - 1
   Re_estimate <- .get_module_output(
     R_instantaneous$R$`Mean(R)`,
-    incidence_input,
+    input_offset,
     additional_offset
   )
   if (output_HPD) {
     Re_highHPD <- .get_module_output(
       R_instantaneous$R$`Quantile.0.975(R)`,
-      incidence_input,
+      input_offset,
       additional_offset
     )
 
     Re_lowHPD <- .get_module_output(
       R_instantaneous$R$`Quantile.0.025(R)`,
-      incidence_input,
+      input_offset,
       additional_offset
     )
 
@@ -230,6 +251,7 @@ estimate_Re <- function(incidence_data,
 #' @inherit EpiEstim_wrapper
 #'
 .estimate_Re_EpiEstim_piecewise_constant <- function(incidence_input,
+                                                     import_incidence_input = NULL,
                                                      minimum_cumul_incidence = 12,
                                                      interval_ends = NULL,
                                                      interval_length = 7,
@@ -253,20 +275,37 @@ estimate_Re <- function(incidence_data,
     stop("minimum_cumul_incidence parameter is set higher than total cumulative incidence.")
   }
 
+  if(!is.null(import_incidence_input)) {
+    .are_valid_argument_values(list(
+      list(import_incidence_input, "module_input")
+    ))
+
+    incidence <- merge_outputs(output_list = list(local = incidence_input,
+                                                  imported = import_incidence_input),
+                               include_index = FALSE) %>%
+      tidyr::replace_na(list(local = 0, imported = 0))
+
+    incidence_length <- nrow(incidence)
+    input_offset <- min(.get_offset(incidence_input), .get_offset(import_incidence_input))
+
+  } else {
+    incidence <- incidence_vector
+    incidence_length <- length(incidence)
+    input_offset <- .get_offset(incidence_input)
+  }
+
   offset <- which(cumsum(incidence_vector) >= minimum_cumul_incidence)[1]
   # offset needs to be at least two for EpiEstim
   offset <- max(2, offset)
-  right_bound <- length(incidence_vector)
+  right_bound <- incidence_length
 
   if (!is.null(interval_ends)) {
     .are_valid_argument_values(list(
       list(interval_ends, "integer_vector")
       ))
 
-    # we make these be relative to index_offset
-    index_offset <- .get_offset(incidence_input)
-
-    interval_ends <- sort(interval_ends - index_offset)
+    # we make these be relative to input_offset
+    interval_ends <- sort(interval_ends - input_offset)
 
     interval_ends <- interval_ends[interval_ends > offset & interval_ends <= right_bound]
   } else {
@@ -283,8 +322,8 @@ estimate_Re <- function(incidence_data,
 
   interval_starts <- c(offset, interval_ends[-length(interval_ends)] + 1)
 
-  R_instantaneous <- EpiEstim::estimate_R(
-    incidence_vector,
+  R_instantaneous <- suppressWarnings(EpiEstim::estimate_R(
+    incid = incidence,
     method = "parametric_si",
     config = EpiEstim::make_config(
       list(
@@ -295,6 +334,7 @@ estimate_Re <- function(incidence_data,
         mean_prior = mean_Re_prior
       )
     )
+  )
   )
 
   additional_offset <- interval_starts[1] - 1
@@ -310,14 +350,14 @@ estimate_Re <- function(incidence_data,
   }
 
   Re_estimate <- replicate_estimates_on_interval(R_instantaneous$R$`Mean(R)`, interval_starts, interval_ends)
-  Re_estimate <- .get_module_output(Re_estimate, incidence_input, additional_offset)
+  Re_estimate <- .get_module_output(Re_estimate, input_offset, additional_offset)
 
   if (output_HPD) {
     Re_highHPD <- replicate_estimates_on_interval(R_instantaneous$R$`Quantile.0.975(R)`, interval_starts, interval_ends)
-    Re_highHPD <- .get_module_output(Re_highHPD, incidence_input, additional_offset)
+    Re_highHPD <- .get_module_output(Re_highHPD, input_offset, additional_offset)
 
     Re_lowHPD <- replicate_estimates_on_interval(R_instantaneous$R$`Quantile.0.025(R)`, interval_starts, interval_ends)
-    Re_lowHPD <- .get_module_output(Re_lowHPD, incidence_input, additional_offset)
+    Re_lowHPD <- .get_module_output(Re_lowHPD, input_offset, additional_offset)
 
     return(list(
       Re_estimate = Re_estimate,

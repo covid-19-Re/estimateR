@@ -100,5 +100,5 @@ correct_for_partially_observed_data <- function(incidence_data,
 
   truncated_incidence_vector <- incidence_vector[1:(length(incidence_vector) - cutoff)]
 
-  return(.get_module_output(truncated_incidence_vector, input))
+  return(.get_module_output(truncated_incidence_vector, .get_offset(input)))
 }

@@ -23,26 +23,14 @@ This parameter allows one to keep track of the date of the first value in \code{
 without needing to carry a \code{date} column around.
 A positive offset means \code{values} are delayed in the future compared to the reference values.
 A negative offset means the opposite.
-}
-
-@return Module input object.
-List with two elements:
-\enumerate{
-\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
-\item An integer named \code{index_offset}: the offset, counted in number of time steps,
-by which the first value in \code{values} is shifted compared to a reference time step
-This parameter allows one to keep track of the date of the first value in \code{values}
-without needing to carry a \code{date} column around.
-A positive offset means \code{values} are delayed in the future compared to the reference values.
-A negative offset means the opposite.
 }}
 
 \item{output_name}{string. Name to be given to the \code{values} column}
 
 \item{index_col}{string. Name of the index column included in the output.
-If a \code{ref_date} is passed to the fucntion, the result will contain
+If a \code{ref_date} is passed to the function, the result will contain
 a \code{date} column instead.
-Even so, a value must be given here for internal steps.}
+Even so, a value must be given to this argument for internal steps.}
 
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 

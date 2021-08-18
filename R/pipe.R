@@ -19,6 +19,7 @@
 #' @inheritDotParams .smooth_LOESS -incidence_input
 #' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
+#' @inheritDotParams .estimate_Re_EpiEstim_piecewise_constant -incidence_input -output_HPD
 #'
 #' @inherit bootstrap_return return
 #' @export
@@ -30,6 +31,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
                                             uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
                                             combine_bootstrap_and_estimation_uncertainties = FALSE,
                                             delay,
+                                            import_incidence_data = NULL,
                                             ref_date = NULL,
                                             time_step = "day",
                                             output_Re_only = TRUE,
@@ -92,6 +94,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
         deconvolution_method = deconvolution_method,
         estimation_method = estimation_method,
         delay = total_delay_distribution,
+        import_incidence_data = import_incidence_data,
         ref_date = NULL,
         output_Re_only = FALSE,
         include_index = TRUE,
@@ -140,6 +143,31 @@ get_block_bootstrapped_estimate <- function(incidence_data,
       )
     )
 
+    if(!is.null(import_incidence_data)) {
+      .are_valid_argument_values(list(
+        list(import_incidence_data, "module_input")))
+
+      bootstrapped_import_incidence <- do.call(
+        "get_bootstrap_replicate",
+        c(
+          list(
+            incidence_data = import_incidence_data,
+            bootstrapping_method = "non-parametric block boostrap"
+          ),
+          .get_shared_args(
+            list(
+              .block_bootstrap,
+              .block_bootstrap_overlap_func,
+              .smooth_LOESS
+            ),
+            dots_args
+          )
+        )
+      )
+    } else {
+      bootstrapped_import_incidence <- NULL
+    }
+
     bootstrapping_result <- do.call(
       "estimate_Re_from_noisy_delayed_incidence",
       c(
@@ -149,6 +177,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
           deconvolution_method = deconvolution_method,
           estimation_method = estimation_method,
           delay = total_delay_distribution,
+          import_incidence_data = bootstrapped_import_incidence,
           ref_date = NULL,
           output_Re_only = FALSE,
           include_index = TRUE,
@@ -232,6 +261,7 @@ get_block_bootstrapped_estimate <- function(incidence_data,
 #' @inheritDotParams .smooth_LOESS -incidence_input
 #' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
+#' @inheritDotParams .estimate_Re_EpiEstim_piecewise_constant -incidence_input -output_HPD
 #'
 #' @return Time series of effective reproductive number estimates through time.
 #' If \code{ref_date} is provided then a date column is included with the output.
@@ -241,6 +271,7 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
                                                      deconvolution_method = "Richardson-Lucy delay distribution",
                                                      estimation_method = "EpiEstim sliding window",
                                                      delay,
+                                                     import_incidence_data = NULL,
                                                      ref_date = NULL,
                                                      time_step = "day",
                                                      output_Re_only = TRUE,
@@ -257,8 +288,6 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
   ))
 
   dots_args <- .get_dots_as_list(...)
-
-  get_infections_from_incidence
 
   smoothed_incidence <- do.call(
     "smooth_incidence",
@@ -289,13 +318,50 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
     )
   )
 
+  if(!is.null(import_incidence_data)) {
+    .are_valid_argument_values(list(
+      list(import_incidence_data, "module_input")))
+
+    smoothed_import_incidence <- do.call(
+      "smooth_incidence",
+      c(
+        list(
+          incidence_data = import_incidence_data,
+          smoothing_method = smoothing_method
+        ),
+        .get_shared_args(.smooth_LOESS, dots_args)
+      )
+    )
+
+    deconvolved_import_incidence <- do.call(
+      "deconvolve_incidence",
+      c(
+        list(
+          incidence_data = smoothed_import_incidence,
+          deconvolution_method = deconvolution_method,
+          delay = delay
+        ),
+        .get_shared_args(
+          list(
+            .deconvolve_incidence_Richardson_Lucy,
+            convolve_delays
+          ),
+          dots_args
+        )
+      )
+    )
+  } else {
+    deconvolved_import_incidence <- NULL
+  }
+
   estimated_Re <- do.call(
     "estimate_Re",
     c(
       list(
         incidence_data = deconvolved_incidence,
         estimation_method = estimation_method,
-        simplify_output = FALSE
+        simplify_output = FALSE,
+        import_incidence_input = deconvolved_import_incidence
       ),
       .get_shared_args(.estimate_Re_EpiEstim_sliding_window, dots_args)
     )
@@ -501,6 +567,7 @@ get_infections_from_incidence <- function(incidence_data,
 #' @inheritDotParams .smooth_LOESS -incidence_input
 #' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
+#' @inheritDotParams .estimate_Re_EpiEstim_piecewise_constant -incidence_input -output_HPD
 #' @inheritDotParams merge_outputs -output_list -include_index -index_col
 #' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_until_final_report
 #'
@@ -665,6 +732,7 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
 #' @inheritDotParams .smooth_LOESS -incidence_input
 #' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
+#' @inheritDotParams .estimate_Re_EpiEstim_piecewise_constant -incidence_input -output_HPD
 #' @inheritDotParams merge_outputs -output_list -include_index -index_col
 #' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_until_final_report
 #'

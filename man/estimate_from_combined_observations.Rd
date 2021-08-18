@@ -115,7 +115,7 @@ See Details for more details.}
 (as opposed to containing results for each intermediate step)}
 
 \item{...}{
-  Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}, \code{\link[=merge_outputs]{merge_outputs}}, \code{\link[=correct_for_partially_observed_data]{correct_for_partially_observed_data}}
+  Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}, \code{\link[=.estimate_Re_EpiEstim_piecewise_constant]{.estimate_Re_EpiEstim_piecewise_constant}}, \code{\link[=merge_outputs]{merge_outputs}}, \code{\link[=correct_for_partially_observed_data]{correct_for_partially_observed_data}}
   \describe{
     \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.
 The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
@@ -132,6 +132,19 @@ the average initial Re.}
     \item{\code{estimation_window}}{Use with \code{estimation_method = "EpiEstim sliding window"}
 Positive integer value.
 Number of data points over which to assume Re to be constant.}
+    \item{\code{import_incidence_input}}{NULL or module input object.
+List with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+If not NULL, this data represents recorded imported cases.
+And then \code{incidence_input} represents only local cases.}
     \item{\code{minimum_cumul_incidence}}{Numeric value.
 Minimum number of cumulated infections before starting the Re estimation.
 Default is \code{12} as recommended in Cori et al., 2013.}
@@ -139,6 +152,18 @@ Default is \code{12} as recommended in Cori et al., 2013.}
     \item{\code{std_serial_interval}}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
     \item{\code{mean_Re_prior}}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
     \item{\code{output_HPD}}{Boolean. If TRUE, return the highest posterior density interval with the output.}
+    \item{\code{interval_ends}}{Use with \code{estimation_method = "EpiEstim piecewise constant"}
+Integer vector. Optional argument.
+If provided, \code{interval_ends} overrides the \code{interval_length} argument.
+Each element of \code{interval_ends} specifies the right boundary
+of an interval over which Re is assumed to be constant for the calculation.
+Values in \code{interval_ends} must be integer values corresponding
+with the same numbering of time steps as given by \code{incidence_input}.
+In other words, \code{interval_ends} and \code{incidence_input},
+use the same time step as the zero-th time step.}
+    \item{\code{interval_length}}{Use with \code{estimation_method = "EpiEstim piecewise constant"}
+Positive integer value.
+Re is assumed constant over steps of size \code{interval_length}.}
     \item{\code{cutoff_observation_probability}}{value between 0 and 1.
 Only datapoints for timesteps that have a probability of observing a event
 higher than \code{cutoff_observation_probability} are kept.

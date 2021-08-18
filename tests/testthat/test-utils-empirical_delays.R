@@ -83,6 +83,7 @@ test_that(".get_matrix_from_empirical_delay_distr handles returning data over a 
 })
 
 test_that(".get_matrix_from_empirical_delay_distr returns a matrix with the expected distributions when using fit = gamma", {
+  skip_on_cran()
   nr_distribution_samples <- 500
   time_steps <- 30
 

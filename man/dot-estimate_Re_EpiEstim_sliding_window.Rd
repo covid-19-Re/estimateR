@@ -6,6 +6,7 @@
 \usage{
 .estimate_Re_EpiEstim_sliding_window(
   incidence_input,
+  import_incidence_input = NULL,
   minimum_cumul_incidence = 12,
   estimation_window = 3,
   mean_serial_interval = 4.8,
@@ -25,9 +26,9 @@ This parameter allows one to keep track of the date of the first value in \code{
 without needing to carry a \code{date} column around.
 A positive offset means \code{values} are delayed in the future compared to the reference values.
 A negative offset means the opposite.
-}
+}}
 
-@return Module input object.
+\item{import_incidence_input}{NULL or module input object.
 List with two elements:
 \enumerate{
 \item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
@@ -37,7 +38,9 @@ This parameter allows one to keep track of the date of the first value in \code{
 without needing to carry a \code{date} column around.
 A positive offset means \code{values} are delayed in the future compared to the reference values.
 A negative offset means the opposite.
-}}
+}
+If not NULL, this data represents recorded imported cases.
+And then \code{incidence_input} represents only local cases.}
 
 \item{minimum_cumul_incidence}{Numeric value.
 Minimum number of cumulated infections before starting the Re estimation.

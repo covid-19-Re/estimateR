@@ -103,7 +103,7 @@ get_bootstrap_replicate <- function(incidence_data,
     bootstrapped_incidence <- round(bootstrapped_incidence)
   }
 
-  return(.get_module_output(bootstrapped_incidence, incidence_input))
+  return(.get_module_output(bootstrapped_incidence, .get_offset(incidence_input)))
 }
 
 #' Helper function for block-bootstrapping

@@ -37,6 +37,9 @@ NULL
 #'  This means that the first value in \code{incidence_data}
 #'  is associated with the reference time step (no shift towards the future or past).
 #' }
+#' @param import_incidence_data NULL or argument with the same requirements as \code{incidence_data}.
+#' If not NULL, this argument represents records of imported cases and
+#' \code{incidence_data} represents local cases only.
 #' @param partially_delayed_incidence An object containing incidence data through time.
 #' It can be:
 #' \itemize{
@@ -76,7 +79,8 @@ NULL
 #' @param simplify_output boolean. Return a numeric vector instead of module
 #'  output object if output offset is zero?
 #'
-#'  @return A list with two elements:
+#'
+#' @return A list with two elements:
 #'  \enumerate{
 #'  \item A numeric vector named \code{values}: the result of the computations on the input data.
 #'  \item An integer named \code{index_offset}: the offset, counted in number of time steps,
@@ -156,7 +160,7 @@ NULL
 #'  A negative offset means the opposite.
 #'  }
 #'
-#'  @return Module input object.
+#' @return Module input object.
 #' List with two elements:
 #'  \enumerate{
 #'  \item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
@@ -179,6 +183,19 @@ NULL
 #' @param std_serial_interval Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}
 #' @param mean_Re_prior Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}
 #' @param output_HPD Boolean. If TRUE, return the highest posterior density interval with the output.
+#' @param import_incidence_input NULL or module input object.
+#' List with two elements:
+#'  \enumerate{
+#'  \item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+#'  \item An integer named \code{index_offset}: the offset, counted in number of time steps,
+#'  by which the first value in \code{values} is shifted compared to a reference time step
+#'  This parameter allows one to keep track of the date of the first value in \code{values}
+#'  without needing to carry a \code{date} column around.
+#'  A positive offset means \code{values} are delayed in the future compared to the reference values.
+#'  A negative offset means the opposite.
+#'  }
+#'  If not NULL, this data represents recorded imported cases.
+#'  And then \code{incidence_input} represents only local cases.
 #'
 #' @return If \code{output_HPD = FALSE},
 #' value is a module object (a list of the same kind as \code{incidence_input}).

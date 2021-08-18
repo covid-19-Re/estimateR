@@ -37,14 +37,58 @@ test_that("estimate_Re_from_noisy_delayed_incidence yields consistent results on
     0.76, 0.74, 0.71, 0.68, 0.64, NA, NA, NA, NA, NA
   )
 
-  # master
-  # reference_R_values <- c(NA,NA,NA,NA,4.98,3.63,3.06,2.78,2.62,
-  #                         2.49,2.38,2.27,2.17,2.07,1.97,1.87,
-  #                         1.78,1.69,1.61,1.52,1.44,1.37,1.3,1.23,
-  #                         1.16,1.09,1.02,0.96,0.9,0.86,0.82,0.79,
-  #                         0.76,0.74,0.71,0.68,0.64,NA,NA,NA,NA,NA)
-
   reference_dates <- seq.Date(from = as.Date("2020-01-30"), to = as.Date("2020-03-11"), by = "day")
+
+  expect_equal(estimates$Re_estimate, reference_R_values, tolerance = 5E-2)
+  expect_equal(estimates$date, reference_dates)
+})
+
+test_that("estimate_Re_from_noisy_delayed_incidence yields consistent results with import data", {
+  toy_incidence_data <- c(
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 1, 2, 13, 17, 22, 31, 41, 52, 65, 80, 97, 116,
+    138, 162, 189, 218, 245, 268, 292, 311, 322, 330,
+    332, 324, 312, 297, 276, 256, 236, 214, 192, 170,
+    145, 118, 91, 66
+  )
+
+  toy_import_data <- c(
+    1,1,1,1,1,1,2,2,2,0,0,
+    0,0,0,0,0,9,0,1,0,0,0,0
+  )
+
+  delay_distribution <- c(
+    0, 0.015, 0.09, 0.168,
+    0.195, 0.176, 0.135, 0.091, 0.057, 0.034,
+    0.019, 0.01, 0.005, 0.003,
+    0.001, 0.001
+  )
+
+  estimates <- estimate_Re_from_noisy_delayed_incidence(
+    incidence_data = toy_incidence_data,
+    import_incidence_data = toy_import_data,
+    smoothing_method = "LOESS",
+    deconvolution_method = "Richardson-Lucy delay distribution",
+    estimation_method = "EpiEstim sliding window",
+    delay = delay_distribution,
+    estimation_window = 3,
+    mean_serial_interval = 4.8,
+    std_serial_interval = 2.3,
+    minimum_cumul_incidence = 10,
+    mean_Re_prior = 1,
+    output_Re_only = FALSE,
+    ref_date = as.Date("2020-02-04"),
+    time_step = "day"
+  )
+
+  reference_R_values <- c(NA,NA,NA,NA,NA,NA,NA,NA,NA,3.52,3.59,3.52,
+                          3.37,3.21,3.05,2.89,2.74,2.61,2.48,2.36,
+                          2.24,2.13,2.03,1.92,1.83,1.73,1.64,1.56,
+                          1.47,1.39,1.32,1.25,1.17,1.1,1.02,0.95,
+                          0.89,0.84,0.81,0.77,0.74,0.72,0.69,0.65,
+                          0.62,NA,NA,NA,NA,NA)
+
+  reference_dates <- seq.Date(from = as.Date("2020-01-30"), to = as.Date("2020-03-19"), by = "day")
 
   expect_equal(estimates$Re_estimate, reference_R_values, tolerance = 5E-2)
   expect_equal(estimates$date, reference_dates)
@@ -103,8 +147,8 @@ test_that("estimate_Re_from_noisy_delayed_incidence passes '...' arguments consi
   expect_equal(estimates$date_index, reference_indices)
 })
 
-# TODO skip on CRAN as it can fail by chance
 test_that("get_block_bootstrapped_estimate yields consistent results on a toy example", {
+  skip_on_cran()
   toy_incidence_data <- c(
     6, 8, 10, 13, 17, 22, 31, 41, 52, 65, 80, 97, 116,
     138, 162, 189, 218, 245, 268, 292, 311, 322, 330,
@@ -206,8 +250,78 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
   expect_equal(estimates$CI_up_Re_estimate, reference_CI_up_values, tolerance = 1E-1)
 })
 
-# TODO skip on CRAN as it can fail by chance
+test_that("get_block_bootstrapped_estimate yields consistent with import data", {
+  skip_on_cran()
+  toy_incidence_data <- c(
+    6, 8, 10, 13, 17, 22, 31, 41, 52, 65, 80, 97, 116,
+    138, 162, 189, 218, 245, 268, 292, 311, 322, 330,
+    332, 324, 312, 297, 276, 256, 236, 214, 192, 170,
+    145, 118, 91, 66
+  )
+
+  toy_import_data <- c(
+    1,1,1,1,1,1,2,2,2,0,0,
+    0,0,0,0,0,9,0,1,0,0,0,0
+  )
+
+  shape_incubation <- 2
+  scale_incubation <- 1.2
+  delay_incubation <- list(name = "gamma", shape = shape_incubation, scale = scale_incubation)
+
+  shape_onset_to_report <- 3
+  scale_onset_to_report <- 1.3
+  delay_onset_to_report <- list(name = "gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
+
+  estimates <- get_block_bootstrapped_estimate(
+    incidence_data = toy_incidence_data,
+    import_incidence_data = toy_import_data,
+    N_bootstrap_replicates = 100,
+    smoothing_method = "LOESS",
+    deconvolution_method = "Richardson-Lucy delay distribution",
+    estimation_method = "EpiEstim sliding window",
+    uncertainty_summary_method = "bagged mean - CI from bootstrap estimates",
+    delay = list(delay_incubation, delay_onset_to_report),
+    estimation_window = 3,
+    mean_serial_interval = 4.8,
+    std_serial_interval = 2.3,
+    minimum_cumul_incidence = 10,
+    mean_Re_prior = 1,
+    ref_date = as.Date("2020-02-04"),
+    time_step = "day"
+  )
+
+  reference_dates <- seq.Date(
+    from = as.Date("2020-02-04"),
+    to = as.Date("2020-03-05"),
+    by = "day"
+  )
+
+  reference_R_mean_values <- c(2.69,2.48,2.37,2.29,2.22,2.14,2.06,
+                               1.98,1.9,1.82,1.73,1.65,1.57,1.49,
+                               1.42,1.35,1.28,1.21,1.14,1.08,1.02,
+                               0.97,0.92,0.89,0.86,0.84,0.82,0.8,
+                               0.79,0.77,0.75)
+
+  reference_CI_down_values <- c(2.53,2.34,2.24,2.18,2.12,2.05,1.97,
+                                1.89,1.8,1.72,1.65,1.58,1.5,1.43,
+                                1.36,1.29,1.23,1.17,1.11,1.05,0.99,0.94,0.89,
+                                0.85,0.82,0.79,0.77,0.74,0.72,0.7,0.67)
+
+  reference_CI_up_values <- c(2.85,2.63,2.5,2.4,2.32,2.23,2.15,
+                              2.08,2,1.91,1.82,1.72,1.64,1.55,
+                              1.47,1.4,1.32,1.25,1.18,1.12,1.05,
+                              1,0.96,0.92,0.9,0.88,0.87,0.86,
+                              0.85,0.84,0.83)
+
+
+  expect_equal(estimates$date, reference_dates)
+  expect_equal(estimates$Re_estimate, reference_R_mean_values, tolerance = 1E-1)
+  expect_equal(estimates$CI_down_Re_estimate, reference_CI_down_values, tolerance = 1E-1)
+  expect_equal(estimates$CI_up_Re_estimate, reference_CI_up_values, tolerance = 1E-1)
+})
+
 test_that("get_block_bootstrapped_estimate passes '...' arguments to inner functions properly", {
+  skip_on_cran()
   toy_incidence_data <- c(
     6, 8, 10, 13, 17, 22, 31, 41, 52, 65, 80, 97, 116,
     138, 162, 189, 218, 245, 268, 292, 311, 322, 330,
@@ -289,7 +403,6 @@ test_that("get_block_bootstrapped_estimate passes '...' arguments to inner funct
   expect_equal(estimates$CI_down_Re_estimate, reference_CI_down_values, tolerance = 1E-1)
   expect_equal(estimates$CI_up_Re_estimate, reference_CI_up_values, tolerance = 1E-1)
 })
-
 
 test_that("get_infections_from_incidence handles partially-delayed data correctly", {
   toy_onset_data <- c(
@@ -393,8 +506,8 @@ test_that("estimate_from_combined_observations returns consistent results", {
   expect_equal(results_estimation$Re_estimate, reference_R_values, tolerance = 1E-1)
 })
 
-# TODO switch off on CRAN as can fail by chance
 test_that("get_bootstrapped_estimate_from_combined_observations returns consistent results", {
+  skip_on_cran()
   toy_onset_data <- c(
     6, 8, 10, 13, 17, 22, 31, 41, 52, 65, 80, 97, 116,
     138, 162, 189, 218, 245, 268, 292, 311, 322, 330,
@@ -464,6 +577,7 @@ test_that("get_bootstrapped_estimate_from_combined_observations returns consiste
 })
 
 test_that("get_bootstrapped_estimate_from_combined_observations can deal with empirical delay data", {
+  skip_on_cran()
   ref_date <- as.Date("2021-03-24")
   n_days <- 50
   shape_initial_delay <- 6
@@ -528,8 +642,8 @@ test_that("get_bootstrapped_estimate_from_combined_observations can deal with em
   expect_equal(results_estimation$Re_estimate, reference_R_values, tolerance = 1E-1)
 })
 
-# TODO skip on CRAN as it can fail by chance
 test_that("get_block_bootstrapped_estimate yields consistent results on summaries of uncertainty", {
+  skip_on_cran()
   toy_incidence_data <- c(
     6, 8, 10, 13, 17, 22, 31, 41, 52, 65, 80, 97, 116,
     138, 162, 189, 218, 245, 268, 292, 311, 322, 330,
@@ -611,8 +725,8 @@ test_that("get_block_bootstrapped_estimate yields consistent results on summarie
   expect_equal(estimates$CI_up_Re_estimate, reference_CI_up_R_mean_values, tolerance = 1E-1)
 })
 
-# TODO switch off on CRAN as can fail by chance
 test_that("get_bootstrapped_estimate_from_combined_observations yields consistent results on summaries of uncertainty", {
+  skip_on_cran()
   toy_onset_data <- c(
     6, 8, 10, 13, 17, 22, 31, 41, 52, 65, 80, 97, 116,
     138, 162, 189, 218, 245, 268, 292, 311, 322, 330,
@@ -704,8 +818,8 @@ test_that("get_bootstrapped_estimate_from_combined_observations yields consisten
   expect_equal(results_estimation$CI_up_Re_estimate, reference_CI_up_R_mean, tolerance = 1E-1)
 })
 
-# TODO skip on CRAN as it can fail by chance
 test_that("get_block_bootstrapped_estimate consistently combines HPDs with bootstrap CIs", {
+  skip_on_cran()
   toy_incidence_data <- c(
     6, 8, 10, 13, 17, 22, 31, 41, 52, 65, 80, 97, 116,
     138, 162, 189, 218, 245, 268, 292, 311, 322, 330,
@@ -805,8 +919,8 @@ test_that("get_block_bootstrapped_estimate consistently combines HPDs with boots
   expect_equal(simplified_estimates$Re_estimate, pretty_reference_Re_estimate, tolerance = 1E-1)
 })
 
-# TODO skip on CRAN as it can fail by chance
 test_that("get_bootstrapped_estimate_from_combined_observations consistently combines HPDs with bootstrap CIs", {
+  skip_on_cran()
   toy_onset_data <- c(
     6, 8, 10, 13, 17, 22, 31, 41, 52, 65, 80, 97, 116,
     138, 162, 189, 218, 245, 268, 292, 311, 322, 330,

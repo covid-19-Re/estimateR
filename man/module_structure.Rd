@@ -23,6 +23,10 @@ This means that the first value in \code{incidence_data}
 is associated with the reference time step (no shift towards the future or past).
 }}
 
+\item{import_incidence_data}{NULL or argument with the same requirements as \code{incidence_data}.
+If not NULL, this argument represents records of imported cases and
+\code{incidence_data} represents local cases only.}
+
 \item{partially_delayed_incidence}{An object containing incidence data through time.
 It can be:
 \itemize{
@@ -62,9 +66,10 @@ is associated with the reference time step (no shift towards the future or past)
 }}
 
 \item{simplify_output}{boolean. Return a numeric vector instead of module
-output object if output offset is zero?
-
-@return A list with two elements:
+output object if output offset is zero?}
+}
+\value{
+A list with two elements:
 \enumerate{
 \item A numeric vector named \code{values}: the result of the computations on the input data.
 \item An integer named \code{index_offset}: the offset, counted in number of time steps,
@@ -78,7 +83,7 @@ accounts for the (optional) \code{index_offset} of the input.
 }
 If \code{index_offset} is \code{0} and \code{simplify_output = TRUE},
 the \code{index_offset} is dropped and the \code{values}
-element is returned as a numeric vector.}
+element is returned as a numeric vector.
 }
 \description{
 Module structure characteristics

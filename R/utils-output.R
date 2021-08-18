@@ -3,9 +3,9 @@
 #' @inherit inner_module
 #' @param output_name string. Name to be given to the \code{values} column
 #' @param index_col string. Name of the index column included in the output.
-#' If a \code{ref_date} is passed to the fucntion, the result will contain
+#' If a \code{ref_date} is passed to the function, the result will contain
 #' a \code{date} column instead.
-#' Even so, a value must be given here for internal steps.
+#' Even so, a value must be given to this argument for internal steps.
 #' @inherit dating
 #'
 #' @return tibble
@@ -55,21 +55,21 @@ make_tibble_from_output <- function(output,
 #' The shift applied during module operations is the \code{offset} argument.
 #'
 #' @param results numeric vector containing output of module operations.
-#' @param offset integer. Shift resulting from operations performed in module.
-#' @inheritParams inner_module
+#' @param original_offset integer. Input offset before computations.
+#' @param additional_offset integer. Shift resulting from operations performed in module.
 #'
-#' @inherit module_structure
-.get_module_output <- function(results, input, offset = 0) {
+#' @inherit module_structure return
+.get_module_output <- function(results, original_offset, additional_offset = 0) {
   .are_valid_argument_values(list(
     list(results, "numeric_vector"),
-    list(input, "module_input"),
-    list(offset, "integer")
+    list(original_offset, "integer"),
+    list(additional_offset, "integer")
   ))
   if (length(results) == 0) {
     return(.make_empty_module_output())
   }
 
-  new_offset <- input$index_offset + offset
+  new_offset <- original_offset + additional_offset
 
   while (is.na(results[1])) {
     results <- results[-1]

@@ -94,6 +94,23 @@ This option is included for comparison with legacy code.}
     \item{\code{return_fitted_distribution}}{boolean. If TRUE, the function also returns the gamma distribution that was fitted to the respective column.}
   }}
 }
+\value{
+A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the result of the computations on the input data.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the result is shifted compared to an \code{index_offset} of \code{0}.
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+Note that the \code{index_offset} of the output of the function call
+accounts for the (optional) \code{index_offset} of the input.
+}
+If \code{index_offset} is \code{0} and \code{simplify_output = TRUE},
+the \code{index_offset} is dropped and the \code{values}
+element is returned as a numeric vector.
+}
 \description{
 Use this function to correct the tail of an incidence time series
 if incidence was collected following a subsequent observation event.

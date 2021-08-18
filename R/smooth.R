@@ -92,5 +92,5 @@ smooth_incidence <- function(incidence_data,
   normalized_smoothed_counts <-
     raw_smoothed_counts * sum(incidence_vector, na.rm = T) / sum(raw_smoothed_counts, na.rm = T)
 
-  return(.get_module_output(normalized_smoothed_counts, incidence_input))
+  return(.get_module_output(normalized_smoothed_counts, .get_offset(incidence_input)))
 }

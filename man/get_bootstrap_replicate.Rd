@@ -40,9 +40,21 @@ implemented in \code{\link{.block_bootstrap}}}
 }}
 
 \item{simplify_output}{boolean. Return a numeric vector instead of module
-output object if output offset is zero?
+output object if output offset is zero?}
 
-@return A list with two elements:
+\item{...}{
+  Arguments passed on to \code{\link[=.block_bootstrap]{.block_bootstrap}}
+  \describe{
+    \item{\code{round_incidence}}{boolean. If \code{TRUE}, the bootstrapped incidence is rounded to the nearest integer.}
+    \item{\code{smoothing_method}}{string. Method used to smooth the original incidence data.
+Available options are:
+\itemize{
+\item{'LOESS', implemented in \code{\link{.smooth_LOESS}}}
+}}
+  }}
+}
+\value{
+A list with two elements:
 \enumerate{
 \item A numeric vector named \code{values}: the result of the computations on the input data.
 \item An integer named \code{index_offset}: the offset, counted in number of time steps,
@@ -56,18 +68,7 @@ accounts for the (optional) \code{index_offset} of the input.
 }
 If \code{index_offset} is \code{0} and \code{simplify_output = TRUE},
 the \code{index_offset} is dropped and the \code{values}
-element is returned as a numeric vector.}
-
-\item{...}{
-  Arguments passed on to \code{\link[=.block_bootstrap]{.block_bootstrap}}
-  \describe{
-    \item{\code{round_incidence}}{boolean. If \code{TRUE}, the bootstrapped incidence is rounded to the nearest integer.}
-    \item{\code{smoothing_method}}{string. Method used to smooth the original incidence data.
-Available options are:
-\itemize{
-\item{'LOESS', implemented in \code{\link{.smooth_LOESS}}}
-}}
-  }}
+element is returned as a numeric vector.
 }
 \description{
 Apply a bootstrapping procedure on incidence data.
