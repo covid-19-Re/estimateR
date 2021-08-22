@@ -40,8 +40,7 @@
 
 
 <meta property="og:title" content="Check if valid distribution list — .is_valid_distribution" />
-<meta property="og:description" content="Throws an error if not a list, or not a list with the appropriate elements.
-Returns FALSE if parameter values return an improper distribution (if gamma distr)" />
+<meta property="og:description" content="Check if valid distribution list" />
 
 
 
@@ -102,6 +101,9 @@ Returns FALSE if parameter values return an improper distribution (if gamma dist
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -131,11 +133,13 @@ Returns FALSE if parameter values return an improper distribution (if gamma dist
     </div>
 
     <div class="ref-description">
-    <p>Throws an error if not a list, or not a list with the appropriate elements.
-Returns FALSE if parameter values return an improper distribution (if gamma distr)</p>
+    <p>Check if valid distribution list</p>
     </div>
 
-    <pre class="usage"><span class='fu'>.is_valid_distribution</span><span class='op'>(</span><span class='va'>distribution</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>.is_valid_distribution</span><span class='op'>(</span>
+  <span class='va'>distribution</span>,
+  parameter_name <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/deparse.html'>deparse</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/substitute.html'>substitute</a></span><span class='op'>(</span><span class='va'>distribution</span><span class='op'>)</span><span class='op'>)</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -148,11 +152,15 @@ The <code>distribution</code> list must contain a 'name' element, this element m
 correspond to one of the types of <code><a href='https://rdrr.io/r/stats/Distributions.html'>distributions</a></code> supported in the <a href='https://rdrr.io/r/stats/Distributions.html'>Distributions</a> package.
 <code>distribution</code> must also contain parameters for the specified distribution, in the form '<code>parameter_name=parameter_value</code>'.</p></td>
     </tr>
+    <tr>
+      <th>parameter_name</th>
+      <td><p>A string containing the name the tested parameter had in the initial function in which it was passed.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a boolean value.</p>
+    <p>boolean. Returns FALSE if parameter values return an improper distribution (if gamma distr). Throws an error if not a list, or not a list with the appropriate elements. Returns TRUE otherwise.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

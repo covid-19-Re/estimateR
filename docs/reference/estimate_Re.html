@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Estimate effective reproductive number Re from incidence data — estimate_Re • estimateR</title>
+<title>Estimate the effective reproductive number Re through time from incidence data — estimate_Re • estimateR</title>
 
 
 <!-- jquery -->
@@ -39,12 +39,9 @@
 
 
 
-<meta property="og:title" content="Estimate effective reproductive number Re from incidence data — estimate_Re" />
-<meta property="og:description" content="The incidence data input should represent infections,
-as opposed to representing delayed observations of infections.
-If the incidence data represents delayed observations of infections
-then one should deconvolve it first with deconvolve_incidence.
-TODO add details on inner function, that it wraps around EpiEstim and so on." />
+<meta property="og:title" content="Estimate the effective reproductive number Re through time from incidence data — estimate_Re" />
+<meta property="og:description" content="estimate_Re() takes the number of infections through time
+and computes the Re value through time (also known as Rt)." />
 
 
 
@@ -105,6 +102,9 @@ TODO add details on inner function, that it wraps around EpiEstim and so on." />
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -128,17 +128,14 @@ TODO add details on inner function, that it wraps around EpiEstim and so on." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Estimate effective reproductive number Re from incidence data</h1>
+    <h1>Estimate the effective reproductive number Re through time from incidence data</h1>
     
     <div class="hidden name"><code>estimate_Re.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>The incidence data input should represent infections,
-as opposed to representing delayed observations of infections.
-If the incidence data represents delayed observations of infections
-then one should deconvolve it first with <code>deconvolve_incidence</code>.
-TODO add details on inner function, that it wraps around EpiEstim and so on.</p>
+    <p><code>estimate_Re()</code> takes the number of infections through time
+and computes the Re value through time (also known as Rt).</p>
     </div>
 
     <pre class="usage"><span class='fu'>estimate_Re</span><span class='op'>(</span>
@@ -153,7 +150,22 @@ TODO add details on inner function, that it wraps around EpiEstim and so on.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>incidence_data</th>
-      <td><p>numeric vector. Incidence data (TODO improve definition)</p></td>
+      <td><p>An object containing incidence data through time.
+It can either be:</p><ul>
+<li><p>A list with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the first value in <code>values</code> is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.</p></li>
+</ol></li>
+<li><p>A numeric vector. The vector corresponds to the <code>values</code> element
+descrived above, and <code>index_offset</code> is implicitely zero.
+This means that the first value in <code>incidence_data</code>
+is associated with the reference time step (no shift towards the future or past).</p></li>
+</ul></td>
     </tr>
     <tr>
       <th>estimation_method</th>
@@ -168,17 +180,33 @@ implemented in <code><a href='.estimate_Re_EpiEstim_piecewise_constant.html'>.es
     </tr>
     <tr>
       <th>simplify_output</th>
-      <td><p>boolean. Return a numeric vector instead of module
-output object if output offset is zero? TODO to be described better.</p></td>
+      <td><p>boolean. Simplify the output when possible?</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Arguments passed on to <code><a href='.estimate_Re_EpiEstim_sliding_window.html'>.estimate_Re_EpiEstim_sliding_window</a></code></p><dl>
-    <dt><code>minimum_cumul_incidence</code></dt><dd><p>Numeric scalar. Minimum number of cumulated infections before starting the Re estimation</p></dd>
-    <dt><code>estimation_window</code></dt><dd><p>Integer scalar. Number of data points over which to assume Re to be constant.</p></dd>
-    <dt><code>mean_serial_interval</code></dt><dd><p>Numeric positive scalar. <code>mean_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
-    <dt><code>std_serial_interval</code></dt><dd><p>Numeric positive scalar. <code>std_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
-    <dt><code>mean_Re_prior</code></dt><dd><p>Numeric positive scalar. <code>mean prior</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
+      <td><p>Arguments passed on to <code><a href='.estimate_Re_EpiEstim_sliding_window.html'>.estimate_Re_EpiEstim_sliding_window</a></code>, <code><a href='.estimate_Re_EpiEstim_piecewise_constant.html'>.estimate_Re_EpiEstim_piecewise_constant</a></code></p><dl>
+    <dt><code>estimation_window</code></dt><dd><p>Use with <code>estimation_method = "EpiEstim sliding window"</code>
+Positive integer value.
+Number of data points over which to assume Re to be constant.</p></dd>
+    <dt><code>minimum_cumul_incidence</code></dt><dd><p>Numeric value.
+Minimum number of cumulated infections before starting the Re estimation.
+Default is <code>12</code> as recommended in Cori et al., 2013.</p></dd>
+    <dt><code>mean_serial_interval</code></dt><dd><p>Numeric positive value. <code>mean_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
+    <dt><code>std_serial_interval</code></dt><dd><p>Numeric positive value. <code>std_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
+    <dt><code>mean_Re_prior</code></dt><dd><p>Numeric positive value. <code>mean prior</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
+    <dt><code>output_HPD</code></dt><dd><p>Boolean. If TRUE, return the highest posterior density interval with the output.</p></dd>
+    <dt><code>interval_ends</code></dt><dd><p>Use with <code>estimation_method = "EpiEstim piecewise constant"</code>
+Integer vector. Optional argument.
+If provided, <code>interval_ends</code> overrides the <code>interval_length</code> argument.
+Each element of <code>interval_ends</code> specifies the right boundary
+of an interval over which Re is assumed to be constant for the calculation.
+Values in <code>interval_ends</code> must be integer values corresponding
+with the same numbering of time steps as given by <code>incidence_input</code>.
+In other words, <code>interval_ends</code> and <code>incidence_input</code>,
+use the same time step as the zero-th time step.</p></dd>
+    <dt><code>interval_length</code></dt><dd><p>Use with <code>estimation_method = "EpiEstim piecewise constant"</code>
+Positive integer value.
+Re is assumed constant over steps of size <code>interval_length</code>.</p></dd>
   
 </dl></td>
     </tr>
@@ -186,7 +214,56 @@ output object if output offset is zero? TODO to be described better.</p></td>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>a module output object. Re estimates.</p>
+    <p>A list with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the result of the computations on the input data.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the result is shifted compared to an <code>index_offset</code> of <code>0</code>.
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+Note that the <code>index_offset</code> of the output of the function call
+accounts for the (optional) <code>index_offset</code> of the input.</p></li>
+</ol><p>If <code>index_offset</code> is <code>0</code> and <code>simplify_output = TRUE</code>,
+the <code>index_offset</code> is dropped and the <code>values</code>
+element is returned as a numeric vector.</p>
+<p>If <code>output_HPD = TRUE</code> (additional parameter),
+the highest posterior density interval boundaries are output along with the mean Re estimates.
+In that case, a list of three lists is returned:</p><ul>
+<li><p><code>Re_estimate</code> contains the Re estimates.</p></li>
+<li><p><code>Re_highHPD</code> and <code>Re_lowHPD</code> contain
+the higher and lower boundaries of the HPD interval,
+as computed by <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></li>
+</ul><p>If, in addition, <code>simplify_output = TRUE</code>,
+then the 3 elements are merged into a single dataframe by <code><a href='merge_outputs.html'>merge_outputs()</a></code>.
+A date column can be added to the dataframe by passing an extra <code>ref_date</code> argument
+(see <code><a href='merge_outputs.html'>merge_outputs</a></code> for details).</p>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>The incidence input should represent infections,
+as opposed to representing delayed observations of infections.
+If the incidence data represents delayed observations of infections,
+one should first reconstruct the incidence of infections using
+<code><a href='deconvolve_incidence.html'>deconvolve_incidence()</a></code> or <code><a href='get_infections_from_incidence.html'>get_infections_from_incidence()</a></code>
+which wraps around it and includes a smoothing step of the delayed observations.</p>
+<p><code>estimate_Re()</code> wraps around the <code>estimate_R()</code> function
+of the <code>EpiEstim</code> package from Cori et al, 2013.
+<code>estimate_Re()</code> allows for two types of Re estimations:</p><ol>
+<li><p>A sliding-window estimation.
+For each time step T, the Re(T) value is computed by assuming that Re is constant
+for time steps (T-X+1, ..., T-1, T), with X being the sliding window size.
+This option is chosen by setting <code>estimation_method = "EpiEstim sliding window"</code></p></li>
+<li><p>A piecewise-constant estimation.
+Re(t) is computed as being a piecewise-constant function of time.
+The length of each step can be a fixed number of time steps.
+That number is specified using the <code>interval_length</code> parameter.
+The length of each step can also be irregular.
+This can be useful if the boundaries of the steps are meant to coincide with particular events
+such as the implementation or cancellation of public health interventions.
+The right boundaries of the steps are specified using the <code>interval_ends</code> parameter.
+This option is chosen by setting <code>estimation_method = "EpiEstim piecewise constant"</code></p></li>
+</ol>
+
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

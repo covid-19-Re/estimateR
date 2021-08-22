@@ -111,8 +111,7 @@ We can then perform the Re estimation. The computations will take a few seconds 
 EST_estimates <- get_block_bootstrapped_estimate(
   incidence_data = EST_incidence$case_incidence,
   N_bootstrap_replicates = N_bootstrap_replicates,
-  delay_incubation = distribution_incubation, 
-  delay_onset_to_report = distribution_onset_to_confirmation,
+  delay = list(distribution_incubation, distribution_onset_to_confirmation),
   estimation_window = estimation_window,
   minimum_cumul_incidence = minimum_cumul_incidence,
   mean_serial_interval = mean_serial_interval,

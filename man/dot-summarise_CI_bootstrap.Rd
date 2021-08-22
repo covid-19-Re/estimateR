@@ -16,13 +16,35 @@
 )
 }
 \arguments{
-\item{bootstrap_id_col}{string. Name of the column containing bootstrap samples numbering.
-Id 0 must correspond to the estimate on the original data.}
+\item{central_values}{Values around which the confidence interval is going to be centered.
+Must be a dataframe with a timestep index column named \code{index_col}
+and a value column named \code{value_col}.
+The index column must not contain any \code{NA} value.}
 
-\item{index_col}{string. Index column to keep track of which data point
-in bootstrapped estimates corresponds to which data point in the original estimates.}
+\item{bootstrapped_values}{Bootstrap
+replicates of the original data.
+Must be a dataframe in the long format
+with a timestep index column named \code{index_col},
+a bootstrap replicate index column named \code{bootstrap_id_col},
+and a value column named \code{value_col}.
+The index column must not contain any \code{NA} value.}
+
+\item{value_col}{string. Name of the column containing values.}
+
+\item{bootstrap_id_col}{string. Name of the column containing bootstrap samples numbering.
+Id 0 must correspond to values associated to the original data.}
+
+\item{index_col}{string. Name of the index column.
+The index tracks which data point in bootstrapped values
+corresponds to which data point in the original values.}
 
 \item{alpha}{value between 0 and 1. Confidence level of the confidence interval.}
+
+\item{prefix_up}{string. prefix to add to \code{output_value_col}
+to name the column containing the upper limit of confidence interval}
+
+\item{prefix_down}{string. prefix to add to \code{output_value_col}
+to name the column containing the lower limit of confidence interval}
 }
 \value{
 dataframe with 4 columns:

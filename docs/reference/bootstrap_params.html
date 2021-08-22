@@ -101,6 +101,9 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -140,6 +143,14 @@
     <tr>
       <th>N_bootstrap_replicates</th>
       <td><p>integer. Number of bootstrap samples.</p></td>
+    </tr>
+    <tr>
+      <th>combine_bootstrap_and_estimation_uncertainties</th>
+      <td><p>boolean.
+If TRUE, the uncertainty interval reported is the union of
+the highest posterior density interval from the Re estimation
+with the confidence interval from the boostrapping of time series
+of observations.</p></td>
     </tr>
     </table>
 

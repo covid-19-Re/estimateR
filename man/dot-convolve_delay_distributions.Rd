@@ -2,19 +2,17 @@
 % Please edit documentation in R/utils-convolution.R
 \name{.convolve_delay_distributions}
 \alias{.convolve_delay_distributions}
-\title{Convolve two delay vectors or matrices}
+\title{Convolve a list of delay vectors or matrices}
 \usage{
-.convolve_delay_distributions(first_delay, second_delay)
+.convolve_delay_distributions(delay_distributions)
 }
 \arguments{
-\item{first_delay}{discretized delay distribution vector or matrix}
-
-\item{second_delay}{discretized delay distribution vector or matrix}
+\item{delay_distributions}{list of discretized delay distribution vector or matrix}
 }
 \value{
-discretized delay distribution vector (if both input delays are
+discretized delay distribution vector (if all input delays are
 vectors) or matrix
 }
 \description{
-Convolve two delay vectors or matrices
+Convolve a list of delay vectors or matrices
 }

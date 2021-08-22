@@ -40,17 +40,20 @@
 
 
 <meta property="og:title" content="Correct incidence data for yet-to-be-observed fraction of events — correct_for_partially_observed_data" />
-<meta property="og:description" content="Use this function to correct the tail of an incidence timeseries
+<meta property="og:description" content="Use this function to correct the tail of an incidence time series
 if incidence was collected following a subsequent observation event.
 For instance, if the incidence represents people starting to show symptoms of a disease
 (dates of onset of symptoms), the data would typically have been collected among
 individuals whose case was confirmed via a test.
 If so, among all events of onset of symptoms, only those who had time to be
 confirmed by a test were reported.
-Thus, close to the present, there is an underreporting of onset of symptoms events.
+Thus, close to the present, there is an under-reporting of onset of symptoms events.
 In order to account for this effect, this function divides each incidence value
-by the probability of an event happening at a particular timestep to have been observed.
-Typically, this correction only affects the few most recent datapoints." />
+by the probability of an event happening at a particular time step to have been observed.
+Typically, this correction only affects the few most recent data points.
+A trimming is done at the tail of the time series to avoid correcting for time steps
+for which the observation probability is too low, which could result in too uncertain corrected values.
+This trimming is tuned via the cutoff_observation_probability argument." />
 
 
 
@@ -111,6 +114,9 @@ Typically, this correction only affects the few most recent datapoints." />
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -140,23 +146,26 @@ Typically, this correction only affects the few most recent datapoints." />
     </div>
 
     <div class="ref-description">
-    <p>Use this function to correct the tail of an incidence timeseries
+    <p>Use this function to correct the tail of an incidence time series
 if incidence was collected following a subsequent observation event.
 For instance, if the incidence represents people starting to show symptoms of a disease
 (dates of onset of symptoms), the data would typically have been collected among
 individuals whose case was confirmed via a test.
 If so, among all events of onset of symptoms, only those who had time to be
 confirmed by a test were reported.
-Thus, close to the present, there is an underreporting of onset of symptoms events.
+Thus, close to the present, there is an under-reporting of onset of symptoms events.
 In order to account for this effect, this function divides each incidence value
-by the probability of an event happening at a particular timestep to have been observed.
-Typically, this correction only affects the few most recent datapoints.</p>
+by the probability of an event happening at a particular time step to have been observed.
+Typically, this correction only affects the few most recent data points.
+A trimming is done at the tail of the time series to avoid correcting for time steps
+for which the observation probability is too low, which could result in too uncertain corrected values.
+This trimming is tuned via the <code>cutoff_observation_probability</code> argument.</p>
     </div>
 
     <pre class="usage"><span class='fu'>correct_for_partially_observed_data</span><span class='op'>(</span>
   <span class='va'>incidence_data</span>,
-  <span class='va'>delay_distribution_final_report</span>,
-  cutoff_observation_probability <span class='op'>=</span> <span class='fl'>0.1</span>,
+  <span class='va'>delay_until_final_report</span>,
+  cutoff_observation_probability <span class='op'>=</span> <span class='fl'>0.33</span>,
   ref_date <span class='op'>=</span> <span class='cn'>NULL</span>,
   time_step <span class='op'>=</span> <span class='st'>"day"</span>,
   <span class='va'>...</span>
@@ -167,27 +176,99 @@ Typically, this correction only affects the few most recent datapoints.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>incidence_data</th>
-      <td><p>numeric vector. Incidence data (TODO improve definition)</p></td>
+      <td><p>An object containing incidence data through time.
+It can either be:</p><ul>
+<li><p>A list with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the first value in <code>values</code> is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.</p></li>
+</ol></li>
+<li><p>A numeric vector. The vector corresponds to the <code>values</code> element
+descrived above, and <code>index_offset</code> is implicitely zero.
+This means that the first value in <code>incidence_data</code>
+is associated with the reference time step (no shift towards the future or past).</p></li>
+</ul></td>
     </tr>
     <tr>
-      <th>delay_distribution_final_report</th>
-      <td><p>TODO refactor to estimateR
-Distribution of the delay between the events collected in the incidence data
-and the a posteriori observations of these events.</p></td>
+      <th>delay_until_final_report</th>
+      <td><p>Single delay or list of delays.
+Each delay can be one of:</p><ul>
+<li><p>a list representing a distribution object</p></li>
+<li><p>a discretized delay distribution vector</p></li>
+<li><p>a discretized delay distribution matrix</p></li>
+<li><p>a dataframe containing empirical delay data</p></li>
+</ul></td>
     </tr>
     <tr>
       <th>cutoff_observation_probability</th>
       <td><p>value between 0 and 1.
-Only datapoints for timesteps that have a probability to be observed higher
-than <code>cutoff_observation_probability</code> are kept.
+Only datapoints for timesteps that have a probability of observing a event
+higher than <code>cutoff_observation_probability</code> are kept.
 The few datapoints with a lower probability to be observed are trimmed off
 the tail of the timeseries.</p></td>
     </tr>
+    <tr>
+      <th>ref_date</th>
+      <td><p>Date. Optional. Date of the first data entry in <code>incidence_data</code></p></td>
+    </tr>
+    <tr>
+      <th>time_step</th>
+      <td><p>string. Time between two consecutive incidence datapoints.
+"day", "2 days", "week", "year"... (see <code><a href='https://rdrr.io/r/base/seq.Date.html'>seq.Date</a></code> for details)</p></td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td><p>Arguments passed on to <code><a href='get_matrix_from_empirical_delay_distr.html'>get_matrix_from_empirical_delay_distr</a></code></p><dl>
+    <dt><code>min_number_cases</code></dt><dd><p>integer.
+Minimal number of cases to build the empirical distribution from.
+If <code>num_steps_in_a_unit</code> is <code>NULL</code>, for any time step T,
+the <code>min_number_cases</code> records prior to T are used.
+If less than <code>min_number_cases</code> delays were recorded before T,
+then T is ignored and the <code>min_number_cases</code> earliest-recorded delays are used.
+If <code>num_steps_in_a_unit</code> is given a value, a similar same procedure is applied,
+except that, now at least <code>min_number_cases</code> must be taken over a round number of
+time units. For example, if <code>num_steps_in_a_unit = 7</code>, and time steps represent consecutive days,
+to build the distribution for time step T,
+we find the smallest number of weeks starting from T and going in the past,
+for which at least <code>min_number_cases</code> delays were recorded.
+We then use all the delays recorded during these weeks.
+Weeks are not meant as necessarily being Monday to Sunday,
+but simply 7 days in a row, e.g. it can be Thursday-Wednesday.
+Again, if less than <code>min_number_cases</code> delays were recorded before T,
+then T is ignored.
+We then find the minimum number of weeks, starting from the first recorded delay
+that contains at least <code>min_number_cases</code>.</p></dd>
+    <dt><code>upper_quantile_threshold</code></dt><dd><p>numeric. Between 0 and 1.
+Argument for internal use.</p></dd>
+    <dt><code>min_number_cases_fraction</code></dt><dd><p>numeric. Between 0 and 1.
+If <code>min_number_cases</code> is not provided (kept to <code>NULL</code>),
+the number of most-recent cases used to build
+the instant delay distribution is <code>min_number_cases_fraction</code>
+times the total number of reported delays.</p></dd>
+    <dt><code>min_min_number_cases</code></dt><dd><p>numeric. Lower bound
+for number of cases used to build an instant delay distribution.</p></dd>
+    <dt><code>fit</code></dt><dd><p>string. One of "gamma" or "none". Specifies the type of fit that
+is applied to the columns of the delay matrix</p></dd>
+    <dt><code>num_steps_in_a_unit</code></dt><dd><p>Optional argument.
+Number of time steps in a full time unit (e.g. 7 if looking at weeks).
+If set, the delays used to build a particular
+delay distribution will span over a round number of such time units.
+This option is included for comparison with legacy code.</p></dd>
+    <dt><code>return_fitted_distribution</code></dt><dd><p>boolean. If TRUE, the function also returns the gamma distribution that was fitted to the respective column.</p></dd>
+  
+</dl></td>
+    </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>module output object</p>
+    <p>The <code>ref_date</code> argument is only needed if the <code>delay_until_final_report</code>
+is passed as a dataframe of individual delay observations (a.k.a empirical delay data).
+In that case, <code>ref_date</code> must correspond to the date of the first time step in <code>incidence_data</code>.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

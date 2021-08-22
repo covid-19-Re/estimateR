@@ -12,8 +12,8 @@ get_block_bootstrapped_estimate(
   estimation_method = "EpiEstim sliding window",
   uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
   combine_bootstrap_and_estimation_uncertainties = FALSE,
-  delay_incubation,
-  delay_onset_to_report = c(1),
+  delay,
+  import_incidence_data = NULL,
   ref_date = NULL,
   time_step = "day",
   output_Re_only = TRUE,
@@ -21,7 +21,24 @@ get_block_bootstrapped_estimate(
 )
 }
 \arguments{
-\item{incidence_data}{numeric vector. Incidence data (TODO improve definition)}
+\item{incidence_data}{An object containing incidence data through time.
+It can either be:
+\itemize{
+\item A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+\item A numeric vector. The vector corresponds to the \code{values} element
+descrived above, and \code{index_offset} is implicitely zero.
+This means that the first value in \code{incidence_data}
+is associated with the reference time step (no shift towards the future or past).
+}}
 
 \item{N_bootstrap_replicates}{integer. Number of bootstrap samples.}
 
@@ -60,9 +77,24 @@ The confidence interval is built using bootstrapped estimates
 and centered around the mean of bootstrapped estimates and original estimates.}
 }}
 
-\item{delay_incubation}{TODO add details}
+\item{combine_bootstrap_and_estimation_uncertainties}{boolean.
+If TRUE, the uncertainty interval reported is the union of
+the highest posterior density interval from the Re estimation
+with the confidence interval from the boostrapping of time series
+of observations.}
 
-\item{delay_onset_to_report}{TODO add details}
+\item{delay}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
+
+\item{import_incidence_data}{NULL or argument with the same requirements as \code{incidence_data}.
+If not NULL, this argument represents records of imported cases and
+\code{incidence_data} represents local cases only.}
 
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
@@ -73,23 +105,61 @@ and centered around the mean of bootstrapped estimates and original estimates.}
 (as opposed to containing results for each intermediate step)}
 
 \item{...}{
-  Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}
+  Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}, \code{\link[=.estimate_Re_EpiEstim_piecewise_constant]{.estimate_Re_EpiEstim_piecewise_constant}}
   \describe{
-    \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.}
-    \item{\code{degree}}{integer. LOESS degree.}
-    \item{\code{delay_distribution}}{numeric square matrix or vector. TODO refactor to estimateR}
+    \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.
+The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
+the ratio of \code{data_points_incl} and the number of time steps in the input data.}
+    \item{\code{degree}}{integer. LOESS degree. Must be 0, 1 or 2.}
+    \item{\code{initial_Re_estimate_window}}{integer. In order to help with the smoothing, the function extends
+the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
+the number of timesteps in the beginning of \code{incidence_input} to take into account when computing
+the average initial Re.}
+    \item{\code{delay_distribution}}{numeric square matrix or vector.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
     \item{\code{verbose}}{Boolean. Print verbose output?}
-    \item{\code{minimum_cumul_incidence}}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
-    \item{\code{estimation_window}}{Integer scalar. Number of data points over which to assume Re to be constant.}
-    \item{\code{mean_serial_interval}}{Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
-    \item{\code{std_serial_interval}}{Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
-    \item{\code{mean_Re_prior}}{Numeric positive scalar. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{estimation_window}}{Use with \code{estimation_method = "EpiEstim sliding window"}
+Positive integer value.
+Number of data points over which to assume Re to be constant.}
+    \item{\code{import_incidence_input}}{NULL or module input object.
+List with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+If not NULL, this data represents recorded imported cases.
+And then \code{incidence_input} represents only local cases.}
+    \item{\code{minimum_cumul_incidence}}{Numeric value.
+Minimum number of cumulated infections before starting the Re estimation.
+Default is \code{12} as recommended in Cori et al., 2013.}
+    \item{\code{mean_serial_interval}}{Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{std_serial_interval}}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{mean_Re_prior}}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+    \item{\code{output_HPD}}{Boolean. If TRUE, return the highest posterior density interval with the output.}
+    \item{\code{interval_ends}}{Use with \code{estimation_method = "EpiEstim piecewise constant"}
+Integer vector. Optional argument.
+If provided, \code{interval_ends} overrides the \code{interval_length} argument.
+Each element of \code{interval_ends} specifies the right boundary
+of an interval over which Re is assumed to be constant for the calculation.
+Values in \code{interval_ends} must be integer values corresponding
+with the same numbering of time steps as given by \code{incidence_input}.
+In other words, \code{interval_ends} and \code{incidence_input},
+use the same time step as the zero-th time step.}
+    \item{\code{interval_length}}{Use with \code{estimation_method = "EpiEstim piecewise constant"}
+Positive integer value.
+Re is assumed constant over steps of size \code{interval_length}.}
   }}
 }
 \value{
-tibble. Re estimations along with results from each pipeline step. TODO add details
+Effective reproductive estimates through time with confidence interval boundaries.
+If \code{output_Re_only} is \code{FALSE}, then transformations made
+on the input observations during calculations are output as well.
 }
 \description{
 An estimation of the effective reproductive number through time is made
@@ -97,13 +167,4 @@ on the original incidence data.
 Then, the same estimation is performed on a number of bootstrap samples built from the original incidence data.
 The estimate on the original data is output along with confidence interval boundaries
 built from the distribution of bootstrapped estimates.
-}
-\details{
-A base assumption made here is that the delay between infection can be split into two independent delays
-(with the second delay being optional).
-The first waiting time corresponds to the time between the infection event and the onset of symptoms.
-The second (optional) waiting time corresponds to the delay between the onset of symptoms and the case observation.
-If this second waiting time is omitted, observation is assumed to have happened at the end of the first waiting time.
-In latter case, the first waiting time distribution does not need to correspond to an incubation period per se,
-but it must in any case correspond to the delay between infection and case observation.
 }

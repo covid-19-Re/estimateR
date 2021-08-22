@@ -5,10 +5,15 @@
 \alias{HK_incidence_data}
 \title{Incidence data for COVID-19 in Hong Kong}
 \format{
-A data frame with 196 rows and 2 variables:
+A data frame with 196 rows and 4 variables:
 \describe{
 \item{date}{date of case reporting in YYYY-mm-dd format}
-\item{case_incidence}{number of cases reported on this date}
+\item{case_incidence}{total number of case confirmations
+reported on this date}
+\item{onset_incidence}{number of events of onset of symptoms
+occurring on this date}
+\item{report_incidence}{number of case confirmations reported on this date
+with no known date of onset of symptoms (or asymptomatoc cases)}
 }
 }
 \source{

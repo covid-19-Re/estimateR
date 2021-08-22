@@ -4,17 +4,53 @@
 \alias{.smooth_LOESS}
 \title{LOESS smoothing function}
 \usage{
-.smooth_LOESS(incidence_input, data_points_incl = 21, degree = 1)
+.smooth_LOESS(
+  incidence_input,
+  data_points_incl = 21,
+  degree = 1,
+  initial_Re_estimate_window = 5
+)
 }
 \arguments{
-\item{incidence_input}{module input object.}
+\item{incidence_input}{Module input object.
+List with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}}
 
-\item{data_points_incl}{integer. Size of the window used in the LOESS algorithm.}
+\item{data_points_incl}{integer. Size of the window used in the LOESS algorithm.
+The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
+the ratio of \code{data_points_incl} and the number of time steps in the input data.}
 
-\item{degree}{integer. LOESS degree.}
+\item{degree}{integer. LOESS degree. Must be 0, 1 or 2.}
+
+\item{initial_Re_estimate_window}{integer. In order to help with the smoothing, the function extends
+the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
+the number of timesteps in the beginning of \code{incidence_input} to take into account when computing
+the average initial Re.}
 }
 \value{
-module output object. Smoothed incidence.
+A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the result of the computations on the input data.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the result is shifted compared to an \code{index_offset} of \code{0}.
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+Note that the \code{index_offset} of the output of the function call
+accounts for the (optional) \code{index_offset} of the input.
+}
+If \code{index_offset} is \code{0} and \code{simplify_output = TRUE},
+the \code{index_offset} is dropped and the \code{values}
+element is returned as a numeric vector.
 }
 \description{
 Prefer the use of the wrapper function \code{smooth_incidence(..., smoothing_method = "LOESS")}
@@ -22,8 +58,6 @@ instead of \code{.smooth_LOESS}.
 }
 \details{
 This function implements the LOESS method for smoothing noisy data.
-It is essentially a wrapper around \code{\link[stats]{loess}}.
+It relies on \code{\link[stats]{loess}}.
 See the help section for \code{\link[stats]{loess}} for details on LOESS.
-
-#TODO add details on how data_points_incl relates to span.
 }

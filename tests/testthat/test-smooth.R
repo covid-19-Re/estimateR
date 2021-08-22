@@ -1,4 +1,4 @@
-#TODO test LOESS function
+# TODO test LOESS function
 # 1) always positive values
 # 2) normalized total
 # 3) constant output if constant input
@@ -8,38 +8,42 @@
 smoothing_methods_tested <- c("LOESS")
 
 test_that("smooth_incidence output values are positive ", {
-  random_values <- sample.int(1000, size = 100, replace= TRUE)
-
-  sapply(smoothing_methods_tested, function(x) {
-        smoothed_values <- .get_values(smooth_incidence(random_values, smoothing_method = x))
-         expect_gte(min(smoothed_values), 0)})
-})
-
-test_that("smooth_incidence output values sum up to the total of the original incidence ", {
-  random_values <- sample.int(1000, size = 100, replace= TRUE)
+  random_values <- sample.int(1000, size = 100, replace = TRUE)
 
   sapply(smoothing_methods_tested, function(x) {
     smoothed_values <- .get_values(smooth_incidence(random_values, smoothing_method = x))
-    expect_equal(sum(smoothed_values), sum(random_values))})
+    expect_gte(min(smoothed_values), 0)
+  })
+})
+
+test_that("smooth_incidence output values sum up to the total of the original incidence ", {
+  random_values <- sample.int(1000, size = 100, replace = TRUE)
+
+  sapply(smoothing_methods_tested, function(x) {
+    smoothed_values <- .get_values(smooth_incidence(random_values, smoothing_method = x))
+    expect_equal(sum(smoothed_values), sum(random_values))
+  })
 })
 
 test_that("smooth_incidence output values are constant if input is constant ", {
-  #TODO unskip test when added way to deal with left-truncated incidence input
+  # TODO unskip test when added way to deal with left-truncated incidence input
   skip("Left-truncated incidence input cannot be dealt with yet.")
   constant_values <- rep(5.3, times = 100)
 
   sapply(smoothing_methods_tested, function(x) {
     smoothed_values <- .get_values(smooth_incidence(constant_values, smoothing_method = x))
-    expect_equal(smoothed_values, constant_values)})
+    expect_equal(smoothed_values, constant_values)
+  })
 })
 
 test_that("smooth_incidence output values are bounded by bounds of noisy values", {
-  random_values <- sample.int(1000, size = 100, replace= TRUE)
+  random_values <- sample.int(1000, size = 100, replace = TRUE)
 
   sapply(smoothing_methods_tested, function(x) {
     smoothed_values <- .get_values(smooth_incidence(random_values, smoothing_method = x))
     expect_gte(min(smoothed_values), min(random_values))
-    expect_lte(max(smoothed_values), max(random_values))})
+    expect_lte(max(smoothed_values), max(random_values))
+  })
 })
 
 test_that("smooth_incidence output stays consistent for LOESS method", {

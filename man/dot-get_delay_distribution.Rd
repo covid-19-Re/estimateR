@@ -17,13 +17,21 @@
 Delay distribution to transform or validate
 into a vector of discretized probability distribution.}
 
+\item{n_report_time_steps}{integer. Length of the incidence time series in the accompanying analysis.
+This argument is needed to determine the dimensions of the output matrix.}
+
+\item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
+
+\item{time_step}{string. Time between two consecutive incidence datapoints.
+"day", "2 days", "week", "year"... (see \code{\link[base]{seq.Date}} for details)}
+
 \item{...}{
   Arguments passed on to \code{\link[=build_delay_distribution]{build_delay_distribution}}
   \describe{
-    \item{\code{max_quantile}}{numeric value between 0 and 1. TODO add details
+    \item{\code{max_quantile}}{numeric value between 0 and 1.
 Upper quantile reached by the last element in the discretized distribution vector.}
     \item{\code{offset_by_one}}{boolean.
-Set to TRUE if \code{distribution} represent the fit of data that was offset by one
+Set to TRUE if \code{distribution} represents the fit of data that was offset by one
 (\code{fitted_data = original_data + 1}) to accommodate zeroes in \code{original_data}.}
   }}
 }
@@ -33,12 +41,21 @@ vector or matrix of discretized probability distribution.
 \description{
 Can take a \code{distribution} list, a probability distribution vector,
 a probability distribution matrix or empirical delay data as input.
+If \code{delay} is already a delay distribution vector or matrix, it is returned as is.
 }
 \details{
 If \code{delay} is a \code{distribution} list,
 this function builds and return the vector of discretized probability distribution.
 If it is a vector, it checks that \code{delay}
 is a valid discretized probability distribution and returns it.
-See \code{\link{build_delay_distribution}} for details on the \code{distribution} list format.
-TODO add details on matrix and empirical data cases and the acceptable formats.
+Similarly, if \code{delay} is a matrix,
+the function checks that it is in the correct format and returns it.
+In a matrix, each column index corresponds to a time step associated with a date of event,
+each row index corresponds to a time step associated with a date of event observation.
+Each entry m_ij corresponds to the probability that an event occurring at time step j
+is observed at time step i.
+Matrices must be lower-triangular. Sums over columns must not exceed 1.
+
+See \code{\link{build_delay_distribution}} for details on the \code{distribution} list format;
+see \code{\link{get_matrix_from_empirical_delay_distr}} for details on the empirical delay data format.
 }

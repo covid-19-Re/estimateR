@@ -8,10 +8,9 @@ get_infections_from_incidence(
   incidence_data,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
-  delay_incubation,
-  delay_onset_to_report = c(1),
+  delay,
   is_partially_reported_data = FALSE,
-  delay_distribution_final_report = NULL,
+  delay_until_final_report = NULL,
   output_infection_incidence_only = TRUE,
   ref_date = NULL,
   time_step = "day",
@@ -19,7 +18,24 @@ get_infections_from_incidence(
 )
 }
 \arguments{
-\item{incidence_data}{numeric vector. Incidence data (TODO improve definition)}
+\item{incidence_data}{An object containing incidence data through time.
+It can either be:
+\itemize{
+\item A list with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+\item A numeric vector. The vector corresponds to the \code{values} element
+descrived above, and \code{index_offset} is implicitely zero.
+This means that the first value in \code{incidence_data}
+is associated with the reference time step (no shift towards the future or past).
+}}
 
 \item{smoothing_method}{string. Method used to smooth the original incidence data.
 Available options are:
@@ -35,15 +51,31 @@ Available options are:
 implemented in \code{\link{.deconvolve_incidence_Richardson_Lucy}}}
 }}
 
-\item{delay_incubation}{TODO add details}
+\item{delay}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
 
-\item{delay_onset_to_report}{TODO add details}
+\item{is_partially_reported_data}{boolean.
+Set to \code{TRUE} if \code{incidence_data} represents delayed observations
+of infection events that themselves rely on further-delayed observations.}
 
-\item{is_partially_reported_data}{boolean TODO add details}
+\item{delay_until_final_report}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
 
-\item{delay_distribution_final_report}{TODO add details}
-
-\item{output_infection_incidence_only}{boolean. TODO add details}
+\item{output_infection_incidence_only}{boolean.
+Should the output contain only the estimated infection incidence?
+(as opposed to containing results for intermediary steps)}
 
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
@@ -53,28 +85,41 @@ implemented in \code{\link{.deconvolve_incidence_Richardson_Lucy}}}
 \item{...}{
   Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=merge_outputs]{merge_outputs}}, \code{\link[=correct_for_partially_observed_data]{correct_for_partially_observed_data}}
   \describe{
-    \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.}
-    \item{\code{degree}}{integer. LOESS degree.}
-    \item{\code{delay_distribution}}{numeric square matrix or vector. TODO refactor to estimateR}
+    \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.
+The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
+the ratio of \code{data_points_incl} and the number of time steps in the input data.}
+    \item{\code{degree}}{integer. LOESS degree. Must be 0, 1 or 2.}
+    \item{\code{initial_Re_estimate_window}}{integer. In order to help with the smoothing, the function extends
+the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
+the number of timesteps in the beginning of \code{incidence_input} to take into account when computing
+the average initial Re.}
+    \item{\code{delay_distribution}}{numeric square matrix or vector.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
     \item{\code{verbose}}{Boolean. Print verbose output?}
     \item{\code{cutoff_observation_probability}}{value between 0 and 1.
-Only datapoints for timesteps that have a probability to be observed higher
-than \code{cutoff_observation_probability} are kept.
+Only datapoints for timesteps that have a probability of observing a event
+higher than \code{cutoff_observation_probability} are kept.
 The few datapoints with a lower probability to be observed are trimmed off
 the tail of the timeseries.}
   }}
 }
 \value{
-
+Time series of infections through time.
+If \code{ref_date} is provided then a date column is included with the output.
 }
 \description{
 This function takes as input incidence data of delayed observations of infections events,
 as well as the probability distribution(s) of the delay(s).
 It returns an inferred incidence of infection events.
-This function can account for the observations being dependent on future delayed observations.
+}
+\details{
+This function can account for the observations being dependent on future delayed observations,
+with the \code{is_partially_reported_data} flag.
 For instance, if the incidence data represents symptom onset events, usually these events
 are dependent on a secondary delayed observation: a case confirmation typically, or
-a hospital admission or any other type of event,
+a hospital admission or any other type of event.
+When setting \code{is_partially_reported_data} to \code{TRUE},
+use the \code{delay_until_final_report} argument to specify the delay
+from infection until this secondary delayed observation.
 }

@@ -72,6 +72,9 @@
       <a href="articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -101,6 +104,7 @@
 <h1 class="hasAnchor">
 <a href="#estimater-package" class="anchor"></a><em>estimateR</em> package</h1>
 <p>The <em>estimateR</em> package provides tools to estimate the effective reproductive number through time from delayed and indirect observations of infection events. This package is under development. The README file is still at a super rough stage.</p>
+<p>The full documentation is available <strong><a href="https://covid-19-re.github.io/estimateR/">here</a></strong>.</p>
 <div id="quick-toy-example" class="section level2">
 <h2 class="hasAnchor">
 <a href="#quick-toy-example" class="anchor"></a>Quick toy example</h2>
@@ -115,11 +119,11 @@
                           <span class="fl">348</span>,<span class="fl">331</span>,<span class="fl">311</span>,<span class="fl">267</span>,<span class="fl">288</span>,<span class="fl">254</span>,<span class="fl">239</span><span class="op">)</span>
 
 
-<span class="co">## The numbers below are part of the user input, </span>
+<span class="co">## The numbers below are part of the user input,</span>
 <span class="co">## they need to be adapted to the particular disease studied.</span>
 
 <span class="co"># Incubation period - gamma distribution parameters</span>
-<span class="va">shape_incubation</span> <span class="op">=</span> <span class="fl">3.2</span> 
+<span class="va">shape_incubation</span> <span class="op">=</span> <span class="fl">3.2</span>
 <span class="va">scale_incubation</span> <span class="op">=</span> <span class="fl">1.3</span>
 <span class="va">incubation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>name<span class="op">=</span><span class="st">"gamma"</span>, shape <span class="op">=</span> <span class="va">shape_incubation</span>, scale <span class="op">=</span> <span class="va">scale_incubation</span><span class="op">)</span>
 
@@ -137,7 +141,7 @@
 <span class="co"># The estimation window corresponds to the size of the sliding window used in EpiEstim.</span>
 <span class="co"># See help(estimate_Re) for additional details.</span>
 <span class="co"># Here, it is set to three days.</span>
-<span class="va">estimation_window</span> <span class="op">=</span> <span class="fl">3</span> 
+<span class="va">estimation_window</span> <span class="op">=</span> <span class="fl">3</span>
 
 <span class="co">## End of user input</span>
 

@@ -12,7 +12,13 @@
 )
 }
 \arguments{
+\item{user_input}{The variable to be tested}
+
 \item{parameter_name}{A string containing the name the tested parameter had in the initial function in which it was passed.}
+
+\item{interval_start}{Left-bound of the accepted interval}
+
+\item{interval_end}{Right-bound of the accepted interval}
 }
 \value{
 TRUE if all tests were passed. Throws an error otherwise.

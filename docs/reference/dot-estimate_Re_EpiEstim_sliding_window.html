@@ -103,6 +103,9 @@ for a sliding window of 4 time steps." />
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -139,7 +142,7 @@ for a sliding window of 4 time steps.</p>
 
     <pre class="usage"><span class='fu'>.estimate_Re_EpiEstim_sliding_window</span><span class='op'>(</span>
   <span class='va'>incidence_input</span>,
-  minimum_cumul_incidence <span class='op'>=</span> <span class='fl'>10</span>,
+  minimum_cumul_incidence <span class='op'>=</span> <span class='fl'>12</span>,
   estimation_window <span class='op'>=</span> <span class='fl'>3</span>,
   mean_serial_interval <span class='op'>=</span> <span class='fl'>4.8</span>,
   std_serial_interval <span class='op'>=</span> <span class='fl'>2.3</span>,
@@ -152,33 +155,70 @@ for a sliding window of 4 time steps.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>incidence_input</th>
-      <td><p>module input object.</p></td>
+      <td><p>Module input object.
+List with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the first value in <code>values</code> is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.</p></li>
+</ol>
+
+<p>@return Module input object.
+List with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the first value in <code>values</code> is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.</p></li>
+</ol></td>
     </tr>
     <tr>
       <th>minimum_cumul_incidence</th>
-      <td><p>Numeric scalar. Minimum number of cumulated infections before starting the Re estimation</p></td>
+      <td><p>Numeric value.
+Minimum number of cumulated infections before starting the Re estimation.
+Default is <code>12</code> as recommended in Cori et al., 2013.</p></td>
     </tr>
     <tr>
       <th>estimation_window</th>
-      <td><p>Integer scalar. Number of data points over which to assume Re to be constant.</p></td>
+      <td><p>Use with <code>estimation_method = "EpiEstim sliding window"</code>
+Positive integer value.
+Number of data points over which to assume Re to be constant.</p></td>
     </tr>
     <tr>
       <th>mean_serial_interval</th>
-      <td><p>Numeric positive scalar. <code>mean_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></td>
+      <td><p>Numeric positive value. <code>mean_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></td>
     </tr>
     <tr>
       <th>std_serial_interval</th>
-      <td><p>Numeric positive scalar. <code>std_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></td>
+      <td><p>Numeric positive value. <code>std_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></td>
     </tr>
     <tr>
       <th>mean_Re_prior</th>
-      <td><p>Numeric positive scalar. <code>mean prior</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></td>
+      <td><p>Numeric positive value. <code>mean prior</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></td>
+    </tr>
+    <tr>
+      <th>output_HPD</th>
+      <td><p>Boolean. If TRUE, return the highest posterior density interval with the output.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>module output object. mean of Re estimates</p>
+    <p>If <code>output_HPD = FALSE</code>,
+value is a module object (a list of the same kind as <code>incidence_input</code>).
+The <code>values</code> element of the list then contains the Re estimates.
+If <code>output_HPD = TRUE</code>, a list of three module objects is returned.</p><ul>
+<li><p><code>Re_estimate</code> contains the Re estimates.</p></li>
+<li><p><code>Re_highHPD</code> and <code>Re_lowHPD</code> contain
+the higher and lower boundaries of the HPD interval,
+as computed by <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></li>
+</ul>
+
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

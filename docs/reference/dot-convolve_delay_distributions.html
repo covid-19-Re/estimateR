@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Convolve two delay vectors or matrices — .convolve_delay_distributions • estimateR</title>
+<title>Convolve a list of delay vectors or matrices — .convolve_delay_distributions • estimateR</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Convolve two delay vectors or matrices — .convolve_delay_distributions" />
-<meta property="og:description" content="Convolve two delay vectors or matrices" />
+<meta property="og:title" content="Convolve a list of delay vectors or matrices — .convolve_delay_distributions" />
+<meta property="og:description" content="Convolve a list of delay vectors or matrices" />
 
 
 
@@ -101,6 +101,9 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -124,33 +127,29 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Convolve two delay vectors or matrices</h1>
+    <h1>Convolve a list of delay vectors or matrices</h1>
     
     <div class="hidden name"><code>dot-convolve_delay_distributions.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Convolve two delay vectors or matrices</p>
+    <p>Convolve a list of delay vectors or matrices</p>
     </div>
 
-    <pre class="usage"><span class='fu'>.convolve_delay_distributions</span><span class='op'>(</span><span class='va'>first_delay</span>, <span class='va'>second_delay</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>.convolve_delay_distributions</span><span class='op'>(</span><span class='va'>delay_distributions</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>first_delay</th>
-      <td><p>discretized delay distribution vector or matrix</p></td>
-    </tr>
-    <tr>
-      <th>second_delay</th>
-      <td><p>discretized delay distribution vector or matrix</p></td>
+      <th>delay_distributions</th>
+      <td><p>list of discretized delay distribution vector or matrix</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>discretized delay distribution vector (if both input delays are
+    <p>discretized delay distribution vector (if all input delays are
 vectors) or matrix</p>
 
   </div>

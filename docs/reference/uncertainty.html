@@ -101,6 +101,9 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -138,50 +141,87 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>original_estimates</th>
-      <td><p>Optional. Estimates obtained on the original data.
+      <th>uncertainty_summary_method</th>
+      <td><p>One of these options:</p><ul>
+<li><p>'original estimate - CI from bootstrap estimates'.
+The confidence interval is built using bootstrapped estimates
+and centered around the original estimates.</p></li>
+<li><p>'bagged mean - CI from bootstrap estimates'.
+The confidence interval is built using bootstrapped estimates
+and centered around the mean of bootstrapped estimates and original estimates.</p></li>
+</ul></td>
+    </tr>
+    <tr>
+      <th>original_values</th>
+      <td><p>Optional. Values of reference
+used to construct the uncertainty interval around.
+Typically, these are estimates obtained on the original data.
 Must be a dataframe with a timestep index column named <code>index_col</code>
-and an estimate column named <code>Re_estimate_col</code>.
+and a value column named <code>value_col</code>.
 The index column must not contain any <code>NA</code> value.</p></td>
     </tr>
     <tr>
-      <th>bootstrapped_estimates</th>
-      <td><p>Estimates obtained on a number of bootstrap
+      <th>bootstrapped_values</th>
+      <td><p>Bootstrap
 replicates of the original data.
 Must be a dataframe in the long format
 with a timestep index column named <code>index_col</code>,
 a bootstrap replicate index column named <code>bootstrap_id_col</code>,
-and an estimate column named <code>Re_estimate_col</code>.
+and a value column named <code>value_col</code>.
 The index column must not contain any <code>NA</code> value.</p></td>
     </tr>
     <tr>
-      <th>central_estimates</th>
-      <td><p>Estimates around which the confidence interval is going to be centered.
+      <th>central_values</th>
+      <td><p>Values around which the confidence interval is going to be centered.
 Must be a dataframe with a timestep index column named <code>index_col</code>
-and an estimate column named <code>Re_estimate_col</code>.
+and a value column named <code>value_col</code>.
 The index column must not contain any <code>NA</code> value.</p></td>
-    </tr>
-    <tr>
-      <th>Re_estimate_col</th>
-      <td><p>string. Name of the column containing Re estimates</p></td>
-    </tr>
-    <tr>
-      <th>estimate_col</th>
-      <td><p>string. Name of the column containing estimates</p></td>
-    </tr>
-    <tr>
-      <th>bootstrap_id_col</th>
-      <td><p>string. Name of the column containing bootstrap samples numbering.
-Id 0 must correspond to the estimate on the original data.</p></td>
-    </tr>
-    <tr>
-      <th>index_col</th>
-      <td><p>string. Index column to keep track of which data point
-in bootstrapped estimates corresponds to which data point in the original estimates.</p></td>
     </tr>
     <tr>
       <th>alpha</th>
       <td><p>value between 0 and 1. Confidence level of the confidence interval.</p></td>
+    </tr>
+    <tr>
+      <th>combine_bootstrap_and_estimation_uncertainties</th>
+      <td><p>boolean.
+Combine uncertainty from Re estimation with uncertainty from observation process?
+If <code>TRUE</code>, the credible intervals for Re estimates must be passed via <code>Re_HPDs</code>.
+The output credible intervals
+will be the union of bootstrapping intervals and Re estimation intervals.</p></td>
+    </tr>
+    <tr>
+      <th>Re_HPDs</th>
+      <td><p>Optional. Credible intervals for Re estimates.
+Use only if <code>combine_bootstrap_and_estimation_uncertainties</code> is <code>TRUE</code>.</p></td>
+    </tr>
+    <tr>
+      <th>value_col</th>
+      <td><p>string. Name of the column containing values.</p></td>
+    </tr>
+    <tr>
+      <th>bootstrap_id_col</th>
+      <td><p>string. Name of the column containing bootstrap samples numbering.
+Id 0 must correspond to values associated to the original data.</p></td>
+    </tr>
+    <tr>
+      <th>index_col</th>
+      <td><p>string. Name of the index column.
+The index tracks which data point in bootstrapped values
+corresponds to which data point in the original values.</p></td>
+    </tr>
+    <tr>
+      <th>output_value_col</th>
+      <td><p>string. Name of the output column with estimated values.</p></td>
+    </tr>
+    <tr>
+      <th>prefix_up</th>
+      <td><p>string. prefix to add to <code>output_value_col</code>
+to name the column containing the upper limit of confidence interval</p></td>
+    </tr>
+    <tr>
+      <th>prefix_down</th>
+      <td><p>string. prefix to add to <code>output_value_col</code>
+to name the column containing the lower limit of confidence interval</p></td>
     </tr>
     </table>
 

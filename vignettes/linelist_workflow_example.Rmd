@@ -125,7 +125,7 @@ CH_estimates <- get_bootstrapped_estimates_from_combined_observations(
   fully_delayed_incidence = CH_incidence_data$confirmation_incidence,
   N_bootstrap_replicates = N_bootstrap_replicates,
   delay_until_partial = distribution_incubation,
-  delay_from_partial_to_full = CH_delay_data,
+  delay_until_final_report = CH_delay_data,
   partial_observation_requires_full_observation = TRUE,
   combine_bootstrap_and_estimation_uncertainties = TRUE,
   estimation_window = estimation_window,

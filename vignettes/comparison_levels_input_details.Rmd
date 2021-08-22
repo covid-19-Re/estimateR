@@ -149,8 +149,7 @@ Last, the `ref_date` argument lets us specify the date of the first incidence re
 HK_first_estimates <- get_block_bootstrapped_estimate(
   incidence_data = HK_incidence_data$case_incidence,
   N_bootstrap_replicates = 100,
-  delay_incubation = distribution_incubation, 
-  delay_onset_to_report = delay_onset_to_report,
+  delay = list(distribution_incubation, delay_onset_to_report), 
   estimation_window = 3, # 3-day sliding window for the Re estimation
   minimum_cumul_incidence = 50,
   mean_serial_interval = mean_serial_interval,
@@ -189,7 +188,7 @@ The `partially_delayed_incidence` argument corresponds to the `onset_incidence`,
 The `report_incidence` on the other hand corresponds to case confirmation events, 
 they are delayed from the original infection events by the incubation period, and by a delay between onset of symptom and confirmation.
 We call them 'fully delayed' and they correspond to the `fully_delayed_incidence` argument of `get_bootstrapped_estimates_from_combined_observations`.
-The `delay_until_partial` argument is thus the incubation period whereas the `delay_from_partial_to_full` argument is the delay from onset to report (or case confirmation).
+The `delay_until_partial` argument is thus the incubation period whereas the `delay_until_final_report` argument is the delay from onset to report (or case confirmation).
 Something important to note here is that in order from someone to report that they started showing COVID-19 symptoms on day T, 
 they first need to be confirmed as a positive case, which usually happens later than day T (e.g. T + 3 days).
 Because of this, we see a drop in the incidence of symptom onset events close to the present. Here the present is July 31st.
@@ -212,7 +211,7 @@ HK_combined_estimates <- get_bootstrapped_estimates_from_combined_observations(
   fully_delayed_incidence = HK_incidence_data$report_incidence,
   N_bootstrap_replicates = 50, # only 50 replicates to keep execution fast
   delay_until_partial = distribution_incubation,
-  delay_from_partial_to_full = delay_onset_to_report,
+  delay_until_final_report = delay_onset_to_report,
   partial_observation_requires_full_observation = TRUE,
   minimum_cumul_incidence = 50,
   estimation_window = 3, # 3-day sliding window for the Re estimation
@@ -244,8 +243,7 @@ but this time we directly feed the `HK_delay_data` dataframe to the `delay_onset
 HK_variable_delays_estimates <- get_block_bootstrapped_estimate(
   incidence_data = HK_incidence_data$case_incidence,
   N_bootstrap_replicates = 50, # only 50 replicates to keep execution fast
-  delay_incubation = distribution_incubation, 
-  delay_onset_to_report = HK_delay_data,
+  delay = list(distribution_incubation, HK_delay_data),
   estimation_window = 3, # 3-day sliding window for the Re estimation
   minimum_cumul_incidence = 50,
   mean_serial_interval = mean_serial_interval,
@@ -263,7 +261,7 @@ HK_variable_delays_combined_estimates <- get_bootstrapped_estimates_from_combine
   fully_delayed_incidence = HK_incidence_data$report_incidence,
   N_bootstrap_replicates = 50, # only 50 replicates to keep execution fast
   delay_until_partial = distribution_incubation,
-  delay_from_partial_to_full = HK_delay_data,
+  delay_until_final_report = HK_delay_data,
   partial_observation_requires_full_observation = TRUE,
   estimation_window = 3, # 3-day sliding window for the Re estimation
    minimum_cumul_incidence = 50,

@@ -6,7 +6,8 @@
 \usage{
 .estimate_Re_EpiEstim_sliding_window(
   incidence_input,
-  minimum_cumul_incidence = 10,
+  import_incidence_input = NULL,
+  minimum_cumul_incidence = 12,
   estimation_window = 3,
   mean_serial_interval = 4.8,
   std_serial_interval = 2.3,
@@ -15,20 +16,59 @@
 )
 }
 \arguments{
-\item{incidence_input}{module input object.}
+\item{incidence_input}{Module input object.
+List with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}}
 
-\item{minimum_cumul_incidence}{Numeric scalar. Minimum number of cumulated infections before starting the Re estimation}
+\item{import_incidence_input}{NULL or module input object.
+List with two elements:
+\enumerate{
+\item A numeric vector named \code{values}: the incidence recorded on consecutive time steps.
+\item An integer named \code{index_offset}: the offset, counted in number of time steps,
+by which the first value in \code{values} is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in \code{values}
+without needing to carry a \code{date} column around.
+A positive offset means \code{values} are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+}
+If not NULL, this data represents recorded imported cases.
+And then \code{incidence_input} represents only local cases.}
 
-\item{estimation_window}{Integer scalar. Number of data points over which to assume Re to be constant.}
+\item{minimum_cumul_incidence}{Numeric value.
+Minimum number of cumulated infections before starting the Re estimation.
+Default is \code{12} as recommended in Cori et al., 2013.}
 
-\item{mean_serial_interval}{Numeric positive scalar. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
+\item{estimation_window}{Use with \code{estimation_method = "EpiEstim sliding window"}
+Positive integer value.
+Number of data points over which to assume Re to be constant.}
 
-\item{std_serial_interval}{Numeric positive scalar. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
+\item{mean_serial_interval}{Numeric positive value. \code{mean_si} for \code{\link[EpiEstim]{estimate_R}}}
 
-\item{mean_Re_prior}{Numeric positive scalar. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+\item{std_serial_interval}{Numeric positive value. \code{std_si} for \code{\link[EpiEstim]{estimate_R}}}
+
+\item{mean_Re_prior}{Numeric positive value. \code{mean prior} for \code{\link[EpiEstim]{estimate_R}}}
+
+\item{output_HPD}{Boolean. If TRUE, return the highest posterior density interval with the output.}
 }
 \value{
-module output object. mean of Re estimates
+If \code{output_HPD = FALSE},
+value is a module object (a list of the same kind as \code{incidence_input}).
+The \code{values} element of the list then contains the Re estimates.
+If \code{output_HPD = TRUE}, a list of three module objects is returned.
+\itemize{
+\item \code{Re_estimate} contains the Re estimates.
+\item \code{Re_highHPD} and \code{Re_lowHPD} contain
+the higher and lower boundaries of the HPD interval,
+as computed by \code{\link[EpiEstim]{estimate_R}}
+}
 }
 \description{
 The Re value reported for time t corresponds to the value estimated

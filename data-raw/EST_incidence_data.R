@@ -7,7 +7,9 @@ if ("try-error" %in% class(EST_data)) {
 }
 
 EST_incidence_data <- EST_data %>%
-  dplyr::transmute(date = lubridate::as_date(StatisticsDate),
-            case_incidence = DailyCases)
+  dplyr::transmute(
+    date = lubridate::as_date(StatisticsDate),
+    case_incidence = DailyCases
+  )
 
 usethis::use_data(EST_incidence_data, overwrite = TRUE, compress = "bzip2", version = 2)

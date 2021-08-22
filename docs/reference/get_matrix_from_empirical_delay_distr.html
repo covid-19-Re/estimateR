@@ -111,6 +111,9 @@ and will be accounted for by estimateR when estimating the reproductive number."
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -161,7 +164,10 @@ and will be accounted for by <code>estimateR</code> when estimating the reproduc
   min_number_cases <span class='op'>=</span> <span class='cn'>NULL</span>,
   upper_quantile_threshold <span class='op'>=</span> <span class='fl'>0.99</span>,
   min_number_cases_fraction <span class='op'>=</span> <span class='fl'>0.05</span>,
-  min_min_number_cases <span class='op'>=</span> <span class='fl'>10</span>
+  min_min_number_cases <span class='op'>=</span> <span class='fl'>10</span>,
+  fit <span class='op'>=</span> <span class='st'>"none"</span>,
+  return_fitted_distribution <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  num_steps_in_a_unit <span class='op'>=</span> <span class='cn'>NULL</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -187,12 +193,30 @@ This argument is needed to determine the dimensions of the output matrix.</p></t
     </tr>
     <tr>
       <th>min_number_cases</th>
-      <td><p>integer. Minimal number of cases to build
-the empirical distribution from. TODO add details</p></td>
+      <td><p>integer.
+Minimal number of cases to build the empirical distribution from.
+If <code>num_steps_in_a_unit</code> is <code>NULL</code>, for any time step T,
+the <code>min_number_cases</code> records prior to T are used.
+If less than <code>min_number_cases</code> delays were recorded before T,
+then T is ignored and the <code>min_number_cases</code> earliest-recorded delays are used.
+If <code>num_steps_in_a_unit</code> is given a value, a similar same procedure is applied,
+except that, now at least <code>min_number_cases</code> must be taken over a round number of
+time units. For example, if <code>num_steps_in_a_unit = 7</code>, and time steps represent consecutive days,
+to build the distribution for time step T,
+we find the smallest number of weeks starting from T and going in the past,
+for which at least <code>min_number_cases</code> delays were recorded.
+We then use all the delays recorded during these weeks.
+Weeks are not meant as necessarily being Monday to Sunday,
+but simply 7 days in a row, e.g. it can be Thursday-Wednesday.
+Again, if less than <code>min_number_cases</code> delays were recorded before T,
+then T is ignored.
+We then find the minimum number of weeks, starting from the first recorded delay
+that contains at least <code>min_number_cases</code>.</p></td>
     </tr>
     <tr>
       <th>upper_quantile_threshold</th>
-      <td><p>numeric. Between 0 and 1. TODO add details</p></td>
+      <td><p>numeric. Between 0 and 1.
+Argument for internal use.</p></td>
     </tr>
     <tr>
       <th>min_number_cases_fraction</th>
@@ -207,6 +231,23 @@ times the total number of reported delays.</p></td>
       <td><p>numeric. Lower bound
 for number of cases used to build an instant delay distribution.</p></td>
     </tr>
+    <tr>
+      <th>fit</th>
+      <td><p>string. One of "gamma" or "none". Specifies the type of fit that
+is applied to the columns of the delay matrix</p></td>
+    </tr>
+    <tr>
+      <th>return_fitted_distribution</th>
+      <td><p>boolean. If TRUE, the function also returns the gamma distribution that was fitted to the respective column.</p></td>
+    </tr>
+    <tr>
+      <th>num_steps_in_a_unit</th>
+      <td><p>Optional argument.
+Number of time steps in a full time unit (e.g. 7 if looking at weeks).
+If set, the delays used to build a particular
+delay distribution will span over a round number of such time units.
+This option is included for comparison with legacy code.</p></td>
+    </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -214,17 +255,12 @@ for number of cases used to build an instant delay distribution.</p></td>
     <p>a discretized delay distribution matrix.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>An <code>empirical_delays</code> dataframe must contain (at least) two columns.
-An 'event_date' column of type <code>Date</code>
-and a 'report_delay' column of type <code>numeric</code>.
-Each row represents the recording of a single delay between event and observation.
-Typically, the 'event' here is the onset of symptoms of the disease of interest.
-And the observation can be, for instance, case confirmation, hospital admission,
-admission to an ICU, or death, depending on what the incidence data represents.
-For a particular row, 'event_date' would then represent, for a single individual,
-the date at which symptoms appeared. And 'report_delay' would represent the number
-of time steps (as specified by <code>time_step</code>) until the observation was made
-for this same individual.</p>
+    <p>The <code>ref_date</code> argument here will be understood as the date of the first record in the incidence data
+for which the empirical delay data will be used.
+If <code>ref_date</code> is not provided, the reference date will be taken as being the earliest date in the
+<code>event_date</code> column of <code>empirical_delays</code>. In other words, the date of the first record in the incidence data
+will be assumed to be the same as the date of the first record in the empirical delay data.
+If this is not the case in your analysis, make sure to specify a <code>ref_date</code> argument.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

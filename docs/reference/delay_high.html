@@ -101,6 +101,9 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -138,32 +141,71 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>delay_incubation</th>
-      <td><p>TODO add details</p></td>
+      <th>delays</th>
+      <td><p>List of delays, with flexible structure.
+Each delay in the <code>delays</code> list can be one of:</p><ul>
+<li><p>a list representing a distribution object</p></li>
+<li><p>a discretized delay distribution vector</p></li>
+<li><p>a discretized delay distribution matrix</p></li>
+<li><p>a dataframe containing empirical delay data</p></li>
+</ul></td>
     </tr>
     <tr>
-      <th>delay_onset_to_report</th>
-      <td><p>TODO add details</p></td>
+      <th>delay</th>
+      <td><p>Single delay or list of delays.
+Each delay can be one of:</p><ul>
+<li><p>a list representing a distribution object</p></li>
+<li><p>a discretized delay distribution vector</p></li>
+<li><p>a discretized delay distribution matrix</p></li>
+<li><p>a dataframe containing empirical delay data</p></li>
+</ul></td>
     </tr>
     <tr>
       <th>delay_distribution_final_report</th>
-      <td><p>TODO add details</p></td>
+      <td><p>Distribution of the delay between the events collected in the incidence data
+and the a posteriori observations of these events.</p></td>
+    </tr>
+    <tr>
+      <th>cutoff_observation_probability</th>
+      <td><p>value between 0 and 1.
+Only datapoints for timesteps that have a probability of observing a event
+higher than <code>cutoff_observation_probability</code> are kept.
+The few datapoints with a lower probability to be observed are trimmed off
+the tail of the timeseries.</p></td>
     </tr>
     <tr>
       <th>is_partially_reported_data</th>
-      <td><p>boolean TODO add details</p></td>
+      <td><p>boolean.
+Set to <code>TRUE</code> if <code>incidence_data</code> represents delayed observations
+of infection events that themselves rely on further-delayed observations.</p></td>
     </tr>
     <tr>
       <th>delay_until_partial</th>
-      <td><p>TODO add details</p></td>
+      <td><p>Single delay or list of delays.
+Each delay can be one of:</p><ul>
+<li><p>a list representing a distribution object</p></li>
+<li><p>a discretized delay distribution vector</p></li>
+<li><p>a discretized delay distribution matrix</p></li>
+<li><p>a dataframe containing empirical delay data</p></li>
+</ul></td>
     </tr>
     <tr>
-      <th>delay_from_partial_to_full</th>
-      <td><p>TODO add details</p></td>
+      <th>delay_until_final_report</th>
+      <td><p>Single delay or list of delays.
+Each delay can be one of:</p><ul>
+<li><p>a list representing a distribution object</p></li>
+<li><p>a discretized delay distribution vector</p></li>
+<li><p>a discretized delay distribution matrix</p></li>
+<li><p>a dataframe containing empirical delay data</p></li>
+</ul></td>
     </tr>
     <tr>
       <th>partial_observation_requires_full_observation</th>
-      <td><p>boolean TODO add details</p></td>
+      <td><p>boolean
+Set to <code>TRUE</code> if <code>partially_delayed_incidence</code> represent
+delayed observations of infection events that
+themselves rely on further-delayed observations.
+See Details for more details.</p></td>
     </tr>
     </table>
 

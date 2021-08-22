@@ -2,10 +2,21 @@
 % Please edit documentation in R/utils-validation.R
 \name{.check_is_estimate}
 \alias{.check_is_estimate}
-\title{TODO docs}
+\title{Utility functions for input validity.}
 \usage{
 .check_is_estimate(user_input, parameter_name, index_col_name)
 }
+\arguments{
+\item{user_input}{The variable to be tested}
+
+\item{parameter_name}{A string containing the name the tested parameter had in the initial function in which it was passed.}
+
+\item{index_col_name}{string. Name of the index column in the \code{user_input} dataframe.}
+}
+\value{
+TRUE if all tests were passed. Throws an error otherwise.
+}
 \description{
-TODO docs
+Utility function to check whether an object is a valid estimates object.
+It must be a dataframe and have an index column named \code{index_col_name} that doesn't contain any \code{NA} values.
 }

@@ -17,9 +17,11 @@
 \item{tolerate_NAs}{Can the distribution contain NA values?}
 
 \item{tolerance_on_sum}{Numeric tolerance in checking that vector elements sum to 1.}
+
+\item{parameter_name}{A string containing the name the tested parameter had in the initial function in which it was passed.}
 }
 \value{
-TRUE if no error was raised.
+TRUE if all tests were passed. Throws an error otherwise.
 }
 \description{
 To pass the check:

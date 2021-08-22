@@ -102,6 +102,9 @@ Otherwise, an error is thrown if delay does not follow the expected format." />
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
+      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
+    </li>
+    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -135,7 +138,10 @@ Otherwise, an error is thrown if delay does not follow the expected format." />
 Otherwise, an error is thrown if <code>delay</code> does not follow the expected format.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>.check_is_empirical_delay_data</span><span class='op'>(</span><span class='va'>delay</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>.check_is_empirical_delay_data</span><span class='op'>(</span>
+  <span class='va'>delay</span>,
+  parameter_name <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/deparse.html'>deparse</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/substitute.html'>substitute</a></span><span class='op'>(</span><span class='va'>distribution</span><span class='op'>)</span><span class='op'>)</span>
+<span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -143,6 +149,10 @@ Otherwise, an error is thrown if <code>delay</code> does not follow the expected
     <tr>
       <th>delay</th>
       <td><p>object to be tested</p></td>
+    </tr>
+    <tr>
+      <th>parameter_name</th>
+      <td><p>A string containing the name the tested parameter had in the initial function in which it was passed.</p></td>
     </tr>
     </table>
 
