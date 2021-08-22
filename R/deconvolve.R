@@ -4,6 +4,8 @@
 #' The assumption made is that delayed observations represent the convolution of the time series of infections with a delay distribution.
 #' \code{deconvolve_incidence} implements a deconvolution algorithm (Richardson-Lucy) to reconstruct
 #' a vector of infection events from input data representing delayed observations.
+#' 
+#' @example man/examples/deconvolve_incidence.R
 #'
 #' @inheritParams module_methods
 #' @inheritParams module_structure

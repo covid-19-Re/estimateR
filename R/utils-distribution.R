@@ -123,6 +123,8 @@
 #TODO add details on the discretization
 #' Build a discretized probability distribution vector from a delay distribution list
 #'
+#' @example man/examples/build_delay_distribution.R
+#'
 #' @inheritParams distribution
 #' @inheritParams .get_discretized_distribution
 #' @param max_quantile numeric value between 0 and 1. TODO add details

@@ -212,10 +212,9 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
   return(TRUE)
 }
 
-
+#' Utility functions for input validity.
+#' 
 #' @description Utility function to determine whether an object is a numeric vector with all positive (or zero) values.
-#'
-#' @inherit validation_utility_params
 #' @param vector vector to be tested
 #'
 #' @return boolean. TRUE if vector is a positive numeric vector. FALSE otherwise
@@ -554,9 +553,9 @@ accepted_parameter_value <- list(smoothing_method = c("LOESS"),
   return(TRUE)
 }
 
+#' Utility functions for input validity.
+#' 
 #' @description Utility function that checks that the values the user passed when calling a function are valid.
-#'
-#' @inherit validation_utility_params
 #' @param user_inputs A list of lists with two elements: the first is the value of the parameter to be tested. The second is the expected type of that parameter.
 #'
 .are_valid_argument_values <- function(user_inputs){

@@ -18,6 +18,7 @@
 #' In latter case, the first waiting time distribution does not need to correspond to an incubation period per se,
 #' but it must in any case correspond to the delay between infection and case observation.
 #'
+#' @example man/examples/get_block_bootstrapped_estimate.R
 #'
 #' @inheritParams pipe_params
 #' @inheritParams bootstrap_params
@@ -239,6 +240,8 @@ get_block_bootstrapped_estimate <- function(incidence_data,
 #' The \code{\link[=deconvolve_incidence]{deconvolution step}} uses the Richardson-Lucy algorithm  by default.
 #' The \code{\link[=estimate_Re]{Re estimation}} uses the Cori method with a sliding window  by default.
 #'
+#' @example man/examples/estimate_Re_from_noisy_delayed_incidence.R
+#'
 #' @inheritParams module_structure
 #' @inheritParams module_methods
 #' @inheritParams universal_params
@@ -342,6 +345,8 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
 #' For instance, if the incidence data represents symptom onset events, usually these events
 #' are dependent on a secondary delayed observation: a case confirmation typically, or
 #' a hospital admission or any other type of event,
+#'
+#' @example man/examples/get_infections_from_incidence.R
 #'
 #' @inheritParams module_structure
 #' @inheritParams module_methods
@@ -457,6 +462,7 @@ get_infections_from_incidence <- function(incidence_data,
 #' Typically, the recording of a symptom onset event will require a future case confirmation.
 #' If so, the \code{partial_observation_requires_full_observation} flag should be set to \code{TRUE}.
 #'
+#' @example man/examples/estimate_from_combined_observations.R
 #'
 #' @inheritParams module_structure
 #' @inheritParams module_methods
@@ -565,6 +571,8 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
 # TODO doc
 # TODO continue here
 #' Estimate Re from incidence and estimate uncertainty by bootstrapping
+#'
+#' @example man/examples/get_bootstrapped_estimates_from_combined_observations.R
 #'
 #' @inheritParams module_structure
 #' @inheritParams module_methods

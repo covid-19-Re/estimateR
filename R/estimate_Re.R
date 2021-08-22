@@ -8,12 +8,14 @@
 #' then one should deconvolve it first with \code{deconvolve_incidence}.
 #' TODO add details on inner function, that it wraps around EpiEstim and so on.
 #'
-#'
+#' @example man/examples/estimate_Re.R
+#' 
 #' @inheritParams module_methods
 #' @inheritParams module_structure
 #' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
 #'
 #' @return a module output object. Re estimates.
+#' @seealso \code{\link{smooth_incidence}}, \code{\link{deconvolve_incidence}} 
 #' @export
 estimate_Re <- function( incidence_data,
                          estimation_method = "EpiEstim sliding window",

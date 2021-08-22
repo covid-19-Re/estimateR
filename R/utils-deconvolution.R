@@ -161,6 +161,8 @@
 #' of epidemic of interest, this will be reflected in the recorded empirical delays
 #' and will be accounted for by \code{estimateR} when estimating the reproductive number.
 #'
+#' @example man/examples/get_matrix_from_empirical_delay_distr.R
+#'
 #' @inherit empirical_delay_data_format
 #'
 #' @param empirical_delays dataframe containing the empirical data. See Details.

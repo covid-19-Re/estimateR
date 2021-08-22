@@ -10,6 +10,9 @@
 #' The confidence interval is built using bootstrapped estimates
 #' and centered around the mean of bootstrapped estimates and original estimates.}
 #' }
+#' 
+#' @example man/examples/summarise_uncertainty.R
+#' 
 #' @inherit uncertainty
 #' @inheritDotParams .summarise_CI_bootstrap
 #'

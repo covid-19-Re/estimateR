@@ -18,6 +18,7 @@
 #' If a reference date is provided with \code{ref_date}, a date column is appended to the tibble,
 #' with sequential dates generated with the time step specified by the \code{time_step} parameter.
 #'
+#' @example man/examples/merge_outputs.R
 #'
 #' @param output_list named list of module output objects.
 #' @param include_index boolean. Include an index column in output?
@@ -320,6 +321,8 @@ leftpad_input <- function(input, new_offset, padding_value = 0){
 #' In order to account for this effect, this function divides each incidence value
 #' by the probability of an event happening at a particular timestep to have been observed.
 #' Typically, this correction only affects the few most recent datapoints.
+#'
+#' @example man/examples/correct_for_partially_observed_data.R
 #'
 #' @param delay_distribution_final_report TODO refactor to estimateR
 #' Distribution of the delay between the events collected in the incidence data

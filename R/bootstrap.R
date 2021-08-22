@@ -7,6 +7,7 @@
 #' bootstrapping procedures.
 #' For now, only one bootstrapping function is implemented.
 #' It performs a non-parametric block bootstrapping.
+#' @example man/examples/get_bootstrap_replicate.R
 #'
 #' @inheritParams module_methods
 #' @inheritParams module_structure

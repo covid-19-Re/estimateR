@@ -175,7 +175,7 @@
 #' see \code{\link{get_matrix_from_empirical_delay_distr}} for details on the format
 #' expected for the empirical delay data.
 #'
-#'
+#' @example man/examples/convolve_delay_inputs.R
 #'
 #' @param delay_incubation Incubation delay. Flexible format.
 #' @param delay_onset_to_report Delay between symptom onset and report. Flexible format.
