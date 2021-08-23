@@ -101,9 +101,6 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
-      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
-    </li>
-    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -149,10 +146,6 @@ a particular infection event should not be recorded in both time series.</p>
 meaning that they represents two different ways infection events
 can be observed, with two different delays
 then set <code>partial_observation_requires_full_observation</code> to <code>FALSE</code>.
-The <code>delay_until_final_report</code> delay then corresponds to the delay
-from infection until observation in <code>fully_delayed_incidence</code>.
-And the <code>delay_until_partial</code> delay then corresponds to the delay
-from infection until observation in <code>partially_delayed_incidence</code>.
 Note that a particular infection events should NOT be recorded twice:
 it cannot be recorded both in <code>partially_delayed_incidence</code> and in <code>fully_delayed_incidence</code>.</p>
 <p>An alternative use-case is when the two sets of observations are not independent
@@ -168,10 +161,10 @@ to <code>TRUE</code> and we call the incidence constructed from events of
 symptom onset <code>partially_delayed_incidence</code> and
 the incidence constructed from case confirmation events
 <code>fully_delayed_incidence</code>.
-The full delay from infection to positive test in this example is
-specified with the <code>delay_until_final_report</code> argument.
 The delay from infection to symptom onset events is
 specified with the <code>delay_until_partial</code> argument.
+The delay from symptom onset to positive test in this example is
+specified with the <code>delay_until_final_report</code> argument.
 Note that, for a particular patient,
 if the date of onset of symptom is known, the patient must not be counted again
 in the incidence of case confirmation.

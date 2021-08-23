@@ -104,9 +104,6 @@ The shift applied during module operations is the offset argument." />
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
-      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
-    </li>
-    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -142,7 +139,7 @@ The new offset is simply (module input offset) + (shift applied during module op
 The shift applied during module operations is the <code>offset</code> argument.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>.get_module_output</span><span class='op'>(</span><span class='va'>results</span>, <span class='va'>input</span>, offset <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>.get_module_output</span><span class='op'>(</span><span class='va'>results</span>, <span class='va'>original_offset</span>, additional_offset <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -152,35 +149,30 @@ The shift applied during module operations is the <code>offset</code> argument.<
       <td><p>numeric vector containing output of module operations.</p></td>
     </tr>
     <tr>
-      <th>input</th>
-      <td><p>Module input object.
-List with two elements:</p><ol>
-<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
-<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
-by which the first value in <code>values</code> is shifted compared to a reference time step
-This parameter allows one to keep track of the date of the first value in <code>values</code>
-without needing to carry a <code>date</code> column around.
-A positive offset means <code>values</code> are delayed in the future compared to the reference values.
-A negative offset means the opposite.</p></li>
-</ol>
-
-<p>@return Module input object.
-List with two elements:</p><ol>
-<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
-<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
-by which the first value in <code>values</code> is shifted compared to a reference time step
-This parameter allows one to keep track of the date of the first value in <code>values</code>
-without needing to carry a <code>date</code> column around.
-A positive offset means <code>values</code> are delayed in the future compared to the reference values.
-A negative offset means the opposite.</p></li>
-</ol></td>
+      <th>original_offset</th>
+      <td><p>integer. Input offset before computations.</p></td>
     </tr>
     <tr>
-      <th>offset</th>
+      <th>additional_offset</th>
       <td><p>integer. Shift resulting from operations performed in module.</p></td>
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A list with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the result of the computations on the input data.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the result is shifted compared to an <code>index_offset</code> of <code>0</code>.
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+Note that the <code>index_offset</code> of the output of the function call
+accounts for the (optional) <code>index_offset</code> of the input.</p></li>
+</ol><p>If <code>index_offset</code> is <code>0</code> and <code>simplify_output = TRUE</code>,
+the <code>index_offset</code> is dropped and the <code>values</code>
+element is returned as a numeric vector.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

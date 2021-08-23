@@ -103,9 +103,6 @@ for a sliding window of 4 time steps." />
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
-      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
-    </li>
-    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -142,6 +139,7 @@ for a sliding window of 4 time steps.</p>
 
     <pre class="usage"><span class='fu'>.estimate_Re_EpiEstim_sliding_window</span><span class='op'>(</span>
   <span class='va'>incidence_input</span>,
+  import_incidence_input <span class='op'>=</span> <span class='cn'>NULL</span>,
   minimum_cumul_incidence <span class='op'>=</span> <span class='fl'>12</span>,
   estimation_window <span class='op'>=</span> <span class='fl'>3</span>,
   mean_serial_interval <span class='op'>=</span> <span class='fl'>4.8</span>,
@@ -164,9 +162,11 @@ This parameter allows one to keep track of the date of the first value in <code>
 without needing to carry a <code>date</code> column around.
 A positive offset means <code>values</code> are delayed in the future compared to the reference values.
 A negative offset means the opposite.</p></li>
-</ol>
-
-<p>@return Module input object.
+</ol></td>
+    </tr>
+    <tr>
+      <th>import_incidence_input</th>
+      <td><p>NULL or module input object.
 List with two elements:</p><ol>
 <li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
 <li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
@@ -175,7 +175,8 @@ This parameter allows one to keep track of the date of the first value in <code>
 without needing to carry a <code>date</code> column around.
 A positive offset means <code>values</code> are delayed in the future compared to the reference values.
 A negative offset means the opposite.</p></li>
-</ol></td>
+</ol><p>If not NULL, this data represents recorded imported cases.
+And then <code>incidence_input</code> represents only local cases.</p></td>
     </tr>
     <tr>
       <th>minimum_cumul_incidence</th>

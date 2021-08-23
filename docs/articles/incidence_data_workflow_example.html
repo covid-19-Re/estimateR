@@ -60,9 +60,6 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
-      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
-    </li>
-    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -120,7 +117,7 @@
 
 <span class="co"># Package for plotting</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span></code></pre></div>
-<p>In this example, we fetch and analyze COVID-19 incidence data from Estonia. The Estonian public health authorities publish detailed COVID-19 related data <a href="https://www.terviseamet.ee/et/koroonaviirus/avaandmed">here</a>. We start by fetching the dataset containing the number of reported cases for each day since the beginning of the pandemic.</p>
+<p>In this example, we fetch and analyze COVID-19 incidence data from Estonia. The Estonian public health authorities publish detailed COVID-19 related data <a href="https://www.terviseamet.ee/et/koroonaviirus/avaandmed">here</a>. We start by fetching the dataset containing the number of reported cases for each day since the beginning of the COVID-19 pandemic.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">url</span> <span class="op">&lt;-</span> <span class="st">"https://opendata.digilugu.ee/opendata_covid19_tests_total.csv"</span>
 <span class="va">EST_data</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/try.html">try</a></span><span class="op">(</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html">read_csv</a></span><span class="op">(</span><span class="va">url</span><span class="op">)</span><span class="op">)</span>
@@ -168,9 +165,10 @@
     <span class="fu"><a href="https://tidyr.tidyverse.org/reference/complete.html">complete</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.Date.html">seq.Date</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,  <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span>,
                                       by <span class="op">=</span> <span class="st">"days"</span><span class="op">)</span>,
                   fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>case_incidence <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>Now that our incidence data is ready and curated, we need to gather all COVID-19 parameters required for the Re estimation. TODO add references</p>
+<p>Now that our incidence data is ready and curated, we need to gather all COVID-19 parameters required for the Re estimation.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co">## Delay between infection and onset of symptoms (incubation period) in days</span>
+<span class="co"># Ref: Linton et al., Journal of Clinical Medicine, 2020</span>
 <span class="co"># Gamma distribution parameter</span>
 <span class="va">shape_incubation</span> <span class="op">&lt;-</span> <span class="fl">3.2</span>
 <span class="va">scale_incubation</span> <span class="op">&lt;-</span> <span class="fl">1.3</span>
@@ -182,6 +180,7 @@
 
 
 <span class="co">## Delay between onset of symptoms and case confirmation in days</span>
+<span class="co"># Ref: Bi et al., The Lancet Infectious Diseases, 2020</span>
 <span class="co"># Gamma distribution parameter</span>
 <span class="va">shape_onset_to_confirmation</span> <span class="op">&lt;-</span> <span class="fl">2.1</span>
 <span class="va">scale_onset_to_confirmation</span> <span class="op">&lt;-</span> <span class="fl">2.6</span>
@@ -192,6 +191,7 @@
                                 scale <span class="op">=</span> <span class="va">scale_onset_to_confirmation</span><span class="op">)</span>
 
 <span class="co">## Serial interval (for Re estimation) in days</span>
+<span class="co"># Ref: Nishiura et al.,International Journal of Infectious Diseases, 2020</span>
 <span class="va">mean_serial_interval</span> <span class="op">&lt;-</span> <span class="fl">4.8</span>
 <span class="va">std_serial_interval</span> <span class="op">&lt;-</span> <span class="fl">2.3</span></code></pre></div>
 <p>We also need some specifications for the analysis:</p>
@@ -217,22 +217,17 @@
   time_step <span class="op">=</span> <span class="va">time_step</span>,
   combine_bootstrap_and_estimation_uncertainties <span class="op">=</span> <span class="cn">TRUE</span>
 <span class="op">)</span>
-<span class="co">#&gt; Warning in estimate_R_func(incid = incid, method = method, si_sample = si_sample, : You're estimating R too early in the epidemic to get the desired</span>
-<span class="co">#&gt;             posterior CV.</span>
-
-<span class="co">#&gt; Warning in estimate_R_func(incid = incid, method = method, si_sample = si_sample, : You're estimating R too early in the epidemic to get the desired</span>
-<span class="co">#&gt;             posterior CV.</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">EST_estimates</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 6 x 4</span>
 <span class="co">#&gt;   date       Re_estimate CI_down_Re_estimate CI_up_Re_estimate</span>
 <span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;               &lt;dbl&gt;             &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 2020-03-06        2.14                1.15              3.13</span>
-<span class="co">#&gt; 2 2020-03-07        1.87                1.04              2.71</span>
-<span class="co">#&gt; 3 2020-03-08        1.65                1.14              2.16</span>
-<span class="co">#&gt; 4 2020-03-09        1.49                1.07              1.90</span>
-<span class="co">#&gt; 5 2020-03-10        1.38                1.06              1.70</span>
-<span class="co">#&gt; 6 2020-03-11        1.31                1.05              1.58</span></code></pre></div>
+<span class="co">#&gt; 1 2020-03-06        2.14                1.38              2.90</span>
+<span class="co">#&gt; 2 2020-03-07        1.87                1.14              2.61</span>
+<span class="co">#&gt; 3 2020-03-08        1.65                1.21              2.10</span>
+<span class="co">#&gt; 4 2020-03-09        1.49                1.12              1.85</span>
+<span class="co">#&gt; 5 2020-03-10        1.38                1.09              1.67</span>
+<span class="co">#&gt; 6 2020-03-11        1.31                1.06              1.58</span></code></pre></div>
 <p>Now let us plot these estimates through time, along with their confidence intervals.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">EST_estimates</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">Re_estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
