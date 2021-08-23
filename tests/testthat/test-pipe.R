@@ -632,12 +632,13 @@ test_that("get_bootstrapped_estimate_from_combined_observations can deal with em
     cutoff_observation_probability = 0.1
   )
 
-  reference_R_values <- c(2.06,1.91,1.85,1.81,1.77,
-                          1.73,1.7,1.67,1.64,1.6,1.55,
-                          1.5,1.44,1.38,1.32,1.27,1.22,
-                          1.18,1.15,1.12,1.09,1.07,1.05,
-                          1.03,1.01,0.98,0.96,0.94,0.92,
-                          0.91,0.9,0.9)
+  reference_R_values <- c(1.98,1.76,1.67,1.63,
+                          1.63,1.65,1.66,1.66,
+                          1.66,1.63,1.59,1.54,
+                          1.48,1.42,1.37,1.32,
+                          1.26,1.21,1.17,1.12,
+                          1.08,1.04,1,0.95,0.91,
+                          0.87,0.83,0.8,0.77,0.75)
 
   expect_equal(results_estimation$Re_estimate, reference_R_values, tolerance = 1E-1)
 })

@@ -113,10 +113,6 @@ NULL
 #' meaning that they represents two different ways infection events
 #' can be observed, with two different delays
 #' then set \code{partial_observation_requires_full_observation} to \code{FALSE}.
-#' The \code{delay_until_final_report} delay then corresponds to the delay
-#' from infection until observation in \code{fully_delayed_incidence}.
-#' And the \code{delay_until_partial} delay then corresponds to the delay
-#' from infection until observation in \code{partially_delayed_incidence}.
 #' Note that a particular infection events should NOT be recorded twice:
 #' it cannot be recorded both in \code{partially_delayed_incidence} and in \code{fully_delayed_incidence}.
 #'
@@ -133,10 +129,10 @@ NULL
 #' symptom onset \code{partially_delayed_incidence} and
 #' the incidence constructed from case confirmation events
 #' \code{fully_delayed_incidence}.
-#' The full delay from infection to positive test in this example is
-#' specified with the \code{delay_until_final_report} argument.
 #' The delay from infection to symptom onset events is
 #' specified with the \code{delay_until_partial} argument.
+#' The delay from symptom onset to positive test in this example is
+#' specified with the \code{delay_until_final_report} argument.
 #' Note that, for a particular patient,
 #' if the date of onset of symptom is known, the patient must not be counted again
 #' in the incidence of case confirmation.

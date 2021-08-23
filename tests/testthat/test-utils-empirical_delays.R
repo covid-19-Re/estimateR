@@ -102,7 +102,7 @@ test_that(".get_matrix_from_empirical_delay_distr returns a matrix with the expe
   set.seed(1)
   result <- .delay_distribution_matrix_rmse_compute(original_distribution_shapes, original_distribution_scales, nr_distribution_samples)
   expect_equal(max(result$shape_rmse, 0.3193425), 0.3193425, tolerance = 1E-2) # the RMSE gets lower with more time_steps;
-  expect_equal(max(result$scale_rmse, 0.3491427), 0.3491427, tolerance = 1E-2) # kept the lower time_steps value to reduce running time
+  expect_equal(max(result$scale_rmse, 0.3808837), 0.3808837, tolerance = 1E-2) # kept the lower time_steps value to reduce running time
 
 
   # Testing delay matrix with data sampled from a different gamma distribution for each timestep

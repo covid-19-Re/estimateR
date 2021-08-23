@@ -10,19 +10,37 @@ knitr::opts_chunk$set(
 )
 ```
 
-# **estimateR** package
 
 The **estimateR** package provides tools to estimate the effective reproductive number through time from delayed and indirect observations of infection events.
-This package is under development. 
-The README file is still at a super rough stage.
+This package is currently in a beta version. 
 
+## Installation
 
-## Quick toy example
+First, make sure you have installed the **devtools** package locally.
+If not, run:
+```
+install.packages("devtools")
+``` 
+in RStudio or other.
 
-We demonstrate below a basic use of the **estimateR** package. Check out the *estimateR* vignette for more details.
+Then run:
+```
+library(devtools)
+install_github("covid-19-Re/estimateR")
+```
+
+## Documentation
+
+The full documentation is available **[here](https://covid-19-re.github.io/estimateR/)**.
+
+## Quick example
+
+We demonstrate below a basic use of the **estimateR** package. Check out the *estimateR* vignette and additional vignettes for more details.
 
 We start with arbitrary incidence data representing daily counts of case confirmations for a disease of interest.
 This incidence data counts the number of people getting tested positive for a particular infectious disease X on day *T*.
+With `estimate_Re_from_noisy_delayed_incidence()`, we compute the reproductive number through time from this incidence data
+and specifications of the delays between infection events and case confirmations as well as the serial interval.
 
 ```{r}
 library(estimateR)
@@ -58,13 +76,11 @@ std_serial_interval = 2.3
 estimation_window = 3 
 
 ## End of user input
-
 toy_estimates <- estimate_Re_from_noisy_delayed_incidence(toy_incidence_data,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
-  delay_incubation = incubation,
-  delay_onset_to_report = onset_to_report,
+  delay = list(incubation, onset_to_report),
   estimation_window = estimation_window,
   mean_serial_interval = mean_serial_interval,
   std_serial_interval  = std_serial_interval,
@@ -73,7 +89,7 @@ toy_estimates <- estimate_Re_from_noisy_delayed_incidence(toy_incidence_data,
   time_step = "day"
 )
 
-head(toy_estimates, n = 20)
+tail(toy_estimates, n = 20)
 ```
 
 
