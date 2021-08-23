@@ -63,11 +63,12 @@ smooth_incidence <- function(incidence_data,
 #' the average initial Re.
 #'
 .smooth_LOESS <- function(incidence_input, data_points_incl = 21, degree = 1, initial_Re_estimate_window = 5) {
-
-  .are_valid_argument_values(list(list(incidence_input, "module_input"),
-                                  list(data_points_incl, "non_negative_number"),
-                                  list(degree, "non_negative_number"), #minimal test; needs to be one of {0,1,2}, but stats::loess already throws if it isn't
-                                  list(initial_Re_estimate_window, "positive_integer")))
+  .are_valid_argument_values(list(
+    list(incidence_input, "module_input"),
+    list(data_points_incl, "non_negative_number"),
+    list(degree, "non_negative_number"), # minimal test; needs to be one of {0,1,2}, but stats::loess already throws if it isn't
+    list(initial_Re_estimate_window, "positive_integer")
+  ))
 
   incidence_vector <- .get_values(incidence_input)
 
@@ -76,14 +77,16 @@ smooth_incidence <- function(incidence_data,
 
   n_pad <- round(length(incidence_vector) * sel_span * 0.5)
 
-  avg_change_rate <- incidence_vector[2:(initial_Re_estimate_window + 1)]/incidence_vector[1:initial_Re_estimate_window]
+  avg_change_rate <- incidence_vector[2:(initial_Re_estimate_window + 1)] / incidence_vector[1:initial_Re_estimate_window]
   avg_change_rate[!is.finite(avg_change_rate)] <- 1
   avg_change_rate <- mean(avg_change_rate)
 
   values_to_pad_with <- incidence_vector[1] * (avg_change_rate^(-n_pad:-1))
 
-  c_data <- data.frame(value = c(values_to_pad_with, incidence_vector),
-                       date_num = 1:(n_pad + n_points))
+  c_data <- data.frame(
+    value = c(values_to_pad_with, incidence_vector),
+    date_num = 1:(n_pad + n_points)
+  )
 
   c_data.lo <- stats::loess(value ~ date_num, data = c_data, span = sel_span, degree = degree)
   smoothed <- stats::predict(c_data.lo)

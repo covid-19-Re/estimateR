@@ -21,14 +21,16 @@ test_that("deconvolve_incidence yields consistent results on a toy constant-dela
     max_iterations = 100
   )
 
-  reference_values <- c(4.9,6.6,8.3,10.9,14.4,18.8,27,36.5,47.4,
-                        60.3,75.1,91.9,110.9,133,157.6,185.9,216.9,
-                        246.6,272.5,299.2,320.7,333.6,343,345.4,
-                        336.7,323.2,306.1,282.8,260.8,239.2,215.9,
-                        192.7,169.4,142.8,113.9,85.3,59.4)
+  reference_values <- c(
+    4.9, 6.6, 8.3, 10.9, 14.4, 18.8, 27, 36.5, 47.4,
+    60.3, 75.1, 91.9, 110.9, 133, 157.6, 185.9, 216.9,
+    246.6, 272.5, 299.2, 320.7, 333.6, 343, 345.4,
+    336.7, 323.2, 306.1, 282.8, 260.8, 239.2, 215.9,
+    192.7, 169.4, 142.8, 113.9, 85.3, 59.4
+  )
   reference_offset <- -5
 
-  expect_lte( max(abs(.get_values(deconvolved_incidence) - reference_values)), expected = 1)
+  expect_lte(max(abs(.get_values(deconvolved_incidence) - reference_values)), expected = 1)
   expect_identical(.get_offset(deconvolved_incidence), reference_offset)
 })
 
@@ -63,8 +65,10 @@ test_that("deconvolve_incidence yields consistent results on a toy moving-throug
   deconvolved_incidence <- deconvolve_incidence(
     incidence_data = toy_incidence_data,
     deconvolution_method = "Richardson-Lucy delay distribution",
-    delay = list(distribution_incubation,
-                  generated_empirical_delays),
+    delay = list(
+      distribution_incubation,
+      generated_empirical_delays
+    ),
     ref_date = ref_date,
     min_number_cases = 20,
     threshold_chi_squared = 1,
@@ -72,19 +76,21 @@ test_that("deconvolve_incidence yields consistent results on a toy moving-throug
     fit = "none"
   )
 
- reference_values <- c(3.6,4.9,6.2,8.2,11,14.8,
-                       21.8,30.2,40.4,53.2,69,
-                       87.6,108.7,133.8,162.3,
-                       195.9,234.5,273.8,309.5,
-                       345.2,373.3,389.3,398.3,
-                       396.1,378.5,353.5,323.2,
-                       286.4,252.3,221,191.1,
-                       163.9,137.3,109.5,83.2,
-                       60.2,40.5)
+  reference_values <- c(
+    3.6, 4.9, 6.2, 8.2, 11, 14.8,
+    21.8, 30.2, 40.4, 53.2, 69,
+    87.6, 108.7, 133.8, 162.3,
+    195.9, 234.5, 273.8, 309.5,
+    345.2, 373.3, 389.3, 398.3,
+    396.1, 378.5, 353.5, 323.2,
+    286.4, 252.3, 221, 191.1,
+    163.9, 137.3, 109.5, 83.2,
+    60.2, 40.5
+  )
 
   reference_offset <- -11
 
-  expect_lte( max(abs(.get_values(deconvolved_incidence) - reference_values)), expected = 0.1)
+  expect_lte(max(abs(.get_values(deconvolved_incidence) - reference_values)), expected = 0.1)
   expect_identical(.get_offset(deconvolved_incidence), reference_offset)
 })
 
@@ -121,8 +127,10 @@ test_that("deconvolve_incidence takes into account extra parameters for get_matr
   deconvolved_incidence <- deconvolve_incidence(
     incidence_data = toy_incidence_data,
     deconvolution_method = "Richardson-Lucy delay distribution",
-    delay = list(distribution_incubation,
-                  generated_empirical_delays),
+    delay = list(
+      distribution_incubation,
+      generated_empirical_delays
+    ),
     ref_date = ref_date,
     threshold_chi_squared = 1,
     max_iterations = 100,
@@ -130,17 +138,19 @@ test_that("deconvolve_incidence takes into account extra parameters for get_matr
     min_number_cases = min_number_cases
   )
 
-  reference_values <- c(2.44,3.32,4.26,5.72,7.77,
-                        10.52,15.61,21.91,29.68,39.79,
-                        52.62,68.5,87.73,111.35,138.94,
-                        171.69,209.07,247.21,283.37,321.86,
-                        355.1,377.96,394.83,401.25,391.94,
-                        374.41,350.6,318.05,285.99,254.04,
-                        220.78,188.94,158.86,128.11,98.12,
-                        70.87,47.9)
+  reference_values <- c(
+    2.44, 3.32, 4.26, 5.72, 7.77,
+    10.52, 15.61, 21.91, 29.68, 39.79,
+    52.62, 68.5, 87.73, 111.35, 138.94,
+    171.69, 209.07, 247.21, 283.37, 321.86,
+    355.1, 377.96, 394.83, 401.25, 391.94,
+    374.41, 350.6, 318.05, 285.99, 254.04,
+    220.78, 188.94, 158.86, 128.11, 98.12,
+    70.87, 47.9
+  )
 
   reference_offset <- -14
 
-  expect_lte( max(abs(.get_values(deconvolved_incidence) - reference_values)), expected = 0.1 ) # Work-around because weird behaviour of expect_equal()
+  expect_lte(max(abs(.get_values(deconvolved_incidence) - reference_values)), expected = 0.1) # Work-around because weird behaviour of expect_equal()
   expect_identical(.get_offset(deconvolved_incidence), reference_offset)
 })

@@ -11,10 +11,10 @@
 #' @return tibble
 #' @export
 make_tibble_from_output <- function(output,
-                                     output_name = "value",
-                                     index_col = "idx",
-                                     ref_date = NULL,
-                                     time_step = "day") {
+                                    output_name = "value",
+                                    index_col = "idx",
+                                    ref_date = NULL,
+                                    time_step = "day") {
   .are_valid_argument_values(list(
     list(output, "module_input"),
     list(output_name, "string"),
@@ -28,12 +28,14 @@ make_tibble_from_output <- function(output,
 
   formatted_output <- dplyr::tibble(!!index_col := indices, !!output_name := .get_values(tmp_output))
 
-  if(!is.null(ref_date)){
-    formatted_output <- .add_date_column(estimates = formatted_output,
-                     ref_date = ref_date,
-                     time_step = time_step,
-                     index_col = index_col,
-                     keep_index_col = FALSE)
+  if (!is.null(ref_date)) {
+    formatted_output <- .add_date_column(
+      estimates = formatted_output,
+      ref_date = ref_date,
+      time_step = time_step,
+      index_col = index_col,
+      keep_index_col = FALSE
+    )
   }
 
   return(formatted_output)
@@ -216,14 +218,14 @@ merge_outputs <- function(output_list,
 #' @return The input dataframe without leading NA rows.
 .prettify_result <- function(data,
                              index_col = "idx",
-                             date_col = "date"){
+                             date_col = "date") {
   .are_valid_argument_values(list(
     list(index_col, "string"),
     list(date_col, "string")
   ))
 
-  if(is.data.frame(data)){
-    if(!(index_col %in% names(data) || date_col %in% names(data))){
+  if (is.data.frame(data)) {
+    if (!(index_col %in% names(data) || date_col %in% names(data))) {
       stop("data argument must contain an index column or date column (or both).")
     }
 
@@ -243,11 +245,13 @@ merge_outputs <- function(output_list,
       dplyr::pull(.data[[ref_col]])
 
     cleaned_data <- data %>%
-      dplyr::filter(.data[[ref_col]] >= first_row_to_keep,
-                    .data[[ref_col]] <= last_row_to_keep)
+      dplyr::filter(
+        .data[[ref_col]] >= first_row_to_keep,
+        .data[[ref_col]] <= last_row_to_keep
+      )
 
     return(cleaned_data)
-  } else if(is.list(data)) { # This needs to be checked second, because is.list(dataframe) is TRUE.
+  } else if (is.list(data)) { # This needs to be checked second, because is.list(dataframe) is TRUE.
     return(.simplify_output(data))
   } else {
     stop("Data must be a list (module output) or dataframe.")

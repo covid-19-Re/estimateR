@@ -56,7 +56,8 @@ correct_for_partially_observed_data <- function(incidence_data,
       .get_shared_args(list(
         convolve_delays,
         build_delay_distribution,
-        get_matrix_from_empirical_delay_distr), dots_args)
+        get_matrix_from_empirical_delay_distr
+      ), dots_args)
     )
   )
 

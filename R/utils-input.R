@@ -145,6 +145,3 @@ leftpad_input <- function(input, new_offset, padding_value = 0) {
     return(list(values = padded_values, index_offset = new_offset))
   }
 }
-
-
-

@@ -11,12 +11,11 @@
                                              date_of_interest,
                                              num_steps_in_a_unit = 7,
                                              min_number_cases) {
-
   recent_counts <- delays %>%
     dplyr::arrange(dplyr::desc(.data$event_date)) %>%
     dplyr::filter(.data$event_date <= date_of_interest)
 
-  if(nrow(recent_counts) < min_number_cases) {
+  if (nrow(recent_counts) < min_number_cases) {
     first_observation_dates <- delays %>%
       dplyr::arrange(.data$event_date) %>%
       dplyr::slice_head(n = min_number_cases) %>%
@@ -25,7 +24,7 @@
     max_date <- max(first_observation_dates)
     num_steps_since_start <- trunc(as.double(max_date - min(delays$event_date), units = "auto"))
 
-    if((num_steps_since_start %% num_steps_in_a_unit) == 0) {
+    if ((num_steps_since_start %% num_steps_in_a_unit) == 0) {
       max_date_with_full_weeks <- max_date
     } else {
       max_date_with_full_weeks <- max_date + num_steps_in_a_unit - (num_steps_since_start %% num_steps_in_a_unit)
@@ -34,7 +33,6 @@
     recent_counts_distribution <- delays %>%
       dplyr::filter(.data$event_date <= max_date_with_full_weeks) %>%
       dplyr::pull(.data$report_delay)
-
   } else {
     first_observation_dates <- recent_counts %>%
       dplyr::slice_head(n = min_number_cases) %>%
@@ -43,14 +41,16 @@
     min_date <- min(first_observation_dates)
     num_steps_since_start <- trunc(as.double(date_of_interest - min_date, units = "auto"))
 
-    if((num_steps_since_start %% num_steps_in_a_unit) == 0) {
+    if ((num_steps_since_start %% num_steps_in_a_unit) == 0) {
       min_date_with_full_weeks <- min_date
     } else {
       min_date_with_full_weeks <- min_date - num_steps_in_a_unit + (num_steps_since_start %% num_steps_in_a_unit)
     }
     recent_counts_distribution <- delays %>%
-      dplyr::filter(.data$event_date >= min_date_with_full_weeks,
-                    .data$event_date <= date_of_interest) %>%
+      dplyr::filter(
+        .data$event_date >= min_date_with_full_weeks,
+        .data$event_date <= date_of_interest
+      ) %>%
       dplyr::pull(.data$report_delay)
   }
   return(recent_counts_distribution)
@@ -97,7 +97,6 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
                                                   fit = "none",
                                                   return_fitted_distribution = FALSE,
                                                   num_steps_in_a_unit = NULL) {
-
   .are_valid_argument_values(list(
     list(empirical_delays, "empirical_delay_data"),
     list(n_report_time_steps, "positive_integer"),
@@ -160,7 +159,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
   last_varying_col <- dplyr::if_else(n_time_steps > threshold_right_truncation, n_time_steps - threshold_right_truncation, n_time_steps)
 
-  distrib_list <- list() #needed for the test that checks if get_matrix_from_empirical_delay_distr returns a matrix with the expected distributions when using fit = "gamma"
+  distrib_list <- list() # needed for the test that checks if get_matrix_from_empirical_delay_distr returns a matrix with the expected distributions when using fit = "gamma"
 
   # Shuffle rows so as to get rid of potential biases associated
   shuffled_delays <- empirical_delays %>%
@@ -169,9 +168,8 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   # Populate the delay_distribution_matrix by column
   if (n_time_steps > threshold_right_truncation) {
     for (i in 1:last_varying_col) {
-
-      if(is.null(num_steps_in_a_unit)) {
-        #TODO take out in internal function to reduce duplication
+      if (is.null(num_steps_in_a_unit)) {
+        # TODO take out in internal function to reduce duplication
         recent_counts <- shuffled_delays %>%
           dplyr::arrange(dplyr::desc(.data$event_date)) %>%
           dplyr::filter(.data$event_date <= all_dates[i])
@@ -192,14 +190,16 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
             dplyr::pull(.data$report_delay)
         }
       } else {
-        recent_counts_distribution <- .get_delays_over_full_time_units(delays = shuffled_delays,
-                                                                       date_of_interest = all_dates[i],
-                                                                       num_steps_in_a_unit = num_steps_in_a_unit,
-                                                                       min_number_cases = min_number_cases)
+        recent_counts_distribution <- .get_delays_over_full_time_units(
+          delays = shuffled_delays,
+          date_of_interest = all_dates[i],
+          num_steps_in_a_unit = num_steps_in_a_unit,
+          min_number_cases = min_number_cases
+        )
       }
 
       result <- .get_delay_matrix_column(recent_counts_distribution, fit, col_number = i, n_time_steps, return_fitted_distribution)
-      if(is.list(result)){
+      if (is.list(result)) {
         distrib_list[[i]] <- result$distribution
         new_column <- result$column
       } else {
@@ -209,7 +209,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     }
   } else { # if n_time_steps <= threshold_right_truncation
 
-    if(is.null(num_steps_in_a_unit)) {
+    if (is.null(num_steps_in_a_unit)) {
       recent_counts <- shuffled_delays %>%
         dplyr::arrange(dplyr::desc(.data$event_date)) %>%
         dplyr::filter(.data$event_date <= all_dates[1])
@@ -230,16 +230,18 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
           dplyr::pull(.data$report_delay)
       }
     } else {
-      recent_counts_distribution <- .get_delays_over_full_time_units(delays = shuffled_delays,
-                                                                     date_of_interest = all_dates[1],
-                                                                     num_steps_in_a_unit = num_steps_in_a_unit,
-                                                                     min_number_cases = min_number_cases)
+      recent_counts_distribution <- .get_delays_over_full_time_units(
+        delays = shuffled_delays,
+        date_of_interest = all_dates[1],
+        num_steps_in_a_unit = num_steps_in_a_unit,
+        min_number_cases = min_number_cases
+      )
     }
 
 
 
     result <- .get_delay_matrix_column(recent_counts_distribution, fit, col_number = 1, n_time_steps, return_fitted_distribution)
-    if(is.list(result)){
+    if (is.list(result)) {
       distrib_list[[i]] <- result$distribution
       new_column <- result$column
     } else {
@@ -263,7 +265,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     }
   }
 
-  if(return_fitted_distribution){
+  if (return_fitted_distribution) {
     return(list(matrix = delay_distribution_matrix, distributions = distrib_list))
   }
 
@@ -284,7 +286,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 #' If \code{return_fitted_distribution = TRUE}, it returns a list with two elements:
 #' \code{column} - delay matrix column as described above,
 #' and \code{distribution} - the delay distribution that was fitted to the column.
-.get_delay_matrix_column <- function(recent_counts_distribution, fit = "none", col_number, N, return_fitted_distribution = FALSE){
+.get_delay_matrix_column <- function(recent_counts_distribution, fit = "none", col_number, N, return_fitted_distribution = FALSE) {
   .are_valid_argument_values(list(
     list(recent_counts_distribution, "numeric_vector"),
     list(fit, "delay_matrix_column_fit"),
@@ -309,7 +311,6 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
 
     distribution <- list(name = "gamma", shape = shape_fit, scale = scale_fit)
     delay_distr <- build_delay_distribution(distribution, offset_by_one = TRUE)
-
   } else { # no fit
     delay_distr <- graphics::hist(recent_counts_distribution, breaks = seq(0, N, l = N + 1), plot = FALSE)
     delay_distr <- delay_distr$density
@@ -320,7 +321,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   }
   new_column <- c(rep(0, times = i - 1), delay_distr[1:(N - i + 1)])
 
-  if(fit == "gamma" && return_fitted_distribution == TRUE){
+  if (fit == "gamma" && return_fitted_distribution == TRUE) {
     return(list(column = new_column, distribution = distribution))
   }
   return(new_column)
@@ -364,7 +365,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   distribution_shapes <- c()
   distribution_scales <- c()
 
-  for (distribution in distrib_list){
+  for (distribution in distrib_list) {
     distribution_shapes <- c(distribution_shapes, distribution$shape)
     distribution_scales <- c(distribution_scales, distribution$scale)
   }

@@ -91,7 +91,7 @@ accepted_parameter_value <- list(
 #' @inheritParams validation_utility_params
 #'
 #' @return boolean. Returns FALSE if parameter values return an improper distribution (if gamma distr). Throws an error if not a list, or not a list with the appropriate elements. Returns TRUE otherwise.
-.is_valid_distribution <- function(distribution, parameter_name = deparse(substitute(distribution))){
+.is_valid_distribution <- function(distribution, parameter_name = deparse(substitute(distribution))) {
   .check_class_parameter_name(distribution, "list", parameter_name)
 
   if (!"name" %in% names(distribution)) {
@@ -381,21 +381,21 @@ accepted_parameter_value <- list(
 #' @param delay_list user inputted object to be tested
 #'
 .is_valid_delay_single_or_list <- function(delay_list, parameter_name, incidence_data_length) {
-
-  if(is.list(delay_list) && !is.data.frame(delay_list)) {
+  if (is.list(delay_list) && !is.data.frame(delay_list)) {
     is_distribution <- try(.is_valid_distribution(delay_list, parameter_name), silent = TRUE)
     if ("try-error" %in% class(is_distribution)) {
       is_delay_list <- try(lapply(delay_list, function(delay) {
         .is_valid_delay_object(delay, parameter_name, incidence_data_length)
-        } ), silent =TRUE)
+      }), silent = TRUE)
 
-      if("try-error" %in% class(is_delay_list)) {
-        stop(paste("Invalid", parameter_name,
-                   "Either one of the delay objects is invalid or", parameter_name,
-                   "is an invalid distribution object."))
+      if ("try-error" %in% class(is_delay_list)) {
+        stop(paste(
+          "Invalid", parameter_name,
+          "Either one of the delay objects is invalid or", parameter_name,
+          "is an invalid distribution object."
+        ))
       }
     }
-
   } else {
     .is_valid_delay_object(delay_list, parameter_name, incidence_data_length)
   }
@@ -570,7 +570,7 @@ accepted_parameter_value <- list(
 .check_is_estimate <- function(user_input, parameter_name, index_col_name) {
   .check_class_parameter_name(user_input, "data.frame", parameter_name)
 
-  if(index_col_name %!in% names(user_input)){
+  if (index_col_name %!in% names(user_input)) {
     stop(paste("Missing index column. No column named ", index_col_name, "in", parameter_name))
   }
 

@@ -41,4 +41,3 @@ test_that(".get_delay_matrix_from_delay_distribution_parms returns valid output"
   # Check that all columns sum up to less than one.
   expect_delay_matrix_sums_lte_1(matrix_result, full_cols = 0)
 })
-
