@@ -14,16 +14,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Draft vignette demonstrating a simple use case of **estimateR**
-
-This vignette's purpose is to demonstrate how to use the **estimateR** package in a basic use case.
+This vignette's purpose is to demonstrate how to use the **estimateR** package in a simple use case.
 The **estimateR** package provides tools to estimate the effective reproductive number through time from delayed and indirect observations of infection events.
 
 Let us start with a toy dataset. 
-The incidence data represents daily counts of case confirmations.
+We will assume in this example that the incidence data represents daily counts of case confirmations.
 This incidence data counts the number of people getting tested positive for a particular infectious disease X on day *T*.
 
-TODO replace with example data in the package
 ```{r}
 library(estimateR)
 
@@ -35,11 +32,11 @@ toy_incidence_data <- c(
 )
 ```
 
-Here, we represent the incidence data in its simplest form: a numeric vector. Let us assume reporting started on Feb 24th 2021. There are 30 entries in our `toy_incidence_data` vector, each representing data for a single day in succession. There were 4 reported cases on Feb 24th and 239 on March 25th, the last reporting date.
+Here, we represent the incidence data in its simplest form: a numeric vector. Let us assume reporting started on Feb 24th 2021. There are 30 entries in our `toy_incidence_data` vector, each representing data for a single day in succession. Thus, there were 4 reported cases on Feb 24th and 239 on March 25th, the last reporting date.
 
 ## Smoothing
-The toy incidence data we generated above is noisy, as could be real incidence data.
-Thus, we start by smoothing the toy data, using the **LOESS** smoothing method.
+The toy incidence data we generated above is noisy, as real incidence data could be.
+Therefore, we start by smoothing the toy data, using the **LOESS** smoothing method.
 
 ```{r}
 smoothed_toy_incidence <- smooth_incidence(
@@ -48,13 +45,13 @@ smoothed_toy_incidence <- smooth_incidence(
 )
 ```
 
-We are interested in the effective reproductive number through time *Re*. 
-To estimate this number, we need the time series (in the conceptual sense, not the data type sense) of infection events over the period of interest.
+
+To estimate the effective reproductive number through time *Re*, we need the time series (in the conceptual sense, not the data type sense) of infection events over the period of interest.
 But all we have at the moment is a smoothed version of the time series of confirmed case reports. There are two major differences between this time series and the time series of infection events. 
 First, in almost all real-life cases, only a fraction of infected individuals will get tested, and even among individuals tested some false-negative results will arise. For simplicity, we ignore false-positive numbers here.
 This difference does not cause direct issues for estimating *Re*. Indeed, as long as the fraction of tested individuals among the pool of newly-infected individuals remains constant then *Re* estimates are not biased.
   
-Second, a case-confirmation report is not a direct observation of an infection event. This report will always come with a delay. For simplicity, we assume here that individuals are only tested after they start showing symptoms for the pathogen of interest. 
+Second, a case-confirmation report is not a direct observation of an infection event. This report comes with a delay. For simplicity, we assume here that individuals are only tested after they start showing symptoms for the pathogen of interest. 
 The delay between infection and observation can thus be divided into two distinct time periods: the incubation period and the delay from symptom onset to case confirmation. The exact number of days this delay represents will vary from individual to individual, we capture this variability by assuming the delay observed in any particular individual is the result of a random draw from a probability distribution representing the population variability in the reporting delays.  
 
 In mathematical terms, the observed time series is the result of the convolution of the time series of infections and the distribution of delays. To infer the time series of infection events, we perform the inverse transformation: we deconvolve the delay distribution from the time series of observations. We use the Richardson-Lucy algorithm to perform this deconvolution step. 
@@ -66,9 +63,10 @@ In **estimateR**, we approximate both delay distributions -incubation period and
 ```{r}
 
 # These numbers are part of the user input, they need to be adapted to the particular disease studied.
+# The values chosen below are arbitrary.
 
 # Incubation period - gamma distribution parameters
-shape_incubation <- 3.2 
+shape_incubation <- 3.2
 scale_incubation <- 1.3
 incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
 
@@ -125,7 +123,6 @@ toy_results <- merge_outputs(
   time_step = "day"
 )
 
-
 head(toy_results)
 ```
 
@@ -179,8 +176,10 @@ head(toy_estimates)
 ## Uncertainty estimation
 
 In order to estimate the uncertainty around the *Re* estimation made above, we apply a bootstrapping procedure to the toy observation data.
+This procedure produces a number of so-called bootstrap samples from the original observations.
+By re-estimating *Re* with each of these artificial time series, we can approximate the uncertainty in *Re* estimates 
+that derives from the noise in the original data.
 
-TODO add details on what this bootstrapping procedure is and why it is used.
 
 ```{r}
 N_bootstrap_replicates <- 100

@@ -105,9 +105,6 @@ built from the distribution of bootstrapped estimates." />
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
-      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
-    </li>
-    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -308,7 +305,7 @@ See Details for more details.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Arguments passed on to <code><a href='.smooth_LOESS.html'>.smooth_LOESS</a></code>, <code><a href='.deconvolve_incidence_Richardson_Lucy.html'>.deconvolve_incidence_Richardson_Lucy</a></code>, <code><a href='.estimate_Re_EpiEstim_sliding_window.html'>.estimate_Re_EpiEstim_sliding_window</a></code>, <code><a href='merge_outputs.html'>merge_outputs</a></code>, <code><a href='correct_for_partially_observed_data.html'>correct_for_partially_observed_data</a></code></p><dl>
+      <td><p>Arguments passed on to <code><a href='.smooth_LOESS.html'>.smooth_LOESS</a></code>, <code><a href='.deconvolve_incidence_Richardson_Lucy.html'>.deconvolve_incidence_Richardson_Lucy</a></code>, <code><a href='.estimate_Re_EpiEstim_sliding_window.html'>.estimate_Re_EpiEstim_sliding_window</a></code>, <code><a href='.estimate_Re_EpiEstim_piecewise_constant.html'>.estimate_Re_EpiEstim_piecewise_constant</a></code>, <code><a href='merge_outputs.html'>merge_outputs</a></code>, <code><a href='correct_for_partially_observed_data.html'>correct_for_partially_observed_data</a></code></p><dl>
     <dt><code>data_points_incl</code></dt><dd><p>integer. Size of the window used in the LOESS algorithm.
 The <code>span</code> parameter passed to <code><a href='https://rdrr.io/r/stats/loess.html'>loess</a></code> is computed as
 the ratio of <code>data_points_incl</code> and the number of time steps in the input data.</p></dd>
@@ -324,6 +321,19 @@ the average initial Re.</p></dd>
     <dt><code>estimation_window</code></dt><dd><p>Use with <code>estimation_method = "EpiEstim sliding window"</code>
 Positive integer value.
 Number of data points over which to assume Re to be constant.</p></dd>
+    <dt><code>import_incidence_input</code></dt><dd><p>NULL or module input object.
+List with two elements:
+<ol>
+<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the first value in <code>values</code> is shifted compared to a reference time step
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.</p></li>
+</ol>
+If not NULL, this data represents recorded imported cases.
+And then <code>incidence_input</code> represents only local cases.</p></dd>
     <dt><code>minimum_cumul_incidence</code></dt><dd><p>Numeric value.
 Minimum number of cumulated infections before starting the Re estimation.
 Default is <code>12</code> as recommended in Cori et al., 2013.</p></dd>
@@ -331,6 +341,18 @@ Default is <code>12</code> as recommended in Cori et al., 2013.</p></dd>
     <dt><code>std_serial_interval</code></dt><dd><p>Numeric positive value. <code>std_si</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
     <dt><code>mean_Re_prior</code></dt><dd><p>Numeric positive value. <code>mean prior</code> for <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>estimate_R</a></code></p></dd>
     <dt><code>output_HPD</code></dt><dd><p>Boolean. If TRUE, return the highest posterior density interval with the output.</p></dd>
+    <dt><code>interval_ends</code></dt><dd><p>Use with <code>estimation_method = "EpiEstim piecewise constant"</code>
+Integer vector. Optional argument.
+If provided, <code>interval_ends</code> overrides the <code>interval_length</code> argument.
+Each element of <code>interval_ends</code> specifies the right boundary
+of an interval over which Re is assumed to be constant for the calculation.
+Values in <code>interval_ends</code> must be integer values corresponding
+with the same numbering of time steps as given by <code>incidence_input</code>.
+In other words, <code>interval_ends</code> and <code>incidence_input</code>,
+use the same time step as the zero-th time step.</p></dd>
+    <dt><code>interval_length</code></dt><dd><p>Use with <code>estimation_method = "EpiEstim piecewise constant"</code>
+Positive integer value.
+Re is assumed constant over steps of size <code>interval_length</code>.</p></dd>
     <dt><code>cutoff_observation_probability</code></dt><dd><p>value between 0 and 1.
 Only datapoints for timesteps that have a probability of observing a event
 higher than <code>cutoff_observation_probability</code> are kept.

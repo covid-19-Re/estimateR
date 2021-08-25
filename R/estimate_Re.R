@@ -109,7 +109,8 @@ estimate_Re <- function(incidence_data,
     if (.is_list_of_outputs(Re_estimate)) {
       Re_estimate <- do.call(
         "merge_outputs",
-        c(list(output_list = Re_estimate),
+        c(
+          list(output_list = Re_estimate),
           .get_shared_args(merge_outputs, dots_args)
         )
       )
@@ -154,19 +155,22 @@ estimate_Re <- function(incidence_data,
     stop("minimum_cumul_incidence parameter is set higher than total cumulative incidence.")
   }
 
-  if(!is.null(import_incidence_input)) {
+  if (!is.null(import_incidence_input)) {
     .are_valid_argument_values(list(
       list(import_incidence_input, "module_input")
     ))
 
-    incidence <- merge_outputs(output_list = list(local = incidence_input,
-                                imported = import_incidence_input),
-                           include_index = FALSE) %>%
+    incidence <- merge_outputs(
+      output_list = list(
+        local = incidence_input,
+        imported = import_incidence_input
+      ),
+      include_index = FALSE
+    ) %>%
       tidyr::replace_na(list(local = 0, imported = 0))
 
     incidence_length <- nrow(incidence)
     input_offset <- min(.get_offset(incidence_input), .get_offset(import_incidence_input))
-
   } else {
     incidence <- incidence_vector
     incidence_length <- length(incidence)
@@ -201,8 +205,7 @@ estimate_Re <- function(incidence_data,
         mean_prior = mean_Re_prior
       )
     )
-  )
-  )
+  ))
 
   additional_offset <- t_end[1] - 1
   Re_estimate <- .get_module_output(
@@ -262,7 +265,6 @@ estimate_Re <- function(incidence_data,
                                                      std_serial_interval = 2.3,
                                                      mean_Re_prior = 1,
                                                      output_HPD = FALSE) {
-
   .are_valid_argument_values(list(
     list(incidence_input, "module_input"),
     list(minimum_cumul_incidence, "non_negative_number"),
@@ -278,19 +280,22 @@ estimate_Re <- function(incidence_data,
     stop("minimum_cumul_incidence parameter is set higher than total cumulative incidence.")
   }
 
-  if(!is.null(import_incidence_input)) {
+  if (!is.null(import_incidence_input)) {
     .are_valid_argument_values(list(
       list(import_incidence_input, "module_input")
     ))
 
-    incidence <- merge_outputs(output_list = list(local = incidence_input,
-                                                  imported = import_incidence_input),
-                               include_index = FALSE) %>%
+    incidence <- merge_outputs(
+      output_list = list(
+        local = incidence_input,
+        imported = import_incidence_input
+      ),
+      include_index = FALSE
+    ) %>%
       tidyr::replace_na(list(local = 0, imported = 0))
 
     incidence_length <- nrow(incidence)
     input_offset <- min(.get_offset(incidence_input), .get_offset(import_incidence_input))
-
   } else {
     incidence <- incidence_vector
     incidence_length <- length(incidence)
@@ -305,7 +310,7 @@ estimate_Re <- function(incidence_data,
   if (!is.null(interval_ends)) {
     .are_valid_argument_values(list(
       list(interval_ends, "integer_vector")
-      ))
+    ))
 
     # we make these be relative to input_offset
     interval_ends <- sort(interval_ends - input_offset)
@@ -337,8 +342,7 @@ estimate_Re <- function(incidence_data,
         mean_prior = mean_Re_prior
       )
     )
-  )
-  )
+  ))
 
   additional_offset <- interval_starts[1] - 1
 

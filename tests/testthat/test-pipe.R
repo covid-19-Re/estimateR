@@ -53,8 +53,8 @@ test_that("estimate_Re_from_noisy_delayed_incidence yields consistent results wi
   )
 
   toy_import_data <- c(
-    1,1,1,1,1,1,2,2,2,0,0,
-    0,0,0,0,0,9,0,1,0,0,0,0
+    1, 1, 1, 1, 1, 1, 2, 2, 2, 0, 0,
+    0, 0, 0, 0, 0, 9, 0, 1, 0, 0, 0, 0
   )
 
   delay_distribution <- c(
@@ -81,12 +81,14 @@ test_that("estimate_Re_from_noisy_delayed_incidence yields consistent results wi
     time_step = "day"
   )
 
-  reference_R_values <- c(NA,NA,NA,NA,NA,NA,NA,NA,NA,3.52,3.59,3.52,
-                          3.37,3.21,3.05,2.89,2.74,2.61,2.48,2.36,
-                          2.24,2.13,2.03,1.92,1.83,1.73,1.64,1.56,
-                          1.47,1.39,1.32,1.25,1.17,1.1,1.02,0.95,
-                          0.89,0.84,0.81,0.77,0.74,0.72,0.69,0.65,
-                          0.62,NA,NA,NA,NA,NA)
+  reference_R_values <- c(
+    NA, NA, NA, NA, NA, NA, NA, NA, NA, 3.52, 3.59, 3.52,
+    3.37, 3.21, 3.05, 2.89, 2.74, 2.61, 2.48, 2.36,
+    2.24, 2.13, 2.03, 1.92, 1.83, 1.73, 1.64, 1.56,
+    1.47, 1.39, 1.32, 1.25, 1.17, 1.1, 1.02, 0.95,
+    0.89, 0.84, 0.81, 0.77, 0.74, 0.72, 0.69, 0.65,
+    0.62, NA, NA, NA, NA, NA
+  )
 
   reference_dates <- seq.Date(from = as.Date("2020-01-30"), to = as.Date("2020-03-19"), by = "day")
 
@@ -187,21 +189,27 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
     by = "day"
   )
 
-  reference_R_mean_values <- c(3.33,3.04,2.84,2.67,2.52,2.38,2.25,
-                               2.13,2.01,1.9,1.8,1.7,1.61,1.52,1.44,
-                               1.36,1.29,1.22,1.15,1.09,1.03,0.97,
-                               0.92,0.89,0.86,0.84,0.82,0.8,0.78,0.77,0.75)
+  reference_R_mean_values <- c(
+    3.33, 3.04, 2.84, 2.67, 2.52, 2.38, 2.25,
+    2.13, 2.01, 1.9, 1.8, 1.7, 1.61, 1.52, 1.44,
+    1.36, 1.29, 1.22, 1.15, 1.09, 1.03, 0.97,
+    0.92, 0.89, 0.86, 0.84, 0.82, 0.8, 0.78, 0.77, 0.75
+  )
 
-  reference_CI_down_values <- c(3.13,2.84,2.65,2.51,2.39,2.27,
-                                2.14,2.02,1.91,1.81,1.71,1.63,
-                                1.54,1.46,1.39,1.31,1.24,1.17,
-                                1.11,1.05,0.99,0.94,0.89,0.85,
-                                0.82,0.79,0.77,0.75,0.72,0.7,0.67)
+  reference_CI_down_values <- c(
+    3.13, 2.84, 2.65, 2.51, 2.39, 2.27,
+    2.14, 2.02, 1.91, 1.81, 1.71, 1.63,
+    1.54, 1.46, 1.39, 1.31, 1.24, 1.17,
+    1.11, 1.05, 0.99, 0.94, 0.89, 0.85,
+    0.82, 0.79, 0.77, 0.75, 0.72, 0.7, 0.67
+  )
 
-  reference_CI_up_values <- c(3.54,3.24,3.02,2.83,2.66,2.5,2.36,2.23,
-                              2.12,2,1.88,1.78,1.68,1.58,1.49,1.41,
-                              1.34,1.26,1.19,1.12,1.06,1,0.96,0.92,
-                              0.9,0.88,0.87,0.86,0.84,0.83,0.82)
+  reference_CI_up_values <- c(
+    3.54, 3.24, 3.02, 2.83, 2.66, 2.5, 2.36, 2.23,
+    2.12, 2, 1.88, 1.78, 1.68, 1.58, 1.49, 1.41,
+    1.34, 1.26, 1.19, 1.12, 1.06, 1, 0.96, 0.92,
+    0.9, 0.88, 0.87, 0.86, 0.84, 0.83, 0.82
+  )
 
 
   expect_equal(estimates$date, reference_dates)
@@ -226,23 +234,29 @@ test_that("get_block_bootstrapped_estimate yields consistent results on a toy ex
 
   reference_indices <- 0:30
 
-  reference_R_original_values <- c(3.2,2.91,2.72,2.57,2.44,2.32,
-                                   2.2,2.09,1.98,1.88,1.78,1.69,
-                                   1.6,1.52,1.44,1.36,1.29,1.22,
-                                   1.15,1.08,1.01,0.95,0.89,0.84,
-                                   0.8,0.77,0.75,0.72,0.7,0.66,0.63)
+  reference_R_original_values <- c(
+    3.2, 2.91, 2.72, 2.57, 2.44, 2.32,
+    2.2, 2.09, 1.98, 1.88, 1.78, 1.69,
+    1.6, 1.52, 1.44, 1.36, 1.29, 1.22,
+    1.15, 1.08, 1.01, 0.95, 0.89, 0.84,
+    0.8, 0.77, 0.75, 0.72, 0.7, 0.66, 0.63
+  )
 
-  reference_CI_down_values <- c(3.04,2.75,2.58,2.45,2.34,2.22,
-                                2.11,1.99,1.89,1.79,1.7,1.62,
-                                1.55,1.47,1.39,1.32,1.25,1.18,
-                                1.11,1.04,0.98,0.91,0.86,0.81,
-                                0.77,0.73,0.7,0.67,0.64,0.6,0.56)
+  reference_CI_down_values <- c(
+    3.04, 2.75, 2.58, 2.45, 2.34, 2.22,
+    2.11, 1.99, 1.89, 1.79, 1.7, 1.62,
+    1.55, 1.47, 1.39, 1.32, 1.25, 1.18,
+    1.11, 1.04, 0.98, 0.91, 0.86, 0.81,
+    0.77, 0.73, 0.7, 0.67, 0.64, 0.6, 0.56
+  )
 
-  reference_CI_up_values <- c(3.36,3.07,2.86,2.69,2.55,2.42,2.3,
-                              2.19,2.08,1.97,1.86,1.76,1.66,1.57,
-                              1.48,1.4,1.33,1.26,1.18,1.11,1.04,
-                              0.98,0.92,0.88,0.84,0.82,0.8,0.78,
-                              0.75,0.73,0.7)
+  reference_CI_up_values <- c(
+    3.36, 3.07, 2.86, 2.69, 2.55, 2.42, 2.3,
+    2.19, 2.08, 1.97, 1.86, 1.76, 1.66, 1.57,
+    1.48, 1.4, 1.33, 1.26, 1.18, 1.11, 1.04,
+    0.98, 0.92, 0.88, 0.84, 0.82, 0.8, 0.78,
+    0.75, 0.73, 0.7
+  )
 
   expect_equal(estimates$idx, reference_indices)
   expect_equal(estimates$Re_estimate, reference_R_original_values, tolerance = 1E-1)
@@ -260,8 +274,8 @@ test_that("get_block_bootstrapped_estimate yields consistent with import data", 
   )
 
   toy_import_data <- c(
-    1,1,1,1,1,1,2,2,2,0,0,
-    0,0,0,0,0,9,0,1,0,0,0,0
+    1, 1, 1, 1, 1, 1, 2, 2, 2, 0, 0,
+    0, 0, 0, 0, 0, 9, 0, 1, 0, 0, 0, 0
   )
 
   shape_incubation <- 2
@@ -296,22 +310,28 @@ test_that("get_block_bootstrapped_estimate yields consistent with import data", 
     by = "day"
   )
 
-  reference_R_mean_values <- c(2.69,2.48,2.37,2.29,2.22,2.14,2.06,
-                               1.98,1.9,1.82,1.73,1.65,1.57,1.49,
-                               1.42,1.35,1.28,1.21,1.14,1.08,1.02,
-                               0.97,0.92,0.89,0.86,0.84,0.82,0.8,
-                               0.79,0.77,0.75)
+  reference_R_mean_values <- c(
+    2.69, 2.48, 2.37, 2.29, 2.22, 2.14, 2.06,
+    1.98, 1.9, 1.82, 1.73, 1.65, 1.57, 1.49,
+    1.42, 1.35, 1.28, 1.21, 1.14, 1.08, 1.02,
+    0.97, 0.92, 0.89, 0.86, 0.84, 0.82, 0.8,
+    0.79, 0.77, 0.75
+  )
 
-  reference_CI_down_values <- c(2.53,2.34,2.24,2.18,2.12,2.05,1.97,
-                                1.89,1.8,1.72,1.65,1.58,1.5,1.43,
-                                1.36,1.29,1.23,1.17,1.11,1.05,0.99,0.94,0.89,
-                                0.85,0.82,0.79,0.77,0.74,0.72,0.7,0.67)
+  reference_CI_down_values <- c(
+    2.53, 2.34, 2.24, 2.18, 2.12, 2.05, 1.97,
+    1.89, 1.8, 1.72, 1.65, 1.58, 1.5, 1.43,
+    1.36, 1.29, 1.23, 1.17, 1.11, 1.05, 0.99, 0.94, 0.89,
+    0.85, 0.82, 0.79, 0.77, 0.74, 0.72, 0.7, 0.67
+  )
 
-  reference_CI_up_values <- c(2.85,2.63,2.5,2.4,2.32,2.23,2.15,
-                              2.08,2,1.91,1.82,1.72,1.64,1.55,
-                              1.47,1.4,1.32,1.25,1.18,1.12,1.05,
-                              1,0.96,0.92,0.9,0.88,0.87,0.86,
-                              0.85,0.84,0.83)
+  reference_CI_up_values <- c(
+    2.85, 2.63, 2.5, 2.4, 2.32, 2.23, 2.15,
+    2.08, 2, 1.91, 1.82, 1.72, 1.64, 1.55,
+    1.47, 1.4, 1.32, 1.25, 1.18, 1.12, 1.05,
+    1, 0.96, 0.92, 0.9, 0.88, 0.87, 0.86,
+    0.85, 0.84, 0.83
+  )
 
 
   expect_equal(estimates$date, reference_dates)
@@ -632,12 +652,15 @@ test_that("get_bootstrapped_estimate_from_combined_observations can deal with em
     cutoff_observation_probability = 0.1
   )
 
-  reference_R_values <- c(2.06,1.91,1.85,1.81,1.77,
-                          1.73,1.7,1.67,1.64,1.6,1.55,
-                          1.5,1.44,1.38,1.32,1.27,1.22,
-                          1.18,1.15,1.12,1.09,1.07,1.05,
-                          1.03,1.01,0.98,0.96,0.94,0.92,
-                          0.91,0.9,0.9)
+  reference_R_values <- c(
+    1.98, 1.76, 1.67, 1.63,
+    1.63, 1.65, 1.66, 1.66,
+    1.66, 1.63, 1.59, 1.54,
+    1.48, 1.42, 1.37, 1.32,
+    1.26, 1.21, 1.17, 1.12,
+    1.08, 1.04, 1, 0.95, 0.91,
+    0.87, 0.83, 0.8, 0.77, 0.75
+  )
 
   expect_equal(results_estimation$Re_estimate, reference_R_values, tolerance = 1E-1)
 })
@@ -666,7 +689,7 @@ test_that("get_block_bootstrapped_estimate yields consistent results on summarie
     deconvolution_method = "Richardson-Lucy delay distribution",
     estimation_method = "EpiEstim sliding window",
     uncertainty_summary_method = "original estimate - CI from bootstrap estimates",
-    delay = list(delay_incubation,delay_onset_to_report),
+    delay = list(delay_incubation, delay_onset_to_report),
     estimation_window = 3,
     mean_serial_interval = 4.8,
     std_serial_interval = 2.3,
@@ -807,12 +830,12 @@ test_that("get_bootstrapped_estimate_from_combined_observations yields consisten
   )
 
   expect_equal(results_estimation$partially_delayed_observations,
-               reference_partially_delayed_observations_values,
-               tolerance = 1E-1
+    reference_partially_delayed_observations_values,
+    tolerance = 1E-1
   )
   expect_equal(results_estimation$CI_up_combined_deconvolved_incidence,
-               reference_CI_up_combined_deconvolved_incidence_values,
-               tolerance = 1E-1
+    reference_CI_up_combined_deconvolved_incidence_values,
+    tolerance = 1E-1
   )
   expect_equal(results_estimation$Re_estimate, reference_R_mean_values, tolerance = 1E-1)
   expect_equal(results_estimation$CI_up_Re_estimate, reference_CI_up_R_mean, tolerance = 1E-1)
@@ -872,44 +895,54 @@ test_that("get_block_bootstrapped_estimate consistently combines HPDs with boots
     output_Re_only = TRUE
   )
 
-  reference_CI_down <- c(NA,NA,NA,NA,NA,NA,2.51,2.37,2.28,
-                         2.2,2.12,2,1.91,1.83,1.76,1.67,1.58,
-                         1.49,1.43,1.44,1.49,1.55,1.59,1.61,
-                         1.63,1.63,1.61,1.58,1.54,1.5,1.46,
-                         1.43,1.41,1.38,NA,NA,NA,NA,NA,NA)
+  reference_CI_down <- c(
+    NA, NA, NA, NA, NA, NA, 2.51, 2.37, 2.28,
+    2.2, 2.12, 2, 1.91, 1.83, 1.76, 1.67, 1.58,
+    1.49, 1.43, 1.44, 1.49, 1.55, 1.59, 1.61,
+    1.63, 1.63, 1.61, 1.58, 1.54, 1.5, 1.46,
+    1.43, 1.41, 1.38, NA, NA, NA, NA, NA, NA
+  )
 
-  pretty_reference_CI_down <- c(2.51,2.37,2.28,
-                                2.2,2.12,2,1.91,1.83,1.76,1.67,
-                                1.58,1.49,1.43,1.44,1.49,1.55,
-                                1.59,1.61,1.63,1.63,1.61,1.58,
-                                1.54,1.5,1.46,1.43,1.41,1.38)
+  pretty_reference_CI_down <- c(
+    2.51, 2.37, 2.28,
+    2.2, 2.12, 2, 1.91, 1.83, 1.76, 1.67,
+    1.58, 1.49, 1.43, 1.44, 1.49, 1.55,
+    1.59, 1.61, 1.63, 1.63, 1.61, 1.58,
+    1.54, 1.5, 1.46, 1.43, 1.41, 1.38
+  )
 
-  reference_bootstrap_CI_up <- c(NA,NA,NA,NA,NA,NA,3.27,3.08,2.93,
-                                 2.82,2.72,2.61,2.47,2.31,2.16,2.05,
-                                 1.97,1.92,1.89,1.89,1.93,1.99,2.05,
-                                 2.07,2.08,2.07,2.03,1.96,1.87,1.79,
-                                 1.71,1.64,1.59,1.55,NA,NA,NA,NA,NA,NA)
+  reference_bootstrap_CI_up <- c(
+    NA, NA, NA, NA, NA, NA, 3.27, 3.08, 2.93,
+    2.82, 2.72, 2.61, 2.47, 2.31, 2.16, 2.05,
+    1.97, 1.92, 1.89, 1.89, 1.93, 1.99, 2.05,
+    2.07, 2.08, 2.07, 2.03, 1.96, 1.87, 1.79,
+    1.71, 1.64, 1.59, 1.55, NA, NA, NA, NA, NA, NA
+  )
 
-  reference_highHPD <- c(NA,NA,NA,NA,NA,NA,3.67,3.33,
-                         3.1,2.91,2.74,2.61,2.47,
-                         2.31,2.16,2.05,1.97,1.92,1.89,
-                         1.89,1.93,1.99,2.05,2.07,2.08,
-                         2.07,2.03,1.96,1.87,1.79,1.71,
-                         1.64,1.59,1.55,NA,NA,NA,NA,NA,NA)
+  reference_highHPD <- c(
+    NA, NA, NA, NA, NA, NA, 3.67, 3.33,
+    3.1, 2.91, 2.74, 2.61, 2.47,
+    2.31, 2.16, 2.05, 1.97, 1.92, 1.89,
+    1.89, 1.93, 1.99, 2.05, 2.07, 2.08,
+    2.07, 2.03, 1.96, 1.87, 1.79, 1.71,
+    1.64, 1.59, 1.55, NA, NA, NA, NA, NA, NA
+  )
 
   reference_Re_estimate <- c(
-    NA,NA,NA,NA,NA,NA,3.06,2.83,2.67,
-    2.54,2.42,2.31,2.19,2.07,1.96,1.86,
-    1.78,1.71,1.66,1.67,1.71,1.77,1.82,
-    1.84,1.86,1.85,1.82,1.77,1.7,1.64,1.58,
-    1.54,1.5,1.47,NA,NA,NA,NA,NA,NA)
+    NA, NA, NA, NA, NA, NA, 3.06, 2.83, 2.67,
+    2.54, 2.42, 2.31, 2.19, 2.07, 1.96, 1.86,
+    1.78, 1.71, 1.66, 1.67, 1.71, 1.77, 1.82,
+    1.84, 1.86, 1.85, 1.82, 1.77, 1.7, 1.64, 1.58,
+    1.54, 1.5, 1.47, NA, NA, NA, NA, NA, NA
+  )
 
   pretty_reference_Re_estimate <- c(
-    3.06,2.83,2.67,
-    2.54,2.42,2.31,2.19,2.07,1.96,1.86,
-    1.78,1.71,1.66,1.67,1.71,1.77,1.82,
-    1.84,1.86,1.85,1.82,1.77,1.7,1.64,1.58,
-    1.54,1.5,1.47)
+    3.06, 2.83, 2.67,
+    2.54, 2.42, 2.31, 2.19, 2.07, 1.96, 1.86,
+    1.78, 1.71, 1.66, 1.67, 1.71, 1.77, 1.82,
+    1.84, 1.86, 1.85, 1.82, 1.77, 1.7, 1.64, 1.58,
+    1.54, 1.5, 1.47
+  )
 
   expect_equal(simplified_estimates$CI_down_Re_estimate, pretty_reference_CI_down, tolerance = 1E-1)
   expect_equal(estimates$CI_down_Re_estimate, reference_CI_down, tolerance = 1E-1)
@@ -987,7 +1020,8 @@ test_that("get_bootstrapped_estimate_from_combined_observations consistently com
     1.93, 1.91, 1.9, 1.89, 1.87, 1.87, 1.89,
     1.99, 2.14, 2.34, 2.55, 2.74, 2.98, 3.44,
     3.97, 4.16, 3.88, 3.34, 2.81, 2.41,
-    2.15)
+    2.15
+  )
 
   expect_equal(results_estimation$Re_estimate, reference_R_mean_values, tolerance = 1E-1)
   expect_equal(results_estimation$CI_down_Re_estimate, reference_CI_down_R_mean, tolerance = 1E-1)

@@ -175,7 +175,6 @@ summarise_uncertainty <- function(bootstrapped_values,
                                    value_col,
                                    bootstrap_id_col,
                                    index_col) {
-
   .are_valid_argument_values(list(
     list(bootstrapped_values, "bootstrap_estimates", c(value_col, bootstrap_id_col, index_col)),
     list(value_col, "string"),
@@ -264,15 +263,15 @@ do_uncertainty_summary <- function(original_values,
 
     if (combine_bootstrap_and_estimation_uncertainties) {
       estimates_with_uncertainty <- dplyr::full_join(estimates_with_uncertainty,
-                                                     Re_HPDs,
-                                                     by = index_col
+        Re_HPDs,
+        by = index_col
       ) %>%
         dplyr::mutate(
           !!CI_down_col_name := dplyr::if_else(.data[[CI_down_col_name]] > .data$Re_lowHPD,
-                                               .data$Re_lowHPD, .data[[CI_down_col_name]]
+            .data$Re_lowHPD, .data[[CI_down_col_name]]
           ),
           !!CI_up_col_name := dplyr::if_else(.data[[CI_up_col_name]] < .data$Re_highHPD,
-                                             .data$Re_highHPD, .data[[CI_up_col_name]]
+            .data$Re_highHPD, .data[[CI_up_col_name]]
           )
         ) %>%
         dplyr::select(!c(.data$Re_lowHPD, .data$Re_highHPD))
@@ -314,7 +313,7 @@ do_uncertainty_summary <- function(original_values,
 
 
       estimates_with_uncertainty <- dplyr::full_join(estimates_with_uncertainty, Re_HPDs,
-                                                     by = index_col
+        by = index_col
       ) %>%
         dplyr::mutate(
           !!bootstrapped_CI_down_col_name := .data[[CI_down_col_name]],
@@ -322,10 +321,10 @@ do_uncertainty_summary <- function(original_values,
         ) %>%
         dplyr::mutate(
           !!CI_down_col_name := dplyr::if_else(.data[[CI_down_col_name]] > .data$Re_lowHPD,
-                                               .data$Re_lowHPD, .data[[CI_down_col_name]]
+            .data$Re_lowHPD, .data[[CI_down_col_name]]
           ),
           !!CI_up_col_name := dplyr::if_else(.data[[CI_up_col_name]] < .data$Re_highHPD,
-                                             .data$Re_highHPD, .data[[CI_up_col_name]]
+            .data$Re_highHPD, .data[[CI_up_col_name]]
           )
         )
     }

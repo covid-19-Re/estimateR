@@ -212,8 +212,6 @@ build_delay_distribution <- function(distribution,
                                     ref_date = NULL,
                                     time_step = "day",
                                     ...) {
-
-
   .are_valid_argument_values(list(
     list(delay, "delay_object", 1), # We put '1' here, because we do not care here about checking the dimension of the matrix.
     list(n_report_time_steps, "null_or_int"),
@@ -388,7 +386,9 @@ build_delay_distribution <- function(distribution,
   .are_valid_argument_values(
     list(
       list(delay_distribution_vector, "probability_distr_vector"),
-      list(quantile, "numeric_between_zero_one")))
+      list(quantile, "numeric_between_zero_one")
+    )
+  )
 
   initial_shift <- ceiling(min(which(cumsum(delay_distribution_vector) > quantile))) - 1
   initial_shift <- max(initial_shift, 0, na.rm = TRUE)
@@ -400,12 +400,13 @@ build_delay_distribution <- function(distribution,
 #' @param delay_list list or single delay object
 #'
 #' @return TRUE if single delay, FALSE otherwise
-.is_single_delay <- function(delay_list){
+.is_single_delay <- function(delay_list) {
   .are_valid_argument_values(list(
     # We put '1' here, because we do not care here about checking the dimension of the matrix.
-    list(delay_list, "delay_single_or_list", 1)))
+    list(delay_list, "delay_single_or_list", 1)
+  ))
 
-  if(is.list(delay_list) && !is.data.frame(delay_list)){
+  if (is.list(delay_list) && !is.data.frame(delay_list)) {
     is_distribution <- try(.is_valid_distribution(delay_list, "dummy_name"), silent = TRUE)
     if ("try-error" %!in% class(is_distribution)) {
       return(TRUE)

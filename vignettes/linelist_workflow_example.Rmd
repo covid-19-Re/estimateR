@@ -27,7 +27,7 @@ library(tidyr)
 library(ggplot2)
 ```
 
-The example is a synthetic version of a linelist of COVID-19 cases.
+The example data is a synthetic version of a linelist of COVID-19 cases.
 The aggregated incidence of this linelist corresponds to or closely matches the incidence of Swiss cases as reported by the Federal Office of Public Health.
 To keep the data handling fast and easy, we restricted the simulated data from February to June 2020.
 The data is stored in the `CH_simulated_linelist` variable.
@@ -35,7 +35,20 @@ The data is stored in the `CH_simulated_linelist` variable.
 # Simulated Swiss linelist
 head(CH_simulated_linelist, n = 10)
 ```
-We transform the linelist into a dataframe that contains the daily incidence for case confirmations.
+
+## Data preparation
+### Aggregated incidence
+
+We start by transforming the linelist into a dataframe that contains the daily incidence for case confirmations.
+When doing so, we make sure to extract as much information as possible from the linelist in order to better inform the *Re* estimation.
+For some cases recorded in the linelist, the date of onset of symptom is known. For these cases,
+inferring the date of infection is easier than cases for which this information was not recorded.
+-We assume that all recorded cases are symptomatic, and that tests are always performed after
+the onset of symptoms-
+The delayed observation of the infection event is less delayed when it is the onset of symptoms rather than the case confirmation.
+Therefore, we will separate cases in two incidences: 
+1.cases for which the date of symptom onset is known. In that case, the incidence vector represents these onset events.
+1.cases with no known date of symptom onset. In that case, the incidence vector represents case confirmation events.
 
 First, we construct the incidence of events of onset of symptoms for cases for which it is known.
 ```{r}
@@ -74,7 +87,11 @@ CH_incidence_data <- full_join(onset_incidence, confirmation_incidence, by = 'da
 
 head(CH_incidence_data)
 ```
+
+### Delay data
 As a second step, we make use of the linelist to inform the analysis on the distribution of the delay between onset of symptom and case confirmation.
+This lets us use empirical distribution for delays instead of estimates of delays from the literature, which may not be as relevant to the particular data of interest.
+Moreover, providing this data allows **estimateR** to let the empirical delay distributions vary through time, instead of relying on a single average estimate for the entire time window.
 
 ```{r}
 CH_delay_data <- CH_simulated_linelist %>%
@@ -90,9 +107,14 @@ CH_delay_data <- CH_simulated_linelist %>%
 head(CH_delay_data)
 ```
 
-Additionally, we need to specify the incubation period for COVID-19 (TODO add ref) and the serial interval (TODO add ref).
+## Analysis
+
+### Additional user input
+
+Additionally to the incidence and delay data prepared in the section above, we need to specify the incubation period for COVID-19 and the serial interval.
 ```{r}
-## Delay between infection and onset of symptoms (incubation period) in days
+# Delay between infection and onset of symptoms (incubation period) in days
+# Ref: Linton et al., Journal of Clinical Medicine, 2020
 # Gamma distribution parameter
 shape_incubation <- 3.2
 scale_incubation <- 1.3
@@ -103,6 +125,7 @@ distribution_incubation <- list(name = "gamma",
                                 scale = scale_incubation)
 
 # Serial interval (for Re estimation) in days
+# Ref: Nishiura et al.,International Journal of Infectious Diseases, 2020
 mean_serial_interval <- 4.8
 std_serial_interval <- 2.3
 ```
@@ -118,6 +141,7 @@ ref_date = min(CH_incidence_data$date)
 time_step = "day"
 ```
 
+### Computation 
 We can then perform the Re estimation. The computation should take a few seconds to complete.
 ```{r}
 CH_estimates <- get_bootstrapped_estimates_from_combined_observations(
@@ -139,6 +163,7 @@ CH_estimates <- get_bootstrapped_estimates_from_combined_observations(
 head(CH_estimates)
 ```
 
+### Plot
 ```{r, fig.width=8, fig.height=4}
 ggplot(CH_estimates, aes(x = date, y = Re_estimate)) +
   geom_line(lwd=  1.1) +
@@ -150,4 +175,3 @@ ggplot(CH_estimates, aes(x = date, y = Re_estimate)) +
   xlab("") +
   theme_bw()
 ```
-TODO Summary

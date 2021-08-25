@@ -101,9 +101,6 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
-      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
-    </li>
-    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -152,17 +149,6 @@ This parameter allows one to keep track of the date of the first value in <code>
 without needing to carry a <code>date</code> column around.
 A positive offset means <code>values</code> are delayed in the future compared to the reference values.
 A negative offset means the opposite.</p></li>
-</ol>
-
-<p>@return Module input object.
-List with two elements:</p><ol>
-<li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
-<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
-by which the first value in <code>values</code> is shifted compared to a reference time step
-This parameter allows one to keep track of the date of the first value in <code>values</code>
-without needing to carry a <code>date</code> column around.
-A positive offset means <code>values</code> are delayed in the future compared to the reference values.
-A negative offset means the opposite.</p></li>
 </ol></td>
     </tr>
     <tr>
@@ -176,9 +162,13 @@ This parameter allows one to keep track of the date of the first value in <code>
 without needing to carry a <code>date</code> column around.
 A positive offset means <code>values</code> are delayed in the future compared to the reference values.
 A negative offset means the opposite.</p></li>
-</ol>
+</ol></td>
+    </tr>
+    </table>
 
-<p>@return Module input object.
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>Module input object.
 List with two elements:</p><ol>
 <li><p>A numeric vector named <code>values</code>: the incidence recorded on consecutive time steps.</p></li>
 <li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
@@ -187,9 +177,7 @@ This parameter allows one to keep track of the date of the first value in <code>
 without needing to carry a <code>date</code> column around.
 A positive offset means <code>values</code> are delayed in the future compared to the reference values.
 A negative offset means the opposite.</p></li>
-</ol></td>
-    </tr>
-    </table>
+</ol>
 
 
   </div>

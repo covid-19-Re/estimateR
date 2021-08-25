@@ -44,7 +44,8 @@ deconvolve_incidence <- function(incidence_data,
       .get_shared_args(list(
         convolve_delays,
         build_delay_distribution,
-        get_matrix_from_empirical_delay_distr), dots_args)
+        get_matrix_from_empirical_delay_distr
+      ), dots_args)
     )
   )
 
@@ -83,7 +84,6 @@ deconvolve_incidence <- function(incidence_data,
                                                   threshold_chi_squared = 1,
                                                   max_iterations = 100,
                                                   verbose = FALSE) {
-
   .are_valid_argument_values(list(
     list(incidence_input, "module_input"),
     list(delay_distribution, "computation_ready_delay_object", .get_input_length(incidence_input)),
@@ -163,8 +163,8 @@ deconvolve_incidence <- function(incidence_data,
 
     chi_squared <- 1 / length_original_vector *
       sum((convolved_estimate[(n_time_units_left_extension + 1):length(convolved_estimate)] -
-             original_incidence[(n_time_units_left_extension + 1):length(original_incidence)])^2 /
-            convolved_estimate[(n_time_units_left_extension + 1):length(convolved_estimate)], na.rm = T)
+        original_incidence[(n_time_units_left_extension + 1):length(original_incidence)])^2 /
+        convolved_estimate[(n_time_units_left_extension + 1):length(convolved_estimate)], na.rm = T)
 
     count <- count + 1
   }
@@ -177,5 +177,5 @@ deconvolve_incidence <- function(incidence_data,
   # Remove first and last values as they cannot be properly inferred
   final_estimate <- current_estimate[(1 + extra_left_steps):(length(current_estimate) - initial_shift)]
 
-  return(.get_module_output(final_estimate,.get_offset(incidence_input), additional_offset))
+  return(.get_module_output(final_estimate, .get_offset(incidence_input), additional_offset))
 }

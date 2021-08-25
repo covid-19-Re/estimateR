@@ -101,9 +101,6 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
-      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
-    </li>
-    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -160,6 +157,12 @@ is associated with the reference time step (no shift towards the future or past)
 </ul></td>
     </tr>
     <tr>
+      <th>import_incidence_data</th>
+      <td><p>NULL or argument with the same requirements as <code>incidence_data</code>.
+If not NULL, this argument represents records of imported cases and
+<code>incidence_data</code> represents local cases only.</p></td>
+    </tr>
+    <tr>
       <th>partially_delayed_incidence</th>
       <td><p>An object containing incidence data through time.
 It can be:</p><ul>
@@ -200,8 +203,13 @@ is associated with the reference time step (no shift towards the future or past)
     <tr>
       <th>simplify_output</th>
       <td><p>boolean. Return a numeric vector instead of module
-output object if output offset is zero?</p>
-<p>@return A list with two elements:</p><ol>
+output object if output offset is zero?</p></td>
+    </tr>
+    </table>
+
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A list with two elements:</p><ol>
 <li><p>A numeric vector named <code>values</code>: the result of the computations on the input data.</p></li>
 <li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
 by which the result is shifted compared to an <code>index_offset</code> of <code>0</code>.
@@ -213,10 +221,7 @@ Note that the <code>index_offset</code> of the output of the function call
 accounts for the (optional) <code>index_offset</code> of the input.</p></li>
 </ol><p>If <code>index_offset</code> is <code>0</code> and <code>simplify_output = TRUE</code>,
 the <code>index_offset</code> is dropped and the <code>values</code>
-element is returned as a numeric vector.</p></td>
-    </tr>
-    </table>
-
+element is returned as a numeric vector.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

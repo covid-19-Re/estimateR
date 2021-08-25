@@ -60,9 +60,6 @@
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
-      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
-    </li>
-    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -94,7 +91,7 @@
 
     
     
-<p>TODO write intro on what this vignette is for. TODO continue work on the wording</p>
+<p>In this vignette, we have a more in-depth look at the different levels of details that the input data can have in <strong>estimateR</strong>. We will analyze the same example data a couple of times, each time making use of an additional layer of information.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">estimateR</span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
@@ -107,7 +104,10 @@
 <span class="co">#&gt; </span>
 <span class="co">#&gt;     intersect, setdiff, setequal, union</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org">tidyr</a></span><span class="op">)</span></code></pre></div>
-<p>Aggregated case data for the Hong Kong COVID-19 epidemic. This data is derived from the linelist published by the Hong Kong <a href="https://www.chp.gov.hk">Centre for Health Protection</a>.</p>
+<div id="example-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#example-data" class="anchor"></a>Example data</h2>
+<p>The example data we use here is aggregated case data for the Hong Kong COVID-19 epidemic. This data is derived from the linelist published by the Hong Kong <a href="https://www.chp.gov.hk">Centre for Health Protection</a>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Hong Kong incidence data</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">HK_incidence_data</span>, n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
@@ -124,9 +124,9 @@
 <span class="co">#&gt;  8 2020-01-25              0               4                0</span>
 <span class="co">#&gt;  9 2020-01-26              3               1                0</span>
 <span class="co">#&gt; 10 2020-01-27              0               0                0</span></code></pre></div>
-<p>The original format of this data is a line list: it shows each recorded COVID-19 case in a separate row, with columns specifying different types of information that were (or were not) recorded for each case. These columns include the age and gender of the diseased individual, the name o the hospital they were admitted to (if applicable), the date of onset of symptoms and the reporting date. In general, the case report comes after the onset of symptoms.</p>
-<p>We aggregated this data into 4 columns. In the <code>HK_incidence_data</code> dataframe, each row corresponds to a single date, and we count three types of incidence. The <code>case_incidence</code> entry for a particular day is the number of cases reported on that date. This is what we typically think of when we talk about incidence. Moreover, we use to our advantage the fact that we have access to the date of onset of symptoms for many diseased individuals. We build the <code>onset_incidence</code> column by summing, for each date, the number of individuals who started showing symptoms on this date. Thus we create a time series of ‘incidence’ of symptom onset events. For some individuals, the symptom onset date was not recorded. Therefore we build a third incidence column called <code>report_incidence</code>. In <code>report_incidence</code>, we sum all cases reported on a particular date, which do not have a recorded symptom onset date. This new incidence column is complementary to <code>onset_incidence</code>, which records symptom onset events.</p>
-<p>We note that, for any particular date, summming the entries in <code>onset_incidence</code> and <code>report_incidence</code> generally does not equal the entry in the <code>case_incidence</code> column. This is normal sincea case counted on day X in the <code>case_incidence</code> column could appear on, e.g. day X - 3 in the <code>onset_incidence</code> column. However, it must be true that, for any particular date, ‘report_incidence’ ≤ ‘case_incidence’. Also, it must be true that the sum across all rows of <code>onset_incidence</code> plus that of <code>report_incidence</code> is equal to that of <code>case_incidence</code>. This sum amount to the total number of reported cases of COVID-19 in Honk-Kong over the time period of interest. Note that, in the original data some cases are reported as being asymptomatic. For simplicity, we treat these cases as if their date of onset of symptoms was unknown.</p>
+<p>The original format of this data is a linelist: it shows each recorded COVID-19 case in a separate row, with columns specifying different types of information that were (or were not) recorded for each case. These columns include the age and gender of the diseased individual, the name of the hospital they were admitted to (if applicable), the date of onset of symptoms and the reporting date. In general, the case report comes after the onset of symptoms.</p>
+<p>We aggregated this data into 4 columns. In the <code>HK_incidence_data</code> dataframe, each row corresponds to a single date, and we count three types of incidence. The <code>case_incidence</code> entry for a particular day is the number of cases reported on that date. This is what we typically think of when we talk about incidence. Moreover, we use to our advantage the fact that we have access to the date of onset of symptoms for many diseased individuals. We build the <code>onset_incidence</code> column by summing, for each date, the number of individuals who started showing symptoms on this date. Thus we create a time series with the incidence of symptom onset events. Since, the symptom onset date was not recorded for all individuals, we build a third incidence column called <code>report_incidence</code>. In <code>report_incidence</code>, we sum all cases reported on a particular date which do not have a recorded symptom onset date. This new incidence column is complementary to <code>onset_incidence</code>, which records symptom onset events.</p>
+<p>We note that, for any particular date, summing the entries in <code>onset_incidence</code> and <code>report_incidence</code> generally does not equal the entry in the <code>case_incidence</code> column. This is normal since a case counted on day X in the <code>case_incidence</code> column could appear on, e.g. day X - 3 in the <code>onset_incidence</code> column. However, it must be true that, for any particular date, ‘report_incidence’ ≤ ‘case_incidence’. Also, it must be true that the sum across all rows of <code>onset_incidence</code> plus that of <code>report_incidence</code> is equal to that of <code>case_incidence</code>. These sums amount to the total number of reported cases of COVID-19 in Honk-Kong over the time period of interest. Note that, in the original data some cases are reported as being asymptomatic. As a crude approximation, we treat these cases as symptomatic cases with an unknown date of onset of symptoms.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Total number of cases reported in Hong-Kong</span>
 <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">HK_incidence_data</span><span class="op">$</span><span class="va">case_incidence</span><span class="op">)</span><span class="op">)</span>
@@ -137,14 +137,16 @@
 <span class="co">#&gt; [1] 3271</span>
 
 <span class="co"># Both sums are equal, which is what we want.</span></code></pre></div>
+</div>
 <div id="first-analysis" class="section level2">
 <h2 class="hasAnchor">
 <a href="#first-analysis" class="anchor"></a>First analysis</h2>
-<p>As a first rough analysis, we start by estimating the reproductive number through time only using the <code>case_incidence</code> column. We pretend that we only know about incidence through case confirmations. For many real-life cases, data on symptom onset date is not available, thus it is useful to consider this simpler use case.</p>
+<p>As a first analysis, we estimate the reproductive number through time using the <code>case_incidence</code> column only. In doing so, we pretend that we only know about incidence through case confirmations. For many real-life cases, data on symptom onset date is not available, thus it is useful to consider this simpler use case.</p>
 <p>To do this simplified analysis, we need an estimation of the delay distribution between infection and case report. We assume this delay can be separated into two independent components: an incubation period, from infection to onset of symptoms, and a delay from onset of symptoms until case report. Making such an assumption is quite safe, unless you have many recorded cases who were asymptomatic at the time of testing.</p>
-<p>For the incubation period, we use here an estimate from the literature on COVID-19. TODO add ref</p>
+<p>For the incubation period, we use here an estimate from the literature on COVID-19.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co">## Delay between infection and onset of symptoms (incubation period) in days</span>
+<code class="sourceCode R"><span class="co"># Delay between infection and onset of symptoms (incubation period) in days</span>
+<span class="co"># Ref: Linton et al., Journal of Clinical Medicine, 2020</span>
 <span class="co"># Gamma distribution parameter</span>
 <span class="va">shape_incubation</span> <span class="op">&lt;-</span> <span class="fl">3.2</span>
 <span class="va">scale_incubation</span> <span class="op">&lt;-</span> <span class="fl">1.3</span>
@@ -153,7 +155,7 @@
 <span class="va">distribution_incubation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"gamma"</span>, 
                                 shape <span class="op">=</span> <span class="va">shape_incubation</span>, 
                                 scale <span class="op">=</span> <span class="va">scale_incubation</span><span class="op">)</span></code></pre></div>
-<p>For the period between the onset of symptoms and the case report, we could use an estimate from the academic literature as well. Here, we choose instead to build an estimation of this distribution directly from the data at hand. TODO add note below on why it can still be useful to this case even though then we could directly use the symptom onset data. From the same <a href="https://www.chp.gov.hk">Hong-Kong linelist</a> that let us build the <code>HK_incidence_data</code> dataframe shown above, we compiled a dataset of individual delays reported between onset of symptoms and case confirmation. The column <code>event_date</code> shows the date of onset of symptoms for a particular diseased individual, whereas <code>report_delay</code> shows the number of days that elapsed between the onset of symptoms and the case confirmation.</p>
+<p>For the period between the onset of symptoms and the case report, we could use an estimate from the academic literature as well. Here, we instead build an estimation of this distribution directly from the data at hand. From the same <a href="https://www.chp.gov.hk">Hong-Kong linelist</a> that let us build the <code>HK_incidence_data</code> dataframe shown above, we compiled a dataset (<code>HK_delay_data</code>) of individual delays reported between onset of symptoms and case confirmation. The column <code>event_date</code> shows the date of onset of symptoms for a particular diseased individual, whereas <code>report_delay</code> shows the number of days that elapsed between the onset of symptoms and the case confirmation.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Delay between onset of symptom and case report</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">HK_delay_data</span><span class="op">)</span>
@@ -166,7 +168,8 @@
 <span class="co">#&gt; 4 2020-01-21            5</span>
 <span class="co">#&gt; 5 2020-01-21            5</span>
 <span class="co">#&gt; 6 2020-01-22            8</span></code></pre></div>
-<p>We could feed this dataset directly to <strong>estimateR</strong>, as we will see below. Instead, to exemplify another use case, we choose here to build an estimate of the delay distribution by ourselves. It is this estimate that we will feed to <strong>estimateR</strong> in this first analysis. TODO add note on why we would go through the trouble of doing that (maybe data from elsewhere, or only few datapoints for which we have delay data, or no record of the correspondence between delay data and incidence data)</p>
+<p>We could feed this dataset directly to <strong>estimateR</strong>, as we will see below. Instead, to exemplify another use case, we choose here to build an estimate of the delay distribution by ourselves. It is this estimate that we will feed to <strong>estimateR</strong> in this first analysis.</p>
+<p>Building the delay distribution before the analysis forbids <strong>estimateR</strong> from allowing delay distributions to vary over the time period analyzed. In some applications, we may want to do that because: 1. There are too few delays recorded to incorporate variations-through-time of the delay distribution. 2. The delay data corresponds to a different epidemic (different location or time-period) as the one whose <em>Re</em> we are estimating.</p>
 <p>What we need to build is a vector containing the frequencies at which a delay (in number of days) occurs in the empirical data. These frequencies must be ordered, from the frequency of 0-day delays, to the frequency of the maximal delay observed (there can be trailing zeroes too). Here, we need to use increments of 1-day because that is the increment used in the incidence dataset (<code>HK_incidence_data</code>).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">empirical_frequencies</span> <span class="op">&lt;-</span> <span class="va">HK_delay_data</span> <span class="op">%&gt;%</span> 
@@ -188,17 +191,18 @@
   <span class="va">delay_onset_to_report</span> <span class="op">&lt;-</span> <span class="va">empirical_frequencies</span> <span class="op">%&gt;%</span> 
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">report_delay</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="co"># Sort by increasing delay</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span><span class="op">(</span><span class="va">freq</span><span class="op">)</span> <span class="co"># Pull frequencies as a vector</span></code></pre></div>
-<p>We could go further one step further and fit a particular distribution (e.g. gamma or lognormal) to this empirical frequency vector. We may have especially wanted to do that if we had had few datapoints to inform the delay distribution. Fitting with a particular distribution could help smooth out the empirical frequencies in this case. When doing so, one needs to be mindful of zero values in the empirical delays, as not all distribution types allow for zeroes. TODO add code on how to do that(when extracting to other vignette).</p>
-<p>Finally, we also need an estimate of the serial interval, the time between two successive cases in a transmission chain. We draw this estimate from the academic litterature TODO add ref</p>
+<p>We could go one step further and fit a particular distribution (e.g. gamma or lognormal) to this empirical frequency vector. We may have especially wanted to do that if we had had few datapoints to inform the delay distribution. Fitting with a particular distribution could help smooth out the empirical frequencies in this case. When doing so, one needs to be mindful of zero values in the empirical delays, as not all distribution types allow for zeroes.</p>
+<p>Finally, we also need an estimate of the serial interval, the time between two successive cases in a transmission chain. We draw this estimate from the academic literature.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Serial interval (for Re estimation) in days</span>
+<span class="co"># Ref: Nishiura et al.,International Journal of Infectious Diseases, 2020</span>
 <span class="va">mean_serial_interval</span> <span class="op">&lt;-</span> <span class="fl">4.8</span>
 <span class="va">std_serial_interval</span> <span class="op">&lt;-</span> <span class="fl">2.3</span></code></pre></div>
 <div id="estimation-of-the-effective-reproductive-number-through-time" class="section level3">
 <h3 class="hasAnchor">
 <a href="#estimation-of-the-effective-reproductive-number-through-time" class="anchor"></a>Estimation of the effective reproductive number through time</h3>
-<p>Given the data prepared above and the additional parameters informing the analysis, we run a simplified analysis of the Hong Kong data. The <code>estimation_window</code> parameter specifies the number of time steps (days here) over which the reproductive number is assumed to be constant. A window of 3 days means an estimate reported on day T was built assuming the reproductive number was constant over days T-2, T-1 and T. The 3-day window is then slid for the day T+1, which assumes a constant Re over T-1,T and T+1. The <code>minimum_cumul_incidence</code> parameter specifies the minimum cumulative incidence required for the reproductive number estimate to begin. If <code>minimum_cumul_incidence</code> is too low, the earliest Re estimates are too uncertain.</p>
-<p>We use the <code>get_block_bootstrapped_estimate</code> function in order to not only estimate Re over the original data, but also produce confidence intervals. The <code>N_bootstrap_replicates</code> parameter lets us specify how many bootstrap replicates we want to run the estimation on. The more, the better the uncertainty estimate is, but the longer the estimate will take. Last, the <code>ref_date</code> argument lets us specify the date of the first incidence record in the <code>incidence_data</code> vector. <code>time_step</code> specifies the time step between two consecutive records in <code>incidence_data</code>.</p>
+<p>Given the data prepared above and the additional parameters informing the analysis, we can now run an analysis of the Hong Kong data. The <code>estimation_window</code> parameter specifies the number of time steps (days here) over which the reproductive number is assumed to be constant. A window of 3 days means an estimate reported on day T was built assuming the reproductive number was constant over days T-2, T-1 and T. The 3-day window is then slid for the day T+1, which assumes a constant <em>Re</em> over T-1,T and T+1. The <code>minimum_cumul_incidence</code> parameter specifies the minimum cumulative incidence required for the reproductive number estimate to begin. If <code>minimum_cumul_incidence</code> is too low, the earliest <em>Re</em> estimates are too uncertain.</p>
+<p>We use the <code>get_block_bootstrapped_estimate</code> function in order to not only estimate <em>Re</em> over the original data, but also produce confidence intervals. The <code>N_bootstrap_replicates</code> parameter lets us specify how many bootstrap replicates we want to sample. The more, the better the uncertainty estimate, but the longer the estimate runtime. Last, the <code>ref_date</code> argument lets us specify the date of the first incidence record in the <code>incidence_data</code> vector. <code>time_step</code> specifies the time step between two consecutive records in <code>incidence_data</code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">HK_first_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_block_bootstrapped_estimate.html">get_block_bootstrapped_estimate</a></span><span class="op">(</span>
   incidence_data <span class="op">=</span> <span class="va">HK_incidence_data</span><span class="op">$</span><span class="va">case_incidence</span>,
@@ -216,12 +220,12 @@
 <span class="co">#&gt; # A tibble: 6 x 4</span>
 <span class="co">#&gt;   date       Re_estimate CI_down_Re_estimate CI_up_Re_estimate</span>
 <span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;               &lt;dbl&gt;             &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 2020-02-06       0.955               0.672              1.24</span>
-<span class="co">#&gt; 2 2020-02-07       0.901               0.636              1.17</span>
-<span class="co">#&gt; 3 2020-02-08       0.854               0.608              1.10</span>
-<span class="co">#&gt; 4 2020-02-09       0.828               0.554              1.10</span>
-<span class="co">#&gt; 5 2020-02-10       0.838               0.554              1.12</span>
-<span class="co">#&gt; 6 2020-02-11       0.875               0.576              1.17</span></code></pre></div>
+<span class="co">#&gt; 1 2020-02-06       0.955               0.578              1.33</span>
+<span class="co">#&gt; 2 2020-02-07       0.901               0.533              1.27</span>
+<span class="co">#&gt; 3 2020-02-08       0.854               0.514              1.19</span>
+<span class="co">#&gt; 4 2020-02-09       0.828               0.489              1.17</span>
+<span class="co">#&gt; 5 2020-02-10       0.838               0.482              1.19</span>
+<span class="co">#&gt; 6 2020-02-11       0.875               0.507              1.24</span></code></pre></div>
 <p>We have obtained our first estimates of Re for Hong Kong from February to July 2020. Let us now plot these estimates with their confidence interval.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
@@ -240,8 +244,8 @@
 <div id="analysis-including-incidence-of-symptom-onset-events" class="section level2">
 <h2 class="hasAnchor">
 <a href="#analysis-including-incidence-of-symptom-onset-events" class="anchor"></a>Analysis including incidence of symptom onset events</h2>
-<p>We could stop here, or try to get better informed estimates leveraging the data we have not used in the initial analysis. As discussed above, we can do is break down the incidence data into a ‘onset of symptoms’ incidence and a ‘case confirmation’ incidence. In the data, these correspond to <code>onset_incidence</code> and <code>report_incidence</code>.</p>
-<p>We now use the <code>get_bootstrapped_estimates_from_combined_observations</code> function to combine these two incidence vectors together. The <code>partially_delayed_incidence</code> argument corresponds to the <code>onset_incidence</code>, because the symptom onset events are only delayed from the infection events by the incubation period. We thus call them ‘partially delayed’. The <code>report_incidence</code> on the other hand corresponds to case confirmation events, they are delayed from the original infection events by the incubation period, and by a delay between onset of symptom and confirmation. We call them ‘fully delayed’ and they correspond to the <code>fully_delayed_incidence</code> argument of <code>get_bootstrapped_estimates_from_combined_observations</code>. The <code>delay_until_partial</code> argument is thus the incubation period whereas the <code>delay_until_final_report</code> argument is the delay from onset to report (or case confirmation). Something important to note here is that in order from someone to report that they started showing COVID-19 symptoms on day T, they first need to be confirmed as a positive case, which usually happens later than day T (e.g. T + 3 days). Because of this, we see a drop in the incidence of symptom onset events close to the present. Here the present is July 31st.</p>
+<p>We could stop here, or try to get better informed estimates leveraging the data we have not used in the initial analysis. As discussed above, we can break down the incidence data into a ‘onset of symptoms’ incidence and a ‘case confirmation’ incidence. In the <code>HK_incidence_data</code> dataframe, these correspond to the <code>onset_incidence</code> and <code>report_incidence</code> columns. In this next analysis, we make use of the fact that we know the date of onset of symptoms for a lot of cases. For these cases (in the <code>onset_incidence</code> column), it is much easier to infer the date of infection, as the delay from infection to observation is significantly reduced compared to the case confirmation data.</p>
+<p>We use the <code>get_bootstrapped_estimates_from_combined_observations</code> function to combine the two incidence vectors together. The <code>partially_delayed_incidence</code> argument corresponds to the <code>onset_incidence</code>, because the symptom onset events are only delayed from the infection events by the incubation period. We thus call them ‘partially delayed’. The <code>report_incidence</code> on the other hand corresponds to case confirmation events, they are delayed from the original infection events by the incubation period, and by a delay between onset of symptom and confirmation. We call them ‘fully delayed’ and they correspond to the <code>fully_delayed_incidence</code> argument of <code>get_bootstrapped_estimates_from_combined_observations</code>. The <code>delay_until_partial</code> argument is thus the incubation period whereas the <code>delay_until_final_report</code> argument is the delay from onset to report (or case confirmation). Something important to note here is that in order from someone to report that they started showing COVID-19 symptoms on day T, they first need to be confirmed as a positive case, which usually happens later than day T (e.g. T + 3 days). Because of this, we see a drop in the incidence of symptom onset events close to the present -here the present is July 31st-.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">tail</a></span><span class="op">(</span><span class="va">HK_incidence_data</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 6 x 4</span>
@@ -253,7 +257,7 @@
 <span class="co">#&gt; 4 2020-07-29            117              14               16</span>
 <span class="co">#&gt; 5 2020-07-30            149               4               23</span>
 <span class="co">#&gt; 6 2020-07-31            121               1               20</span></code></pre></div>
-<p>This is to be expected, most people with symptoms appearing just before July 31st will be confirmed in August, thus they cannot have been recorded in our dataset, which emulates the present being July 31 2020. In order not to bias our estimates of Re close to the present, we need to account for this drop. Otherwise, Re will artificially seen as going down. This is all accounted for inside functions called by <code>get_bootstrapped_estimates_from_combined_observations</code>. We only need to set the <code>partial_observation_requires_full_observation</code> flag to <code>TRUE</code>, whenever our ‘partially-delayed’ observations requires the ‘fully-delayed’ observation to have happened.</p>
+<p>This is to be expected, most people with symptoms appearing just before July 31st will be confirmed in August, thus they cannot have been recorded in our dataset, which emulates the present being July 31 2020. In order not to bias our estimates of Re close to the present, <strong>estimateR</strong> need to account for this drop. Otherwise, Re will artificially seen as going down. This is all accounted for inside functions called by <code>get_bootstrapped_estimates_from_combined_observations</code>. We only need to set the <code>partial_observation_requires_full_observation</code> flag to <code>TRUE</code>, whenever our ‘partially-delayed’ observations requires the ‘fully-delayed’ observation to have happened.</p>
 <p>All other parameters are kept the same as in the previous analysis, except for <code>N_bootstrap_replicates</code> which is set to 50 here, to save time on the vignette computations.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">HK_combined_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_bootstrapped_estimates_from_combined_observations.html">get_bootstrapped_estimates_from_combined_observations</a></span><span class="op">(</span>
@@ -275,19 +279,19 @@
 <span class="co">#&gt; # A tibble: 6 x 4</span>
 <span class="co">#&gt;   date       Re_estimate CI_down_Re_estimate CI_up_Re_estimate</span>
 <span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;               &lt;dbl&gt;             &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 2020-02-03       0.927               0.731             1.12 </span>
-<span class="co">#&gt; 2 2020-02-04       0.880               0.707             1.05 </span>
-<span class="co">#&gt; 3 2020-02-05       0.837               0.649             1.02 </span>
-<span class="co">#&gt; 4 2020-02-06       0.804               0.602             1.01 </span>
-<span class="co">#&gt; 5 2020-02-07       0.785               0.573             0.997</span>
-<span class="co">#&gt; 6 2020-02-08       0.780               0.571             0.988</span></code></pre></div>
+<span class="co">#&gt; 1 2020-02-03       0.927               0.704             1.15 </span>
+<span class="co">#&gt; 2 2020-02-04       0.880               0.678             1.08 </span>
+<span class="co">#&gt; 3 2020-02-05       0.837               0.625             1.05 </span>
+<span class="co">#&gt; 4 2020-02-06       0.804               0.592             1.02 </span>
+<span class="co">#&gt; 5 2020-02-07       0.785               0.569             1.00 </span>
+<span class="co">#&gt; 6 2020-02-08       0.780               0.569             0.990</span></code></pre></div>
 <p>You may notice that the earliest Re estimates dates differ, this is a normal side effect of splitting the incidence data this way. We will plot them one on top of the other further down below, but you can already see that these estimates are different from the initial ones. In all likelihood, they are more accurate. By incorporating the empirical dates of symptom onset events, we bypassed the deconvolution step required to infer these dates from the case confirmation dates. Our goal is to produce an estimate of the incidence of infection events through time that is as close to reality as possible. When using the onset of symptoms, we are already halfway there. Thus, the estimates we produce using this additional data are likely to be closer to reality.</p>
 </div>
 <div id="further-analysis-including-variability-through-time-of-reporting-delays" class="section level2">
 <h2 class="hasAnchor">
 <a href="#further-analysis-including-variability-through-time-of-reporting-delays" class="anchor"></a>Further analysis including variability-through-time of reporting delays</h2>
-<p>In both analyses above, the distribution of the delay between onset of symptoms and case confirmation was averaged through the entire period of interest. However, we could build a finer analysis by not averaging over the entire period of interest but instead allowing this distribution to vary through time. TODO add couple of sentences on why that could be nice to do (because can vary in reality). With <strong>estimateR</strong>, this can be done simply by feeding the empirical data directly to the function used for the analysis. Doing so will result in a decrease in computation speed, but this decrease should be relatively small.</p>
-<p>We start by performing the same analysis an the first analysis, but this time we directly feed the <code>HK_delay_data</code> dataframe to the <code>delay_onset_to_report</code> argument of <code>get_block_bootstrapped_estimate</code>.</p>
+<p>In both analyses above, the distribution of the delay between onset of symptoms and case confirmation was averaged through the entire period of interest. However, we could build a finer analysis by not averaging over the entire period of interest but instead allowing this distribution to vary through time. In reality, it is quite possible for delay distributions to vary through time, e.g. as epidemic waves build up and saturate testing facilities. With <strong>estimateR</strong>, this can be done simply by feeding the empirical data directly to the function used for the analysis. Doing so will result in a decrease in computation speed, but this decrease should be relatively small.</p>
+<p>We start by performing the same analysis as the first analysis, but this time we directly feed the <code>HK_delay_data</code> dataframe to the <code>delay_onset_to_report</code> argument of <code>get_block_bootstrapped_estimate</code>.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">HK_variable_delays_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_block_bootstrapped_estimate.html">get_block_bootstrapped_estimate</a></span><span class="op">(</span>
   incidence_data <span class="op">=</span> <span class="va">HK_incidence_data</span><span class="op">$</span><span class="va">case_incidence</span>,
@@ -368,6 +372,7 @@
 <a href="#summary" class="anchor"></a>Summary</h2>
 <p><strong>estimateR</strong> can deal with different levels of precision in the input data.</p>
 <p>Whenever available, including the dates of onset of symptoms is a good idea as it will significantly help the analysis. For the same reason, including empirical delay data in the analysis can be valuable, in particular in cases for which the delay distribution has significantly changed through time. As seen in the Hong Kong example, if the date of onset of symptoms is known for most cases then the additional effect of the empirical delay data will be reduced. Given that their inclusion can be computationally a bit costly, a trade-off between speed and precision can sometimes be found in not including them.</p>
+<p>When there is not a large number of datapoints to estimate delay distributions through time (less than thousands), it is usually better to not allow for variability through time. Otherwise, spurious peaks in <em>Re</em> may appear as the inference of the time series infection events becomes unstable due to a strong variability in the delay distribution.</p>
 </div>
   </div>
 

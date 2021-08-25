@@ -104,9 +104,6 @@ For now, only a non-parametric block bootstrapping function is implemented." />
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
-      <a href="../articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
-    </li>
-    <li>
       <a href="../articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -183,20 +180,7 @@ implemented in <code><a href='.block_bootstrap.html'>.block_bootstrap</a></code>
     <tr>
       <th>simplify_output</th>
       <td><p>boolean. Return a numeric vector instead of module
-output object if output offset is zero?</p>
-<p>@return A list with two elements:</p><ol>
-<li><p>A numeric vector named <code>values</code>: the result of the computations on the input data.</p></li>
-<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
-by which the result is shifted compared to an <code>index_offset</code> of <code>0</code>.
-This parameter allows one to keep track of the date of the first value in <code>values</code>
-without needing to carry a <code>date</code> column around.
-A positive offset means <code>values</code> are delayed in the future compared to the reference values.
-A negative offset means the opposite.
-Note that the <code>index_offset</code> of the output of the function call
-accounts for the (optional) <code>index_offset</code> of the input.</p></li>
-</ol><p>If <code>index_offset</code> is <code>0</code> and <code>simplify_output = TRUE</code>,
-the <code>index_offset</code> is dropped and the <code>values</code>
-element is returned as a numeric vector.</p></td>
+output object if output offset is zero?</p></td>
     </tr>
     <tr>
       <th>...</th>
@@ -212,6 +196,21 @@ Available options are:
     </tr>
     </table>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A list with two elements:</p><ol>
+<li><p>A numeric vector named <code>values</code>: the result of the computations on the input data.</p></li>
+<li><p>An integer named <code>index_offset</code>: the offset, counted in number of time steps,
+by which the result is shifted compared to an <code>index_offset</code> of <code>0</code>.
+This parameter allows one to keep track of the date of the first value in <code>values</code>
+without needing to carry a <code>date</code> column around.
+A positive offset means <code>values</code> are delayed in the future compared to the reference values.
+A negative offset means the opposite.
+Note that the <code>index_offset</code> of the output of the function call
+accounts for the (optional) <code>index_offset</code> of the input.</p></li>
+</ol><p>If <code>index_offset</code> is <code>0</code> and <code>simplify_output = TRUE</code>,
+the <code>index_offset</code> is dropped and the <code>values</code>
+element is returned as a numeric vector.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

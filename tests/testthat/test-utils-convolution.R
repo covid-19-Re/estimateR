@@ -182,21 +182,24 @@ test_that(".convolve_delays is consistent on convolving several vectors and matr
   ncol = 3,
   byrow = TRUE
   )
-  vector_c <-  c(0.2, 0.2, 0.3, 0.3)
+  vector_c <- c(0.2, 0.2, 0.3, 0.3)
 
   convolved_output <- convolve_delays(
     delays = list(vector_a, matrix_b, vector_c)
   )
 
   ref_result <- matrix(
-    c(0.004, 0.000, 0.000, 0.000, 0.000,
-  0.022, 0.004, 0.000, 0.000, 0.000,
-  0.076, 0.022, 0.004, 0.000, 0.000,
-  0.151, 0.086, 0.028, 0.008, 0.000,
-  0.231, 0.171, 0.093, 0.033, 0.006),
-  nrow = 5,
-  ncol = 5,
-  byrow = TRUE)
+    c(
+      0.004, 0.000, 0.000, 0.000, 0.000,
+      0.022, 0.004, 0.000, 0.000, 0.000,
+      0.076, 0.022, 0.004, 0.000, 0.000,
+      0.151, 0.086, 0.028, 0.008, 0.000,
+      0.231, 0.171, 0.093, 0.033, 0.006
+    ),
+    nrow = 5,
+    ncol = 5,
+    byrow = TRUE
+  )
 
   expect_equal(convolved_output, ref_result, tolerance = 1E-3)
 })
@@ -226,7 +229,7 @@ test_that(".convolve_delays can work with a single delay as input", {
     delays = incubation_delay
   )
 
-  ref_result <- c(0,0.08,0.17,0.2,0.17,0.13,0.09,0.06,0.04,0.02,0.01,0.01,0,0,0,0,0)
+  ref_result <- c(0, 0.08, 0.17, 0.2, 0.17, 0.13, 0.09, 0.06, 0.04, 0.02, 0.01, 0.01, 0, 0, 0, 0, 0)
 
   expect_equal(convolved_output, ref_result, tolerance = 5E-2)
 })

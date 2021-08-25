@@ -1,24 +1,41 @@
 README
 ================
 
-# *estimateR* package
-
-The *estimateR* package provides tools to estimate the effective
+The **estimateR** package provides tools to estimate the effective
 reproductive number through time from delayed and indirect observations
-of infection events. This package is under development. The README file
-is still at a super rough stage.
+of infection events. This package is currently in a beta version.
 
-The full documentation is available **[here](https://covid-19-re.github.io/estimateR/)**.
+## Installation
 
-## Quick toy example
+First, make sure you have installed the **devtools** package locally. If
+not, run:
 
-We demonstrate below a basic use of the *estimateR* package. Check out
-the estimateR vignette for more details.
+    install.packages("devtools")
+
+in RStudio or other.
+
+Then run:
+
+    library(devtools)
+    install_github("covid-19-Re/estimateR")
+
+## Documentation
+
+The full documentation is available
+**[here](https://covid-19-re.github.io/estimateR/)**.
+
+## Quick example
+
+We demonstrate below a basic use of the **estimateR** package. Check out
+the *estimateR* vignette and additional vignettes for more details.
 
 We start with arbitrary incidence data representing daily counts of case
 confirmations for a disease of interest. This incidence data counts the
 number of people getting tested positive for a particular infectious
-disease X on day *T*.
+disease X on day *T*. With `estimate_Re_from_noisy_delayed_incidence()`,
+we compute the reproductive number through time from this incidence data
+and specifications of the delays between infection events and case
+confirmations as well as the serial interval.
 
 ``` r
 library(estimateR)
@@ -29,11 +46,11 @@ toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
                           348,331,311,267,288,254,239)
 
 
-## The numbers below are part of the user input,
+## The numbers below are part of the user input, 
 ## they need to be adapted to the particular disease studied.
 
 # Incubation period - gamma distribution parameters
-shape_incubation = 3.2
+shape_incubation = 3.2 
 scale_incubation = 1.3
 incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
 
@@ -51,16 +68,14 @@ std_serial_interval = 2.3
 # The estimation window corresponds to the size of the sliding window used in EpiEstim.
 # See help(estimate_Re) for additional details.
 # Here, it is set to three days.
-estimation_window = 3
+estimation_window = 3 
 
 ## End of user input
-
-toy_estimates <- smooth_deconvolve_estimate(toy_incidence_data,
+toy_estimates <- estimate_Re_from_noisy_delayed_incidence(toy_incidence_data,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
   estimation_method = "EpiEstim sliding window",
-  delay_incubation = incubation,
-  delay_onset_to_report = onset_to_report,
+  delay = list(incubation, onset_to_report),
   estimation_window = estimation_window,
   mean_serial_interval = mean_serial_interval,
   std_serial_interval  = std_serial_interval,
@@ -69,47 +84,47 @@ toy_estimates <- smooth_deconvolve_estimate(toy_incidence_data,
   time_step = "day"
 )
 
-head(toy_estimates, n = 20)
+tail(toy_estimates, n = 20)
 #>          date observed_incidence smoothed_incidence deconvolved_incidence
-#> 1  2020-02-16                 NA                 NA              18.43639
-#> 2  2020-02-17                 NA                 NA              21.98931
-#> 3  2020-02-18                 NA                 NA              25.78989
-#> 4  2020-02-19                 NA                 NA              30.33052
-#> 5  2020-02-20                 NA                 NA              36.10101
-#> 6  2020-02-21                 NA                 NA              43.46775
-#> 7  2020-02-22                 NA                 NA              52.48302
-#> 8  2020-02-23                 NA                 NA              63.25173
-#> 9  2020-02-24                  4           17.75345              75.80742
-#> 10 2020-02-25                  9           21.35431              90.01481
-#> 11 2020-02-26                 19           25.29413             105.42458
-#> 12 2020-02-27                 14           30.08292             121.78595
-#> 13 2020-02-28                 36           36.23071             139.21664
-#> 14 2020-02-29                 16           44.08374             157.85615
-#> 15 2020-03-01                 39           53.55827             177.84666
-#> 16 2020-03-02                 27           64.51933             196.21270
-#> 17 2020-03-03                 46           76.83199             210.79070
-#> 18 2020-03-04                 77           90.36127             222.97111
-#> 19 2020-03-05                 78          104.73262             234.22213
-#> 20 2020-03-06                113          119.79569             246.11074
-#>      R_mean
-#> 1        NA
-#> 2        NA
-#> 3        NA
-#> 4        NA
-#> 5  4.454175
-#> 6  3.174828
-#> 7  2.664187
-#> 8  2.443120
-#> 9  2.338139
-#> 10 2.274462
-#> 11 2.215251
-#> 12 2.145688
-#> 13 2.065824
-#> 14 1.983260
-#> 15 1.905728
-#> 16 1.826669
-#> 17 1.735752
-#> 18 1.632269
-#> 19 1.528623
-#> 20 1.440937
+#> 19 2020-03-05                 78           104.7215              234.0993
+#> 20 2020-03-06                113           119.7628              245.9896
+#> 21 2020-03-07                102           135.7005              257.5132
+#> 22 2020-03-08                134           152.7363              267.2654
+#> 23 2020-03-09                165           171.0718              276.2164
+#> 24 2020-03-10                183           187.9392              285.2313
+#> 25 2020-03-11                219           201.4078              295.1153
+#> 26 2020-03-12                247           212.9347              305.0930
+#> 27 2020-03-13                266           223.9770              314.2166
+#> 28 2020-03-14                308           235.9919              323.0184
+#> 29 2020-03-15                304           247.8836              331.9951
+#> 30 2020-03-16                324           258.1096              341.6153
+#> 31 2020-03-17                346           267.4566                    NA
+#> 32 2020-03-18                348           276.7116                    NA
+#> 33 2020-03-19                331           286.6611                    NA
+#> 34 2020-03-20                311           296.5506                    NA
+#> 35 2020-03-21                267           305.4301                    NA
+#> 36 2020-03-22                288           313.7929                    NA
+#> 37 2020-03-23                254           322.1324                    NA
+#> 38 2020-03-24                239           330.9420                    NA
+#>    Re_estimate
+#> 19    1.532188
+#> 20    1.443083
+#> 21    1.374851
+#> 22    1.322608
+#> 23    1.280009
+#> 24    1.244622
+#> 25    1.218098
+#> 26    1.199757
+#> 27    1.186535
+#> 28    1.175290
+#> 29    1.165038
+#> 30    1.157006
+#> 31          NA
+#> 32          NA
+#> 33          NA
+#> 34          NA
+#> 35          NA
+#> 36          NA
+#> 37          NA
+#> 38          NA
 ```

@@ -124,7 +124,6 @@
 #' @return discretized delay distribution vector (if all input delays are
 #'   vectors) or matrix
 .convolve_delay_distributions <- function(delay_distributions) {
-
   .are_valid_argument_values(list(
     # We put '1' here, because we do not care here about checking the dimension of the matrix.
     list(delay_distributions, "delay_single_or_list", 1)
@@ -132,11 +131,11 @@
 
   number_of_delays_in_list <- length(delay_distributions)
 
-  if(number_of_delays_in_list == 1) {
+  if (number_of_delays_in_list == 1) {
     return(delay_distributions[[1]])
   }
 
-  if(number_of_delays_in_list == 2) {
+  if (number_of_delays_in_list == 2) {
     return(.convolve_two_delay_distributions(delay_distributions[[1]], delay_distributions[[2]]))
   }
 
@@ -157,7 +156,7 @@
 #' @return discretized delay distribution vector (if both input delays are
 #'   vectors) or matrix
 .convolve_two_delay_distributions <- function(first_delay,
-                                          second_delay) {
+                                              second_delay) {
   .are_valid_argument_values(list(
     list(first_delay, "delay_object", 1),
     list(second_delay, "delay_object", 1)
@@ -235,7 +234,6 @@
 convolve_delays <- function(delays,
                             n_report_time_steps = NULL,
                             ...) {
-
   .are_valid_argument_values(list(
     # We put '1' here, because we do not care here about checking the dimension of the matrix.
     list(delays, "delay_single_or_list", 1),
@@ -245,7 +243,7 @@ convolve_delays <- function(delays,
 
   dots_args <- .get_dots_as_list(...)
 
-  if(.is_single_delay(delays)) {
+  if (.is_single_delay(delays)) {
     delay_distribution <- do.call(
       ".get_delay_distribution",
       c(
@@ -260,26 +258,26 @@ convolve_delays <- function(delays,
       )
     )
     return(delay_distribution)
-
   } else {
+    delay_distributions <- lapply(
+      delays,
+      function(delay) {
+        delay_distribution <- do.call(
+          ".get_delay_distribution",
+          c(
+            list(
+              delay = delay,
+              n_report_time_steps = n_report_time_steps
+            ),
+            .get_shared_args(list(
+              get_matrix_from_empirical_delay_distr,
+              build_delay_distribution
+            ), dots_args)
+          )
+        )
+      }
+    )
 
-  delay_distributions <- lapply(delays,
-                                function(delay) {
-                                  delay_distribution <- do.call(
-                                    ".get_delay_distribution",
-                                    c(
-                                      list(
-                                        delay = delay,
-                                        n_report_time_steps = n_report_time_steps
-                                      ),
-                                      .get_shared_args(list(
-                                        get_matrix_from_empirical_delay_distr,
-                                        build_delay_distribution
-                                      ), dots_args)
-                                    )
-                                  )
-                                })
-
-  return(.convolve_delay_distributions(delay_distributions))
+    return(.convolve_delay_distributions(delay_distributions))
   }
 }

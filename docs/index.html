@@ -5,20 +5,20 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reproductive number estimation from delayed infection reports • estimateR</title>
+<title>Reproductive number estimation from delayed observations of infections • estimateR</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="Reproductive number estimation from delayed infection reports">
-<meta property="og:description" content="Draft description. 
+<script src="pkgdown.js"></script><meta property="og:title" content="Reproductive number estimation from delayed observations of infections">
+<meta property="og:description" content="
     The estimateR package implements a modular pipeline to estimate the effective reproductive number from incidence data.
     The incidence data does not need to directly represent infections.
     Instead, the incidence data can represent indirect and temporally-delayed noisy observations of infection events.
     Typically, these could be: case confirmation via testing for the pathogen of interest,
     or hospital admissions of patients suffering from the disease of interest,
-    ICU admissions of such patients, or even deaths.
+    ICU admissions of such patients, or deaths.
     In addition to incidence data, one needs an estimate of the delay distribution between infection events and their observations.
     Typically, the delay between an infection and its observation can be split into two independent delays:
     the incubation period and the delay between symptom onset and observation.
@@ -72,9 +72,6 @@
       <a href="articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
-      <a href="articles/estimation_of_uncertainty.html">Available options for estimating uncertainty on Re estimates</a>
-    </li>
-    <li>
       <a href="articles/incidence_data_workflow_example.html">From aggregated incidence data to Re estimates</a>
     </li>
     <li>
@@ -95,22 +92,31 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-
 <div id="readme" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#readme" class="anchor"></a>README</h1></div>
-</div>
-<div id="estimater-package" class="section level1">
-<h1 class="hasAnchor">
-<a href="#estimater-package" class="anchor"></a><em>estimateR</em> package</h1>
-<p>The <em>estimateR</em> package provides tools to estimate the effective reproductive number through time from delayed and indirect observations of infection events. This package is under development. The README file is still at a super rough stage.</p>
-<p>The full documentation is available <strong><a href="https://covid-19-re.github.io/estimateR/">here</a></strong>.</p>
-<div id="quick-toy-example" class="section level2">
+<p>The <strong>estimateR</strong> package provides tools to estimate the effective reproductive number through time from delayed and indirect observations of infection events. This package is currently in a beta version.</p>
+<div id="installation" class="section level2">
 <h2 class="hasAnchor">
-<a href="#quick-toy-example" class="anchor"></a>Quick toy example</h2>
-<p>We demonstrate below a basic use of the <em>estimateR</em> package. Check out the estimateR vignette for more details.</p>
-<p>We start with arbitrary incidence data representing daily counts of case confirmations for a disease of interest. This incidence data counts the number of people getting tested positive for a particular infectious disease X on day <em>T</em>.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<a href="#installation" class="anchor"></a>Installation</h2>
+<p>First, make sure you have installed the <strong>devtools</strong> package locally. If not, run:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"devtools"</span>)</span></code></pre></div>
+<p>in RStudio or other.</p>
+<p>Then run:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(devtools)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">install_github</span>(<span class="st">"covid-19-Re/estimateR"</span>)</span></code></pre></div>
+</div>
+<div id="documentation" class="section level2">
+<h2 class="hasAnchor">
+<a href="#documentation" class="anchor"></a>Documentation</h2>
+<p>The full documentation is available <strong><a href="https://covid-19-re.github.io/estimateR/">here</a></strong>.</p>
+</div>
+<div id="quick-example" class="section level2">
+<h2 class="hasAnchor">
+<a href="#quick-example" class="anchor"></a>Quick example</h2>
+<p>We demonstrate below a basic use of the <strong>estimateR</strong> package. Check out the <em>estimateR</em> vignette and additional vignettes for more details.</p>
+<p>We start with arbitrary incidence data representing daily counts of case confirmations for a disease of interest. This incidence data counts the number of people getting tested positive for a particular infectious disease X on day <em>T</em>. With <code><a href="reference/estimate_Re_from_noisy_delayed_incidence.html">estimate_Re_from_noisy_delayed_incidence()</a></code>, we compute the reproductive number through time from this incidence data and specifications of the delays between infection events and case confirmations as well as the serial interval.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">estimateR</span><span class="op">)</span>
 <span class="va">date_first_data_point</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="st">"2020-02-24"</span><span class="op">)</span>
 <span class="va">toy_incidence_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">4</span>,<span class="fl">9</span>,<span class="fl">19</span>,<span class="fl">14</span>,<span class="fl">36</span>,<span class="fl">16</span>,<span class="fl">39</span>,<span class="fl">27</span>,<span class="fl">46</span>,
@@ -119,11 +125,11 @@
                           <span class="fl">348</span>,<span class="fl">331</span>,<span class="fl">311</span>,<span class="fl">267</span>,<span class="fl">288</span>,<span class="fl">254</span>,<span class="fl">239</span><span class="op">)</span>
 
 
-<span class="co">## The numbers below are part of the user input,</span>
+<span class="co">## The numbers below are part of the user input, </span>
 <span class="co">## they need to be adapted to the particular disease studied.</span>
 
 <span class="co"># Incubation period - gamma distribution parameters</span>
-<span class="va">shape_incubation</span> <span class="op">=</span> <span class="fl">3.2</span>
+<span class="va">shape_incubation</span> <span class="op">=</span> <span class="fl">3.2</span> 
 <span class="va">scale_incubation</span> <span class="op">=</span> <span class="fl">1.3</span>
 <span class="va">incubation</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>name<span class="op">=</span><span class="st">"gamma"</span>, shape <span class="op">=</span> <span class="va">shape_incubation</span>, scale <span class="op">=</span> <span class="va">scale_incubation</span><span class="op">)</span>
 
@@ -141,16 +147,14 @@
 <span class="co"># The estimation window corresponds to the size of the sliding window used in EpiEstim.</span>
 <span class="co"># See help(estimate_Re) for additional details.</span>
 <span class="co"># Here, it is set to three days.</span>
-<span class="va">estimation_window</span> <span class="op">=</span> <span class="fl">3</span>
+<span class="va">estimation_window</span> <span class="op">=</span> <span class="fl">3</span> 
 
 <span class="co">## End of user input</span>
-
-<span class="va">toy_estimates</span> <span class="op">&lt;-</span> <span class="fu">smooth_deconvolve_estimate</span><span class="op">(</span><span class="va">toy_incidence_data</span>,
+<span class="va">toy_estimates</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/estimate_Re_from_noisy_delayed_incidence.html">estimate_Re_from_noisy_delayed_incidence</a></span><span class="op">(</span><span class="va">toy_incidence_data</span>,
   smoothing_method <span class="op">=</span> <span class="st">"LOESS"</span>,
   deconvolution_method <span class="op">=</span> <span class="st">"Richardson-Lucy delay distribution"</span>,
   estimation_method <span class="op">=</span> <span class="st">"EpiEstim sliding window"</span>,
-  delay_incubation <span class="op">=</span> <span class="va">incubation</span>,
-  delay_onset_to_report <span class="op">=</span> <span class="va">onset_to_report</span>,
+  delay <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span><span class="va">incubation</span>, <span class="va">onset_to_report</span><span class="op">)</span>,
   estimation_window <span class="op">=</span> <span class="va">estimation_window</span>,
   mean_serial_interval <span class="op">=</span> <span class="va">mean_serial_interval</span>,
   std_serial_interval  <span class="op">=</span> <span class="va">std_serial_interval</span>,
@@ -159,52 +163,51 @@
   time_step <span class="op">=</span> <span class="st">"day"</span>
 <span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">toy_estimates</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html">tail</a></span><span class="op">(</span><span class="va">toy_estimates</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>
 <span class="co">#&gt;          date observed_incidence smoothed_incidence deconvolved_incidence</span>
-<span class="co">#&gt; 1  2020-02-16                 NA                 NA              18.43639</span>
-<span class="co">#&gt; 2  2020-02-17                 NA                 NA              21.98931</span>
-<span class="co">#&gt; 3  2020-02-18                 NA                 NA              25.78989</span>
-<span class="co">#&gt; 4  2020-02-19                 NA                 NA              30.33052</span>
-<span class="co">#&gt; 5  2020-02-20                 NA                 NA              36.10101</span>
-<span class="co">#&gt; 6  2020-02-21                 NA                 NA              43.46775</span>
-<span class="co">#&gt; 7  2020-02-22                 NA                 NA              52.48302</span>
-<span class="co">#&gt; 8  2020-02-23                 NA                 NA              63.25173</span>
-<span class="co">#&gt; 9  2020-02-24                  4           17.75345              75.80742</span>
-<span class="co">#&gt; 10 2020-02-25                  9           21.35431              90.01481</span>
-<span class="co">#&gt; 11 2020-02-26                 19           25.29413             105.42458</span>
-<span class="co">#&gt; 12 2020-02-27                 14           30.08292             121.78595</span>
-<span class="co">#&gt; 13 2020-02-28                 36           36.23071             139.21664</span>
-<span class="co">#&gt; 14 2020-02-29                 16           44.08374             157.85615</span>
-<span class="co">#&gt; 15 2020-03-01                 39           53.55827             177.84666</span>
-<span class="co">#&gt; 16 2020-03-02                 27           64.51933             196.21270</span>
-<span class="co">#&gt; 17 2020-03-03                 46           76.83199             210.79070</span>
-<span class="co">#&gt; 18 2020-03-04                 77           90.36127             222.97111</span>
-<span class="co">#&gt; 19 2020-03-05                 78          104.73262             234.22213</span>
-<span class="co">#&gt; 20 2020-03-06                113          119.79569             246.11074</span>
-<span class="co">#&gt;      R_mean</span>
-<span class="co">#&gt; 1        NA</span>
-<span class="co">#&gt; 2        NA</span>
-<span class="co">#&gt; 3        NA</span>
-<span class="co">#&gt; 4        NA</span>
-<span class="co">#&gt; 5  4.454175</span>
-<span class="co">#&gt; 6  3.174828</span>
-<span class="co">#&gt; 7  2.664187</span>
-<span class="co">#&gt; 8  2.443120</span>
-<span class="co">#&gt; 9  2.338139</span>
-<span class="co">#&gt; 10 2.274462</span>
-<span class="co">#&gt; 11 2.215251</span>
-<span class="co">#&gt; 12 2.145688</span>
-<span class="co">#&gt; 13 2.065824</span>
-<span class="co">#&gt; 14 1.983260</span>
-<span class="co">#&gt; 15 1.905728</span>
-<span class="co">#&gt; 16 1.826669</span>
-<span class="co">#&gt; 17 1.735752</span>
-<span class="co">#&gt; 18 1.632269</span>
-<span class="co">#&gt; 19 1.528623</span>
-<span class="co">#&gt; 20 1.440937</span></code></pre></div>
+<span class="co">#&gt; 19 2020-03-05                 78           104.7215              234.0993</span>
+<span class="co">#&gt; 20 2020-03-06                113           119.7628              245.9896</span>
+<span class="co">#&gt; 21 2020-03-07                102           135.7005              257.5132</span>
+<span class="co">#&gt; 22 2020-03-08                134           152.7363              267.2654</span>
+<span class="co">#&gt; 23 2020-03-09                165           171.0718              276.2164</span>
+<span class="co">#&gt; 24 2020-03-10                183           187.9392              285.2313</span>
+<span class="co">#&gt; 25 2020-03-11                219           201.4078              295.1153</span>
+<span class="co">#&gt; 26 2020-03-12                247           212.9347              305.0930</span>
+<span class="co">#&gt; 27 2020-03-13                266           223.9770              314.2166</span>
+<span class="co">#&gt; 28 2020-03-14                308           235.9919              323.0184</span>
+<span class="co">#&gt; 29 2020-03-15                304           247.8836              331.9951</span>
+<span class="co">#&gt; 30 2020-03-16                324           258.1096              341.6153</span>
+<span class="co">#&gt; 31 2020-03-17                346           267.4566                    NA</span>
+<span class="co">#&gt; 32 2020-03-18                348           276.7116                    NA</span>
+<span class="co">#&gt; 33 2020-03-19                331           286.6611                    NA</span>
+<span class="co">#&gt; 34 2020-03-20                311           296.5506                    NA</span>
+<span class="co">#&gt; 35 2020-03-21                267           305.4301                    NA</span>
+<span class="co">#&gt; 36 2020-03-22                288           313.7929                    NA</span>
+<span class="co">#&gt; 37 2020-03-23                254           322.1324                    NA</span>
+<span class="co">#&gt; 38 2020-03-24                239           330.9420                    NA</span>
+<span class="co">#&gt;    Re_estimate</span>
+<span class="co">#&gt; 19    1.532188</span>
+<span class="co">#&gt; 20    1.443083</span>
+<span class="co">#&gt; 21    1.374851</span>
+<span class="co">#&gt; 22    1.322608</span>
+<span class="co">#&gt; 23    1.280009</span>
+<span class="co">#&gt; 24    1.244622</span>
+<span class="co">#&gt; 25    1.218098</span>
+<span class="co">#&gt; 26    1.199757</span>
+<span class="co">#&gt; 27    1.186535</span>
+<span class="co">#&gt; 28    1.175290</span>
+<span class="co">#&gt; 29    1.165038</span>
+<span class="co">#&gt; 30    1.157006</span>
+<span class="co">#&gt; 31          NA</span>
+<span class="co">#&gt; 32          NA</span>
+<span class="co">#&gt; 33          NA</span>
+<span class="co">#&gt; 34          NA</span>
+<span class="co">#&gt; 35          NA</span>
+<span class="co">#&gt; 36          NA</span>
+<span class="co">#&gt; 37          NA</span>
+<span class="co">#&gt; 38          NA</span></code></pre></div>
 </div>
 </div>
-
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -212,7 +215,7 @@
 <h2>License</h2>
 <ul class="list-unstyled">
 <li><a href="LICENSE.html">Full license</a></li>
-<li><small><a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
+<li><small>GPL (&gt;= 3) + file <a href="LICENSE-text.html">LICENSE</a></small></li>
 </ul>
 </div>
 <div class="developers">

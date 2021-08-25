@@ -120,13 +120,15 @@ test_that("estimate_Re outputs HPD intervals when asked", {
 
 test_that("estimate_Re yields consistent results with imports", {
   incidence_data <- c(
-    0,0,0,1, 2, 12, 32, 34, 45, 87, 134, 230, 234, 222, 210, 190, 259,
+    0, 0, 0, 1, 2, 12, 32, 34, 45, 87, 134, 230, 234, 222, 210, 190, 259,
     351, 453, 593, 603, 407, 348, 304, 292, 256, 229,
     132, 98, 86, 54, 39, 23, 3, 2, 12, 14
   )
 
-  import_incidence_data <- c(2,1,0,1,2,4,0,0,0,0,0,0,0,0,2,3,2,1,0,0,0,0,
-                             0,0,0,0,0,0,21,2,0)
+  import_incidence_data <- c(
+    2, 1, 0, 1, 2, 4, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 2, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 21, 2, 0
+  )
 
   estimated_Re <- estimate_Re(
     incidence_data = incidence_data,
@@ -140,11 +142,12 @@ test_that("estimate_Re yields consistent results with imports", {
   )
 
   reference_values <- c(
-    15.34,12.47,7.81,5.97,5.67,6.14,
-    5.22,3.8,2.45,1.66,1.42,1.51,1.83,
-    2.21,2.3,1.88,1.32,0.89,0.73,0.65,
-    0.62,0.53,0.43,0.33,0.29,0.25,0.2,
-    0.14,0.08,0.06,0.14)
+    15.34, 12.47, 7.81, 5.97, 5.67, 6.14,
+    5.22, 3.8, 2.45, 1.66, 1.42, 1.51, 1.83,
+    2.21, 2.3, 1.88, 1.32, 0.89, 0.73, 0.65,
+    0.62, 0.53, 0.43, 0.33, 0.29, 0.25, 0.2,
+    0.14, 0.08, 0.06, 0.14
+  )
   reference_offset <- 6
 
   expect_equal(.get_values(estimated_Re), reference_values, tolerance = 1E-2)
