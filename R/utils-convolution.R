@@ -215,13 +215,13 @@
 #' see \code{\link{get_matrix_from_empirical_delay_distr}} for details on the format
 #' expected for the empirical delay data.
 #'
-#' @example man/examples/convolve_delay_inputs.R
+#' @example man/examples/convolve_delays.R
 #' 
 #' @inherit delay_high
 #' @param n_report_time_steps integer. Length of incidence time series.
 #' Use only when providing empirical delay data.
 #' @inheritParams dating
-#' @inheritDotParams get_matrix_from_empirical_delay_distr -empirical_delays
+#' @inheritDotParams get_matrix_from_empirical_delay_distr -empirical_delays -return_fitted_distribution
 #' @inheritDotParams build_delay_distribution -distribution
 #'
 #' @return a discretized delay distribution vector or matrix.

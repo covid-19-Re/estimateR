@@ -7,6 +7,8 @@
 #' a \code{date} column instead.
 #' Even so, a value must be given to this argument for internal steps.
 #' @inherit dating
+#' 
+#' @example man/examples/make_tibble_from_output.R
 #'
 #' @return tibble
 #' @export
@@ -132,6 +134,7 @@ make_tibble_from_output <- function(output,
 #' If a reference date is provided with \code{ref_date}, a date column is appended to the tibble,
 #' with sequential dates generated with the time step specified by the \code{time_step} parameter.
 #'
+#' @example man/examples/merge_outputs.R
 #'
 #' @param output_list named list of module output objects.
 #' @param include_index boolean. Include an index column in output?

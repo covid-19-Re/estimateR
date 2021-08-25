@@ -2,16 +2,24 @@ shape_incubation = 3.2
 scale_incubation = 1.3
 delay_incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
 
-smoothed_incidence <- smooth_incidence(HK_incidence_data$case_incidence)
-deconvolved_incidence <- deconvolve_incidence(smoothed_incidence, 
-                                              delay_incubation = delay_incubation)
+smoothed_incidence <- smooth_incidence(HK_incidence_data$onset_incidence)
+deconvolved_incidence <- deconvolve_incidence(
+  smoothed_incidence, 
+  delay = delay_incubation
+)
 
 ## Basic usage of merge_outputs
-merged_incidence_1 <- merge_outputs(list("smoothed" = smoothed_incidence, 
-                                       "deconvolved" = deconvolved_incidence))
 
-## Advanced usage of merge_outputs #todo: find a function where you can input another name for index column, another timestep, and ref date
-merged_incidence_2 <- merge_outputs(list("smoothed" = smoothed_incidence, 
-                                         "deconvolved" = deconvolved_incidence),
-                                    ref_date = HK_incidence_data$date[1],
-                                    include_index = FALSE)
+merged_incidence_1 <- merge_outputs(
+  list("smoothed sympton onset" = smoothed_incidence,"deconvolved sympton onset" = deconvolved_incidence)
+)
+
+
+## Advanced usage of merge_outputs
+
+merged_incidence_2 <- merge_outputs(
+  list("smoothed sympton onset" = smoothed_incidence,"deconvolved sympton onset" = deconvolved_incidence),
+  ref_date = HK_incidence_data$date[1],
+  include_index = TRUE,
+  index_col = "index"
+)
