@@ -11,14 +11,14 @@ deconvolved_incidence <- deconvolve_incidence(
 ## Basic usage of merge_outputs
 
 merged_incidence_1 <- merge_outputs(
-  list("smoothed sympton onset" = smoothed_incidence,"deconvolved sympton onset" = deconvolved_incidence)
+  list("smoothed symptom onset" = smoothed_incidence,"deconvolved symptom onset" = deconvolved_incidence)
 )
 
 
 ## Advanced usage of merge_outputs
 
 merged_incidence_2 <- merge_outputs(
-  list("smoothed sympton onset" = smoothed_incidence,"deconvolved sympton onset" = deconvolved_incidence),
+  list("smoothed symptom onset" = smoothed_incidence,"deconvolved symptom onset" = deconvolved_incidence),
   ref_date = HK_incidence_data$date[1],
   include_index = TRUE,
   index_col = "index"

@@ -36,17 +36,10 @@ Re_estimate_3 <- estimate_Re_from_noisy_delayed_incidence(
 # Incorporating prior knowledge over the epidemic. Here, it is assumed that Re 
 # changes values 4 times during the epidemic, so the intervals over which Re is
 # assumed to be constant are passed as a parameter.
-last_interval_index <- length(deconvolved_incidence$values) + deconvolved_incidence$index_offset 
-
+last_interval_index <- length(HK_incidence_data$case_incidence)
 Re_estimate_4 <- estimate_Re_from_noisy_delayed_incidence(
   incidence_data = HK_incidence_data$case_incidence,
   delay = list(delay_incubation, delay_onset_to_report),
+  estimation_method = "EpiEstim piecewise constant",
   interval_ends = c(50, 75, 100, 160, last_interval_index)
-)
-
-# Recovering the Re HPD as well.
-Re_estimate <- estimate_Re_from_noisy_delayed_incidence(
-  incidence_data = HK_incidence_data$case_incidence,
-  delay = list(delay_incubation, delay_onset_to_report),
-  output_HPD = TRUE
 )

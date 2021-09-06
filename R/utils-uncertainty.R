@@ -21,7 +21,6 @@
 #' \item{\code{CI_down}, the lower limit of the confidence interval}
 #' }
 #' 
-#' @example man/examples/summarise_uncertainty.R
 #' 
 #' @export
 summarise_uncertainty <- function(bootstrapped_values,
