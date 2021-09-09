@@ -30,6 +30,8 @@ smooth_incidence <- function(incidence_data,
         .get_shared_args(.smooth_LOESS, dots_args)
       )
     )
+  } else if (smoothing_method == "none") {
+    smoothed_incidence <- input
   } else {
     smoothed_incidence <- .make_empty_module_output()
   }
