@@ -107,8 +107,29 @@ compute_Ot <- function(infections, delay_distribution, day) {
   # We ensure that the returned number of observations is an integer
   # But we don't just round, otherwise we never see values close to zero.
   summed_observations <- floor(raw_summed_observations) +
-    rbinom(n = 1, size = 1, prob = raw_summed_observations - floor(raw_summed_observations))
+    stats::rbinom(n = 1, size = 1, prob = raw_summed_observations - floor(raw_summed_observations))
   return(summed_observations)
+}
+
+.discard_unsampled_full_observations <- function(partial_observations, delay_until_final_report){
+  delay_distribution <- .get_delay_distribution(delay_until_final_report)
+
+  sampled_partial_observations <- partial_observations
+
+  cdf <- cumsum(delay_distribution)
+  if(cdf[length(cdf)] < 1) {
+    cdf <- c(cdf, 1)
+  }
+
+ max_negative_index <- length(cdf) - 1
+
+  for (idx in 0:max_negative_index) {
+    sampled_partial_observations[length(partial_observations) - idx] <- stats::rbinom(n = 1,
+                                                                                      size = partial_observations[length(partial_observations) - idx],
+                                                                                      prob = cdf[idx + 1])
+  }
+
+ return(sampled_partial_observations)
 }
 
 
@@ -127,13 +148,16 @@ simulate_combined_observations <- function(infections, delay_until_partial, dela
   all_partial_observations <- sapply(1:length(infections),
                                      function(x){compute_Ot(infections, delay_until_partial, day = x)})
   sampled_partial_observations <- sapply(all_partial_observations,
-                                         function(x){rbinom(n=1,size = x, prob = prob_partial_observation)})
+                                         function(x){stats::rbinom(n=1,size = x, prob = prob_partial_observation)})
 
   unsampled_partial_observations <- all_partial_observations - sampled_partial_observations
   unsampled_partial_observations[unsampled_partial_observations < 0] <- 0
   delay_until_final_report <- .get_delay_distribution(delay_until_final_report)
   final_observations <- sapply(1:length(unsampled_partial_observations),
                                function(x){compute_Ot(unsampled_partial_observations, delay_until_final_report, day = x)})
+
+  sampled_partial_observations <- .discard_unsampled_full_observations(sampled_partial_observations,
+                                                                       delay_until_final_report)
 
   return(data.frame(partially_delayed=sampled_partial_observations, fully_delayed = final_observations))
 }
