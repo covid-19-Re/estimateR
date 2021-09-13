@@ -8,7 +8,8 @@ simulate_combined_observations(
   infections,
   delay_until_partial,
   delay_until_final_report,
-  prob_partial_observation
+  prob_partial_observation,
+  noise = list(type = "noiseless")
 )
 }
 \arguments{

@@ -88,6 +88,10 @@ simulate_delayed_observations <- function(infections, delay){
   total_delay_distribution <- convolve_delays(delays = delay)
 
   observations <- sapply(1:length(infections), function(x){compute_Ot(infections, total_delay_distribution, day = x)})
+  # Add (optional) noise
+  observations <- .add_noise(observations,
+                                   noise = noise)
+
   return(observations)
 }
 
@@ -104,32 +108,44 @@ compute_Ot <- function(infections, delay_distribution, day) {
     }
   }
   raw_summed_observations <- sum(sapply(0:(day-1), compute_element_in_sum))
-  # We ensure that the returned number of observations is an integer
-  # But we don't just round, otherwise we never see values close to zero.
-  summed_observations <- floor(raw_summed_observations) +
-    stats::rbinom(n = 1, size = 1, prob = raw_summed_observations - floor(raw_summed_observations))
-  return(summed_observations)
+
+  return(random_round(raw_summed_observations))
 }
 
-.discard_unsampled_full_observations <- function(partial_observations, delay_until_final_report){
-  delay_distribution <- .get_delay_distribution(delay_until_final_report)
+# util
+random_round <- function(observations){
+  # We ensure that the returned number of observations is an integer
+  # But we don't just round, otherwise we never see values close to zero.
+  rounded_observations <- sapply(observations, function(x) {
+    floor(x) + stats::rbinom(n = 1, size = 1, prob = x - floor(x)) })
 
-  sampled_partial_observations <- partial_observations
+  return(rounded_observations)
+}
 
-  cdf <- cumsum(delay_distribution)
-  if(cdf[length(cdf)] < 1) {
-    cdf <- c(cdf, 1)
+
+# Simplified version of noise generation adapted from Huisman et al.
+.add_noise <- function(observations, noise = list(type = 'iid_noise_sd', sd = 1)){
+
+  if (noise$type == 'gaussian'){
+    mult_noise <- stats::rnorm(length(observations), mean = 1, sd = noise$sd)
+    observations = mult_noise * observations
   }
 
- max_negative_index <- length(cdf) - 1
+  if (noise$type ==  'iid_noise_sd'){
+    mult_noise <- stats::rnorm(length(observations), mean = 0, sd = noise$sd)
 
-  for (idx in 0:max_negative_index) {
-    sampled_partial_observations[length(partial_observations) - idx] <- stats::rbinom(n = 1,
-                                                                                      size = partial_observations[length(partial_observations) - idx],
-                                                                                      prob = cdf[idx + 1])
+    # y  =  mu * residual
+    observations = observations * exp(mult_noise)     # so the error is iid log-normal
   }
 
- return(sampled_partial_observations)
+  if (noise$type == 'noiseless'){
+    observations = observations
+  }
+
+  observations = random_round(observations)
+  observations[observations < 0] = 0
+
+  return(observations)
 }
 
 
@@ -143,7 +159,10 @@ compute_Ot <- function(infections, delay_distribution, day) {
 #'
 #' @return
 #' @export
-simulate_combined_observations <- function(infections, delay_until_partial, delay_until_final_report, prob_partial_observation){
+simulate_combined_observations <- function(infections, delay_until_partial,
+                                           delay_until_final_report,
+                                           prob_partial_observation,
+                                           noise = list(type = 'noiseless')){
   delay_until_partial <- .get_delay_distribution(delay_until_partial)
   all_partial_observations <- sapply(1:length(infections),
                                      function(x){compute_Ot(infections, delay_until_partial, day = x)})
@@ -156,8 +175,37 @@ simulate_combined_observations <- function(infections, delay_until_partial, dela
   final_observations <- sapply(1:length(unsampled_partial_observations),
                                function(x){compute_Ot(unsampled_partial_observations, delay_until_final_report, day = x)})
 
+  # Add (optional) noise
+  final_observations <- .add_noise(final_observations,
+                                   noise = noise)
+
+  .discard_unsampled_full_observations <- function(partial_observations, delay_until_final_report){
+    delay_distribution <- .get_delay_distribution(delay_until_final_report)
+
+    sampled_partial_observations <- partial_observations
+
+    cdf <- cumsum(delay_distribution)
+    if(cdf[length(cdf)] < 1) {
+      cdf <- c(cdf, 1)
+    }
+
+    max_negative_index <- length(cdf) - 1
+
+    for (idx in 0:max_negative_index) {
+      sampled_partial_observations[length(partial_observations) - idx] <- stats::rbinom(n = 1,
+                                                                                        size = partial_observations[length(partial_observations) - idx],
+                                                                                        prob = cdf[idx + 1])
+    }
+
+    return(sampled_partial_observations)
+  }
+
   sampled_partial_observations <- .discard_unsampled_full_observations(sampled_partial_observations,
                                                                        delay_until_final_report)
+
+  # Add (optional) noise
+  sampled_partial_observations <- .add_noise(sampled_partial_observations,
+                                             noise = noise)
 
   return(data.frame(partially_delayed=sampled_partial_observations, fully_delayed = final_observations))
 }
