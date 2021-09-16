@@ -181,6 +181,7 @@ deconvolve_incidence <- function(incidence_data,
 
   additional_offset <- -initial_shift
   # Remove first and last values as they cannot be properly inferred
+  #TODO investigate with simulations if this can be shortened
   final_estimate <- current_estimate[(1 + extra_left_steps):(length(current_estimate) - initial_shift)]
 
   return(.get_module_output(final_estimate, .get_offset(incidence_input), additional_offset))

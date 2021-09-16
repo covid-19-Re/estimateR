@@ -94,8 +94,12 @@ smooth_incidence <- function(incidence_data,
   smoothed <- stats::predict(c_data.lo)
   smoothed[smoothed < 0] <- 0
   raw_smoothed_counts <- smoothed[(n_pad + 1):length(smoothed)]
-  normalized_smoothed_counts <-
-    raw_smoothed_counts * sum(incidence_vector, na.rm = T) / sum(raw_smoothed_counts, na.rm = T)
+  if(sum(raw_smoothed_counts, na.rm = T) >0) {
+    normalized_smoothed_counts <-
+      raw_smoothed_counts * sum(incidence_vector, na.rm = T) / sum(raw_smoothed_counts, na.rm = T)
+  } else {
+    normalized_smoothed_counts <- raw_smoothed_counts
+  }
 
   return(.get_module_output(normalized_smoothed_counts, .get_offset(incidence_input)))
 }
