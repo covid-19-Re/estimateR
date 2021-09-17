@@ -40,7 +40,7 @@ simulate_infections <- function(Rt, imported_infections = 1, mean_SI = 4.8, sd_S
 #'
 #' @return Integer vector. Simulated delayed observations.
 #' @export
-simulate_delayed_observations <- function(infections, delay){
+simulate_delayed_observations <- function(infections, delay, noise = list(type = "noiseless")){
   total_delay_distribution <- convolve_delays(delays = delay)
 
   observations <- sapply(1:length(infections), function(x){.compute_Ot(infections, total_delay_distribution, day = x)})

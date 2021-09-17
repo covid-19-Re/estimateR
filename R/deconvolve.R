@@ -131,7 +131,7 @@ deconvolve_incidence <- function(incidence_data,
   # Prepare vector with initial guess for first step of deconvolution
   # Here we extend with extrapolation of last values
   present_trend <- last_recorded_incidence/penultimate_recorded_incidence
-  if(is.infinite(present_trend)) {present_trend <- 1 }
+  if(is.infinite(present_trend) || is.nan(present_trend)) {present_trend <- 1 }
 
   right_padding_values <- last_recorded_incidence * present_trend^(1:initial_shift)
   current_estimate <- c(incidence_vector, right_padding_values)

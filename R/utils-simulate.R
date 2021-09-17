@@ -32,12 +32,12 @@
 #' @return value of the infectiousness profile at time step k.
 .compute_discretized_infectiousness <- function(k, shapeG=2.73, scaleG=1.39) {
   ### Expression from Cori et al. 2013, Web appendix 11
-  w <- k * pgamma(k, shape=shapeG, scale=scaleG) +
-    (k-2)* pgamma(k-2, shape=shapeG, scale=scaleG) +
-    (-2) * (k-1) * pgamma(k-1, shape=shapeG, scale=scaleG) +
-    shapeG * scaleG * (2 * pgamma(k-1, shape=shapeG+1, scale=scaleG) -
-                         pgamma(k-2, shape=shapeG+1, scale=scaleG) -
-                         pgamma(k, shape=shapeG+1, scale=scaleG))
+  w <- k * stats::pgamma(k, shape=shapeG, scale=scaleG) +
+    (k-2)* stats::pgamma(k-2, shape=shapeG, scale=scaleG) +
+    (-2) * (k-1) * stats::pgamma(k-1, shape=shapeG, scale=scaleG) +
+    shapeG * scaleG * (2 * stats::pgamma(k-1, shape=shapeG+1, scale=scaleG) -
+                         stats::pgamma(k-2, shape=shapeG+1, scale=scaleG) -
+                         stats::pgamma(k, shape=shapeG+1, scale=scaleG))
 
   return(w)
 }

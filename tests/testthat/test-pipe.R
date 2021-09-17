@@ -34,8 +34,7 @@ test_that("estimate_Re_from_noisy_delayed_incidence yields consistent results on
     2.53, 2.41, 2.29, 2.18, 2.08, 1.98, 1.88,
     1.78, 1.69, 1.61, 1.52, 1.44, 1.37, 1.3, 1.23,
     1.16, 1.09, 1.02, 0.96, 0.9, 0.86, 0.82, 0.79,
-    0.76, 0.74, 0.71, 0.68, 0.64, NA, NA, NA, NA, NA
-  )
+    0.76, 0.74, 0.72,0.69,0.66,NA,NA,NA,NA,NA)
 
   reference_dates <- seq.Date(from = as.Date("2020-01-30"), to = as.Date("2020-03-11"), by = "day")
 
@@ -137,12 +136,6 @@ test_that("estimate_Re_from_noisy_delayed_incidence passes '...' arguments consi
     0.99, 0.91, 0.84, 0.77, 0.72,
     0.67, 0.63, 0.59, NA, NA, NA, NA, NA
   )
-
-  # master: reference_R_values <- c(NA,NA,NA,NA,NA,NA,NA,10.14,7.67,6.25,5.38,4.77,4.33,
-  #                         3.97,3.66,3.37,3.12,2.88,2.65,2.44,2.25,2.06,1.9,1.74,
-  #                         1.59,1.45,1.32,1.2,1.09,0.99,0.91,0.84,0.77,0.72,
-  #                         0.67,0.63,0.59,NA,NA,NA,NA,NA)
-
   reference_indices <- -5:36
 
   expect_equal(estimates$Re_estimate, reference_R_values, tolerance = 1E-2)

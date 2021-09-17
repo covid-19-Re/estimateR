@@ -11,6 +11,8 @@
 \item{sd_SI}{Numeric positive value. Standard deviation of serial interval of epidemic simulated.}
 
 \item{infections}{Positive integer vector. Course of infections through time.}
+
+\item{noise}{List specifying the type of noise and its parameters, if applicable.}
 }
 \description{
 Simulation parameters

@@ -4,7 +4,11 @@
 \alias{simulate_delayed_observations}
 \title{Simulate a series of delayed observations from a series of infections.}
 \usage{
-simulate_delayed_observations(infections, delay)
+simulate_delayed_observations(
+  infections,
+  delay,
+  noise = list(type = "noiseless")
+)
 }
 \arguments{
 \item{infections}{Positive integer vector. Course of infections through time.}
@@ -17,6 +21,8 @@ Each delay can be one of:
 \item{a discretized delay distribution matrix}
 \item{a dataframe containing empirical delay data}
 }}
+
+\item{noise}{List specifying the type of noise and its parameters, if applicable.}
 }
 \value{
 Integer vector. Simulated delayed observations.

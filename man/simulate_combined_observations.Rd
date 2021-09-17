@@ -36,6 +36,8 @@ Each delay can be one of:
 \item{prob_partial_observation}{Numeric value between 0 and 1.
 Probability of an infection to be observed as a partially-delayed observation,
 instead of as a fully-delayed observation.}
+
+\item{noise}{List specifying the type of noise and its parameters, if applicable.}
 }
 \value{
 A dataframe containing two columns:
