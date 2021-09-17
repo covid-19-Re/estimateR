@@ -358,6 +358,16 @@ NULL
 #' @name dating
 NULL
 
+#' Simulation parameters
+#'
+#' @param Rt Numeric vector. Reproductive number values through time.
+#' @param mean_SI Numeric positive value. Mean of serial interval of epidemic simulated.
+#' @param sd_SI Numeric positive value. Standard deviation of serial interval of epidemic simulated.
+#' @param infections Positive integer vector. Course of infections through time.
+#'
+#' @name simulate
+NULL
+
 #' Methods available for each module
 #'
 #' @param smoothing_method string. Method used to smooth the original incidence data.

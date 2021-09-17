@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulate.R
 \name{simulate_combined_observations}
 \alias{simulate_combined_observations}
-\title{Title}
+\title{Simulate a series of observations from a course of infections, combining some partially-delayed and some fully-delayed observations.}
 \usage{
 simulate_combined_observations(
   infections,
@@ -13,11 +13,38 @@ simulate_combined_observations(
 )
 }
 \arguments{
-\item{prob_partial_observation}{}
+\item{infections}{Positive integer vector. Course of infections through time.}
+
+\item{delay_until_partial}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
+
+\item{delay_until_final_report}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
+
+\item{prob_partial_observation}{Numeric value between 0 and 1.
+Probability of an infection to be observed as a partially-delayed observation,
+instead of as a fully-delayed observation.}
 }
 \value{
-
+A dataframe containing two columns:
+a column "partially_delayed" containing partially-delayed observations
+and a column "fully_delayed" containing fully-delayed observations.
 }
 \description{
-Title
+The infections that are observed as partially-delayed observations cannot be observed a second time as fully-delayed observations,
+meaning that they do not show up a second time in the "fully-delayed" column of the result.
+However, a partially-delayed observation can only be "registered" (included in the "partially-delayed" column) if
+it is has been virtually observed as a fully-delayed observation first.
 }

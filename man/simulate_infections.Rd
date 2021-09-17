@@ -2,16 +2,26 @@
 % Please edit documentation in R/simulate.R
 \name{simulate_infections}
 \alias{simulate_infections}
-\title{Title}
+\title{Simulate a series of infections}
 \usage{
 simulate_infections(Rt, imported_infections = 1, mean_SI = 4.8, sd_SI = 2.3)
 }
 \arguments{
-\item{sd_SI}{}
+\item{Rt}{Numeric vector. Reproductive number values through time.}
+
+\item{imported_infections}{Positive integer vector.
+Must be of length at least one. Does not need to be the same length as \code{Rt}.
+If \code{imported_infections} is of greater length than \code{Rt} then \code{Rt}
+is padded with zeroes to reach the same length.}
+
+\item{mean_SI}{Numeric positive value. Mean of serial interval of epidemic simulated.}
+
+\item{sd_SI}{Numeric positive value. Standard deviation of serial interval of epidemic simulated.}
 }
 \value{
-
+Integer vector. Simulated infections through time.
 }
 \description{
-Title
+Perform a simulation of infections through time, based on a reproductive number course,
+a series of imported cases and a serial interval distribution.
 }

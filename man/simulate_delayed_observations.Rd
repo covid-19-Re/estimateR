@@ -2,16 +2,25 @@
 % Please edit documentation in R/simulate.R
 \name{simulate_delayed_observations}
 \alias{simulate_delayed_observations}
-\title{Title}
+\title{Simulate a series of delayed observations from a series of infections.}
 \usage{
 simulate_delayed_observations(infections, delay)
 }
 \arguments{
-\item{delay}{}
+\item{infections}{Positive integer vector. Course of infections through time.}
+
+\item{delay}{Single delay or list of delays.
+Each delay can be one of:
+\itemize{
+\item{a list representing a distribution object}
+\item{a discretized delay distribution vector}
+\item{a discretized delay distribution matrix}
+\item{a dataframe containing empirical delay data}
+}}
 }
 \value{
-
+Integer vector. Simulated delayed observations.
 }
 \description{
-Title
+Simulate a series of delayed observations from a series of infections.
 }
