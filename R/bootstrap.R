@@ -39,6 +39,8 @@ get_bootstrap_replicate <- function(incidence_data,
         )
       )
     )
+  } else if (bootstrapping_method == "none") {
+    bootstrapped_incidence <- input
   } else {
     bootstrapped_incidence <- .make_empty_module_output()
   }

@@ -1,9 +1,9 @@
 # List containing predefined accepted string inputs for exported functions, for parameters for which validity is tested using the.is_value_in_accepted_values_vector() function
 accepted_parameter_value <- list(
-  smoothing_method = c("LOESS"),
-  deconvolution_method = c("Richardson-Lucy delay distribution"),
+  smoothing_method = c("LOESS", "none"),
+  deconvolution_method = c("Richardson-Lucy delay distribution", "none"),
   estimation_method = c("EpiEstim sliding window", "EpiEstim piecewise constant"),
-  bootstrapping_method = c("non-parametric block boostrap"),
+  bootstrapping_method = c("non-parametric block boostrap", "none"),
   function_prefix = c("d", "q", "p", "r"),
   uncertainty_summary_method = c("original estimate - CI from bootstrap estimates", "bagged mean - CI from bootstrap estimates"),
   fit = c("none", "gamma")
