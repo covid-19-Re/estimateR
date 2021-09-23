@@ -604,6 +604,8 @@ accepted_parameter_value <- list(
   return(TRUE)
 }
 
+#' Utility functions for input validity.
+#' 
 #' @description Utility function that checks that the values the user passed when calling a function are valid.
 #'
 #' @inherit validation_utility_params

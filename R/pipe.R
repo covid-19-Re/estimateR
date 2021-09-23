@@ -8,6 +8,7 @@
 #' The estimate on the original data is output along with confidence interval boundaries
 #' built from the distribution of bootstrapped estimates.
 #'
+#' @example man/examples/get_block_bootstrapped_estimate.R
 #'
 #' @inheritParams pipe_params
 #' @inheritParams bootstrap_params
@@ -255,6 +256,8 @@ get_block_bootstrapped_estimate <- function(incidence_data,
 #' The \code{\link[=deconvolve_incidence]{deconvolution step}} uses the Richardson-Lucy algorithm  by default.
 #' The \code{\link[=estimate_Re]{Re estimation}} uses the Cori method with a sliding window  by default.
 #'
+#' @example man/examples/estimate_Re_from_noisy_delayed_incidence.R
+#'
 #' @inheritParams module_structure
 #' @inheritParams module_methods
 #' @inheritParams universal_params
@@ -430,6 +433,8 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
 #' use the \code{delay_until_final_report} argument to specify the delay
 #' from infection until this secondary delayed observation.
 #'
+#' @example man/examples/get_infections_from_incidence.R
+#'
 #' @inheritParams module_structure
 #' @inheritParams module_methods
 #' @inheritParams pipe_params
@@ -570,6 +575,7 @@ get_infections_from_incidence <- function(incidence_data,
 #' Typically, the recording of a symptom onset event will require a future case confirmation.
 #' If so, the \code{partial_observation_requires_full_observation} flag should be set to \code{TRUE}.
 #'
+#' @example man/examples/estimate_from_combined_observations.R
 #'
 #' @inheritParams module_structure
 #' @inheritParams module_methods
@@ -742,6 +748,7 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
 #' Typically, the recording of a symptom onset event will require a future case confirmation.
 #' If so, the \code{partial_observation_requires_full_observation} flag should be set to \code{TRUE}.
 #'
+#' @example man/examples/get_bootstrapped_estimates_from_combined_observations.R
 #'
 #' @inheritParams module_structure
 #' @inheritParams module_methods

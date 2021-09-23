@@ -78,6 +78,8 @@
 #' will be assumed to be the same as the date of the first record in the empirical delay data.
 #' If this is not the case in your analysis, make sure to specify a \code{ref_date} argument.
 #'
+#' @example man/examples/get_matrix_from_empirical_delay_distr.R
+#'
 #' @inherit empirical_delay_data_format
 #'
 #' @inherit delay_empirical
