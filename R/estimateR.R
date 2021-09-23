@@ -11,7 +11,6 @@ NULL
 #' @param user_inputs A list of lists with two elements: the first is the value of the parameter to be tested. The second is the expected type of that parameter.
 #' @param number The value to be tested
 #' @param user_input The variable to be tested
-#' @param user_inputs A list of lists with two elements: the first is the value of the parameter to be tested. The second is the expected type of that parameter.
 #'
 #' @return TRUE if all tests were passed. Throws an error otherwise.
 #'
