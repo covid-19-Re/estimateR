@@ -163,13 +163,16 @@
 }
 
 
-#' TODO doc
+#' Generate a list of delay distributions with a gradual transition between two input delay distributions
 #'
-#' @param init_delay
-#' @param final_delay
-#' @param n_time_steps
+#' The initial and final delay distributions must be parameterized as gamma distributions with shape and scale parameters.
+#' The intermediary distributions are parameterized by scales and shapes that are linear interpolations between the
+#' initial and final shapes and scales.
+#' @param init_delay List. First delay distribution in the output list
+#' @param final_delay List. Last delay distribution in hte output list
+#' @param n_time_steps Integer. Number of output list
 #'
-#' @return
+#' @return List of delay distributions (specified as lists)
 .build_list_of_gradually_changing_delays <- function(init_delay, final_delay, n_time_steps) {
   #TODO enforce that both delays are distributions specified as lists and are gamma distributions with scake and shape
 

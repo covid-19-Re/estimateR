@@ -2,16 +2,22 @@
 % Please edit documentation in R/utils-simulate.R
 \name{.build_list_of_gradually_changing_delays}
 \alias{.build_list_of_gradually_changing_delays}
-\title{TODO doc}
+\title{Generate a list of delay distributions with a gradual transition between two input delay distributions}
 \usage{
 .build_list_of_gradually_changing_delays(init_delay, final_delay, n_time_steps)
 }
 \arguments{
-\item{n_time_steps}{}
+\item{init_delay}{List. First delay distribution in the output list}
+
+\item{final_delay}{List. Last delay distribution in hte output list}
+
+\item{n_time_steps}{Integer. Number of output list}
 }
 \value{
-
+List of delay distributions (specified as lists)
 }
 \description{
-TODO doc
+The initial and final delay distributions must be parameterized as gamma distributions with shape and scale parameters.
+The intermediary distributions are parameterized by scales and shapes that are linear interpolations between the
+initial and final shapes and scales.
 }
