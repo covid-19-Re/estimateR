@@ -131,7 +131,7 @@ test_that(".convolve_delay_distribution_vector_with_matrix returns correct outpu
 test_that(".convolve_delay_distribution_vector_with_matrix returns valid output", {
   vector_a <- c(0.2, 0.3, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
   vector_b <- c(0.3, 0.13, 0.42, 0.14, 0.01)
-  matrix_b <- .get_matrix_from_single_delay_distr(vector_b, N = 20)
+  matrix_b <- .get_delay_matrix_from_delay_distributions(vector_b, N = 20)
 
   convolved_matrix_vector_first <- .convolve_delay_distribution_vector_with_matrix(
     vector_a = vector_a,
@@ -154,8 +154,8 @@ test_that(".convolve_delay_distribution_matrices returns valid output", {
 
   vector_a <- c(0.21, 0.14, 0.17, 0.09, 0.01, 0.27, 0.11)
   vector_b <- c(0.3, 0.13, 0.42, 0.14, 0.01)
-  matrix_a <- .get_matrix_from_single_delay_distr(vector_a, N = 30)
-  matrix_b <- .get_matrix_from_single_delay_distr(vector_b, N = 30)
+  matrix_a <- .get_delay_matrix_from_delay_distributions(vector_a, N = 30)
+  matrix_b <- .get_delay_matrix_from_delay_distributions(vector_b, N = 30)
 
   convolved_matrix_ab <- .convolve_delay_distribution_matrices(
     matrix_a = matrix_a,

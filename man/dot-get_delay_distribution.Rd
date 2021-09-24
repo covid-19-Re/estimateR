@@ -44,9 +44,12 @@ a probability distribution matrix or empirical delay data as input.
 If \code{delay} is already a delay distribution vector or matrix, it is returned as is.
 }
 \details{
-If \code{delay} is a \code{distribution} list,
+If \code{delay} is a single \code{distribution} list,
 this function builds and return the vector of discretized probability distribution.
-If it is a vector, it checks that \code{delay}
+If \code{delay} is a list of \code{distribution} lists,
+this function builds and return the matrix of discretized probability distribution,
+with dimensions corresponding to the number of delays in the list.
+If \code{delay} is a vector, the function checks that \code{delay}
 is a valid discretized probability distribution and returns it.
 Similarly, if \code{delay} is a matrix,
 the function checks that it is in the correct format and returns it.

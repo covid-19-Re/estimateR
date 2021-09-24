@@ -23,7 +23,7 @@ test_that("build_delay_distribution returns a vector whose elements sum up to 1"
 })
 
 
-test_that(".get_delay_matrix_from_delay_distribution_parms returns valid output", {
+test_that(".get_delay_matrix_from_delay_distributions returns valid output", {
   N <- 100
 
   shapes <- stats::runif(N, min = 0, max = 10)
@@ -33,7 +33,7 @@ test_that(".get_delay_matrix_from_delay_distribution_parms returns valid output"
     return(list(name = "gamma", shape = shapes[i], scale = scales[i]))
   })
 
-  matrix_result <- .get_delay_matrix_from_delay_distribution_parms(
+  matrix_result <- .get_delay_matrix_from_delay_distributions(
     distributions = distribution_list,
     max_quantile = 0.999
   )

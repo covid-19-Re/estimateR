@@ -63,7 +63,7 @@ correct_for_partially_observed_data <- function(incidence_data,
 
   if (NCOL(delay_distribution_final_report) == 1) {
     # delay_distribution_final_report is a vector, we build a delay distr matrix from it
-    delay_distribution_matrix_final_report <- .get_matrix_from_single_delay_distr(delay_distribution_final_report,
+    delay_distribution_matrix_final_report <- .get_delay_matrix_from_delay_distributions(delay_distribution_final_report,
       N = length(incidence_vector)
     )
   } else {
