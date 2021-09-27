@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">estimateR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9000</span>
       </span>
     </div>
 
@@ -66,6 +66,9 @@
       <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right"></ul>
@@ -220,12 +223,12 @@
 <span class="co">#&gt; # A tibble: 6 x 4</span>
 <span class="co">#&gt;   date       Re_estimate CI_down_Re_estimate CI_up_Re_estimate</span>
 <span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;               &lt;dbl&gt;             &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 2020-02-06       0.955               0.578              1.33</span>
-<span class="co">#&gt; 2 2020-02-07       0.901               0.533              1.27</span>
-<span class="co">#&gt; 3 2020-02-08       0.854               0.514              1.19</span>
-<span class="co">#&gt; 4 2020-02-09       0.828               0.489              1.17</span>
-<span class="co">#&gt; 5 2020-02-10       0.838               0.482              1.19</span>
-<span class="co">#&gt; 6 2020-02-11       0.875               0.507              1.24</span></code></pre></div>
+<span class="co">#&gt; 1 2020-02-06       0.955               0.650              1.26</span>
+<span class="co">#&gt; 2 2020-02-07       0.901               0.608              1.19</span>
+<span class="co">#&gt; 3 2020-02-08       0.854               0.575              1.13</span>
+<span class="co">#&gt; 4 2020-02-09       0.828               0.548              1.11</span>
+<span class="co">#&gt; 5 2020-02-10       0.838               0.555              1.12</span>
+<span class="co">#&gt; 6 2020-02-11       0.875               0.592              1.16</span></code></pre></div>
 <p>We have obtained our first estimates of Re for Hong Kong from February to July 2020. Let us now plot these estimates with their confidence interval.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
@@ -279,12 +282,12 @@
 <span class="co">#&gt; # A tibble: 6 x 4</span>
 <span class="co">#&gt;   date       Re_estimate CI_down_Re_estimate CI_up_Re_estimate</span>
 <span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;               &lt;dbl&gt;             &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 2020-02-03       0.927               0.704             1.15 </span>
-<span class="co">#&gt; 2 2020-02-04       0.880               0.678             1.08 </span>
-<span class="co">#&gt; 3 2020-02-05       0.837               0.625             1.05 </span>
-<span class="co">#&gt; 4 2020-02-06       0.804               0.592             1.02 </span>
-<span class="co">#&gt; 5 2020-02-07       0.785               0.569             1.00 </span>
-<span class="co">#&gt; 6 2020-02-08       0.780               0.569             0.990</span></code></pre></div>
+<span class="co">#&gt; 1 2020-02-03       0.927               0.758             1.10 </span>
+<span class="co">#&gt; 2 2020-02-04       0.880               0.661             1.10 </span>
+<span class="co">#&gt; 3 2020-02-05       0.837               0.618             1.05 </span>
+<span class="co">#&gt; 4 2020-02-06       0.804               0.594             1.01 </span>
+<span class="co">#&gt; 5 2020-02-07       0.785               0.595             0.975</span>
+<span class="co">#&gt; 6 2020-02-08       0.780               0.608             0.952</span></code></pre></div>
 <p>You may notice that the earliest Re estimates dates differ, this is a normal side effect of splitting the incidence data this way. We will plot them one on top of the other further down below, but you can already see that these estimates are different from the initial ones. In all likelihood, they are more accurate. By incorporating the empirical dates of symptom onset events, we bypassed the deconvolution step required to infer these dates from the case confirmation dates. Our goal is to produce an estimate of the incidence of infection events through time that is as close to reality as possible. When using the onset of symptoms, we are already halfway there. Thus, the estimates we produce using this additional data are likely to be closer to reality.</p>
 </div>
 <div id="further-analysis-including-variability-through-time-of-reporting-delays" class="section level2">

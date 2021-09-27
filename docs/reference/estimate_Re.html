@@ -73,7 +73,7 @@ and computes the Re value through time (also known as Rt)." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">estimateR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9000</span>
       </span>
     </div>
 
@@ -108,6 +108,9 @@ and computes the Re value through time (also known as Rt)." />
       <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -248,6 +251,7 @@ as computed by <code><a href='https://rdrr.io/pkg/EpiEstim/man/estimate_R.html'>
 then the 3 elements are merged into a single dataframe by <code><a href='merge_outputs.html'>merge_outputs()</a></code>.
 A date column can be added to the dataframe by passing an extra <code>ref_date</code> argument
 (see <code><a href='merge_outputs.html'>merge_outputs</a></code> for details).</p>
+<p>a module output object. Re estimates.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
     <p>The incidence input should represent infections,
@@ -274,7 +278,72 @@ The right boundaries of the steps are specified using the <code>interval_ends</c
 This option is chosen by setting <code>estimation_method = "EpiEstim piecewise constant"</code></p></li>
 </ol>
 
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
+    <div class='dont-index'><p><code><a href='smooth_incidence.html'>smooth_incidence</a></code>, <code><a href='deconvolve_incidence.html'>deconvolve_incidence</a></code></p></div>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='co'>## Building incidence_data</span>
+<span class='co'># estimate_Re assumes incidence_data represents infections, not delayed noisy</span>
+<span class='co'># observations of infections. Thus, we need to first smooth the incidence data</span>
+<span class='co'># and then perform a deconvolution step. For more details, see the smooth_incidence</span>
+<span class='co'># and deconvolve_incidence functions.</span>
+
+<span class='va'>shape_incubation</span> <span class='op'>&lt;-</span> <span class='fl'>3.2</span>
+<span class='va'>scale_incubation</span> <span class='op'>&lt;-</span> <span class='fl'>1.3</span>
+<span class='va'>delay_incubation</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name <span class='op'>=</span> <span class='st'>"gamma"</span>, shape <span class='op'>=</span> <span class='va'>shape_incubation</span>, scale <span class='op'>=</span> <span class='va'>scale_incubation</span><span class='op'>)</span>
+
+<span class='va'>shape_onset_to_report</span> <span class='op'>=</span> <span class='fl'>2.7</span>
+<span class='va'>scale_onset_to_report</span> <span class='op'>=</span> <span class='fl'>1.6</span>
+<span class='va'>delay_onset_to_report</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"gamma"</span>, shape <span class='op'>=</span> <span class='va'>shape_onset_to_report</span>, scale <span class='op'>=</span> <span class='va'>scale_onset_to_report</span><span class='op'>)</span>
+
+<span class='va'>smoothed_incidence</span> <span class='op'>&lt;-</span> <span class='fu'><a href='smooth_incidence.html'>smooth_incidence</a></span><span class='op'>(</span><span class='va'>HK_incidence_data</span><span class='op'>$</span><span class='va'>case_incidence</span><span class='op'>)</span>
+<span class='va'>deconvolved_incidence</span> <span class='op'>&lt;-</span> <span class='fu'><a href='deconvolve_incidence.html'>deconvolve_incidence</a></span><span class='op'>(</span>
+  <span class='va'>smoothed_incidence</span>, 
+  delay <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>delay_incubation</span>, <span class='va'>delay_onset_to_report</span><span class='op'>)</span>
+<span class='op'>)</span>
+
+
+<span class='co'>## Basic usage of estimate_Re</span>
+<span class='va'>Re_estimate_1</span> <span class='op'>&lt;-</span> <span class='fu'>estimate_Re</span><span class='op'>(</span>incidence_data <span class='op'>=</span> <span class='va'>deconvolved_incidence</span><span class='op'>)</span>
+
+
+<span class='co'>## Advanced usage of estimate_Re</span>
+<span class='co'># Incorporating prior knowledge over Re. Here, Re is assumed constant over a time</span>
+<span class='co'># frame of one week, with a prior mean of 1.25.</span>
+<span class='va'>Re_estimate_2</span> <span class='op'>&lt;-</span> <span class='fu'>estimate_Re</span><span class='op'>(</span>
+  incidence_data <span class='op'>=</span> <span class='va'>deconvolved_incidence</span>,
+  estimation_method <span class='op'>=</span> <span class='st'>'EpiEstim piecewise constant'</span>,
+  interval_length <span class='op'>=</span> <span class='fl'>7</span>,
+  mean_Re_prior <span class='op'>=</span> <span class='fl'>1.25</span>
+<span class='op'>)</span>
+
+<span class='co'># Incorporating prior knowledge over the disease. Here, the mean of the serial </span>
+<span class='co'># interval is assumed to be 5 days, and the standard deviation is assumed to be </span>
+<span class='co'># 2.5 days. </span>
+<span class='va'>Re_estimate_3</span> <span class='op'>&lt;-</span> <span class='fu'>estimate_Re</span><span class='op'>(</span>
+  incidence_data <span class='op'>=</span> <span class='va'>deconvolved_incidence</span>,
+  mean_serial_interval <span class='op'>=</span> <span class='fl'>5</span>,
+  std_serial_interval <span class='op'>=</span> <span class='fl'>2.5</span>
+<span class='op'>)</span>
+
+<span class='co'># Incorporating prior knowledge over the epidemic. Here, it is assumed that Re </span>
+<span class='co'># changes values 4 times during the epidemic, so the intervals over which Re is</span>
+<span class='co'># assumed to be constant are passed as a parameter.</span>
+<span class='va'>last_interval_index</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='va'>deconvolved_incidence</span><span class='op'>$</span><span class='va'>values</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>deconvolved_incidence</span><span class='op'>$</span><span class='va'>index_offset</span> 
+
+<span class='va'>Re_estimate_4</span> <span class='op'>&lt;-</span> <span class='fu'>estimate_Re</span><span class='op'>(</span>
+  incidence_data <span class='op'>=</span> <span class='va'>deconvolved_incidence</span>,
+  estimation_method <span class='op'>=</span> <span class='st'>"EpiEstim piecewise constant"</span>,
+  interval_ends <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>50</span>, <span class='fl'>75</span>, <span class='fl'>100</span>, <span class='fl'>160</span>, <span class='va'>last_interval_index</span><span class='op'>)</span>
+<span class='op'>)</span>
+
+<span class='co'># Recovering the Re HPD as well.</span>
+<span class='va'>Re_estimate_5</span> <span class='op'>&lt;-</span> <span class='fu'>estimate_Re</span><span class='op'>(</span>
+  incidence_data <span class='op'>=</span> <span class='va'>deconvolved_incidence</span>,
+  output_HPD <span class='op'>=</span> <span class='cn'>TRUE</span>
+<span class='op'>)</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

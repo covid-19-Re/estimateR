@@ -74,7 +74,7 @@ If delay is already a delay distribution vector or matrix, it is returned as is.
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">estimateR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9000</span>
       </span>
     </div>
 
@@ -109,6 +109,9 @@ If delay is already a delay distribution vector or matrix, it is returned as is.
       <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -186,9 +189,12 @@ Set to TRUE if <code>distribution</code> represents the fit of data that was off
     <p>vector or matrix of discretized probability distribution.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>If <code>delay</code> is a <code>distribution</code> list,
+    <p>If <code>delay</code> is a single <code>distribution</code> list,
 this function builds and return the vector of discretized probability distribution.
-If it is a vector, it checks that <code>delay</code>
+If <code>delay</code> is a list of <code>distribution</code> lists,
+this function builds and return the matrix of discretized probability distribution,
+with dimensions corresponding to the number of delays in the list.
+If <code>delay</code> is a vector, the function checks that <code>delay</code>
 is a valid discretized probability distribution and returns it.
 Similarly, if <code>delay</code> is a matrix,
 the function checks that it is in the correct format and returns it.
