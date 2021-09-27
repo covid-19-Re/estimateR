@@ -145,6 +145,8 @@
 #' The discretization is done by integrating the probability density
 #' on (0, 0.5), (0.5, 1.5), (1.5, 2.5)...
 #'
+#' @example man/examples/build_delay_distribution.R
+#'
 #' @inheritParams distribution
 #' @inheritParams .get_discretized_distribution
 #' @param max_quantile numeric value between 0 and 1.

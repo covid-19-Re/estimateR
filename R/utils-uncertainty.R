@@ -20,6 +20,8 @@
 #' \item{\code{CI_up}, upper limit of the confidence interval}
 #' \item{\code{CI_down}, the lower limit of the confidence interval}
 #' }
+#' 
+#' 
 #' @export
 summarise_uncertainty <- function(bootstrapped_values,
                                   original_values = NULL,

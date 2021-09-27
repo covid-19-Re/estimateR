@@ -29,6 +29,7 @@
 #' This option is chosen by setting \code{estimation_method = "EpiEstim piecewise constant"}
 #' }
 #'
+#' @example man/examples/estimate_Re.R
 #'
 #' @param simplify_output boolean. Simplify the output when possible?
 #' @inheritParams module_methods
@@ -67,6 +68,8 @@
 #' (see \code{\link{merge_outputs}} for details).
 #'
 #'
+#' @return a module output object. Re estimates.
+#' @seealso \code{\link{smooth_incidence}}, \code{\link{deconvolve_incidence}} 
 #' @export
 estimate_Re <- function(incidence_data,
                         estimation_method = "EpiEstim sliding window",

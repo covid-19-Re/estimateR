@@ -3,6 +3,8 @@
 #' Smooth a time series of noisy observations.
 #' Currently only LOESS smoothing (\code{smoothing_method = "LOESS"}) is implemented.
 #'
+#' @example man/examples/smooth_incidence.R
+#' 
 #' @inheritParams module_methods
 #' @inherit module_structure
 #' @inheritDotParams .smooth_LOESS -incidence_input

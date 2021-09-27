@@ -5,6 +5,7 @@
 #' the uncertainty over the estimated Re value due to observation noise.
 #' For now, only a non-parametric block bootstrapping function is implemented.
 #'
+#' @example man/examples/get_bootstrap_replicate.R
 #' @inheritParams module_methods
 #' @inherit module_structure
 #' @inheritDotParams .block_bootstrap -incidence_input

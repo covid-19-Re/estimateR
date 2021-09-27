@@ -219,6 +219,9 @@ accepted_parameter_value <- list(
   if (!is.vector(vector, mode = "numeric")) {
     return(FALSE)
   }
+  if(any(is.na(vector))) {
+    return(FALSE)
+  }
   if (!all(vector >= 0)) {
     return(FALSE)
   }
@@ -604,6 +607,8 @@ accepted_parameter_value <- list(
   return(TRUE)
 }
 
+#' Utility functions for input validity.
+#' 
 #' @description Utility function that checks that the values the user passed when calling a function are valid.
 #'
 #' @inherit validation_utility_params
