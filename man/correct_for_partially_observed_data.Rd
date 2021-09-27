@@ -91,7 +91,6 @@ Number of time steps in a full time unit (e.g. 7 if looking at weeks).
 If set, the delays used to build a particular
 delay distribution will span over a round number of such time units.
 This option is included for comparison with legacy code.}
-    \item{\code{return_fitted_distribution}}{boolean. If TRUE, the function also returns the gamma distribution that was fitted to the respective column.}
   }}
 }
 \value{
@@ -131,4 +130,30 @@ This trimming is tuned via the \code{cutoff_observation_probability} argument.
 The \code{ref_date} argument is only needed if the \code{delay_until_final_report}
 is passed as a dataframe of individual delay observations (a.k.a empirical delay data).
 In that case, \code{ref_date} must correspond to the date of the first time step in \code{incidence_data}.
+}
+\examples{
+## Basic usage of correct_for_partially_observed_data
+
+shape_onset_to_report = 2.7
+scale_onset_to_report = 1.6
+delay_onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
+
+corrected_incidence_data_1 <- correct_for_partially_observed_data(
+  incidence_data = HK_incidence_data$onset_incidence,
+  delay_until_final_report = delay_onset_to_report
+)
+
+
+## Advanced usage of correct_for_partially_observed_data
+# Only taking into account cases that have a chance of being observed greater
+# than 25\%. Here, the delay between symptom onset and report is given as 
+# empirical delay data, hence it is needed to specify the date of the first
+# entry in incidence_data
+
+corrected_incidence_data_2 <- correct_for_partially_observed_data(
+  incidence_data = HK_incidence_data$onset_incidence,
+  delay_until_final_report = HK_delay_data,
+  ref_date = HK_incidence_data$date[1],
+  cutoff_observation_probability = 0.25
+)
 }
