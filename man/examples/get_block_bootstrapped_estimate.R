@@ -2,13 +2,15 @@
 # (Only 10 bootstrap replicates are generated to keep the code fast. In practice,
 # use more.)
 
-shape_incubation = 3.2 
+shape_incubation = 3.2
 scale_incubation = 1.3
 delay_incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
 
 shape_onset_to_report = 2.7
 scale_onset_to_report = 1.6
-delay_onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
+delay_onset_to_report <- list(name="gamma",
+                              shape = shape_onset_to_report,
+                              scale = scale_onset_to_report)
 
 
 Re_estimate_1 <- get_block_bootstrapped_estimate(
@@ -20,7 +22,7 @@ Re_estimate_1 <- get_block_bootstrapped_estimate(
 
 ## Advanced usage of get_block_bootstrapped_estimate
 # (Only 10 bootstrap replicates are generated to keep the code fast. In practice,
-# use more.) 
+# use more.)
 
 
 # Incorporating prior knowledge over Re. Here, Re is assumed constant over a time
@@ -38,7 +40,7 @@ Re_estimate_2 <- get_block_bootstrapped_estimate(
 )
 
 # Incorporating prior knowledge over the disease. Here, we assume the mean of the
-# serial interval to be 5 days, and the deviation is assumed to be 2.5 days. The 
+# serial interval to be 5 days, and the deviation is assumed to be 2.5 days. The
 # delay between symptom onset and case confirmation is passed as empirical data.
 
 Re_estimate_3 <- get_block_bootstrapped_estimate(

@@ -1,10 +1,12 @@
-shape_incubation = 3.2 
+shape_incubation = 3.2
 scale_incubation = 1.3
 delay_incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
 
 shape_onset_to_report = 2.7
 scale_onset_to_report = 1.6
-delay_onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
+delay_onset_to_report <- list(name="gamma",
+                              shape = shape_onset_to_report,
+                              scale = scale_onset_to_report)
 
 
 ## Basic usage of estimate_from_combined_observations
@@ -44,9 +46,9 @@ Re_estimate_3 <- estimate_from_combined_observations(
   mean_Re_prior = 1.25
 )
 
-# Incorporating prior knowledge over the disease. Here, the mean of the serial 
-# interval is assumed to be 5 days, and the standard deviation is assumed to be 
-# 2.5 days. 
+# Incorporating prior knowledge over the disease. Here, the mean of the serial
+# interval is assumed to be 5 days, and the standard deviation is assumed to be
+# 2.5 days.
 Re_estimate_4 <- estimate_from_combined_observations(
   partially_delayed_incidence = HK_incidence_data$onset_incidence,
   fully_delayed_incidence = HK_incidence_data$report_incidence,

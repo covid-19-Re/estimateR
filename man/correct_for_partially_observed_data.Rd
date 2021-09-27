@@ -136,7 +136,9 @@ In that case, \code{ref_date} must correspond to the date of the first time step
 
 shape_onset_to_report = 2.7
 scale_onset_to_report = 1.6
-delay_onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
+delay_onset_to_report <- list(name="gamma",
+                              shape = shape_onset_to_report,
+                              scale = scale_onset_to_report)
 
 corrected_incidence_data_1 <- correct_for_partially_observed_data(
   incidence_data = HK_incidence_data$onset_incidence,
@@ -146,7 +148,7 @@ corrected_incidence_data_1 <- correct_for_partially_observed_data(
 
 ## Advanced usage of correct_for_partially_observed_data
 # Only taking into account cases that have a chance of being observed greater
-# than 25\%. Here, the delay between symptom onset and report is given as 
+# than 25\%. Here, the delay between symptom onset and report is given as
 # empirical delay data, hence it is needed to specify the date of the first
 # entry in incidence_data
 
