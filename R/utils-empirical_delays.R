@@ -150,8 +150,17 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
   initial_shift <- ceiling(stats::quantile(empirical_delays$report_delay, probs = 0.99, na.rm = T))[1]
 
   # Left-pad the dates we are looking at to account for shift between event dates and observation dates.
+  time_unit_start <- regexpr("(day|week|month|quarter|year)", time_step, ignore.case = TRUE)[1]
+  if(time_unit_start == 1) {
+    by_string <- paste0("-1 ", time_step) 
+  } else { #time_step already contains number of time steps
+    # it is assumed that time_step does not contain negative numbers, and it does
+    # contain one of day|week|month|quarter|year
+    by_string <- paste0("-", time_step) 
+  }
+  
   all_dates <- c(
-    rev(seq.Date(from = ref_date, by = paste0("-1 ", time_step), length.out = initial_shift + 1)),
+    rev(seq.Date(from = ref_date, by = by_string, length.out = initial_shift + 1)),
     seq.Date(from = ref_date, by = time_step, length.out = n_report_time_steps)[-1]
   )
 
@@ -258,7 +267,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     }
   }
 
-  if (last_varying_col < n_time_steps) {
+  if (isTRUE(last_varying_col < n_time_steps)) {
     for (j in 1:threshold_right_truncation) {
       delay_distribution_matrix[, i + j] <- c(rep(0, times = j), delay_distribution_matrix[1:(nrow(delay_distribution_matrix) - j), i])
       if (fit == "gamma") {
@@ -267,7 +276,7 @@ get_matrix_from_empirical_delay_distr <- function(empirical_delays,
     }
   }
 
-  if (return_fitted_distribution) {
+  if (isTRUE(return_fitted_distribution) && fit == "gamma") {
     return(list(matrix = delay_distribution_matrix, distributions = distrib_list))
   }
 

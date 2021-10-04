@@ -134,7 +134,11 @@ deconvolve_incidence <- function(incidence_data,
   present_trend <- last_recorded_incidence/penultimate_recorded_incidence
   if(is.infinite(present_trend) || is.nan(present_trend)) {present_trend <- 1 }
 
-  right_padding_values <- last_recorded_incidence * present_trend^(1:initial_shift)
+  if(initial_shift >= 1){
+    right_padding_values <- last_recorded_incidence * present_trend^(1:initial_shift)
+  } else {
+    right_padding_values <- c()
+  }
   current_estimate <- c(incidence_vector, right_padding_values)
 
   extra_left_steps <- n_time_units_left_extension - initial_shift
