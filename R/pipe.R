@@ -520,7 +520,7 @@ get_infections_from_incidence <- function(incidence_data,
   )
 
   if (output_infection_incidence_only) {
-    merged_results <- deconvolved_incidence
+    pretty_results <- deconvolved_incidence
   } else {
     if (is_partially_reported_data) {
       output_list <- list(
@@ -548,15 +548,15 @@ get_infections_from_incidence <- function(incidence_data,
         .get_shared_args(merge_outputs, dots_args)
       )
     )
+    pretty_results <- do.call(
+      ".prettify_result",
+      c(
+        list(data = merged_results),
+        .get_shared_args(.prettify_result, dots_args)
+      )
+    )
   }
 
-  pretty_results <- do.call(
-    ".prettify_result",
-    c(
-      list(data = merged_results),
-      .get_shared_args(.prettify_result, dots_args)
-    )
-  )
 
   return(pretty_results)
 }
