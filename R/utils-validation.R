@@ -201,9 +201,9 @@ accepted_parameter_value <- list(
   if (!is.character(string_user_input)) {
     stop(paste("Expected parameter", parameter_name, "to be a string."))
   }
-  is_valid_time_step <- grepl("^([-+]?\\d+ )?(day|week|month|quarter|year)s?$", string_user_input)
+  is_valid_time_step <- grepl("^([+]?\\d+ )?(day|week|month|quarter|year)s?$", string_user_input)
   if (!is_valid_time_step) {
-    stop(paste("Expected parameter", parameter_name, "to be a character string, containing one of \"day\", \"week\", \"month\", \"quarter\" or \"year\". This can optionally be preceded by a (positive or negative) integer and a space, or followed by \"s\"."))
+    stop(paste("Expected parameter", parameter_name, "to be a character string, containing one of \"day\", \"week\", \"month\", \"quarter\" or \"year\". This can optionally be preceded by a positive integer and a space, or followed by \"s\"."))
   }
   return(TRUE)
 }
