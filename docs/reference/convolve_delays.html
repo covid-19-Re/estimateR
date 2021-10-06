@@ -76,7 +76,7 @@ they are given in in the delays list." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">estimateR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9000</span>
       </span>
     </div>
 
@@ -111,6 +111,9 @@ they are given in in the delays list." />
       <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -202,7 +205,6 @@ This option is included for comparison with legacy code.</p></dd>
     <dt><code>ref_date</code></dt><dd><p>Date. Optional. Date of the first data entry in <code>incidence_data</code></p></dd>
     <dt><code>time_step</code></dt><dd><p>string. Time between two consecutive incidence datapoints.
 "day", "2 days", "week", "year"... (see <code><a href='https://rdrr.io/r/base/seq.Date.html'>seq.Date</a></code> for details)</p></dd>
-    <dt><code>return_fitted_distribution</code></dt><dd><p>boolean. If TRUE, the function also returns the gamma distribution that was fitted to the respective column.</p></dd>
     <dt><code>max_quantile</code></dt><dd><p>numeric value between 0 and 1.
 Upper quantile reached by the last element in the discretized distribution vector.</p></dd>
     <dt><code>offset_by_one</code></dt><dd><p>boolean.
@@ -234,6 +236,58 @@ Each delay in the <code>delays</code> list can be one of:</p><ul>
 <p>see <code><a href='get_matrix_from_empirical_delay_distr.html'>get_matrix_from_empirical_delay_distr</a></code> for details on the format
 expected for the empirical delay data.</p>
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='co'>## Convolving the delay between infection and onset of symptoms with the delay</span>
+<span class='co'># between onset of symptoms and case report to obtain the final delay between</span>
+<span class='co'># infection and case report. Using the resulting delay distribution to recover </span>
+<span class='co'># the original infection events </span>
+
+<span class='va'>smoothed_incidence</span> <span class='op'>&lt;-</span> <span class='fu'><a href='smooth_incidence.html'>smooth_incidence</a></span><span class='op'>(</span><span class='va'>HK_incidence_data</span><span class='op'>$</span><span class='va'>case_incidence</span><span class='op'>)</span>
+
+<span class='va'>shape_incubation</span> <span class='op'>=</span> <span class='fl'>3.2</span> 
+<span class='va'>scale_incubation</span> <span class='op'>=</span> <span class='fl'>1.3</span>
+<span class='va'>delay_incubation</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"gamma"</span>, shape <span class='op'>=</span> <span class='va'>shape_incubation</span>, scale <span class='op'>=</span> <span class='va'>scale_incubation</span><span class='op'>)</span>
+
+<span class='va'>shape_onset_to_report</span> <span class='op'>=</span> <span class='fl'>2.7</span>
+<span class='va'>scale_onset_to_report</span> <span class='op'>=</span> <span class='fl'>1.6</span>
+<span class='va'>delay_onset_to_report</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"gamma"</span>, shape <span class='op'>=</span> <span class='va'>shape_onset_to_report</span>, scale <span class='op'>=</span> <span class='va'>scale_onset_to_report</span><span class='op'>)</span>
+
+<span class='va'>total_delay_1</span> <span class='op'>&lt;-</span> <span class='fu'>convolve_delays</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>delay_incubation</span>, <span class='va'>delay_onset_to_report</span><span class='op'>)</span><span class='op'>)</span>
+
+<span class='va'>deconvolved_incidence</span> <span class='op'>&lt;-</span> <span class='fu'><a href='deconvolve_incidence.html'>deconvolve_incidence</a></span><span class='op'>(</span>
+  incidence_data <span class='op'>=</span> <span class='va'>smoothed_incidence</span>,
+  delay <span class='op'>=</span> <span class='va'>total_delay_1</span>
+<span class='op'>)</span>
+
+<span class='co'>## Convolving multiple delays</span>
+<span class='co'># In this example it is assumed that the delay between infection and case report </span>
+<span class='co'># is composed of three delays; the delay between infection and symptom onset,</span>
+<span class='co'># the delay between symptom onset and case testing </span>
+
+<span class='va'>shape_incubation</span> <span class='op'>=</span> <span class='fl'>3.2</span> 
+<span class='va'>scale_incubation</span> <span class='op'>=</span> <span class='fl'>1.3</span>
+<span class='va'>delay_incubation</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"gamma"</span>, shape <span class='op'>=</span> <span class='va'>shape_incubation</span>, scale <span class='op'>=</span> <span class='va'>scale_incubation</span><span class='op'>)</span>
+
+<span class='va'>delay_onset_to_test_taken</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name <span class='op'>=</span> <span class='st'>"norm"</span>, mean <span class='op'>=</span> <span class='fl'>5</span>, sd <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
+
+<span class='va'>delay_test_to_report</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"norm"</span>, mean <span class='op'>=</span> <span class='fl'>2</span>, sd <span class='op'>=</span> <span class='fl'>0.5</span><span class='op'>)</span>
+
+<span class='va'>total_delay_2</span> <span class='op'>&lt;-</span> <span class='fu'>convolve_delays</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>delay_incubation</span>, <span class='va'>delay_onset_to_test_taken</span>, <span class='va'>delay_test_to_report</span><span class='op'>)</span><span class='op'>)</span>
+
+<span class='co'>## Convolving delays of multiple types</span>
+<span class='co'># Defining the incubation period as a probability vector, and the delay between</span>
+<span class='co'># symptom onset and case observation as a delay matrix</span>
+
+<span class='va'>delay_incubation</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0.01</span>, <span class='fl'>0.1</span>, <span class='fl'>0.15</span>, <span class='fl'>0.18</span>, <span class='fl'>0.17</span>, <span class='fl'>0.14</span>, <span class='fl'>0.11</span>, <span class='fl'>0.07</span>, <span class='fl'>0.035</span>, <span class='fl'>0.020</span>, <span class='fl'>0.015</span><span class='op'>)</span>
+
+<span class='va'>delay_matrix</span> <span class='op'>&lt;-</span> <span class='fu'><a href='get_matrix_from_empirical_delay_distr.html'>get_matrix_from_empirical_delay_distr</a></span><span class='op'>(</span>
+  <span class='va'>HK_delay_data</span>, 
+  n_report_time_steps <span class='op'>=</span> <span class='fl'>50</span>
+<span class='op'>)</span>
+
+<span class='va'>total_delay_3</span> <span class='op'>&lt;-</span> <span class='fu'>convolve_delays</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>delay_incubation</span>, <span class='va'>delay_matrix</span><span class='op'>)</span><span class='op'>)</span>
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">estimateR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9000</span>
       </span>
     </div>
 
@@ -106,6 +106,9 @@
       <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -257,6 +260,12 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="dot-add_noise.html">.add_noise()</a></code> </p>
+        </td>
+        <td><p>Add noise to a series of observations.</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="dot-are_valid_argument_values.html">.are_valid_argument_values()</a></code> </p>
         </td>
         <td><p>Utility functions for input validity.</p></td>
@@ -272,6 +281,12 @@
           <p><code><a href="dot-block_bootstrap_overlap_func.html">.block_bootstrap_overlap_func()</a></code> </p>
         </td>
         <td><p>Helper function for block-bootstrapping</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dot-build_list_of_gradually_changing_delays.html">.build_list_of_gradually_changing_delays()</a></code> </p>
+        </td>
+        <td><p>Generate a list of delay distributions with a gradual transition between two input delay distributions</p></td>
       </tr><tr>
         
         <td>
@@ -371,6 +386,18 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="dot-compute_Ot.html">.compute_Ot()</a></code> </p>
+        </td>
+        <td><p>Compute the number of delayed observations of infections at the current time step.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dot-compute_discretized_infectiousness.html">.compute_discretized_infectiousness()</a></code> </p>
+        </td>
+        <td><p>Compute the discretized infectiousness for a particular time step.</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="dot-convolve_delay_distribution_matrices.html">.convolve_delay_distribution_matrices()</a></code> </p>
         </td>
         <td><p>Convolve two delay distribution matrices</p></td>
@@ -415,6 +442,12 @@ The shapes and scales of the gamma distributions are specified as parameters, an
       </tr><tr>
         
         <td>
+          <p><code><a href="dot-draw_It.html">.draw_It()</a></code> </p>
+        </td>
+        <td><p>Draw the number of infections for a particular time step.</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="dot-estimate_Re_EpiEstim_piecewise_constant.html">.estimate_Re_EpiEstim_piecewise_constant()</a></code> </p>
         </td>
         <td><p>Estimate Re with EpiEstim in a piecewise-constant fashion</p></td>
@@ -451,9 +484,9 @@ The shapes and scales of the gamma distributions are specified as parameters, an
       </tr><tr>
         
         <td>
-          <p><code><a href="dot-get_delay_matrix_from_delay_distribution_parms.html">.get_delay_matrix_from_delay_distribution_parms()</a></code> </p>
+          <p><code><a href="dot-get_delay_matrix_from_delay_distributions.html">.get_delay_matrix_from_delay_distributions()</a></code> </p>
         </td>
-        <td><p>Build delay distribution matrix from list of delay distributions</p></td>
+        <td><p>Build delay distribution matrix from a single delay or a list of delay distributions</p></td>
       </tr><tr>
         
         <td>
@@ -487,15 +520,15 @@ The shapes and scales of the gamma distributions are specified as parameters, an
       </tr><tr>
         
         <td>
-          <p><code><a href="dot-get_input_length.html">.get_input_length()</a></code> </p>
+          <p><code><a href="dot-get_infectiousness_profile.html">.get_infectiousness_profile()</a></code> </p>
         </td>
-        <td><p>Get length of values vector in a module input object.</p></td>
+        <td><p>Compute a discretized infectiousness profile from a serial interval distribution.</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="dot-get_matrix_from_single_delay_distr.html">.get_matrix_from_single_delay_distr()</a></code> </p>
+          <p><code><a href="dot-get_input_length.html">.get_input_length()</a></code> </p>
         </td>
-        <td><p>Make delay distribution matrix from vector of delay distribution.</p></td>
+        <td><p>Get length of values vector in a module input object.</p></td>
       </tr><tr>
         
         <td>
@@ -628,6 +661,12 @@ The shapes and scales of the gamma distributions are specified as parameters, an
           <p><code><a href="dot-print_vector.html">.print_vector()</a></code> </p>
         </td>
         <td><p>Utility function to print vectors in a copy-pastable format</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="dot-random_round.html">.random_round()</a></code> </p>
+        </td>
+        <td><p>Round a value to the integer to either the floor or ceiling value, based on a random draw.</p></td>
       </tr><tr>
         
         <td>
@@ -778,6 +817,30 @@ The shapes and scales of the gamma distributions are specified as parameters, an
           <p><code><a href="pipe_params.html">pipe_params</a></code> </p>
         </td>
         <td><p>Pipe parameters</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="simulate.html">simulate</a></code> </p>
+        </td>
+        <td><p>Simulation parameters</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="simulate_combined_observations.html">simulate_combined_observations()</a></code> </p>
+        </td>
+        <td><p>Simulate a series of observations from a course of infections, combining some partially-delayed and some fully-delayed observations.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="simulate_delayed_observations.html">simulate_delayed_observations()</a></code> </p>
+        </td>
+        <td><p>Simulate a series of delayed observations from a series of infections.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="simulate_infections.html">simulate_infections()</a></code> </p>
+        </td>
+        <td><p>Simulate a series of infections</p></td>
       </tr><tr>
         
         <td>

@@ -184,9 +184,12 @@ build_delay_distribution <- function(distribution,
 #' a probability distribution matrix or empirical delay data as input.
 #' If \code{delay} is already a delay distribution vector or matrix, it is returned as is.
 #'
-#' If \code{delay} is a \code{distribution} list,
+#' If \code{delay} is a single \code{distribution} list,
 #' this function builds and return the vector of discretized probability distribution.
-#' If it is a vector, it checks that \code{delay}
+#' If \code{delay} is a list of \code{distribution} lists,
+#' this function builds and return the matrix of discretized probability distribution,
+#' with dimensions corresponding to the number of delays in the list.
+#' If \code{delay} is a vector, the function checks that \code{delay}
 #' is a valid discretized probability distribution and returns it.
 #' Similarly, if \code{delay} is a matrix,
 #' the function checks that it is in the correct format and returns it.
@@ -213,7 +216,7 @@ build_delay_distribution <- function(distribution,
                                     time_step = "day",
                                     ...) {
   .are_valid_argument_values(list(
-    list(delay, "delay_object", 1), # We put '1' here, because we do not care here about checking the dimension of the matrix.
+    list(delay, "delay_single_or_list", 1), # We put '1' here, because we do not care here about checking the dimension of the matrix.
     list(n_report_time_steps, "null_or_int"),
     list(ref_date, "null_or_date"),
     list(time_step, "time_step")
@@ -239,13 +242,24 @@ build_delay_distribution <- function(distribution,
       )
     )
   } else if (is.list(delay)) {
-    delay_distribution <- do.call(
-      "build_delay_distribution",
-      c(
-        list(distribution = delay),
-        .get_shared_args(list(build_delay_distribution), dots_args)
+    if(.is_single_delay(delay)) {
+      delay_distribution <- do.call(
+        "build_delay_distribution",
+        c(
+          list(distribution = delay),
+          .get_shared_args(list(build_delay_distribution), dots_args)
+        )
       )
-    )
+    } else {
+      delay_distribution <- do.call(
+        ".get_delay_matrix_from_delay_distributions",
+        c(
+          list(distributions = delay),
+          .get_shared_args(list(build_delay_distribution), dots_args)
+        )
+      )
+    }
+
   } else if (is.matrix(delay) || .is_numeric_vector(delay)) {
     delay_distribution <- delay
   } else {
@@ -255,73 +269,84 @@ build_delay_distribution <- function(distribution,
   return(delay_distribution)
 }
 
-#' Make delay distribution matrix from vector of delay distribution.
+#' Build delay distribution matrix from a single delay or a list of delay distributions
 #'
-#' @inheritParams distribution
-#' @param N integer. Dimension of output matrix.
-#'
-#' @return discretized delay distribution matrix, representing a constant-through-time
-#' delay distribution.
-.get_matrix_from_single_delay_distr <- function(delay_distribution_vector, N) {
-  .are_valid_argument_values(list(
-    list(delay_distribution_vector, "probability_distr_vector"),
-    list(N, "positive_integer")
-  ))
-
-  if (N >= length(delay_distribution_vector)) {
-    delay_distribution_vector <- c(delay_distribution_vector, rep(0, times = N - length(delay_distribution_vector)))
-  }
-
-  delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
-  for (i in 1:N) {
-    delay_distribution_matrix[, i] <- c(rep(0, times = i - 1), delay_distribution_vector[1:(N - i + 1)])
-  }
-
-  return(delay_distribution_matrix)
-}
-
-# TODO maybe merge with .get_matrix_from_single_delay_distr by adding N parm and checking if list or unique vector
-#' Build delay distribution matrix from list of delay distributions
-#'
-#' @param distributions list of distributions,
+#' @param distributions single distribution or list of distributions,
 #' each element is either a distribution list or discretized probability distribution vector.
+#' @param N integer. Dimension of output matrix.
+#' Ignored if a list of distributions is provided.
 #' @inheritDotParams build_delay_distribution -distribution
 #'
 #' @return delay distribution matrix
-.get_delay_matrix_from_delay_distribution_parms <- function(distributions, ...) {
-  for (i in 1:length(distributions)) {
-    .are_valid_argument_values(list(list(distributions[[i]], "distribution")))
-  }
+.get_delay_matrix_from_delay_distributions <- function(distributions, N = 1, ...) {
+
+  .are_valid_argument_values(list(
+    # We put '1' here, because we do not care here about checking the dimension of the matrix.
+    list(distributions, "delay_single_or_list", 1),
+    list(N, "positive_integer")
+  ))
+
+  is_single_distribution <- .is_single_delay(distributions)
   dots_args <- .get_dots_as_list(...)
 
-  # Generate list of delay distribution vectors
-  delay_distribution_list <- lapply(distributions, function(distr) {
-    do.call(
-      "build_delay_distribution",
-      c(
-        list(distribution = distr),
-        .get_shared_args(build_delay_distribution, dots_args)
+  if(is_single_distribution) {
+    # Generate delay distribution vector
+    delay_distribution_vector <- do.call(
+        ".get_delay_distribution",
+        c(
+          list(delay = distributions),
+          .get_shared_args(.get_delay_distribution, dots_args)
+        )
       )
-    )
-  })
-
-  N <- length(distributions)
-
-  # Initialize empty matrix
-  delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
-
-  # Fill matrix by column
-  for (i in 1:N) {
-    delay_distr <- delay_distribution_list[[i]]
-
-    # Right-pad delay_distr vector with zeroes if needed
-    if (length(delay_distr) < N - i + 1) {
-      delay_distr <- c(delay_distr, rep(0, times = N - i + 1 - length(delay_distr)))
+    if (N >= length(delay_distribution_vector)) {
+      delay_distribution_vector <- c(delay_distribution_vector, rep(0, times = N - length(delay_distribution_vector)))
     }
-    delay_distribution_matrix[, i] <- c(rep(0, times = i - 1), delay_distr[1:(N - i + 1)])
-  }
 
-  return(delay_distribution_matrix)
+    delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
+    for (i in 1:N) {
+      delay_distribution_matrix[, i] <- c(rep(0, times = i - 1), delay_distribution_vector[1:(N - i + 1)])
+    }
+
+    return(delay_distribution_matrix)
+
+  } else {
+    # List of distributions, each distribution correspond to the delay distribution of a particular time step.
+    # These distributions fill the delay matrix by column (below the diagonal).
+
+    for (i in 1:length(distributions)) {
+      .are_valid_argument_values(list(list(distributions[[i]], "distribution")))
+    }
+    dots_args <- .get_dots_as_list(...)
+
+    # Generate list of delay distribution vectors
+    delay_distribution_list <- lapply(distributions, function(distr) {
+      do.call(
+        "build_delay_distribution",
+        c(
+          list(distribution = distr),
+          .get_shared_args(build_delay_distribution, dots_args)
+        )
+      )
+    })
+
+    N <- length(distributions)
+
+    # Initialize empty matrix
+    delay_distribution_matrix <- matrix(0, nrow = N, ncol = N)
+
+    # Fill matrix by column
+    for (i in 1:N) {
+      delay_distr <- delay_distribution_list[[i]]
+
+      # Right-pad delay_distr vector with zeroes if needed
+      if (length(delay_distr) < N - i + 1) {
+        delay_distr <- c(delay_distr, rep(0, times = N - i + 1 - length(delay_distr)))
+      }
+      delay_distribution_matrix[, i] <- c(rep(0, times = i - 1), delay_distr[1:(N - i + 1)])
+    }
+
+    return(delay_distribution_matrix)
+  }
 }
 
 #' Augment a delay distribution by left padding with new columns.

@@ -1,11 +1,13 @@
 ## Basic usage of estimate_Re_from_noisy_delayed_incidence
-shape_incubation = 3.2 
+shape_incubation = 3.2
 scale_incubation = 1.3
 delay_incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
 
 shape_onset_to_report = 2.7
 scale_onset_to_report = 1.6
-delay_onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
+delay_onset_to_report <- list(name="gamma",
+                              shape = shape_onset_to_report,
+                              scale = scale_onset_to_report)
 
 Re_estimate_1 <- estimate_Re_from_noisy_delayed_incidence(
   incidence_data = HK_incidence_data$case_incidence,
@@ -23,9 +25,9 @@ Re_estimate_2 <- estimate_Re_from_noisy_delayed_incidence(
   mean_Re_prior = 1.25
 )
 
-# Incorporating prior knowledge over the disease. Here, the mean of the serial 
-# interval is assumed to be 5 days, and the standard deviation is assumed to be 
-# 2.5 days. 
+# Incorporating prior knowledge over the disease. Here, the mean of the serial
+# interval is assumed to be 5 days, and the standard deviation is assumed to be
+# 2.5 days.
 Re_estimate_3 <- estimate_Re_from_noisy_delayed_incidence(
   incidence_data = HK_incidence_data$case_incidence,
   delay = list(delay_incubation, delay_onset_to_report),
@@ -33,7 +35,7 @@ Re_estimate_3 <- estimate_Re_from_noisy_delayed_incidence(
   std_serial_interval = 1.25
 )
 
-# Incorporating prior knowledge over the epidemic. Here, it is assumed that Re 
+# Incorporating prior knowledge over the epidemic. Here, it is assumed that Re
 # changes values 4 times during the epidemic, so the intervals over which Re is
 # assumed to be constant are passed as a parameter.
 last_interval_index <- length(HK_incidence_data$case_incidence)

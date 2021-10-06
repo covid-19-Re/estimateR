@@ -82,7 +82,7 @@ and will be accounted for by estimateR when estimating the reproductive number."
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">estimateR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9000</span>
       </span>
     </div>
 
@@ -117,6 +117,9 @@ and will be accounted for by estimateR when estimating the reproductive number."
       <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -259,6 +262,49 @@ If <code>ref_date</code> is not provided, the reference date will be taken as be
 will be assumed to be the same as the date of the first record in the empirical delay data.
 If this is not the case in your analysis, make sure to specify a <code>ref_date</code> argument.</p>
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='co'>## Basic usage of get_matrix_from_empirical_delay_distr</span>
+<span class='co'># Obtaining the deconvolved incidence for the full HK incidence data provided in</span>
+<span class='co'># the package: obtaining the delay matrix and then using it to recover the </span>
+<span class='co'># deconvolved incidence.</span>
+
+<span class='va'>smoothed_incidence</span> <span class='op'>&lt;-</span> <span class='fu'><a href='smooth_incidence.html'>smooth_incidence</a></span><span class='op'>(</span><span class='va'>HK_incidence_data</span><span class='op'>$</span><span class='va'>case_incidence</span><span class='op'>)</span>
+
+<span class='va'>shape_incubation</span> <span class='op'>=</span> <span class='fl'>3.2</span> 
+<span class='va'>scale_incubation</span> <span class='op'>=</span> <span class='fl'>1.3</span>
+<span class='va'>delay_incubation</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"gamma"</span>, shape <span class='op'>=</span> <span class='va'>shape_incubation</span>, scale <span class='op'>=</span> <span class='va'>scale_incubation</span><span class='op'>)</span>
+
+<span class='va'>delay_matrix_1</span> <span class='op'>&lt;-</span> <span class='fu'>get_matrix_from_empirical_delay_distr</span><span class='op'>(</span>
+  <span class='va'>HK_delay_data</span>, 
+  n_report_time_steps <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='va'>smoothed_incidence</span><span class='op'>)</span>
+<span class='op'>)</span>
+
+<span class='va'>deconvolved_incidence_1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='deconvolve_incidence.html'>deconvolve_incidence</a></span><span class='op'>(</span>
+  incidence_data <span class='op'>=</span> <span class='va'>smoothed_incidence</span>,
+  delay <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>delay_incubation</span>, <span class='va'>delay_matrix_1</span><span class='op'>)</span>
+<span class='op'>)</span>
+
+
+<span class='co'>## Advanced usage of get_matrix_from_empirical_delay_distr</span>
+<span class='co'># Obtaining the deconvolved incidence for a section of the HK incidence data </span>
+<span class='co'># provided in the package: computing the delay matrix, fitting gamma distributions </span>
+<span class='co'># to the columns and then using it to recover the deconvolved incidence for the </span>
+<span class='co'># time-frame of interest</span>
+
+<span class='va'>smoothed_partial_incidence</span> <span class='op'>&lt;-</span> <span class='fu'><a href='smooth_incidence.html'>smooth_incidence</a></span><span class='op'>(</span><span class='va'>HK_incidence_data</span><span class='op'>[</span><span class='fl'>30</span><span class='op'>:</span><span class='fl'>90</span>,<span class='op'>]</span><span class='op'>$</span><span class='va'>case_incidence</span><span class='op'>)</span>
+
+<span class='va'>delay_matrix_2</span> <span class='op'>&lt;-</span> <span class='fu'>get_matrix_from_empirical_delay_distr</span><span class='op'>(</span>
+  <span class='va'>HK_delay_data</span>, 
+  n_report_time_steps <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='va'>smoothed_partial_incidence</span><span class='op'>)</span>,
+  fit <span class='op'>=</span> <span class='st'>"gamma"</span>,
+  ref_date <span class='op'>=</span> <span class='va'>HK_incidence_data</span><span class='op'>[</span><span class='fl'>30</span>,<span class='op'>]</span><span class='op'>$</span><span class='va'>date</span>
+<span class='op'>)</span>
+
+<span class='va'>deconvolved_incidence_2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='deconvolve_incidence.html'>deconvolve_incidence</a></span><span class='op'>(</span>
+  incidence_data <span class='op'>=</span> <span class='va'>smoothed_partial_incidence</span>,
+  delay <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>delay_incubation</span>, <span class='va'>delay_matrix_2</span><span class='op'>)</span>
+<span class='op'>)</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

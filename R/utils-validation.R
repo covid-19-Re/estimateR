@@ -219,6 +219,9 @@ accepted_parameter_value <- list(
   if (!is.vector(vector, mode = "numeric")) {
     return(FALSE)
   }
+  if(any(is.na(vector))) {
+    return(FALSE)
+  }
   if (!all(vector >= 0)) {
     return(FALSE)
   }

@@ -9,7 +9,7 @@
 \arguments{
 \item{infections}{Vector representing infections through time.}
 
-\item{delay_distribution}{Numeric vector. Discretized delay distribution represented as a vector.}
+\item{delay_distribution}{Numeric vector or matrix. Discretized delay distribution represented as a vector (matrix).}
 
 \item{day}{Integer. index of the current time step.}
 }

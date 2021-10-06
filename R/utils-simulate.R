@@ -100,7 +100,7 @@
 #' Compute the number of delayed observations of infections at the current time step.
 #'
 #' @param infections Vector representing infections through time.
-#' @param delay_distribution Numeric vector. Discretized delay distribution represented as a vector.
+#' @param delay_distribution Numeric vector or matrix. Discretized delay distribution represented as a vector (matrix).
 #' @param day Integer. index of the current time step.
 #'
 #' @return Integer. Number of observations made on a particular time step.
@@ -108,11 +108,21 @@
   if(day <1) {
     return(0)
   }
+
+  if(is.matrix(delay_distribution)) {
+    if(day <= nrow(delay_distribution)) {
+      delay_distribution_vector <- as.vector(delay_distribution[day, day:1])
+    } else {
+      delay_distribution_vector < c(0)
+    }
+  } else {
+    delay_distribution_vector <- delay_distribution
+  }
   compute_element_in_sum <- function(x) {
-    if(x > (length(delay_distribution) - 1) || x >= day || x < 0) {
+    if(x > (length(delay_distribution_vector) - 1) || x >= day || x < 0) {
       return(0)
     } else {
-      return(infections[day - x] * delay_distribution[x + 1])
+      return(infections[day - x] * delay_distribution_vector[x + 1])
     }
   }
   raw_summed_observations <- sum(sapply(0:(day-1), compute_element_in_sum))
@@ -150,4 +160,35 @@
   observations[observations < 0] = 0
 
   return(observations)
+}
+
+
+#' Generate a list of delay distributions with a gradual transition between two input delay distributions
+#'
+#' The initial and final delay distributions must be parameterized as gamma distributions with shape and scale parameters.
+#' The intermediary distributions are parameterized by scales and shapes that are linear interpolations between the
+#' initial and final shapes and scales.
+#' @param init_delay List. First delay distribution in the output list
+#' @param final_delay List. Last delay distribution in hte output list
+#' @param n_time_steps Integer. Number of output list
+#'
+#' @return List of delay distributions (specified as lists)
+.build_list_of_gradually_changing_delays <- function(init_delay, final_delay, n_time_steps) {
+  #TODO enforce that both delays are distributions specified as lists and are gamma distributions with scake and shape
+
+  init_distrib_name <- init_delay$name
+  final_distrib_name <- final_delay$name
+
+  if(init_distrib_name != final_distrib_name | init_distrib_name!= "gamma") {
+    stop("init_delay and final_delay must be two gamma distributions.")
+  }
+
+  gradual_shapes <- seq(from = init_delay$shape, to = final_delay$shape, length.out = n_time_steps)
+  gradual_scales <- seq(from = init_delay$scale, to = final_delay$scale, length.out = n_time_steps)
+
+  list_of_distributions <- lapply(1:n_time_steps, function(i) {
+    return(list(name = "gamma", scale = gradual_scales[i], shape = gradual_shapes[i]))
+  })
+
+  return(list_of_distributions)
 }
