@@ -1,6 +1,6 @@
 Package: estimateR
 Title: Reproductive number estimation from delayed observations of infections
-Version: 0.1.9000
+Version: 0.2.9000
 Authors@R: c(
     person(given = "Jérémie",
            family = "Scire",

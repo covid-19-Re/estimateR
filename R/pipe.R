@@ -636,6 +636,8 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
       ),
       .get_shared_args(
         list(
+          .smooth_LOESS,
+          correct_for_partially_observed_data,
           .deconvolve_incidence_Richardson_Lucy,
           convolve_delays
         ),
@@ -667,6 +669,7 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
       ),
       .get_shared_args(
         list(
+          .smooth_LOESS,
           .deconvolve_incidence_Richardson_Lucy,
           convolve_delays
         ),
