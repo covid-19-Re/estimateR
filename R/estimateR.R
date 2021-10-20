@@ -296,6 +296,8 @@ NULL
 #' delayed observations of infection events that
 #' themselves rely on further-delayed observations.
 #' See Details for more details.
+#' @param correct_before_smoothing Boolean.
+#' Default is TRUE, parameter exists only for comparison purposes.
 #'
 #' @name delay_high
 NULL

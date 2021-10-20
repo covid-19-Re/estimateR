@@ -17,6 +17,7 @@ get_bootstrapped_estimates_from_combined_observations(
   delay_until_partial,
   delay_until_final_report,
   partial_observation_requires_full_observation = TRUE,
+  correct_before_smoothing = TRUE,
   ref_date = NULL,
   time_step = "day",
   output_Re_only = TRUE,
@@ -137,6 +138,9 @@ delayed observations of infection events that
 themselves rely on further-delayed observations.
 See Details for more details.}
 
+\item{correct_before_smoothing}{Boolean.
+Default is TRUE, parameter exists only for comparison purposes.}
+
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
 \item{time_step}{string. Time between two consecutive incidence datapoints.
@@ -156,8 +160,10 @@ the ratio of \code{data_points_incl} and the number of time steps in the input d
 the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
 the number of timesteps in the beginning of \code{incidence_input} to take into account when computing
 the average initial Re.}
+    \item{\code{left_pad_with_zeroes}}{boolean. Default is FALSE. Used for testing only.}
     \item{\code{delay_distribution}}{numeric square matrix or vector.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
+    \item{\code{constant_right_padding}}{Boolean. Default is FALSE. Only used for testing.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
     \item{\code{verbose}}{Boolean. Print verbose output?}
     \item{\code{estimation_window}}{Use with \code{estimation_method = "EpiEstim sliding window"}

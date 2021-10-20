@@ -8,7 +8,8 @@
   incidence_input,
   data_points_incl = 21,
   degree = 1,
-  initial_Re_estimate_window = 5
+  initial_Re_estimate_window = 5,
+  left_pad_with_zeroes = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ the ratio of \code{data_points_incl} and the number of time steps in the input d
 the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
 the number of timesteps in the beginning of \code{incidence_input} to take into account when computing
 the average initial Re.}
+
+\item{left_pad_with_zeroes}{boolean. Default is FALSE. Used for testing only.}
 }
 \value{
 A list with two elements:

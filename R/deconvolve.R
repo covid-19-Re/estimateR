@@ -79,11 +79,13 @@ deconvolve_incidence <- function(incidence_data,
 #' @inheritParams universal_params
 #' @param delay_distribution numeric square matrix or vector.
 #' @param threshold_chi_squared numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.
+#' @param constant_right_padding Boolean. Default is FALSE. Only used for testing.
 #' @param max_iterations integer. Maximum threshold for the number of iterations in the R-L algorithm.
 #' @inherit module_structure
 .deconvolve_incidence_Richardson_Lucy <- function(incidence_input,
                                                   delay_distribution,
                                                   threshold_chi_squared = 1,
+                                                  constant_right_padding = FALSE,
                                                   max_iterations = 100,
                                                   verbose = FALSE) {
   .are_valid_argument_values(list(
@@ -135,7 +137,11 @@ deconvolve_incidence <- function(incidence_data,
   if(is.infinite(present_trend) || is.nan(present_trend)) {present_trend <- 1 }
 
   if(initial_shift >= 1){
-    right_padding_values <- last_recorded_incidence * present_trend^(1:initial_shift)
+    if(constant_right_padding) {
+      right_padding_values <- rep(last_recorded_incidence, times = initial_shift)
+    } else {
+      right_padding_values <- last_recorded_incidence * present_trend^(1:initial_shift)
+    }
   } else {
     right_padding_values <- c()
   }

@@ -58,6 +58,9 @@ Set to \code{TRUE} if \code{partially_delayed_incidence} represent
 delayed observations of infection events that
 themselves rely on further-delayed observations.
 See Details for more details.}
+
+\item{correct_before_smoothing}{Boolean.
+Default is TRUE, parameter exists only for comparison purposes.}
 }
 \description{
 High-level delay parameters

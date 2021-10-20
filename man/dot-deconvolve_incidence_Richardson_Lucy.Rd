@@ -8,6 +8,7 @@
   incidence_input,
   delay_distribution,
   threshold_chi_squared = 1,
+  constant_right_padding = FALSE,
   max_iterations = 100,
   verbose = FALSE
 )
@@ -28,6 +29,8 @@ A negative offset means the opposite.
 \item{delay_distribution}{numeric square matrix or vector.}
 
 \item{threshold_chi_squared}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
+
+\item{constant_right_padding}{Boolean. Default is FALSE. Only used for testing.}
 
 \item{max_iterations}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
 

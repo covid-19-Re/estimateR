@@ -455,6 +455,7 @@ get_infections_from_incidence <- function(incidence_data,
                                           is_partially_reported_data = FALSE,
                                           delay_until_final_report = NULL,
                                           output_infection_incidence_only = TRUE,
+                                          correct_before_smoothing = TRUE,
                                           ref_date = NULL,
                                           time_step = "day",
                                           ...) {
@@ -465,6 +466,7 @@ get_infections_from_incidence <- function(incidence_data,
     list(delay, "delay_single_or_list", .get_input_length(incidence_data)),
     list(is_partially_reported_data, "boolean"),
     list(output_infection_incidence_only, "boolean"),
+    list(correct_before_smoothing, "boolean"),
     list(ref_date, "null_or_date"),
     list(time_step, "time_step")
   ))
@@ -476,36 +478,84 @@ get_infections_from_incidence <- function(incidence_data,
   if (is_partially_reported_data) {
     .are_valid_argument_values(list(list(delay_until_final_report, "delay_single_or_list", .get_input_length(incidence_data))))
 
-    incidence_data <- do.call(
-      "correct_for_partially_observed_data",
+    if(correct_before_smoothing) {
+      corrected_incidence <- do.call(
+        "correct_for_partially_observed_data",
+        c(
+          list(
+            incidence_data = incidence_data,
+            delay_until_final_report = delay_until_final_report,
+            ref_date = NULL,
+            time_step = "day"
+          ),
+          .get_shared_args(correct_for_partially_observed_data, dots_args)
+        )
+      )
+
+      smoothed_incidence <- do.call(
+        "smooth_incidence",
+        c(
+          list(
+            incidence_data = corrected_incidence,
+            smoothing_method = smoothing_method
+          ),
+          .get_shared_args(.smooth_LOESS, dots_args)
+        )
+      )
+
+      next_step_incidence <- smoothed_incidence
+    } else {
+
+      smoothed_incidence <- do.call(
+        "smooth_incidence",
+        c(
+          list(
+            incidence_data = incidence_data,
+            smoothing_method = smoothing_method
+          ),
+          .get_shared_args(.smooth_LOESS, dots_args)
+        )
+      )
+
+      corrected_incidence <- do.call(
+        "correct_for_partially_observed_data",
+        c(
+          list(
+            incidence_data = smoothed_incidence,
+            delay_until_final_report = delay_until_final_report,
+            ref_date = NULL,
+            time_step = "day"
+          ),
+          .get_shared_args(correct_for_partially_observed_data, dots_args)
+        )
+      )
+
+      next_step_incidence <- corrected_incidence
+    }
+
+
+
+
+  } else {
+    smoothed_incidence <- do.call(
+      "smooth_incidence",
       c(
         list(
           incidence_data = incidence_data,
-          delay_until_final_report = delay_until_final_report,
-          ref_date = NULL,
-          time_step = "day"
+          smoothing_method = smoothing_method
         ),
-        .get_shared_args(correct_for_partially_observed_data, dots_args)
+        .get_shared_args(.smooth_LOESS, dots_args)
       )
     )
-  }
 
-  smoothed_incidence <- do.call(
-    "smooth_incidence",
-    c(
-      list(
-        incidence_data = incidence_data,
-        smoothing_method = smoothing_method
-      ),
-      .get_shared_args(.smooth_LOESS, dots_args)
-    )
-  )
+    next_step_incidence <- smoothed_incidence
+  }
 
   deconvolved_incidence <- do.call(
     "deconvolve_incidence",
     c(
       list(
-        incidence_data = smoothed_incidence,
+        incidence_data = next_step_incidence,
         deconvolution_method = deconvolution_method,
         delay = delay
       ),
@@ -525,7 +575,7 @@ get_infections_from_incidence <- function(incidence_data,
     if (is_partially_reported_data) {
       output_list <- list(
         "observed_incidence" = original_incidence_data,
-        "corrected_incidence" = incidence_data,
+        "corrected_incidence" = corrected_incidence,
         "smoothed_incidence" = smoothed_incidence,
         "deconvolved_incidence" = deconvolved_incidence
       )
@@ -639,7 +689,8 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
           .smooth_LOESS,
           correct_for_partially_observed_data,
           .deconvolve_incidence_Richardson_Lucy,
-          convolve_delays
+          convolve_delays,
+          get_infections_from_incidence
         ),
         dots_args
       )
@@ -782,6 +833,7 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
                                                                   delay_until_partial,
                                                                   delay_until_final_report,
                                                                   partial_observation_requires_full_observation = TRUE,
+                                                                  correct_before_smoothing = TRUE,
                                                                   ref_date = NULL,
                                                                   time_step = "day",
                                                                   output_Re_only = TRUE,
@@ -847,7 +899,7 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
     )
   )
 
-  if (partial_observation_requires_full_observation) {
+  if (partial_observation_requires_full_observation & correct_before_smoothing) {
     partially_delayed_incidence <- do.call(
       "correct_for_partially_observed_data",
       c(
@@ -858,6 +910,8 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
         .get_shared_args(correct_for_partially_observed_data, dots_args)
       )
     )
+
+    partial_observation_requires_full_observation <- FALSE
   }
 
   estimate_from_combined_observations_dots_args <- .get_shared_args(
@@ -883,7 +937,8 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
         estimation_method = estimation_method,
         delay_until_partial = delay_distribution_until_partial,
         delay_until_final_report = delay_distribution_partial_to_full,
-        partial_observation_requires_full_observation = FALSE,
+        partial_observation_requires_full_observation = partial_observation_requires_full_observation,
+        correct_before_smoothing = correct_before_smoothing,
         ref_date = NULL,
         output_Re_only = FALSE,
         include_index = TRUE,
@@ -958,7 +1013,8 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
           estimation_method = estimation_method,
           delay_until_partial = delay_distribution_until_partial,
           delay_until_final_report = delay_distribution_partial_to_full,
-          partial_observation_requires_full_observation = FALSE,
+          partial_observation_requires_full_observation = partial_observation_requires_full_observation,
+          correct_before_smoothing = correct_before_smoothing,
           ref_date = NULL,
           output_Re_only = FALSE,
           include_index = TRUE,

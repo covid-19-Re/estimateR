@@ -4,7 +4,7 @@
 #' Currently only LOESS smoothing (\code{smoothing_method = "LOESS"}) is implemented.
 #'
 #' @example man/examples/smooth_incidence.R
-#' 
+#'
 #' @inheritParams module_methods
 #' @inherit module_structure
 #' @inheritDotParams .smooth_LOESS -incidence_input
@@ -65,8 +65,13 @@ smooth_incidence <- function(incidence_data,
 #' the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
 #' the number of timesteps in the beginning of \code{incidence_input} to take into account when computing
 #' the average initial Re.
+#' @param left_pad_with_zeroes boolean. Default is FALSE. Used for testing only.
 #'
-.smooth_LOESS <- function(incidence_input, data_points_incl = 21, degree = 1, initial_Re_estimate_window = 5) {
+.smooth_LOESS <- function(incidence_input,
+                          data_points_incl = 21,
+                          degree = 1,
+                          initial_Re_estimate_window = 5,
+                          left_pad_with_zeroes = FALSE) {
   .are_valid_argument_values(list(
     list(incidence_input, "module_input"),
     list(data_points_incl, "non_negative_number"),
@@ -85,7 +90,11 @@ smooth_incidence <- function(incidence_data,
   avg_change_rate[!is.finite(avg_change_rate)] <- 1
   avg_change_rate <- mean(avg_change_rate)
 
-  values_to_pad_with <- incidence_vector[1] * (avg_change_rate^(-n_pad:-1))
+  if(left_pad_with_zeroes) {
+    values_to_pad_with <- rep(0, times = n_pad)
+  } else {
+    values_to_pad_with <- incidence_vector[1] * (avg_change_rate^(-n_pad:-1))
+  }
 
   c_data <- data.frame(
     value = c(values_to_pad_with, incidence_vector),

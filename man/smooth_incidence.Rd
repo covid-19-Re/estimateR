@@ -51,6 +51,7 @@ the ratio of \code{data_points_incl} and the number of time steps in the input d
 the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
 the number of timesteps in the beginning of \code{incidence_input} to take into account when computing
 the average initial Re.}
+    \item{\code{left_pad_with_zeroes}}{boolean. Default is FALSE. Used for testing only.}
   }}
 }
 \value{

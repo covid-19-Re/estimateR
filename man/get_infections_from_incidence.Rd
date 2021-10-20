@@ -12,6 +12,7 @@ get_infections_from_incidence(
   is_partially_reported_data = FALSE,
   delay_until_final_report = NULL,
   output_infection_incidence_only = TRUE,
+  correct_before_smoothing = TRUE,
   ref_date = NULL,
   time_step = "day",
   ...
@@ -77,6 +78,9 @@ Each delay can be one of:
 Should the output contain only the estimated infection incidence?
 (as opposed to containing results for intermediary steps)}
 
+\item{correct_before_smoothing}{Boolean.
+Default is TRUE, parameter exists only for comparison purposes.}
+
 \item{ref_date}{Date. Optional. Date of the first data entry in \code{incidence_data}}
 
 \item{time_step}{string. Time between two consecutive incidence datapoints.
@@ -93,8 +97,10 @@ the ratio of \code{data_points_incl} and the number of time steps in the input d
 the data back in time, padding with values obtained by assuming a constant Re. This parameter represents
 the number of timesteps in the beginning of \code{incidence_input} to take into account when computing
 the average initial Re.}
+    \item{\code{left_pad_with_zeroes}}{boolean. Default is FALSE. Used for testing only.}
     \item{\code{delay_distribution}}{numeric square matrix or vector.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
+    \item{\code{constant_right_padding}}{Boolean. Default is FALSE. Only used for testing.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
     \item{\code{verbose}}{Boolean. Print verbose output?}
     \item{\code{cutoff_observation_probability}}{value between 0 and 1.

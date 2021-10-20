@@ -67,6 +67,7 @@ Each delay in the \code{delays} list can be one of:
 }}
     \item{\code{delay_distribution}}{numeric square matrix or vector.}
     \item{\code{threshold_chi_squared}}{numeric scalar. Threshold for chi-squared values under which the R-L algorithm stops.}
+    \item{\code{constant_right_padding}}{Boolean. Default is FALSE. Only used for testing.}
     \item{\code{max_iterations}}{integer. Maximum threshold for the number of iterations in the R-L algorithm.}
     \item{\code{verbose}}{Boolean. Print verbose output?}
   }}
