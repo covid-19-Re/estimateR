@@ -2,6 +2,8 @@
 #'
 #' Perform a simulation of infections through time, based on a reproductive number course,
 #' a series of imported cases and a serial interval distribution.
+#' 
+#' @example man/examples/simulate_infections.R
 #'
 #' @param imported_infections Positive integer vector.
 #' Must be of length at least one. Does not need to be the same length as \code{Rt}.
@@ -35,6 +37,8 @@ simulate_infections <- function(Rt, imported_infections = 1, mean_SI = 4.8, sd_S
 
 #' Simulate a series of delayed observations from a series of infections.
 #'
+#' @example man/examples/simulate_delayed_observations.R
+#'
 #' @inheritParams simulate
 #' @inheritParams delay_high
 #'
@@ -63,6 +67,8 @@ simulate_delayed_observations <- function(infections, delay, noise = list(type =
 #' @param prob_partial_observation Numeric value between 0 and 1.
 #' Probability of an infection to be observed as a partially-delayed observation,
 #' instead of as a fully-delayed observation.
+#'
+#' @example man/examples/simulate_combined_observations.R
 #'
 #' @return A dataframe containing two columns:
 #' a column "partially_delayed" containing partially-delayed observations
