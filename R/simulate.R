@@ -14,6 +14,13 @@
 #' @return Integer vector. Simulated infections through time.
 #' @export
 simulate_infections <- function(Rt, imported_infections = 1, mean_SI = 4.8, sd_SI = 2.3){
+  
+  .are_valid_argument_values(list(
+    list(Rt, "numeric_vector"),
+    list(imported_infections, "non_negative_integer_vector"),
+    list(mean_SI, "positive_number"),
+    list(sd_SI, "positive_number")
+  ))
 
   length_infections <- max(length(Rt), length(imported_infections))
 
@@ -45,6 +52,13 @@ simulate_infections <- function(Rt, imported_infections = 1, mean_SI = 4.8, sd_S
 #' @return Integer vector. Simulated delayed observations.
 #' @export
 simulate_delayed_observations <- function(infections, delay, noise = list(type = "noiseless")){
+  
+  .are_valid_argument_values(list(
+    list(infections, "non_negative_integer_vector"),
+    list(delay, "delay_object"),
+    list(noise, "noise")
+  ))
+  
   total_delay_distribution <- convolve_delays(delays = delay)
 
   observations <- sapply(1:length(infections), function(x){.compute_Ot(infections, total_delay_distribution, day = x)})
@@ -79,6 +93,15 @@ simulate_combined_observations <- function(infections,
                                            delay_until_final_report,
                                            prob_partial_observation,
                                            noise = list(type = 'noiseless')){
+  
+  .are_valid_argument_values(list(
+    list(infections, "non_negative_integer_vector"),
+    list(delay_until_partial, "delay_object"),
+    list(delay_until_final_report, "delay_object"),
+    list(prob_partial_observation, "numeric_between_zero_one"),
+    list(noise, "noise")
+  ))
+  
   delay_until_partial <- .get_delay_distribution(delay_until_partial)
   all_partial_observations <- sapply(1:length(infections),
                                      function(x){.compute_Ot(infections, delay_until_partial, day = x)})
