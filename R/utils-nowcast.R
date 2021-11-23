@@ -30,7 +30,7 @@
 #' is passed as a dataframe of individual delay observations (a.k.a empirical delay data).
 #' In that case, \code{ref_date} must correspond to the date of the first time step in \code{incidence_data}.
 #'
-#' @example man/examples/correct_for_partially_observed_data.R
+#' @example man/examples/nowcast.R
 #'
 #' @inherit module_structure
 #' @inherit delay_high
@@ -38,7 +38,7 @@
 #' @inheritDotParams get_matrix_from_empirical_delay_distr -empirical_delays -n_report_time_steps -return_fitted_distribution
 #'
 #' @export
-correct_for_partially_observed_data <- function(incidence_data,
+nowcast <- function(incidence_data,
                                                 delay_until_final_report,
                                                 cutoff_observation_probability = 0.33,
                                                 gap_to_present = 0,

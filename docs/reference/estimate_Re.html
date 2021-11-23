@@ -73,7 +73,7 @@ and computes the Re value through time (also known as Rt)." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">estimateR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.9000</span>
       </span>
     </div>
 
@@ -295,11 +295,13 @@ This option is chosen by setting <code>estimation_method = "EpiEstim piecewise c
 
 <span class='va'>shape_onset_to_report</span> <span class='op'>=</span> <span class='fl'>2.7</span>
 <span class='va'>scale_onset_to_report</span> <span class='op'>=</span> <span class='fl'>1.6</span>
-<span class='va'>delay_onset_to_report</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"gamma"</span>, shape <span class='op'>=</span> <span class='va'>shape_onset_to_report</span>, scale <span class='op'>=</span> <span class='va'>scale_onset_to_report</span><span class='op'>)</span>
+<span class='va'>delay_onset_to_report</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"gamma"</span>,
+                              shape <span class='op'>=</span> <span class='va'>shape_onset_to_report</span>,
+                              scale <span class='op'>=</span> <span class='va'>scale_onset_to_report</span><span class='op'>)</span>
 
 <span class='va'>smoothed_incidence</span> <span class='op'>&lt;-</span> <span class='fu'><a href='smooth_incidence.html'>smooth_incidence</a></span><span class='op'>(</span><span class='va'>HK_incidence_data</span><span class='op'>$</span><span class='va'>case_incidence</span><span class='op'>)</span>
 <span class='va'>deconvolved_incidence</span> <span class='op'>&lt;-</span> <span class='fu'><a href='deconvolve_incidence.html'>deconvolve_incidence</a></span><span class='op'>(</span>
-  <span class='va'>smoothed_incidence</span>, 
+  <span class='va'>smoothed_incidence</span>,
   delay <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='va'>delay_incubation</span>, <span class='va'>delay_onset_to_report</span><span class='op'>)</span>
 <span class='op'>)</span>
 
@@ -318,19 +320,20 @@ This option is chosen by setting <code>estimation_method = "EpiEstim piecewise c
   mean_Re_prior <span class='op'>=</span> <span class='fl'>1.25</span>
 <span class='op'>)</span>
 
-<span class='co'># Incorporating prior knowledge over the disease. Here, the mean of the serial </span>
-<span class='co'># interval is assumed to be 5 days, and the standard deviation is assumed to be </span>
-<span class='co'># 2.5 days. </span>
+<span class='co'># Incorporating prior knowledge over the disease. Here, the mean of the serial</span>
+<span class='co'># interval is assumed to be 5 days, and the standard deviation is assumed to be</span>
+<span class='co'># 2.5 days.</span>
 <span class='va'>Re_estimate_3</span> <span class='op'>&lt;-</span> <span class='fu'>estimate_Re</span><span class='op'>(</span>
   incidence_data <span class='op'>=</span> <span class='va'>deconvolved_incidence</span>,
   mean_serial_interval <span class='op'>=</span> <span class='fl'>5</span>,
   std_serial_interval <span class='op'>=</span> <span class='fl'>2.5</span>
 <span class='op'>)</span>
 
-<span class='co'># Incorporating prior knowledge over the epidemic. Here, it is assumed that Re </span>
+<span class='co'># Incorporating prior knowledge over the epidemic. Here, it is assumed that Re</span>
 <span class='co'># changes values 4 times during the epidemic, so the intervals over which Re is</span>
 <span class='co'># assumed to be constant are passed as a parameter.</span>
-<span class='va'>last_interval_index</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='va'>deconvolved_incidence</span><span class='op'>$</span><span class='va'>values</span><span class='op'>)</span> <span class='op'>+</span> <span class='va'>deconvolved_incidence</span><span class='op'>$</span><span class='va'>index_offset</span> 
+<span class='va'>last_interval_index</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='va'>deconvolved_incidence</span><span class='op'>$</span><span class='va'>values</span><span class='op'>)</span> <span class='op'>+</span>
+  <span class='va'>deconvolved_incidence</span><span class='op'>$</span><span class='va'>index_offset</span>
 
 <span class='va'>Re_estimate_4</span> <span class='op'>&lt;-</span> <span class='fu'>estimate_Re</span><span class='op'>(</span>
   incidence_data <span class='op'>=</span> <span class='va'>deconvolved_incidence</span>,

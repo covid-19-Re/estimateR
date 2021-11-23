@@ -443,7 +443,7 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
 #' @inheritDotParams .smooth_LOESS -incidence_input
 #' @inheritDotParams .deconvolve_incidence_Richardson_Lucy -incidence_input
 #' @inheritDotParams merge_outputs -output_list -include_index -index_col
-#' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_until_final_report
+#' @inheritDotParams nowcast -incidence_data -delay_until_final_report
 #'
 #' @return Time series of infections through time.
 #' If \code{ref_date} is provided then a date column is included with the output.
@@ -477,7 +477,7 @@ get_infections_from_incidence <- function(incidence_data,
     .are_valid_argument_values(list(list(delay_until_final_report, "delay_single_or_list", .get_input_length(incidence_data))))
 
     incidence_data <- do.call(
-      "correct_for_partially_observed_data",
+      "nowcast",
       c(
         list(
           incidence_data = incidence_data,
@@ -485,7 +485,7 @@ get_infections_from_incidence <- function(incidence_data,
           ref_date = NULL,
           time_step = "day"
         ),
-        .get_shared_args(correct_for_partially_observed_data, dots_args)
+        .get_shared_args(nowcast, dots_args)
       )
     )
   }
@@ -587,7 +587,7 @@ get_infections_from_incidence <- function(incidence_data,
 #' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
 #' @inheritDotParams .estimate_Re_EpiEstim_piecewise_constant -incidence_input -output_HPD
 #' @inheritDotParams merge_outputs -output_list -include_index -index_col
-#' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_until_final_report
+#' @inheritDotParams nowcast -incidence_data -delay_until_final_report
 #'
 #' @inherit combining_observations
 #'
@@ -637,7 +637,7 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
       .get_shared_args(
         list(
           .smooth_LOESS,
-          correct_for_partially_observed_data,
+          nowcast,
           .deconvolve_incidence_Richardson_Lucy,
           convolve_delays
         ),
@@ -764,7 +764,7 @@ estimate_from_combined_observations <- function(partially_delayed_incidence,
 #' @inheritDotParams .estimate_Re_EpiEstim_sliding_window -incidence_input
 #' @inheritDotParams .estimate_Re_EpiEstim_piecewise_constant -incidence_input -output_HPD
 #' @inheritDotParams merge_outputs -output_list -include_index -index_col
-#' @inheritDotParams correct_for_partially_observed_data -incidence_data -delay_until_final_report
+#' @inheritDotParams nowcast -incidence_data -delay_until_final_report
 #'
 #' @inherit combining_observations
 #' @inherit bootstrap_return return
@@ -849,13 +849,13 @@ get_bootstrapped_estimates_from_combined_observations <- function(partially_dela
 
   if (partial_observation_requires_full_observation) {
     partially_delayed_incidence <- do.call(
-      "correct_for_partially_observed_data",
+      "nowcast",
       c(
         list(
           incidence_data = partially_delayed_incidence,
           delay_until_final_report = delay_distribution_partial_to_full
         ),
-        .get_shared_args(correct_for_partially_observed_data, dots_args)
+        .get_shared_args(nowcast, dots_args)
       )
     )
   }

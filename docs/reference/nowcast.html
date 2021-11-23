@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Correct incidence data for yet-to-be-observed fraction of events — correct_for_partially_observed_data • estimateR</title>
+<title>Correct incidence data for yet-to-be-observed fraction of events — nowcast • estimateR</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,7 @@
 
 
 
-<meta property="og:title" content="Correct incidence data for yet-to-be-observed fraction of events — correct_for_partially_observed_data" />
+<meta property="og:title" content="Correct incidence data for yet-to-be-observed fraction of events — nowcast" />
 <meta property="og:description" content="Use this function to correct the tail of an incidence time series
 if incidence was collected following a subsequent observation event.
 For instance, if the incidence represents people starting to show symptoms of a disease
@@ -50,10 +50,7 @@ confirmed by a test were reported.
 Thus, close to the present, there is an under-reporting of onset of symptoms events.
 In order to account for this effect, this function divides each incidence value
 by the probability of an event happening at a particular time step to have been observed.
-Typically, this correction only affects the few most recent data points.
-A trimming is done at the tail of the time series to avoid correcting for time steps
-for which the observation probability is too low, which could result in too uncertain corrected values.
-This trimming is tuned via the cutoff_observation_probability argument." />
+Typically, this correction only affects the few most recent data points." />
 
 
 
@@ -85,7 +82,7 @@ This trimming is tuned via the cutoff_observation_probability argument." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">estimateR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.9000</span>
       </span>
     </div>
 
@@ -142,7 +139,7 @@ This trimming is tuned via the cutoff_observation_probability argument." />
     <div class="page-header">
     <h1>Correct incidence data for yet-to-be-observed fraction of events</h1>
     
-    <div class="hidden name"><code>correct_for_partially_observed_data.Rd</code></div>
+    <div class="hidden name"><code>nowcast.Rd</code></div>
     </div>
 
     <div class="ref-description">
@@ -156,16 +153,14 @@ confirmed by a test were reported.
 Thus, close to the present, there is an under-reporting of onset of symptoms events.
 In order to account for this effect, this function divides each incidence value
 by the probability of an event happening at a particular time step to have been observed.
-Typically, this correction only affects the few most recent data points.
-A trimming is done at the tail of the time series to avoid correcting for time steps
-for which the observation probability is too low, which could result in too uncertain corrected values.
-This trimming is tuned via the <code>cutoff_observation_probability</code> argument.</p>
+Typically, this correction only affects the few most recent data points.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>correct_for_partially_observed_data</span><span class='op'>(</span>
+    <pre class="usage"><span class='fu'>nowcast</span><span class='op'>(</span>
   <span class='va'>incidence_data</span>,
   <span class='va'>delay_until_final_report</span>,
   cutoff_observation_probability <span class='op'>=</span> <span class='fl'>0.33</span>,
+  gap_to_present <span class='op'>=</span> <span class='fl'>0</span>,
   ref_date <span class='op'>=</span> <span class='cn'>NULL</span>,
   time_step <span class='op'>=</span> <span class='st'>"day"</span>,
   <span class='va'>...</span>
@@ -210,6 +205,12 @@ Only datapoints for timesteps that have a probability of observing a event
 higher than <code>cutoff_observation_probability</code> are kept.
 The few datapoints with a lower probability to be observed are trimmed off
 the tail of the timeseries.</p></td>
+    </tr>
+    <tr>
+      <th>gap_to_present</th>
+      <td><p>Integer. Default value: 0.
+Number of time steps truncated off from the right tail of the raw incidence data.
+See Details for more details.</p></td>
     </tr>
     <tr>
       <th>ref_date</th>
@@ -280,36 +281,21 @@ the <code>index_offset</code> is dropped and the <code>values</code>
 element is returned as a numeric vector.</p>
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The <code>ref_date</code> argument is only needed if the <code>delay_until_final_report</code>
+    <p>A trimming is done at the tail of the time series to avoid correcting for time steps
+for which the observation probability is too low, which could result in too uncertain corrected values.
+This trimming is tuned via the <code>cutoff_observation_probability</code> argument.</p>
+<p>The <code>gap_to_present</code> represents the number of time steps truncated off on the right end of the raw data.
+If no truncation was done, <code>gap_to_present</code> should be kept at its default value of 0.
+A truncation can be done when latest reported numbers are too unreliable, e.g. in a monitoring situation
+the latest X days of data can be deemed not worth keeping if they are not well consolidated.
+An alternative to this truncation is actually to nowcast the observed incidence using this function and a delay
+distribution representing the consolidation delay.
+Contrary to best-practice nowcasting methods, this function only provides a maximum-likelihood estimator
+of the acual incidence, it does not include uncertainty around this estimator.</p>
+<p>The <code>ref_date</code> argument is only needed if the <code>delay_until_final_report</code>
 is passed as a dataframe of individual delay observations (a.k.a empirical delay data).
 In that case, <code>ref_date</code> must correspond to the date of the first time step in <code>incidence_data</code>.</p>
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'>## Basic usage of correct_for_partially_observed_data</span>
-
-<span class='va'>shape_onset_to_report</span> <span class='op'>=</span> <span class='fl'>2.7</span>
-<span class='va'>scale_onset_to_report</span> <span class='op'>=</span> <span class='fl'>1.6</span>
-<span class='va'>delay_onset_to_report</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"gamma"</span>, shape <span class='op'>=</span> <span class='va'>shape_onset_to_report</span>, scale <span class='op'>=</span> <span class='va'>scale_onset_to_report</span><span class='op'>)</span>
-
-<span class='va'>corrected_incidence_data_1</span> <span class='op'>&lt;-</span> <span class='fu'>correct_for_partially_observed_data</span><span class='op'>(</span>
-  incidence_data <span class='op'>=</span> <span class='va'>HK_incidence_data</span><span class='op'>$</span><span class='va'>onset_incidence</span>,
-  delay_until_final_report <span class='op'>=</span> <span class='va'>delay_onset_to_report</span>
-<span class='op'>)</span>
-
-
-<span class='co'>## Advanced usage of correct_for_partially_observed_data</span>
-<span class='co'># Only taking into account cases that have a chance of being observed greater</span>
-<span class='co'># than 25%. Here, the delay between symptom onset and report is given as </span>
-<span class='co'># empirical delay data, hence it is needed to specify the date of the first</span>
-<span class='co'># entry in incidence_data</span>
-
-<span class='va'>corrected_incidence_data_2</span> <span class='op'>&lt;-</span> <span class='fu'>correct_for_partially_observed_data</span><span class='op'>(</span>
-  incidence_data <span class='op'>=</span> <span class='va'>HK_incidence_data</span><span class='op'>$</span><span class='va'>onset_incidence</span>,
-  delay_until_final_report <span class='op'>=</span> <span class='va'>HK_delay_data</span>,
-  ref_date <span class='op'>=</span> <span class='va'>HK_incidence_data</span><span class='op'>$</span><span class='va'>date</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>]</span>,
-  cutoff_observation_probability <span class='op'>=</span> <span class='fl'>0.25</span>
-<span class='op'>)</span>
-</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

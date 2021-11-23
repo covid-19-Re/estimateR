@@ -115,7 +115,7 @@ See Details for more details.}
 (as opposed to containing results for each intermediate step)}
 
 \item{...}{
-  Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}, \code{\link[=.estimate_Re_EpiEstim_piecewise_constant]{.estimate_Re_EpiEstim_piecewise_constant}}, \code{\link[=merge_outputs]{merge_outputs}}, \code{\link[=correct_for_partially_observed_data]{correct_for_partially_observed_data}}
+  Arguments passed on to \code{\link[=.smooth_LOESS]{.smooth_LOESS}}, \code{\link[=.deconvolve_incidence_Richardson_Lucy]{.deconvolve_incidence_Richardson_Lucy}}, \code{\link[=.estimate_Re_EpiEstim_sliding_window]{.estimate_Re_EpiEstim_sliding_window}}, \code{\link[=.estimate_Re_EpiEstim_piecewise_constant]{.estimate_Re_EpiEstim_piecewise_constant}}, \code{\link[=merge_outputs]{merge_outputs}}, \code{\link[=nowcast]{nowcast}}
   \describe{
     \item{\code{data_points_incl}}{integer. Size of the window used in the LOESS algorithm.
 The \code{span} parameter passed to \code{\link[stats]{loess}} is computed as
@@ -169,6 +169,9 @@ Only datapoints for timesteps that have a probability of observing a event
 higher than \code{cutoff_observation_probability} are kept.
 The few datapoints with a lower probability to be observed are trimmed off
 the tail of the timeseries.}
+    \item{\code{gap_to_present}}{Integer. Default value: 0.
+Number of time steps truncated off from the right tail of the raw incidence data.
+See Details for more details.}
   }}
 }
 \value{
