@@ -296,6 +296,34 @@ of the acual incidence, it does not include uncertainty around this estimator.</
 is passed as a dataframe of individual delay observations (a.k.a empirical delay data).
 In that case, <code>ref_date</code> must correspond to the date of the first time step in <code>incidence_data</code>.</p>
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='co'>## Basic usage of nowcast</span>
+
+<span class='va'>shape_onset_to_report</span> <span class='op'>=</span> <span class='fl'>2.7</span>
+<span class='va'>scale_onset_to_report</span> <span class='op'>=</span> <span class='fl'>1.6</span>
+<span class='va'>delay_onset_to_report</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"gamma"</span>,
+                              shape <span class='op'>=</span> <span class='va'>shape_onset_to_report</span>,
+                              scale <span class='op'>=</span> <span class='va'>scale_onset_to_report</span><span class='op'>)</span>
+
+<span class='va'>corrected_incidence_data_1</span> <span class='op'>&lt;-</span> <span class='fu'>nowcast</span><span class='op'>(</span>
+  incidence_data <span class='op'>=</span> <span class='va'>HK_incidence_data</span><span class='op'>$</span><span class='va'>onset_incidence</span>,
+  delay_until_final_report <span class='op'>=</span> <span class='va'>delay_onset_to_report</span>
+<span class='op'>)</span>
+
+
+<span class='co'>## Advanced usage of nowcast</span>
+<span class='co'># Only taking into account cases that have a chance of being observed greater</span>
+<span class='co'># than 25%. Here, the delay between symptom onset and report is given as</span>
+<span class='co'># empirical delay data, hence it is needed to specify the date of the first</span>
+<span class='co'># entry in incidence_data</span>
+
+<span class='va'>corrected_incidence_data_2</span> <span class='op'>&lt;-</span> <span class='fu'>nowcast</span><span class='op'>(</span>
+  incidence_data <span class='op'>=</span> <span class='va'>HK_incidence_data</span><span class='op'>$</span><span class='va'>onset_incidence</span>,
+  delay_until_final_report <span class='op'>=</span> <span class='va'>HK_delay_data</span>,
+  ref_date <span class='op'>=</span> <span class='va'>HK_incidence_data</span><span class='op'>$</span><span class='va'>date</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>]</span>,
+  cutoff_observation_probability <span class='op'>=</span> <span class='fl'>0.25</span>
+<span class='op'>)</span>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -307,7 +335,7 @@ In that case, <code>ref_date</code> must correspond to the date of the first tim
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Ana Grosu.</p>
+  <p>Developed by Jérémie Scire, Ana Grosu, Daniel Angst, Jana Huisman.</p>
 </div>
 
 <div class="pkgdown">

@@ -14,7 +14,6 @@ test_that("nowcast() is correct with large gap_to_present", {
   toy_delay <- c(0.05, 0.05, 0.3, 0.2, 0.1, 0.3)
 
   corrected_result <- nowcast(toy_incidence, toy_delay, cutoff_observation_probability = 0.11, gap_to_present = 10)
-  corrected_result <- nowcast(toy_incidence, toy_delay, cutoff_observation_probability = 0.11, gap_to_present = 1)
 
   expect_equal(corrected_result$values, toy_incidence, tolerance = 0.01)
 })
