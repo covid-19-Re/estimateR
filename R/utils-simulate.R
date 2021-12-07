@@ -174,7 +174,7 @@
 #'
 #' @return List of delay distributions (specified as lists)
 .build_list_of_gradually_changing_delays <- function(init_delay, final_delay, n_time_steps) {
-  #TODO enforce that both delays are distributions specified as lists and are gamma distributions with scake and shape
+  #TODO enforce that both delays are distributions specified as lists and are gamma distributions with scale and shape
 
   init_distrib_name <- init_delay$name
   final_distrib_name <- final_delay$name

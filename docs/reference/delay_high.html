@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">estimateR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.9000</span>
       </span>
     </div>
 
@@ -166,6 +166,12 @@ Each delay can be one of:</p><ul>
 and the a posteriori observations of these events.</p></td>
     </tr>
     <tr>
+      <th>gap_to_present</th>
+      <td><p>Integer. Default value: 0.
+Number of time steps truncated off from the right tail of the raw incidence data.
+See Details for more details.</p></td>
+    </tr>
+    <tr>
       <th>cutoff_observation_probability</th>
       <td><p>value between 0 and 1.
 Only datapoints for timesteps that have a probability of observing a event
@@ -221,7 +227,7 @@ See Details for more details.</p></td>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Ana Grosu.</p>
+  <p>Developed by Jérémie Scire, Ana Grosu, Daniel Angst, Jana Huisman.</p>
 </div>
 
 <div class="pkgdown">

@@ -74,7 +74,7 @@ It returns an inferred incidence of infection events." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">estimateR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.9000</span>
       </span>
     </div>
 
@@ -234,7 +234,7 @@ Should the output contain only the estimated infection incidence?
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Arguments passed on to <code><a href='.smooth_LOESS.html'>.smooth_LOESS</a></code>, <code><a href='.deconvolve_incidence_Richardson_Lucy.html'>.deconvolve_incidence_Richardson_Lucy</a></code>, <code><a href='merge_outputs.html'>merge_outputs</a></code>, <code><a href='correct_for_partially_observed_data.html'>correct_for_partially_observed_data</a></code></p><dl>
+      <td><p>Arguments passed on to <code><a href='.smooth_LOESS.html'>.smooth_LOESS</a></code>, <code><a href='.deconvolve_incidence_Richardson_Lucy.html'>.deconvolve_incidence_Richardson_Lucy</a></code>, <code><a href='merge_outputs.html'>merge_outputs</a></code>, <code><a href='nowcast.html'>nowcast</a></code></p><dl>
     <dt><code>data_points_incl</code></dt><dd><p>integer. Size of the window used in the LOESS algorithm.
 The <code>span</code> parameter passed to <code><a href='https://rdrr.io/r/stats/loess.html'>loess</a></code> is computed as
 the ratio of <code>data_points_incl</code> and the number of time steps in the input data.</p></dd>
@@ -252,6 +252,9 @@ Only datapoints for timesteps that have a probability of observing a event
 higher than <code>cutoff_observation_probability</code> are kept.
 The few datapoints with a lower probability to be observed are trimmed off
 the tail of the timeseries.</p></dd>
+    <dt><code>gap_to_present</code></dt><dd><p>Integer. Default value: 0.
+Number of time steps truncated off from the right tail of the raw incidence data.
+See Details for more details.</p></dd>
   
 </dl></td>
     </tr>
@@ -274,17 +277,19 @@ from infection until this secondary delayed observation.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'>## Basic usage of get_infections_from_incidence</span>
-<span class='co'># Recovering infection events from case incidence data assuming distinct gamma </span>
-<span class='co'># distributions for the delay between infection and symptom onset, and the delay </span>
+<span class='co'># Recovering infection events from case incidence data assuming distinct gamma</span>
+<span class='co'># distributions for the delay between infection and symptom onset, and the delay</span>
 <span class='co'># between symptom onset and case reporting.</span>
 
-<span class='va'>shape_incubation</span> <span class='op'>=</span> <span class='fl'>3.2</span> 
+<span class='va'>shape_incubation</span> <span class='op'>=</span> <span class='fl'>3.2</span>
 <span class='va'>scale_incubation</span> <span class='op'>=</span> <span class='fl'>1.3</span>
 <span class='va'>delay_incubation</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"gamma"</span>, shape <span class='op'>=</span> <span class='va'>shape_incubation</span>, scale <span class='op'>=</span> <span class='va'>scale_incubation</span><span class='op'>)</span>
 
 <span class='va'>shape_onset_to_report</span> <span class='op'>=</span> <span class='fl'>2.7</span>
 <span class='va'>scale_onset_to_report</span> <span class='op'>=</span> <span class='fl'>1.6</span>
-<span class='va'>delay_onset_to_report</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"gamma"</span>, shape <span class='op'>=</span> <span class='va'>shape_onset_to_report</span>, scale <span class='op'>=</span> <span class='va'>scale_onset_to_report</span><span class='op'>)</span>
+<span class='va'>delay_onset_to_report</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>name<span class='op'>=</span><span class='st'>"gamma"</span>,
+                              shape <span class='op'>=</span> <span class='va'>shape_onset_to_report</span>,
+                              scale <span class='op'>=</span> <span class='va'>scale_onset_to_report</span><span class='op'>)</span>
 
 <span class='va'>infections_1</span> <span class='op'>&lt;-</span> <span class='fu'>get_infections_from_incidence</span><span class='op'>(</span>
   <span class='va'>HK_incidence_data</span><span class='op'>$</span><span class='va'>case_incidence</span>,
@@ -315,7 +320,7 @@ from infection until this secondary delayed observation.</p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Ana Grosu.</p>
+  <p>Developed by Jérémie Scire, Ana Grosu, Daniel Angst, Jana Huisman.</p>
 </div>
 
 <div class="pkgdown">

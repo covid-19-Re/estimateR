@@ -31,7 +31,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">estimateR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.9000</span>
       </span>
     </div>
 
@@ -141,7 +141,7 @@
   
 <span class="co"># Keep columns of interest only  </span>
 <span class="va">EST_incidence</span> <span class="op">&lt;-</span> <span class="va">EST_data</span> <span class="op">%&gt;%</span>
-  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="http://lubridate.tidyverse.org/reference/as_date.html">as_date</a></span><span class="op">(</span><span class="va">StatisticsDate</span><span class="op">)</span>,
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">transmute</a></span><span class="op">(</span>date <span class="op">=</span> <span class="fu"><a href="https://lubridate.tidyverse.org/reference/as_date.html">as_date</a></span><span class="op">(</span><span class="va">StatisticsDate</span><span class="op">)</span>,
             case_incidence <span class="op">=</span> <span class="va">DailyCases</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 <p>In case the data is inaccessible, an earlier version is stored in the <code>EST_incidence_data</code> variable with <strong>estimateR</strong>.</p>
@@ -225,12 +225,12 @@
 <span class="co">#&gt; # A tibble: 6 x 4</span>
 <span class="co">#&gt;   date       Re_estimate CI_down_Re_estimate CI_up_Re_estimate</span>
 <span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;               &lt;dbl&gt;             &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 2020-03-06        2.14                1.37              2.92</span>
-<span class="co">#&gt; 2 2020-03-07        1.87                1.33              2.42</span>
-<span class="co">#&gt; 3 2020-03-08        1.65                1.30              2.01</span>
-<span class="co">#&gt; 4 2020-03-09        1.49                1.18              1.80</span>
-<span class="co">#&gt; 5 2020-03-10        1.38                1.12              1.66</span>
-<span class="co">#&gt; 6 2020-03-11        1.31                1.07              1.58</span></code></pre></div>
+<span class="co">#&gt; 1 2020-03-06        2.14                1.62              2.67</span>
+<span class="co">#&gt; 2 2020-03-07        1.87                1.38              2.37</span>
+<span class="co">#&gt; 3 2020-03-08        1.65                1.22              2.08</span>
+<span class="co">#&gt; 4 2020-03-09        1.49                1.12              1.85</span>
+<span class="co">#&gt; 5 2020-03-10        1.38                1.07              1.69</span>
+<span class="co">#&gt; 6 2020-03-11        1.31                1.05              1.58</span></code></pre></div>
 <p>Now let us plot these estimates through time, along with their confidence intervals.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">EST_estimates</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">Re_estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
@@ -264,7 +264,7 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Jérémie Scire, Jana Huisman, Daniel Angst, Ana Grosu.</p>
+  <p>Developed by Jérémie Scire, Ana Grosu, Daniel Angst, Jana Huisman.</p>
 </div>
 
 <div class="pkgdown">

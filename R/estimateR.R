@@ -267,6 +267,9 @@ NULL
 #' @param delay_distribution_final_report
 #' Distribution of the delay between the events collected in the incidence data
 #' and the a posteriori observations of these events.
+#' @param gap_to_present Integer. Default value: 0.
+#' Number of time steps truncated off from the right tail of the raw incidence data.
+#' See Details for more details.
 #' @param cutoff_observation_probability value between 0 and 1.
 #' Only datapoints for timesteps that have a probability of observing a event
 #' higher than \code{cutoff_observation_probability} are kept.
