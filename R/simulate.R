@@ -55,7 +55,7 @@ simulate_delayed_observations <- function(infections, delay, noise = list(type =
   
   .are_valid_argument_values(list(
     list(infections, "non_negative_integer_vector"),
-    list(delay, "delay_object"),
+    list(delay, "delay_single_or_list", .get_input_length(infections)),
     list(noise, "noise")
   ))
   
@@ -96,8 +96,8 @@ simulate_combined_observations <- function(infections,
   
   .are_valid_argument_values(list(
     list(infections, "non_negative_integer_vector"),
-    list(delay_until_partial, "delay_object"),
-    list(delay_until_final_report, "delay_object"),
+    list(delay_until_partial, "delay_single_or_list", .get_input_length(infections)),
+    list(delay_until_final_report, "delay_single_or_list", .get_input_length(infections)),
     list(prob_partial_observation, "numeric_between_zero_one"),
     list(noise, "noise")
   ))

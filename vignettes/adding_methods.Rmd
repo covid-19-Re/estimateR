@@ -1,0 +1,373 @@
+---
+title: "Adding a new method to the package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Adding a new method to the package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+This vignette aims to explain the steps required in order to extend the functionality of the package. It is not targeted towards the regular user but towards either: method developers that wish to contribute to the estimateR package, or users with good programming knowledge who find that a certain function needed in their analysis is missing. 
+The estimateR package is built in such a way that extending existing functionality is as easy as possible. A standard analysis might include the following steps: smoothing the data, performing a deconvolution step to recover the infection time-series and finally performing an estimation step to recover the reproductive number. Each one of these steps is implemented separately from the others, as an independent module. The top-level functions usually take a string argument that specifies the method to be used when performing the respective action. For example, the smoothing function `smooth_incidence()` can apply different smoothing methods, by passing different strings to the `smoothing_method` parameter. This makes adding new functionality easy, by adding a new accepted value for the `..._method` parameter, that implements the desired behaviour.
+
+In this vignette, we will add an exponential smoothing method to the `smooth_incidence` function. Exponential smoothing is a form of smoothing that computes a weighted average over all observations in the input time series, with weights that are exponentially decreasing over time, depending on a constant smoothing parameter. It acts as a low-pass filters, removing high-frequency noise. The `smooth` package provides an exponential smoothing function, `es()`. Thus, we will create a wrapper around the `smooth::es()` function, and include it in estimateR, by adding `smoothing_method = "EXPONENTIAL"` as an accepted parameter value.
+ 
+
+The functions that accept this type of extensions are:
+
+* `smooth_incidence`, by implementing an additional `smoothing_method`
+* `deconvolve_incidence`, by implementing an additional `deconvolution_method`
+* `estimate_Re`, by implementing an additional `estimation_method`
+* `get_bootstrap_replicate`, by implementing an additional `bootstrapping_method`
+* `summarise_uncertainty`, by implementing an additional `uncertainty_summary_method`
+
+
+## Adding a new smoothing method
+
+Adding a new function to the package requires having access to the latest version of the source code, which can be obtained by cloning the GitHub repository from [here](https://github.com/covid-19-Re/estimateR).
+
+The first step is to navigate to the source code of the function for which we want to add functionality. In this case, since we want to add a new parameter value for the `smooth_incidence()` function, we will navigate to the "R\\smooth.R" file. In this file, the LOESS smoothing method is already implemented, in `.smooth_LOESS()`. Following the same structure, we will create a new function called `.smooth_EXP()`. 
+
+
+The first step is to write the `.smooth_EXP()` function itself. Looking at the already implemented `.smooth_LOESS()` function, we see that the data type of `incidence_input` is "module input". We also note that our smoothing function should return a "module output" type variable. The "module input" and "module output" variables can be either strictly positive numerical vectors or lists with two elements: `values` (strictly positive numerical vector) and `index_offset` (integer). The `index_offset` represents the offset, counted in number of time steps, by which the first value in `values` is shifted compared to a reference time step. A more detailed explanation can be found in the documentation about `module inputs`. The incidence values can be recovered from a "module input" variable using the `.get_values()` function. "module output" variables can be constructed using the `.get_module_output()` function. Our new `.smooth_EXP()` function will then have the structure below.
+
+
+```{r function skeleton, eval=FALSE}
+.smooth_EXP <- function(incidence_input, ...additional_parameters) {
+  
+  incidence_vector <- .get_values(incidence_input)
+  
+  ### exponential smoothing of incidence values contained by incidence_vector
+  ...
+  ...
+  smoothed_vector <- ...function(incidence_vector)
+  ###
+  
+  return(.get_module_output(...)) 
+}
+```
+
+The `smooth::es()` function accepts many optional parameters, out of which we choose to only include some (`initial`, `level` and `cumulative`), for the sole purpose of exemplifying adding functions with different parameter data types (changing any of these parameters does not affect the smoothing of the data passed as input, which is the part we use; it only affects the forecasting of these values into the future). We will also make sure that all the inferred infection numbers are positive numbers. We will do this by replacing any negative number with 0.
+
+```{r es wrap, eval=FALSE}
+  smoothed_vector <- smooth::es(incidence_vector, 
+                                initial=initial, 
+                                level= level,
+                                cumulative=cumulative)$fitted
+  smoothed_vector[smoothed_vector < 0] <- 0
+```
+
+In order to use the `.get_module_output()` function, however, we need to convert the output of `smooth::es()` to a vector. We also need to pass on whatever offset the initial data might have had onto the output. Our function's return will look like below.
+
+```{r output, eval=FALSE}
+  ...
+  return(.get_module_output(c(smoothed_vector), .get_offset(incidence_input))) 
+```
+
+We need to check the values of the parameters, to ensure the user has passed the expected data types. This can be done using the `.are_valid_argument_values()` function, that receives as parameter a list of lists that contain the parameter to be tested and the expected data type of the parameter. Details about how to validate the parameters, construct the `.are_valid_argument_values()` call, as well as adding a new parameter data type for the `initial` parameter can be found below, in the [Validating parameter values] section. The validation call will look like below.
+
+```{r validation, eval=FALSE}
+  .are_valid_argument_values(list(
+      list(incidence_input, "module_input"),
+      list(initial, "exponential_smoothing_initial"),
+      list(level, "number"),
+      list(cumulative, "boolean")
+    ))
+```
+
+Putting together all the chunks above, the final `smooth_EXP()` function will look like so.
+
+```{r function}
+.smooth_EXP <- function(incidence_input, initial="optimal", level = 0.95, cumulative = FALSE) {
+  .are_valid_argument_values(list(
+    list(incidence_input, "module_input"),
+    list(initial, "exponential_smoothing_initial"),
+    list(level, "number"),
+    list(cumulative, "boolean")
+  ))
+  
+  incidence_vector <- .get_values(incidence_input)
+  smoothed_vector <- smooth::es(incidence_vector, 
+                                initial=initial, 
+                                level= level,
+                                cumulative=cumulative)$fitted
+  smoothed_vector[smoothed_vector < 0] <- 0
+  
+  return(.get_module_output(c(smoothed_vector), .get_offset(incidence_input))) 
+}
+```
+
+The second step is to add the new "exponential smoothing" method as an accepted method for the `smooth_incidence()` function. In `smooth_incidence()`, there are a series of `if ... else` statements that call the appropriate smoothing function for a given method. The `smooth_incidence()` function currently looks like so:
+
+```{r smooth, eval = FALSE}
+smooth_incidence <- function(incidence_data,
+                             smoothing_method = "LOESS",
+                             simplify_output = TRUE,
+                             ...) {
+  .are_valid_argument_values(list(
+    list(incidence_data, "module_input"),
+    list(smoothing_method, "smoothing_method"),
+    list(simplify_output, "boolean")
+  ))
+
+
+  dots_args <- .get_dots_as_list(...)
+  input <- .get_module_input(incidence_data)
+
+  if (smoothing_method == "LOESS") {
+    smoothed_incidence <- do.call(
+      ".smooth_LOESS",
+      c(
+        list(incidence_input = input),
+        .get_shared_args(.smooth_LOESS, dots_args)
+      )
+    )
+  } else if (smoothing_method == "none") {
+    smoothed_incidence <- input
+  } else {
+    smoothed_incidence <- .make_empty_module_output()
+  }
+
+  if (simplify_output) {
+    smoothed_incidence <- .simplify_output(smoothed_incidence)
+  }
+
+  return(smoothed_incidence)
+}
+
+```
+
+We want that, in the case the user inputs `smoothing_method = "EXPONENTIAL"` as a parameter to the `smooth_incidence()` function, the `.smooth_EXP()` smoothing method defined above is called. In order to implement this, we will add a new `if()...else` loop.
+
+```{r mod_smooth, eval= FALSE}
+smooth_incidence <- function(incidence_data,
+                             smoothing_method = "LOESS",
+                             simplify_output = TRUE,
+                             ...) {
+  .are_valid_argument_values(list(
+    list(incidence_data, "module_input"),
+    list(smoothing_method, "smoothing_method"),
+    list(simplify_output, "boolean")
+  ))
+
+
+  dots_args <- .get_dots_as_list(...)
+  input <- .get_module_input(incidence_data)
+
+  if (smoothing_method == "LOESS") {
+    smoothed_incidence <- do.call(
+      ".smooth_LOESS",
+      c(
+        list(incidence_input = input),
+        .get_shared_args(.smooth_LOESS, dots_args)
+      )
+    )
+    
+  ### Added changes start
+  } else if(smoothing_method == "EXPONENTIAL"){
+    ###
+    ### ... call the newly implemented smoothing function ...
+    ###
+  ### Added changes end
+    
+  } else if (smoothing_method == "none") {
+    smoothed_incidence <- input
+  } else {
+    smoothed_incidence <- .make_empty_module_output()
+  }
+
+  if (simplify_output) {
+    smoothed_incidence <- .simplify_output(smoothed_incidence)
+  }
+
+  return(smoothed_incidence)
+}
+```
+
+
+Following the structure of the `if()` statement corresponding to the LOESS smoothing, we will use `do.call()` to call our new smoothing method. We will pass as arguments to the `.smooth_EXP()` function the `incidence_data` on which the smoothing needs to be performed, as well as any additional parameters that were passed in the dot arguments of `smooth_incidence()`, that `.smooth_EXP()` knows how to interpret. This list of parameters can be retrieved by using the already implemented `.get_shared_args()` function. In our case, for example, this will pass on the `initial`, `level` and `cumulative` parameters, if specified by the user. After making these changes, the `smooth_incidence()` function will look like below.
+
+
+```{r mod_smooth_full, eval= FALSE}
+smooth_incidence <- function(incidence_data,
+                             smoothing_method = "LOESS",
+                             simplify_output = TRUE,
+                             ...) {
+  .are_valid_argument_values(list(
+    list(incidence_data, "module_input"),
+    list(smoothing_method, "smoothing_method"),
+    list(simplify_output, "boolean")
+  ))
+
+
+  dots_args <- .get_dots_as_list(...)
+  input <- .get_module_input(incidence_data)
+
+  if (smoothing_method == "LOESS") {
+    smoothed_incidence <- do.call(
+      ".smooth_LOESS",
+      c(
+        list(incidence_input = input),
+        .get_shared_args(.smooth_LOESS, dots_args)
+      )
+    )
+    
+  ### Added changes start
+  } else if(smoothing_method == "EXPONENTIAL"){
+    smoothed_incidence <- do.call(
+      ".smooth_EXP",
+      c(
+        list(incidence_input = input),
+        .get_shared_args(.smooth_EXP, dots_args)
+      )
+    )
+  ### Added changes end
+    
+  } else if (smoothing_method == "none") {
+    smoothed_incidence <- input
+  } else {
+    smoothed_incidence <- .make_empty_module_output()
+  }
+
+  if (simplify_output) {
+    smoothed_incidence <- .simplify_output(smoothed_incidence)
+  }
+
+  return(smoothed_incidence)
+}
+```
+
+In order for the "EXPONENTIAL" string to be an accepted value for the `smoothing_method` parameter, we need to add it to the list of accepted strings defined in the  `R\\utils_validation.R` file. At the top of the file, in the `accepted_parameter_value` list, we will add "EXPONENTIAL" to the vector corresponding to `smoothing_method`. The `accepted_parameter_value` list, after modification, will look like so:
+
+```{r list, eval=FALSE}
+
+accepted_parameter_value <- list(
+  smoothing_method = c("LOESS", "EXPONENTIAL", "none"),
+  deconvolution_method = c("Richardson-Lucy delay distribution", "none"),
+  estimation_method = c("EpiEstim sliding window", "EpiEstim piecewise constant"),
+  bootstrapping_method = c("non-parametric block boostrap", "none"),
+  function_prefix = c("d", "q", "p", "r"),
+  uncertainty_summary_method = c("original estimate - CI from bootstrap estimates", 
+                                 "bagged mean - CI from bootstrap estimates"),
+  fit = c("none", "gamma")
+)
+
+```
+
+
+## Validating parameter values
+
+
+Validating parameters is an important step of adding novel functionality to the estimateR package, especially if the intention is to publish the changes for everyone to use, which we strongly encourage. It is not a mandatory step, as it can be skipped without affecting the final results. However it is advised to perform parameter value validation as it provides informative messages in case of errors and helps check the right data-types are passed on to the functions. 
+
+In order to ensure that all the parameter values passed by the user have the expected data types, at the beginning of every function in the estimateR package, a call to the `.are_valid_argument_values()` function is made. The function takes as parameter a list of lists containing the name of the parameter to be tested, a string that defines its type and optionally, an aditional parameter needed for validation. An example such list is shown below. The list of all already implemented data types checks can be found at the bottom of the `R\\utils_validation.R` file, in the `.are_valid_argument_values()` function. 
+
+```{r example, eval=FALSE}
+  .are_valid_argument_values(list(
+    list(incidence_data, "module_input"),
+    list(N_bootstrap_replicates, "non_negative_number"),
+    list(smoothing_method, "smoothing_method"),
+    list(delay, "delay_single_or_list", .get_input_length(incidence_data)) 
+    # Note: to check if an object is a delay object, for example, the length of
+    # the input data is needed. This is passed as a third element in the list
+    # corresponding to the delay object
+```
+
+The `.are_valid_argument_values()` function will go through every parameter passed in the list, and call its corresponding validation function specified in the `switch` structure inside `.are_valid_argument_values()`. The validation functions already implemented take as parameters the value of the parameter to be validated (stored in `user_input`) and the original name the respective parameter had (in order to display informative error messages; stored in `parameter_name`). Depending on the case, some of them also make use of a third parameter, that (in case it was added as a third element to the list described above) is stored in `additional_function_parameter`. They all return `True` in case of success and, more importantly, **they are assumed to throw an informative error, using the `stop()` function, if the parameter does not satisfy the desired conditions**. Other already implemented validation functions can be used in the new validation function as well. For example, if we wanted to add a new type, we would follow the following steps:
+
+
+```{r addf, eval=FALSE}
+
+# Add validation function in R\utils_validation.R
+.check_is_favourite_food <- function(user_input, parameter_name) {
+ 
+   .check_if_null_or_belongs_to_class(user_input, "character", parameter_name)
+  # ensures user_input is a string
+  
+  if(user_input != "chocolate"){
+    stop(paste0("Expected parameter ", parameter_name, " to be `chocolate`."))
+  }
+    
+  return(TRUE)
+}
+
+
+# Add a new line to the `switch` statement inside `.are_valid_argument_values()`, in R\utils_validation.R
+  #...
+  "favourite_food" = .check_is_favourite_food(user_input, parameter_name),
+  #...
+
+  
+# Use the newly added parameter type for input validation in functions
+foo <- function(food) {
+  .are_valid_argument_values(list(
+    list(food, "favourite_food")
+  ))
+}
+  
+```
+
+In the example described in [Adding a new smoothing method], where we added a new smoothing method to the `smooth_incidence()` function, the new function we implemented has four parameters that need validation: `incidence_input`,`level`, `cumulative` and `initial`. Suitable testing functions are already implemented for the first three. `initial` can have one of two values: {"optimal", "backcasting"}. To check for this we can use the already implemented `.is_value_in_accepted_values_vector()` function, like so:
+
+
+```{r is_value, eval=FALSE}
+# Add the values `initial` can have to the accepted_parameter_value list, at the top of the 
+# `R\\utils_validation.R` file 
+accepted_parameter_value <- list(
+  initial = c("optimal", "backcasting"),
+  smoothing_method = c("LOESS", "EXPONENTIAL", "none"),
+  deconvolution_method = c("Richardson-Lucy delay distribution", "none"),
+  estimation_method = c("EpiEstim sliding window", "EpiEstim piecewise constant"),
+  bootstrapping_method = c("non-parametric block boostrap", "none"),
+  function_prefix = c("d", "q", "p", "r"),
+  uncertainty_summary_method = c("original estimate - CI from bootstrap estimates", 
+                                 "bagged mean - CI from bootstrap estimates"),
+  fit = c("none", "gamma")
+)
+
+# Add a new line to the `switch` statement inside `.are_valid_argument_values()`, in R\utils_validation.R
+  #...
+  "exponential_smoothing_initial" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+  #...
+
+
+# Check if a certain parameter is a valid `initial` parameter, in the new function we added
+  foo <- function(initial_passed_by_user) {
+   .are_valid_argument_values(list(
+    list(initial_passed_by_user, "exponential_smoothing_initial")
+  ))
+    
+  # ... 
+
+} 
+  
+
+```
+
+## Last steps
+
+### Testing and loading changes
+  In order to load the changes, while in the estimateR folder, run:
+  ```{r load, eval=FALSE}
+  devtools::load_all()
+  ```
+  In order to check no errors were introduced by the new functionality, while in the estimateR folder, use:
+  ```{r test, eval=FALSE}
+  devtools::test()
+  ```
+  
+### Adding unitary tests (optional)
+  If you wish to publish the changes, for everybody to use, we strongly encourage adding at least one unit test to check the functionality of the newly added functions. The tests are implemented in the "tests\\testthat\\" folder, using the [`testthat` package](https://testthat.r-lib.org/). After adding the tests, load and test the changes again as described above.
+
+### Publishing changes
+  In order to include the changes in a new version of the package, clone the [GitHub repository](https://github.com/covid-19-Re/estimateR) and create a new branch. Add the changes to this new branch and create a pull request. Make sure the functions are well documented. Ideally, examples may be added to the file corresponding to the edited function, in the "man\\examples" folder.
+  
+  We strongly encourage adding new functionality to the package, and we would be more than happy to provide our help with the process, if needed.
