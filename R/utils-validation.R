@@ -517,17 +517,33 @@ accepted_parameter_value <- list(
 }
 
 
-#' @description Utility function to check whether an object is an integer
+#' @description Utility function to check whether an object is a vectir if integers
 #'
 #' @inherit validation_utility_params
-#' @param number The value to be tested
+#' @param vector The value to be tested
 #'
-.check_if_integer_vector <- function(number, parameter_name) {
-  if (isFALSE(all.equal(round(number), number))) { # did not use .check_class_parameter_name since is.integer(1) returns false
+.check_if_integer_vector <- function(vector, parameter_name) {
+  if (isFALSE(all.equal(round(vector), vector))) { # did not use .check_class_parameter_name since is.integer(1) returns false
     stop(paste(parameter_name, "needs to be an integer vector."))
   }
   return(TRUE)
 }
+
+
+#' @description Utility function to check whether an object is an integer
+#'
+#' @inherit validation_utility_params
+#' @param vector The value to be tested
+#'
+.check_if_non_neg_integer_vector <- function(vector, parameter_name) {
+  
+  .check_if_integer_vector(vector, parameter_name)
+  if (!all(vector >= 0)) {
+    stop(paste(parameter_name, "needs to only contain positive values."))
+  }
+  return(TRUE)
+}
+
 
 #' @description Utility function to check whether an object is an integer or null
 #'
@@ -548,6 +564,26 @@ accepted_parameter_value <- list(
 .check_if_positive_integer <- function(number, parameter_name) {
   .check_if_positive_number(number, parameter_name)
   .check_if_integer_value(number, parameter_name)
+}
+
+
+#' @description Utility function to check whether an object is valid noise list
+#'
+#' @inherit validation_utility_params
+#'
+.check_if_noise <- function(noise, parameter_name) {
+  if(!is.list(noise)){
+    stop(paste0("Expected ", parameter_name, " to be a list."))
+  }
+  
+  if ("type" %!in% names(noise)) {
+    stop(paste0("Expected ", parameter_name, " to be a list with a 'type' element."))
+  }
+  
+  if (noise$type != "noiseless" && "sd" %!in% names(noise)){
+    stop(paste0("Unless the noise type is 'noiseless', expected ", parameter_name, " to contain a 'sd' element."))
+  }
+  return(TRUE)
 }
 
 #' @description Utility function to check whether an object is a number that belongs to a given interval
@@ -644,6 +680,7 @@ accepted_parameter_value <- list(
       "date" = .check_class_parameter_name(user_input, "Date", parameter_name),
       "integer" = .check_if_integer_value(user_input, parameter_name),
       "integer_vector" = .check_if_integer_vector(user_input, parameter_name),
+      "non_negative_integer_vector" = .check_if_non_neg_integer_vector(user_input, parameter_name),
       "distribution" = .is_valid_distribution(user_input, parameter_name),
       "numeric_between_zero_one" = .check_is_numeric_in_interval(user_input, parameter_name, 0, 1),
       "function_prefix" = .is_value_in_accepted_values_vector(user_input, parameter_name),
@@ -655,6 +692,7 @@ accepted_parameter_value <- list(
       "estimates" = .check_is_estimate(user_input, parameter_name, additional_function_parameter),
       "bootstrap_estimates" = .check_is_bootstrap_estimate(user_input, parameter_name, additional_function_parameter),
       "delay_matrix_column_fit" = .is_value_in_accepted_values_vector(user_input, parameter_name),
+      "noise" = .check_if_noise(user_input, parameter_name),
       stop(paste("Checking function for type", input_type, "not found."))
     )
   }
