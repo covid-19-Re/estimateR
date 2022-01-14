@@ -151,6 +151,13 @@
     observations = observations * exp(mult_noise)     # so the error is iid log-normal
   }
 
+  if(noise$type == 'autocorrelated'){
+    ar_coeffs <- noise$ar
+    AR_noise <- stats::arima.sim(model = list(ar = ar_coeffs), n = length(observations), sd = noise$sd)
+
+    observations = observations * exp(as.vector(AR_noise))
+  }
+
   if (noise$type == 'noiseless'){
     # No noise added.
     observations = observations
