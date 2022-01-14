@@ -99,6 +99,9 @@ a series of imported cases and a serial interval distribution." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/adding_methods.html">Adding a new method to the package</a>
+    </li>
+    <li>
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
@@ -106,6 +109,9 @@ a series of imported cases and a serial interval distribution." />
     </li>
     <li>
       <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
+    </li>
+    <li>
+      <a href="../articles/simulating_data.html">Simulating data</a>
     </li>
   </ul>
 </li>
@@ -168,6 +174,31 @@ is padded with zeroes to reach the same length.</p></td>
 
     <p>Integer vector. Simulated infections through time.</p>
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='co'>## Basic usage of simulate_infections</span>
+<span class='co'># Simulating infection incidence corresponding to a drop in Re value from 2.3</span>
+<span class='co'># to 0.5, at the half of the time period, then recovering the Re values using the</span>
+<span class='co'># estimate_Re function</span>
+
+<span class='va'>Re_evolution</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>2.3</span>, <span class='fl'>100</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>0.5</span>, <span class='fl'>100</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>simulated_incidence_1</span> <span class='op'>&lt;-</span> <span class='fu'>simulate_infections</span><span class='op'>(</span>
+  Rt <span class='op'>=</span> <span class='va'>Re_evolution</span>
+<span class='op'>)</span>
+<span class='va'>Re_recovered_1</span> <span class='op'>&lt;-</span> <span class='fu'><a href='estimate_Re.html'>estimate_Re</a></span><span class='op'>(</span><span class='va'>simulated_incidence_1</span><span class='op'>)</span>
+
+
+<span class='co'>## Advanced usage of simulate_infections</span>
+<span class='co'># Simulating infection incidence using the same Re progression as above, but a</span>
+<span class='co'># assuming a constant import of 100 cases per day</span>
+
+<span class='va'>imported_infections</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>100</span>, <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span><span class='op'>(</span><span class='va'>Re_evolution</span><span class='op'>)</span><span class='op'>)</span>
+<span class='va'>simulated_incidence_2</span> <span class='op'>&lt;-</span> <span class='fu'>simulate_infections</span><span class='op'>(</span>
+  Rt <span class='op'>=</span> <span class='va'>Re_evolution</span>,
+  imported_infections <span class='op'>=</span> <span class='va'>imported_infections</span>
+<span class='op'>)</span>
+<span class='va'>Re_recovered_2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='estimate_Re.html'>estimate_Re</a></span><span class='op'>(</span><span class='va'>simulated_incidence_2</span><span class='op'>)</span>
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

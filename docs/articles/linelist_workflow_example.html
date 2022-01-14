@@ -57,6 +57,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/adding_methods.html">Adding a new method to the package</a>
+    </li>
+    <li>
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
@@ -64,6 +67,9 @@
     </li>
     <li>
       <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
+    </li>
+    <li>
+      <a href="../articles/simulating_data.html">Simulating data</a>
     </li>
   </ul>
 </li>
@@ -81,7 +87,7 @@
 
       
 
-      </header><script src="linelist_workflow_example_files/header-attrs-2.6/header-attrs.js"></script><div class="row">
+      </header><script src="linelist_workflow_example_files/header-attrs-2.11/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>From raw linelist data to Re estimates</h1>
@@ -116,7 +122,7 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Simulated Swiss linelist</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">CH_simulated_linelist</span>, n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 10 x 2</span>
+<span class="co">#&gt; # A tibble: 10 × 2</span>
 <span class="co">#&gt;    confirmation_date symptom_onset_date</span>
 <span class="co">#&gt;    &lt;date&gt;            &lt;date&gt;            </span>
 <span class="co">#&gt;  1 2020-02-24        NA                </span>
@@ -145,7 +151,7 @@
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html">tally</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"onset_incidence"</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">onset_incidence</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 2</span>
+<span class="co">#&gt; # A tibble: 6 × 2</span>
 <span class="co">#&gt;   date       onset_incidence</span>
 <span class="co">#&gt;   &lt;date&gt;               &lt;int&gt;</span>
 <span class="co">#&gt; 1 2020-02-17               2</span>
@@ -165,7 +171,7 @@
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html">tally</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"confirmation_incidence"</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">confirmation_incidence</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 2</span>
+<span class="co">#&gt; # A tibble: 6 × 2</span>
 <span class="co">#&gt;   date       confirmation_incidence</span>
 <span class="co">#&gt;   &lt;date&gt;                      &lt;int&gt;</span>
 <span class="co">#&gt; 1 2020-02-24                      1</span>
@@ -187,7 +193,7 @@
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">date</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">CH_incidence_data</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 3</span>
+<span class="co">#&gt; # A tibble: 6 × 3</span>
 <span class="co">#&gt;   date       onset_incidence confirmation_incidence</span>
 <span class="co">#&gt;   &lt;date&gt;               &lt;dbl&gt;                  &lt;dbl&gt;</span>
 <span class="co">#&gt; 1 2020-02-17               2                      0</span>
@@ -213,7 +219,7 @@
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">event_date</span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">CH_delay_data</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 2</span>
+<span class="co">#&gt; # A tibble: 6 × 2</span>
 <span class="co">#&gt;   event_date report_delay</span>
 <span class="co">#&gt;   &lt;date&gt;            &lt;int&gt;</span>
 <span class="co">#&gt; 1 2020-02-17            9</span>
@@ -279,15 +285,15 @@
 <span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">CH_estimates</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 4</span>
+<span class="co">#&gt; # A tibble: 6 × 4</span>
 <span class="co">#&gt;   date       Re_estimate CI_down_Re_estimate CI_up_Re_estimate</span>
 <span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;               &lt;dbl&gt;             &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 2020-02-23        3.16                2.66              3.71</span>
-<span class="co">#&gt; 2 2020-02-24        3.15                2.71              3.63</span>
-<span class="co">#&gt; 3 2020-02-25        3.13                1.50              4.76</span>
-<span class="co">#&gt; 4 2020-02-26        3.09                2.05              4.12</span>
-<span class="co">#&gt; 5 2020-02-27        3.04                2.61              3.46</span>
-<span class="co">#&gt; 6 2020-02-28        2.98                2.73              3.25</span></code></pre></div>
+<span class="co">#&gt; 1 2020-02-23        3.16               2.66               3.71</span>
+<span class="co">#&gt; 2 2020-02-24        3.16               2.36               3.95</span>
+<span class="co">#&gt; 3 2020-02-25        3.13               0.801              5.46</span>
+<span class="co">#&gt; 4 2020-02-26        3.09               1.70               4.48</span>
+<span class="co">#&gt; 5 2020-02-27        3.04               2.53               3.55</span>
+<span class="co">#&gt; 6 2020-02-28        2.99               2.73               3.25</span></code></pre></div>
 </div>
 <div id="plot" class="section level3">
 <h3 class="hasAnchor">

@@ -57,6 +57,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/adding_methods.html">Adding a new method to the package</a>
+    </li>
+    <li>
       <a href="../articles/comparison_levels_input_details.html">Estimating Re using more or less detailed data</a>
     </li>
     <li>
@@ -64,6 +67,9 @@
     </li>
     <li>
       <a href="../articles/linelist_workflow_example.html">From raw linelist data to Re estimates</a>
+    </li>
+    <li>
+      <a href="../articles/simulating_data.html">Simulating data</a>
     </li>
   </ul>
 </li>
@@ -81,7 +87,7 @@
 
       
 
-      </header><script src="incidence_data_workflow_example_files/header-attrs-2.6/header-attrs.js"></script><div class="row">
+      </header><script src="incidence_data_workflow_example_files/header-attrs-2.11/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>From aggregated incidence data to Re estimates</h1>
@@ -148,7 +154,7 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"> <span class="va">EST_incidence</span> <span class="op">&lt;-</span> <span class="va">EST_incidence_data</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">EST_incidence</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 2</span>
+<span class="co">#&gt; # A tibble: 6 × 2</span>
 <span class="co">#&gt;   date       case_incidence</span>
 <span class="co">#&gt;   &lt;date&gt;              &lt;dbl&gt;</span>
 <span class="co">#&gt; 1 2020-02-26              1</span>
@@ -222,15 +228,15 @@
 <span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">EST_estimates</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 6 x 4</span>
+<span class="co">#&gt; # A tibble: 6 × 4</span>
 <span class="co">#&gt;   date       Re_estimate CI_down_Re_estimate CI_up_Re_estimate</span>
 <span class="co">#&gt;   &lt;date&gt;           &lt;dbl&gt;               &lt;dbl&gt;             &lt;dbl&gt;</span>
-<span class="co">#&gt; 1 2020-03-06        2.14                1.62              2.67</span>
-<span class="co">#&gt; 2 2020-03-07        1.87                1.38              2.37</span>
-<span class="co">#&gt; 3 2020-03-08        1.65                1.22              2.08</span>
-<span class="co">#&gt; 4 2020-03-09        1.49                1.12              1.85</span>
-<span class="co">#&gt; 5 2020-03-10        1.38                1.07              1.69</span>
-<span class="co">#&gt; 6 2020-03-11        1.31                1.05              1.58</span></code></pre></div>
+<span class="co">#&gt; 1 2020-03-06        2.14                1.63              2.66</span>
+<span class="co">#&gt; 2 2020-03-07        1.87                1.44              2.31</span>
+<span class="co">#&gt; 3 2020-03-08        1.65                1.29              2.01</span>
+<span class="co">#&gt; 4 2020-03-09        1.49                1.18              1.80</span>
+<span class="co">#&gt; 5 2020-03-10        1.38                1.11              1.66</span>
+<span class="co">#&gt; 6 2020-03-11        1.31                1.06              1.58</span></code></pre></div>
 <p>Now let us plot these estimates through time, along with their confidence intervals.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html">ggplot</a></span><span class="op">(</span><span class="va">EST_estimates</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">date</span>, y <span class="op">=</span> <span class="va">Re_estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>

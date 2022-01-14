@@ -4,10 +4,10 @@
 \alias{.check_if_integer_vector}
 \title{Utility functions for input validity.}
 \usage{
-.check_if_integer_vector(number, parameter_name)
+.check_if_integer_vector(vector, parameter_name)
 }
 \arguments{
-\item{number}{The value to be tested}
+\item{vector}{The value to be tested}
 
 \item{parameter_name}{A string containing the name the tested parameter had in the initial function in which it was passed.}
 }
@@ -15,5 +15,5 @@
 TRUE if all tests were passed. Throws an error otherwise.
 }
 \description{
-Utility function to check whether an object is an integer
+Utility function to check whether an object is a vectir if integers
 }
