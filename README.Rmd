@@ -35,12 +35,9 @@ The full documentation is available **[here](https://covid-19-re.github.io/estim
 
 ## Quick example
 
-We demonstrate below a basic use of the **estimateR** package. Check out the *estimateR* vignette and additional vignettes for more details.
+We demonstrate below a basic use of the **estimateR** package. Check out the **[*estimateR* vignette](https://covid-19-re.github.io/estimateR/articles/estimateR.html)** and additional vignettes for more details.
 
-We start with arbitrary incidence data representing daily counts of case confirmations for a disease of interest.
-This incidence data counts the number of people getting tested positive for a particular infectious disease X on day *T*.
-With `estimate_Re_from_noisy_delayed_incidence()`, we compute the reproductive number through time from this incidence data
-and specifications of the delays between infection events and case confirmations as well as the serial interval.
+We start with arbitrary incidence data representing daily counts of confirmed cases for a disease of interest. This incidence data counts the number of people tested positive for a particular infectious disease and reported on day *t*.
 
 ```{r}
 library(estimateR)
@@ -49,33 +46,58 @@ toy_incidence_data <- c(4,9,19,14,36,16,39,27,46,
                           77,78,113,102,134,165,183,
                           219,247,266,308,304,324,346,
                           348,331,311,267,288,254,239)
+```
 
+Below we explain the required user input. It contains assumptions that need to be adapted to the particular disease and setting studied.
 
-## The numbers below are part of the user input, 
-## they need to be adapted to the particular disease studied.
+#### Reporting delay
 
-# Incubation period - gamma distribution parameters
-shape_incubation = 3.2 
-scale_incubation = 1.3
-incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
+In this toy example, we assume that the incidence data represents cases by date of report. To infer the time series of cases by date of symptom onset, we need an assumption about the reporting delay, i.e. the time between symptom onset and reporting. This delay is specific to each reporting system and can be estimated from data by public health authorities (e.g. from line list data). The delay can vary for each case and is therefore described by a delay distribution.
 
-# Delay from onset of symptoms to case observation - gamma distribution parameters
+Here we assume that the delay is Gamma distributed with the following parameters:
+```{r}
 shape_onset_to_report = 2.7
 scale_onset_to_report = 1.6
 onset_to_report <- list(name="gamma", shape = shape_onset_to_report, scale = scale_onset_to_report)
+```
 
-# We specify these parameters in the same unit as the time steps in the original observation data.
-# For instance, if the original data represents daily reports,
-# the parameters below must be specified in days (this is the case in this toy example).
+#### Incubation period
+
+With the reporting delay, we can estimate the time series of cases by date of symptom onset. However, this is still delayed from the actual time series of infections. We also need to account for an incubation period, i.e. the time between infection and symptom onset in patients. Such information is typically obtained from clinical studies. The incubation period varies between patients and is therefore described by a distribution.
+
+Here we assume that the incubation period is Gamma distributed with the following parameters:
+```{r}
+shape_incubation = 3.2 
+scale_incubation = 1.3
+incubation <- list(name="gamma", shape = shape_incubation, scale = scale_incubation)
+```
+
+#### Generation time / serial interval
+
+To estimate the effective reproductive number from the time series of infections, we need an assumption about the generation interval, i.e. the time from infection of a primary case to the infection of a secondary case. In theory, we are interested in the so-called intrinsic generation interval distribution, which describes the average infectiousness of a patient over time and does not depend on the epidemic phase. In practice however, estimates of the serial interval (time between symptom onset of the primary case and symptom onsets of the secondary case) is used as a proxy for the generation interval. Estimates of the serial interval distribution are typically obtained from household or contact-tracing studies.
+
+> Please note that the validity of using the serial interval as a proxy for the generation interval depends on specific assumptions about disease progression and infection, which may be more or less violated for a certain disease.
+
+In estimateR, we assume that the generation interval / serial interval is gamma distributed. We supply the mean and standard deviation of this gamma distribution:
+```{r}
 mean_serial_interval = 4.8
 std_serial_interval = 2.3
+```
 
-# The estimation window corresponds to the size of the sliding window used in EpiEstim.
-# See help(estimate_Re) for additional details.
-# Here, it is set to three days.
-estimation_window = 3 
+Note that we specify these parameters in the same time unit as the time steps of the original observation data. For instance, if the original data represents daily reports (as in this toy example), then the parameters must be specified in days.
 
-## End of user input
+#### Estimation window
+
+The estimation window corresponds to the size of the smoothing window used in EpiEstim. See `help(estimate_Re)` for additional details. Here, it is set to three days. The wider the window, the stronger the smoothing.
+
+```{r}
+estimation_window = 3
+```
+
+#### Estimating the effective reproductive number
+Now we have provided all relevant disease- and setting-specific parameters. With the function `estimate_Re_from_noisy_delayed_incidence()`, we can compute the reproductive number through time from the incidence data and our further specifications.
+
+```{r}
 toy_estimates <- estimate_Re_from_noisy_delayed_incidence(toy_incidence_data,
   smoothing_method = "LOESS",
   deconvolution_method = "Richardson-Lucy delay distribution",
@@ -88,9 +110,19 @@ toy_estimates <- estimate_Re_from_noisy_delayed_incidence(toy_incidence_data,
   ref_date = date_first_data_point,
   time_step = "day"
 )
+```
 
+Let's look at the most recent Re estimates:
+```{r}
 tail(toy_estimates, n = 20)
 ```
 
+- The column `observed_incidence` shows the originally reported case counts.
+- The column `smoothed_incidence` shows the case counts after smoothing.
+- The column `deconvolved_incidence` shows the estimated number of infections.
+- The column `Re_estimate` shows point estimates for the reproductive number.
 
+**Why are there missing values (NAs)?**
+
+We see that no estimates are available for the 8 most recent days - the earliest available estimate is 9 days delayed. This is because the reporting delay and incubation period prevent us from inferring the number of infections for the most recent past. If individuals are infected today, it will take time until they develop symptoms and are reported as cases. Thus, cases reported today mostly tell us something about past infection, and not much about infections today. As a result, the reproductive number can only be estimated with a certain delay. This delay may be partially reduced depending on what data is available, and through the use of nowcasting. See **[this vignette](https://covid-19-re.github.io/estimateR/articles/comparison_levels_input_details.html)** for more details.
 
