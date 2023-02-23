@@ -122,7 +122,7 @@ parameters must be specified in days.
 #### Estimation window
 
 The estimation window corresponds to the size of the smoothing window
-used in EpiEstim. See `help(estimate_Re)` for additional details. Here,
+used in EpiEstim. See `help(estimate_Re)` for additional details. By default,
 it is set to three days. The wider the window, the stronger the
 smoothing.
 
