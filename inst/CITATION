@@ -1,0 +1,8 @@
+bibentry(
+  "Article",
+  title = "estimateR: An R package to estimate and monitor the effective reproductive number",
+  author = "Jérémie Scire, Jana S. Huisman, Ana Grosu, Daniel C. Angst, Jinzhou Li, Marloes H. Maathuis, Sebastian Bonhoeffer, Tanja Stadler",
+  year = 2022,
+  journal = "medRxiv",
+  doi = "10.1101/2022.06.30.22277095",
+)
