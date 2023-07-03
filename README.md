@@ -223,3 +223,10 @@ delay may be partially reduced depending on what data is available, and
 through the use of nowcasting. See **[this
 vignette](https://covid-19-re.github.io/estimateR/articles/comparison_levels_input_details.html)**
 for more details.
+
+## How to cite?
+
+When using this package for a publication, please cite:
+- our preprint, Scire et al., 2022, medRxiv (medRxiv https://www.medrxiv.org/content/10.1101/2022.06.30.22277095v1)
+(This citation will be updated soon with a peer-reviewed publication.)
+- Cori et al., 2013, AJE (https://doi.org/10.1093/aje/kwt133). estimateR builds on EpiEstim, the software presented in this publication.
