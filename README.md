@@ -227,6 +227,5 @@ for more details.
 ## How to cite?
 
 When using this package for a publication, please cite:
-- our preprint, Scire et al., 2022, medRxiv (medRxiv https://www.medrxiv.org/content/10.1101/2022.06.30.22277095v1)
-(This citation will be updated soon with a peer-reviewed publication.)
+- Scire, J., Huisman, J.S., Grosu, A. et al. estimateR: an R package to estimate and monitor the effective reproductive number. BMC Bioinformatics 24, 310 (2023). https://doi.org/10.1186/s12859-023-05428-4
 - Cori et al., 2013, AJE (https://doi.org/10.1093/aje/kwt133). estimateR builds on EpiEstim, the software presented in this publication.
