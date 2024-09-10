@@ -139,6 +139,8 @@ estimate_Re <- function(incidence_data,
                                                  estimation_window = 3,
                                                  mean_serial_interval = 4.8,
                                                  std_serial_interval = 2.3,
+                                                 method = "parametric_si",
+                                                 si_distr = c(0,1),
                                                  mean_Re_prior = 1,
                                                  output_HPD = FALSE) {
   .are_valid_argument_values(list(
@@ -149,6 +151,10 @@ estimate_Re <- function(incidence_data,
     list(std_serial_interval, "non_negative_number"),
     list(mean_Re_prior, "positive_number")
   ))
+  
+  if (method == "non_parametric_si") {
+    mean_serial_interval <- weighted.mean(1:length(si_distr), w = si_distr)
+  }
 
   incidence_vector <- .get_values(incidence_input)
   if (sum(incidence_vector) < minimum_cumul_incidence) {
@@ -185,27 +191,43 @@ estimate_Re <- function(incidence_data,
   right_bound <- incidence_length - (estimation_window - 1)
 
   if (is.na(offset) | right_bound < offset) {
-    # No valid data point, return empty estimate
-    return(c())
+    stop("Cumulative incidence observed in available data window too small.")
   }
 
   # Computation intervals corresponding to every position of the sliding window
   t_start <- seq(offset, right_bound)
   t_end <- t_start + estimation_window - 1
 
-  R_instantaneous <- suppressWarnings(EpiEstim::estimate_R(
-    incid = incidence,
-    method = "parametric_si",
-    config = EpiEstim::make_config(
-      list(
-        mean_si = mean_serial_interval,
-        std_si = std_serial_interval,
-        t_start = t_start,
-        t_end = t_end,
-        mean_prior = mean_Re_prior
+  if (method == "parametric_si") {
+    R_instantaneous <- suppressWarnings(EpiEstim::estimate_R(
+      incid = incidence,
+      method = "parametric_si",
+      config = EpiEstim::make_config(
+        list(
+          mean_si = mean_serial_interval,
+          std_si = std_serial_interval,
+          t_start = t_start,
+          t_end = t_end,
+          mean_prior = mean_Re_prior
+        )
       )
-    )
-  ))
+    ))
+  } else if (method == "non_parametric_si") {
+    R_instantaneous <- suppressWarnings(EpiEstim::estimate_R(
+      incid = incidence,
+      method = "non_parametric_si",
+      config = EpiEstim::make_config(
+        list(
+          si_distr = si_distr,
+          t_start = t_start,
+          t_end = t_end,
+          mean_prior = mean_Re_prior
+        )
+      )
+    ))
+  } else {
+    stop("Supplied method for serial interval representation not supported by .estimate_Re_EpiEstim_sliding_window")
+  }
 
   additional_offset <- t_end[1] - 1
   Re_estimate <- .get_module_output(

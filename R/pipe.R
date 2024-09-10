@@ -377,6 +377,10 @@ estimate_Re_from_noisy_delayed_incidence <- function(incidence_data,
           ), dots_args)
     )
   )
+  
+  if (is.null(estimated_Re)) {
+    stop("Failed to produce Re estimates.")
+  }
 
   if (output_Re_only) {
     merged_results <- estimated_Re
